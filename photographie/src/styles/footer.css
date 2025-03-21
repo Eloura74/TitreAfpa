@@ -1,4 +1,40 @@
+/* Styles pour le footer élégant */
+@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Cinzel:wght@400;600;900&display=swap');
+
 .footer {
-  @apply bg-gradient-to-r from-[#828282] via-[#ab8a25] to-[#FFD700] 
-           bg-clip-text text-transparent text-center  flex items-center justify-center;
+  position: relative;
+  background-color: rgba(10, 10, 10, 0.95);
+  padding: 1.75rem 0;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 215, 0, 0.05);
+}
+
+.footer-content {
+  position: relative;
+  z-index: 2;
+  font-family: 'Syncopate', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.footer-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+}
+
+.footer-logo {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  display: inline-block;
+  background: linear-gradient(90deg, #d6c487, #ffe992, #c9b36f);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  margin: 0 0.4rem;
 }

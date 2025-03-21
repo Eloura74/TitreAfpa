@@ -1,5 +1,158 @@
-/* Effet sur les liens du menu */
-.linkNav:hover {
-  @apply bg-gradient-to-r from-[#828282] via-[#ab8a25] to-[#FFD700] 
-           bg-clip-text text-transparent;
+/* Styles de la navbar avec design unique */
+@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Cinzel:wght@400;600;900&display=swap');
+
+/* Structure de base */
+.navbar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+  background: linear-gradient(to bottom, rgba(10, 10, 10, 0.9), rgba(10, 10, 10, 0.7));
+  border-bottom: 1px solid rgba(255, 215, 0, 0.05);
+  padding: 0.75rem 2rem;
+}
+
+/* Animation d'entrée */
+@keyframes navFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.navbar-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: navFade 0.5s ease-out forwards;
+}
+
+/* Logo et titre */
+.navbar-brand {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 1.5rem;
+  position: relative;
+  background: linear-gradient(90deg, #d6c487, #ffe992, #c9b36f);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.08);
+  letter-spacing: -0.02em;
+}
+
+.navbar-brand::after {
+  content: '';
+  position: absolute;
+  width: 30%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+  bottom: -3px;
+  left: 0;
+  transition: width 0.3s ease;
+}
+
+.navbar-brand:hover::after {
+  width: 100%;
+}
+
+/* Bouton mobile */
+.navbar-toggle {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.5rem;
+  display: none;
+}
+
+/* Menu de navigation */
+.navbar-menu {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-item {
+  position: relative;
+  font-family: 'Syncopate', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: #ffe992;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 1px;
+  bottom: -3px;
+  left: 0;
+  background: linear-gradient(90deg, #d6c487, #ffe992);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after, .nav-link.active::after {
+  width: 100%;
+}
+
+/* Effets géométriques subtils */
+.navbar-accent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar-toggle {
+    display: block;
+  }
+
+  .navbar-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(10px);
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.05);
+    transform: translateY(-10px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 99;
+  }
+
+  .navbar-menu.open {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
 }
