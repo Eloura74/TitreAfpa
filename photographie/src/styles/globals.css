@@ -14,9 +14,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-body {
+/* body {
   @apply bg-black-900 text-white container mx-auto;
-}
+} */
 
 /* Effet Titre - Platine & Doré */
 .titre-degrade {
