@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
+import Galerie from "./Galerie";
 import "../styles/globals.css";
 import "../styles/home.css"; // Nouveaux styles distinctifs
 import { Link } from "react-router-dom";
@@ -68,7 +69,7 @@ export default function Home() {
           {/* Galerie */}
           {/* ******************* */}
           <div className="service-card">
-            <Link to="/galerie">
+            <Link to="/Galerie">
               <h3 className="service-title">Galerie</h3>
               <p className="service-description">
                 Explorez mes œuvres et laissez-vous inspirer.
