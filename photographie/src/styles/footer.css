@@ -1,0 +1,4 @@
+.footer {
+  @apply bg-gradient-to-r from-[#828282] via-[#ab8a25] to-[#FFD700] 
+           bg-clip-text text-transparent text-center  flex items-center justify-center;
+}

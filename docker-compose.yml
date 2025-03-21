@@ -1,0 +1,68 @@
+version: "3.8"
+
+services:
+  # *********************
+  # MongoDB
+  mongodb:
+    image: mongo:latest
+    container_name: MongoDB-Server-fabien
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+
+  # ********************
+  # Mongo Express
+  mongo-express:
+    image: mongo-express
+    container_name: Mongo-Express-fabien
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_URL=mongodb://MongoDB-Server-fabien:27017
+      - ME_CONFIG_BASICAUTH=false
+
+  # ********************
+  # Neo4j
+  neo4j:
+    image: neo4j:latest
+    container_name: Neo4j-Server-fabien
+    environment:
+      - NEO4J_AUTH=admin/000000 # Remplacez "password123" par un mot de passe sécurisé
+    ports:
+      - "7474:7474" # Interface web de Neo4j
+      - "7687:7687" # Port du protocole Bolt (pour les requêtes depuis vos applications)
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_conf:/var/lib/neo4j/conf
+
+  # ********************
+  # Backend
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - NODE_ENV=development
+      - MONGO_URI=mongodb://admin:password@MongoDB-Server-fabien:27017/
+
+# ********************
+# Volumes
+volumes:
+  mongodb_data:
+    name: mongodb_data_volume
+  mongodb_config:
+    name: mongodb_config_volume
+  neo4j_data:
+    name: neo4j_data_volume
+  neo4j_logs:
+    name: neo4j_logs_volume
+  neo4j_conf:
+    name: neo4j_conf_volume

@@ -1,0 +1,1 @@
+Ce fichier est un test pour vérifier que le dossier public est correctement servi par Vite.

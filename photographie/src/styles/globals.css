@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  @apply bg-gray-900 text-white container mx-auto;
+}
+
+/* Effet Titre - Platine & Doré */
+.titre-degrade {
+  @apply text-5xl font-extrabold;
+  background: linear-gradient(135deg, #828282 10%, #ab8a25 40%, #8a7b25 90%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-bottom: 50px;
+  /* text-shadow: 3px 3px 12px rgba(255, 215, 0, 0.5); / */
+}
+
+.my-gradient-text {
+  @apply bg-gradient-to-r from-[#828282] via-[#ab8a25] to-[#8a7b25] 
+           bg-clip-text text-transparent;
+}
+
+.sous-titre {
+  @apply text-lg text-gray-200 max-w-lg leading-relaxed drop-shadow-lg;
+}
+
+a,
+h2,
+h3 {
+  @apply bg-gradient-to-r from-[#828282] via-[#ab8a25] to-[#FFD700] 
+           bg-clip-text text-transparent;
+}
+
+a:hover {
+  @apply opacity-80 scale-105;
+}
