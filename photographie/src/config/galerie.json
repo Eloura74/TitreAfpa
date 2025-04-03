@@ -1,0 +1,110 @@
+[
+  {
+    "id": 1,
+    "src": "/images/photo1.jpg",
+    "alt": "Portrait artistique en noir et blanc",
+    "titre": "Regard Profond",
+    "description": "Portrait artistique en noir et blanc capturant l'émotion et la profondeur du regard",
+    "prix": 120,
+    "categorie": "Portrait"
+  },
+  {
+    "id": 2,
+    "src": "/images/photo2.jpg",
+    "alt": "Paysage naturel au coucher du soleil",
+    "titre": "Horizon Doré",
+    "description": "Magnifique paysage capturé au moment précis où le soleil touche l'horizon",
+    "prix": 150,
+    "categorie": "Paysage"
+  },
+  {
+    "id": 3,
+    "src": "/images/photo3.jpg",
+    "alt": "Scène urbaine nocturne",
+    "titre": "Nuit Urbaine",
+    "description": "Vue artistique d'une rue animée dans une métropole capturée de nuit",
+    "prix": 135,
+    "categorie": "Urbain"
+  },
+  {
+    "id": 4,
+    "src": "/images/photo4.jpg",
+    "alt": "Macrophotographie de fleur",
+    "titre": "Pétales de Rosée",
+    "description": "Gros plan sur une fleur délicate avec des gouttes de rosée matinale",
+    "prix": 95,
+    "categorie": "Nature"
+  },
+  {
+    "id": 5,
+    "src": "/images/photo5.jpg",
+    "alt": "Photo de mariage émotionnelle",
+    "titre": "Union Éternelle",
+    "description": "Moment d'émotion capturé lors d'une cérémonie de mariage",
+    "prix": 180,
+    "categorie": "Événement"
+  },
+  {
+    "id": 6,
+    "src": "/images/photo6.jpg",
+    "alt": "Architecture moderne",
+    "titre": "Lignes Contemporaines",
+    "description": "Étude géométrique d'un bâtiment à l'architecture avant-gardiste",
+    "prix": 140,
+    "categorie": "Architecture"
+  },
+  {
+    "id": 7,
+    "src": "/images/photo7.jpg",
+    "alt": "Portrait familial en extérieur",
+    "titre": "Liens Familiaux",
+    "description": "Portrait de famille capturant la complicité et l'amour entre les membres",
+    "prix": 160,
+    "categorie": "Portrait"
+  },
+  {
+    "id": 8,
+    "src": "/images/photo8.jpg",
+    "alt": "Paysage montagneux",
+    "titre": "Sommets Majestueux",
+    "description": "Vue panoramique de montagnes enneigées au lever du soleil",
+    "prix": 175,
+    "categorie": "Paysage"
+  },
+  {
+    "id": 9,
+    "src": "/images/photo9.jpg",
+    "alt": "Nature sauvage",
+    "titre": "Faune Sauvage",
+    "description": "Photo animalière capturant un moment rare de la vie sauvage",
+    "prix": 190,
+    "categorie": "Nature"
+  },
+  {
+    "id": 10,
+    "src": "/images/photo10.jpg",
+    "alt": "Événement culturel",
+    "titre": "Festival des Lumières",
+    "description": "Ambiance festive et colorée d'un festival culturel nocturne",
+    "prix": 145,
+    "categorie": "Événement"
+  },
+  {
+    "id": 11,
+    "src": "/images/photo11.jpg",
+    "alt": "Détail architectural historique",
+    "titre": "Héritage Ancien",
+    "description": "Détail architectural d'un monument historique témoignant du passé",
+    "prix": 130,
+    "categorie": "Architecture"
+  },
+  {
+    "id": 12,
+    "src": "/images/photo12.jpg",
+    "alt": "Scène de rue urbaine",
+    "titre": "Rythme Citadin",
+    "description": "Scène de vie quotidienne dans un quartier animé de la ville",
+    "prix": 110,
+    "categorie": "Urbain"
+  }
+]

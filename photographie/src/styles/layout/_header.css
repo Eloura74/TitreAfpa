@@ -1,0 +1,85 @@
+/* ********************************************** */
+/* STYLES D'EN-TÊTE DE PAGE                     */
+/* ********************************************** */
+
+/* Conteneur d'en-tête standard */
+.page-header {
+  padding: 8rem 5vw 4rem;
+  text-align: center;
+  position: relative;
+}
+
+/* Titre de page avec effet dégradé */
+.page-title {
+  font-family: var(--font-secondary);
+  font-weight: var(--font-weight-black);
+  font-size: 3.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+  display: inline-block;
+  background: var(--gradient-gold);
+  background-size: 500% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 10s linear infinite;
+  text-shadow: 0 0 20px rgba(255, 217, 0, 0.1);
+}
+
+/* Ligne décorative sous le titre */
+.title-divider {
+  content: '';
+  width: 40%;
+  height: 2px;
+  background: var(--gradient-line);
+  margin: -10px auto 2rem;
+}
+
+/* Sous-titre de page */
+.page-subtitle {
+  font-family: var(--font-primary);
+  font-size: 0.9rem;
+  line-height: 1.8;
+  font-weight: var(--font-weight-normal);
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 36rem;
+  margin: 0 auto;
+  animation: slideUp 1.5s ease-out 0.5s both;
+}
+
+/* Section de filtres */
+.filter-section {
+  padding: 0 6vw 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Bouton de filtre */
+.filter-button {
+  font-family: var(--font-primary);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: var(--transition-normal);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 0.125rem;
+  background-color: #1a1a20;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.filter-button:hover {
+  background-color: #252530;
+}
+
+.filter-button.active {
+  font-weight: var(--font-weight-semibold);
+  position: relative;
+  background: var(--gradient-gold);
+  color: black;
+}

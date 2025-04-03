@@ -8,7 +8,7 @@ services:
     container_name: MongoDB-Server-fabien
     restart: always
     ports:
-      - "27017:27017"
+      - "27019:27017"
     volumes:
       - mongodb_data:/data/db
       - mongodb_config:/data/configdb
@@ -20,7 +20,7 @@ services:
     container_name: Mongo-Express-fabien
     restart: always
     ports:
-      - "8081:8081"
+      - "8089:8081"
     environment:
       - ME_CONFIG_MONGODB_URL=mongodb://MongoDB-Server-fabien:27017
       - ME_CONFIG_BASICAUTH=false
@@ -46,7 +46,7 @@ services:
     build: ./backend
     container_name: backend
     ports:
-      - "5000:5000"
+      - "5001:5000"
     volumes:
       - ./backend:/app
     environment:

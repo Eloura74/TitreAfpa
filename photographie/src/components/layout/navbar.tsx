@@ -44,7 +44,7 @@ export default function Navbar() {
           </li>
           <li className="nav-item">
             <Link to="/about" className="nav-link">
-              Contact
+              A Propos
             </Link>
           </li>
           <li className="nav-item">
@@ -57,9 +57,14 @@ export default function Navbar() {
               Inscription/Connexion
             </Link>
           </li>
+          <li className="nav-item">
+            <Link to="/galerie-form" className="nav-link">
+              Gestion Galerie
+            </Link>
+          </li>
         </ul>
       </div>
-      
+
       {/* Élément décoratif */}
       <div className="navbar-accent"></div>
     </nav>

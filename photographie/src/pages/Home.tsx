@@ -1,16 +1,26 @@
+// import de base
 import { useEffect } from "react";
-import Navbar from "../components/layout/navbar";
+// import des composants
+import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
-import Galerie from "./Galerie";
+// import des styles
 import "../styles/globals.css";
-import "../styles/home.css"; // Nouveaux styles distinctifs
+import "../styles/home.css";
+// import des images
+import homeImages from "../config/images.json";
+// import des routes
 import { Link } from "react-router-dom";
 
+// ***************************************************************************
+//
+// function Home qui retourne le composant
 export default function Home() {
+  // useEffect pour mettre le titre de la page
   useEffect(() => {
     document.title = "Photographe Professionnel | Accueil";
   }, []);
 
+  // return le composant
   return (
     <div className="home-page">
       {/* ******************* */}
@@ -27,7 +37,7 @@ export default function Home() {
         {/* ******************* */}
         <div className="hero-image-container">
           <img
-            src="/images/photo3.jpg"
+            src={homeImages.hero}
             alt="Photographe professionnel"
             className="hero-image"
           />

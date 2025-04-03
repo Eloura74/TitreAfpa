@@ -1,0 +1,221 @@
+/* Styles pour la page Événements */
+
+/* Animation d'entrée */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -500% 0;
+  }
+  100% {
+    background-position: 500% 0;
+  }
+}
+
+/* En-tête des événements */
+.evenements-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+}
+
+.evenements-titre {
+  font-family: "Cinzel", serif;
+  font-weight: 900;
+  font-size: 3.5rem;
+  margin-top: 4rem;
+  margin-bottom: 2rem;
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(90deg, #d6c487, #ffe992, #c9b36f);
+  background-size: 500% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 10s linear infinite;
+  text-shadow: 0 0 20px rgba(255, 217, 0, 0.1);
+}
+
+.evenements-titre-divider {
+  content: "";
+  width: 40%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 215, 0, 0.2),
+    transparent
+  );
+  margin-bottom: 2rem;
+}
+
+.evenements-subtitle {
+  font-family: "Syncopate", sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.8;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 36rem;
+  margin: 0 auto 2rem;
+  text-align: center;
+  animation: slideUp 1.5s ease-out 0.5s both;
+}
+
+/* Filtres d'événements */
+.evenements-filtres {
+  padding: 0 6vw;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.evenements-filtre-btn {
+  font-family: 'Syncopate', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 0.125rem; /* équivalent à rounded-sm */
+  background-color: #1a1a20;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.evenements-filtre-btn:hover {
+  background-color: #252530;
+}
+
+.evenements-filtre-btn.active {
+  font-weight: 600;
+  position: relative;
+  background: linear-gradient(to right, #d6c487, #ffe992);
+  color: black;
+}
+
+/* Liste des événements */
+.evenements-liste {
+  width: 100%;
+  max-width: 48rem;
+  padding: 0 1rem;
+}
+
+.evenement-carte {
+  animation-duration: 0.8s;
+  animation-fill-mode: forwards;
+  opacity: 0;
+  margin-bottom: 1.5rem;
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.evenement-carte:nth-child(1) { animation-delay: 0.1s; }
+.evenement-carte:nth-child(2) { animation-delay: 0.2s; }
+.evenement-carte:nth-child(3) { animation-delay: 0.3s; }
+.evenement-carte:nth-child(4) { animation-delay: 0.4s; }
+.evenement-carte:nth-child(5) { animation-delay: 0.5s; }
+
+.evenement-contenu {
+  background-color: rgba(10, 10, 16, 0.3);
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.5s ease;
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  backdrop-filter: blur(10px);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.evenement-contenu::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, transparent, rgba(255, 215, 0, 0.03), transparent);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 1;
+}
+
+.evenement-contenu:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 30px -15px rgba(0, 0, 0, 0.5);
+}
+
+.evenement-contenu:hover::before {
+  opacity: 1;
+}
+
+.evenement-contenu::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: right;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+  transition: transform 0.5s ease;
+}
+
+.evenement-contenu:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.evenement-indicateur {
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: 0.5rem;
+  margin-right: 1rem;
+  border-radius: 50%;
+  background-color: #e9d28f;
+}
+
+.evenement-titre {
+  font-family: "Cinzel", serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #d1d1d1, #ffe992, #d1d1d1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  position: relative;
+}
+
+.evenement-description {
+  font-family: "Syncopate", sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+}

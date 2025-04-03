@@ -1,50 +1,295 @@
+/* ********************************************** */
+/* IMPORTS ET POLICES                            */
+/* ********************************************** */
 @import "tailwindcss";
 
+/* ********************************************** */
+/* VARIABLES RACINE ET CONFIGURATION DE BASE     */
+/* ********************************************** */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* Polices principales */
+  font-family: "Syncopate", system-ui, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
+  /* Couleurs de base */
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
+  background-color: #0a0a10;
 
+  /* Lissage des polices */
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Variables CSS personnalisées pour la cohérence des couleurs */
+  --photo-dark-800: #0a0a10;
+  --photo-dark-900: #050508;
+
+  --photo-gold-100: #fff1c0;
+  --photo-gold-200: #ffe992;
+  --photo-gold-300: #ebd87c;
+  --photo-gold-400: #d6c487;
+  --photo-gold-500: #c9b36f;
+  --photo-gold-600: #ab8a25;
+  --photo-gold-700: #8a7b25;
+
+  --photo-gray-100: #f5f5f5;
+  --photo-gray-200: #e5e5e5;
+  --photo-gray-300: #d4d4d4;
+  --photo-gray-400: #a3a3a3;
+  --photo-gray-500: #737373;
+  --photo-gray-600: #525252;
+  --photo-gray-700: #404040;
+  --photo-gray-800: #262626;
+  --photo-gray-900: #171717;
 }
 
-/* body {
-  @apply bg-black-900 text-white container mx-auto;
-} */
+/* ********************************************** */
+/* STRUCTURE DE BASE ET MISE EN PAGE             */
+/* ********************************************** */
+/* Fond texturé pour toutes les pages */
+body {
+  min-height: 100vh;
+  background-color: var(--photo-dark-800);
+  color: white;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23161624' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
 
-/* Effet Titre - Platine & Doré */
+/* Structure de conteneur standard pour toutes les pages */
+.page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: "Syncopate", sans-serif;
+}
+
+/* Conteneur de contenu principal avec espacement standard */
+.main-content {
+  flex-grow: 1;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 8rem;
+  padding-bottom: 4rem;
+  position: relative;
+  z-index: 10;
+}
+
+/* ********************************************** */
+/* TYPOGRAPHIE ET TITRES                         */
+/* ********************************************** */
+/* Style de titre principal avec dégradé doré */
+.title-primary {
+  font-family: "Cinzel", serif;
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(90deg, #d6c487, #ffe992, #c9b36f);
+  background-size: 500% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 10s linear infinite;
+}
+
+/* Séparateur/ligne décorative sous les titres */
+.title-divider {
+  width: 8rem;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--photo-gold-200),
+    transparent
+  );
+  margin-bottom: 2rem;
+}
+
+/* Sous-titre standard */
+.subtitle {
+  color: #a3a3a3;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.5rem;
+  font-family: "Syncopate", sans-serif;
+}
+
+/* Texte avec dégradé doré-platine */
 .titre-degrade {
-  @apply text-5xl font-extrabold;
+  font-size: 3rem;
+  font-weight: 800;
+  font-family: "Cinzel", serif;
   background: linear-gradient(135deg, #828282 10%, #ab8a25 40%, #8a7b25 90%);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
   margin-bottom: 50px;
-  /* text-shadow: 3px 3px 12px rgba(255, 215, 0, 0.5); / */
 }
 
+/* Variante de texte avec dégradé */
 .my-gradient-text {
-  @apply bg-gradient-to-r from-[#828282] via-[#ab8a25] to-[#8a7b25] 
-           bg-clip-text text-transparent;
+  background: linear-gradient(to right, #828282, #ab8a25, #8a7b25);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
+/* Style de sous-titre avec ombre portée */
 .sous-titre {
-  @apply text-lg text-gray-200 max-w-lg leading-relaxed drop-shadow-lg;
+  font-size: 1.125rem;
+  color: #e5e5e5;
+  max-width: 32rem;
+  line-height: 1.7;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+  font-family: "Syncopate", sans-serif;
 }
 
+/* ********************************************** */
+/* LIENS ET NAVIGATION                           */
+/* ********************************************** */
+/* Style standard pour liens et titres secondaires */
 a,
 h2,
 h3 {
-  @apply bg-gradient-to-r from-[#828282] via-[#ab8a25] to-[#FFD700] 
-           bg-clip-text text-transparent;
+  background: linear-gradient(to right, #828282, #ab8a25, #ffd700);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
+/* Animation hover pour les liens */
 a:hover {
-  @apply opacity-80 scale-105;
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+/* ********************************************** */
+/* BOUTONS ET CONTRÔLES                          */
+/* ********************************************** */
+/* Bouton principal avec style or */
+.btn-primary {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--photo-gold-600);
+  border-radius: 0.125rem;
+  font-size: 0.875rem;
+  transition: all 300ms ease;
+  color: var(--photo-gold-200);
+}
+
+.btn-primary:hover {
+  background-color: var(--photo-gold-600);
+  color: black;
+}
+
+.btn-primary.active {
+  background-color: var(--photo-gold-600);
+  color: black;
+  font-weight: 700;
+}
+
+/* ********************************************** */
+/* ANIMATIONS ET EFFETS                          */
+/* ********************************************** */
+/* Animation d'apparition par fondu */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Animation d'apparition par glissement vers le haut */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation d'effet brillant pour les dégradés */
+@keyframes shimmer {
+  0% {
+    background-position: -500% 0;
+  }
+  100% {
+    background-position: 500% 0;
+  }
+}
+
+/* Classes d'animation réutilisables */
+.animate-fadeIn {
+  animation: fadeIn 0.8s ease forwards;
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.animate-shimmer {
+  animation: shimmer 10s linear infinite;
+}
+
+/* animation pour about */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer utilities {
+  .animate-fadeInUp {
+    animation: fadeInUp 0.8s ease forwards;
+  }
+}
+
+/* ********************************************** */
+/* UTILITAIRES DIVERS                            */
+/* ********************************************** */
+/* Fond avec dégradé doré */
+.gold-bg {
+  background: linear-gradient(90deg, #d6c487, #ffe992, #c9b36f);
+}
+
+/* Texte avec dégradé doré */
+.gold-text {
+  background: linear-gradient(90deg, #d6c487, #ffe992, #c9b36f);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Bordure avec effet doré subtil */
+.gold-border {
+  border: 1px solid var(--photo-gold-600);
+}
+
+/* Ombre portée dorée */
+.gold-shadow {
+  box-shadow: 0 5px 15px -3px rgba(255, 215, 0, 0.15);
+}
+
+/* Transition générale */
+.transition-standard {
+  transition: all 300ms ease;
+}
+
+/* Input */
+.input {
+  @apply bg-[#252530] p-2 rounded text-white placeholder-gray-400;
 }

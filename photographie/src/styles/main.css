@@ -1,0 +1,101 @@
+/* ********************************************** */
+/* FICHIER PRINCIPAL D'IMPORTATION CSS         */
+/* ********************************************** */
+
+/* Importation de Tailwind */
+@import "tailwindcss";
+
+/* Base (reset, typographie) - importée en premier pour les polices */
+@import "./base/_typography.css";
+@import "./base/_reset.css";
+
+/* Abstractions (variables, mixins, animations) */
+@import "./abstracts/_variables.css";
+@import "./abstracts/_mixins.css";
+@import "./abstracts/_animations.css";
+
+/* Layout (structure, grille, header) */
+@import "./layout/_grid.css";
+@import "./layout/_header.css";
+
+/* Composants (boutons, cartes) */
+@import "./components/_buttons.css";
+@import "./components/_cards.css";
+
+/* Pages spécifiques */
+@import "./pages/home.css";
+@import "./pages/galerie.css";
+@import "./pages/evenements.css";
+
+/* Composants de layout */
+@import "./components/navbar.css";
+@import "./components/footer.css";
+
+/* ********************************************** */
+/* UTILITAIRES GÉNÉRAUX                         */
+/* ********************************************** */
+
+/* Conteneurs */
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Espacements */
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-4 { margin-top: 1rem; }
+.mt-8 { margin-top: 2rem; }
+.mt-16 { margin-top: 4rem; }
+
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-8 { margin-bottom: 2rem; }
+.mb-16 { margin-bottom: 4rem; }
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Couleurs de texte */
+.text-white { color: white; }
+.text-gold { color: var(--color-gold-300); }
+.text-gray { color: rgba(255, 255, 255, 0.6); }
+
+/* Opacités et visibilité */
+.opacity-75 { opacity: 0.75; }
+.opacity-50 { opacity: 0.5; }
+.hidden { display: none; }
+.visible { visibility: visible; }
+.invisible { visibility: hidden; }
+
+/* Texte */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+/* Flexbox */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-grow { flex-grow: 1; }
+
+/* Position */
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.sticky { position: sticky; }
+
+/* Z-index */
+.z-10 { z-index: 10; }
+.z-20 { z-index: 20; }
+.z-50 { z-index: 50; }
+.z-100 { z-index: 100; }

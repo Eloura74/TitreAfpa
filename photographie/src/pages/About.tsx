@@ -1,26 +1,48 @@
 import { useEffect } from "react";
 import Navbar from "../components/layout/Navbar";
-import "../styles/globals.css"; // Import de tes styles globaux
+import Footer from "../components/layout/Footer";
+import "../styles/globals.css";
 
 export default function About() {
   useEffect(() => {
-    document.title = "Photographe Professionnel | A propos";
+    document.title = "Photographe Professionnel | À propos";
   }, []);
 
   return (
-    <div className="bg-gradient-to-r from-gray-900 via-black to-gray-900 text-white min-h-screen">
-      {/* Navigation */}
+    <div className="page-container">
       <Navbar />
 
-      {/* Contenu de la page A propos */}
-      <section className="py-20 px-8 md:px-20">
-        <h2 className="text-3xl font-bold text-center mb-10">A propos</h2>
-        <p className="sous-titre">
+      <main className="main-content flex flex-col items-center text-center">
+        {/* Titre principal avec animation shimmer */}
+        <h1 className="title-primary text-4xl md:text-5xl font-cinzel uppercase tracking-wider animate-shimmer mb-4">
+          À propos
+        </h1>
+        <div className="title-divider"></div>
+
+        {/* Sous-titre */}
+        <p className="sous-titre mb-10 max-w-2xl">
           Photographe professionnel spécialisé dans les événements, portraits et
           galeries artistiques. Transformez vos souvenirs en véritables œuvres
           d'art.
         </p>
-      </section>
+
+        {/* Bloc biographie stylisé */}
+        <div className="bg-[rgba(10,10,16,0.85)] border gold-border rounded-sm p-8 max-w-3xl text-left animate-fadeInUp">
+          <h2 className="gold-text font-cinzel text-xl mb-4">Mon parcours</h2>
+          <p className="text-[var(--photo-gray-300)] font-syncopate text-sm leading-relaxed">
+            Passionné par l'art visuel depuis mon plus jeune âge, j'ai développé
+            une approche photographique centrée sur l'émotion et l'authenticité.
+            Chaque cliché raconte une histoire, chaque lumière révèle une
+            intention. De la photographie de mariage aux portraits intimistes en
+            passant par des projets artistiques contemporains, je cherche à
+            capturer la beauté brute du moment.
+          </p>
+        </div>
+
+        {/* Espace supplémentaire ou ajout de photo/portrait dans le futur */}
+      </main>
+
+      <Footer />
     </div>
   );
 }

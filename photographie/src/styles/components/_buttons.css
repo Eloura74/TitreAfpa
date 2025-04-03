@@ -1,0 +1,115 @@
+/* ********************************************** */
+/* STYLES DE BOUTONS                           */
+/* ********************************************** */
+
+/* Bouton standard */
+.btn {
+  display: inline-block;
+  font-family: var(--font-primary);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-normal);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  background-color: #1a1a20;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.btn:hover {
+  background-color: #252530;
+  transform: translateY(-2px);
+}
+
+/* Bouton avec dégradé doré */
+.btn-gold {
+  background: var(--gradient-gold);
+  color: #0a0a10;
+  font-weight: var(--font-weight-semibold);
+}
+
+.btn-gold:hover {
+  background: var(--gradient-gold-hover);
+  box-shadow: 0 5px 15px rgba(171, 138, 37, 0.2);
+}
+
+/* Bouton avec bordure */
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--color-gold-400);
+  color: var(--color-gold-300);
+}
+
+.btn-outline:hover {
+  background-color: rgba(201, 179, 111, 0.1);
+  color: var(--color-gold-200);
+}
+
+/* Bouton transparent */
+.btn-ghost {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.5rem 1rem;
+}
+
+.btn-ghost:hover {
+  background: transparent;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Tailles de bouton */
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.7rem;
+}
+
+.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 0.85rem;
+}
+
+/* État désactivé */
+.btn:disabled,
+.btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Bouton avec icône */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Bouton filtre (utilisé dans les pages Galerie et Événements) */
+.filter-btn {
+  font-family: var(--font-primary);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: var(--transition-normal);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 0.125rem; 
+  background-color: #1a1a20;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.filter-btn:hover {
+  background-color: #252530;
+}
+
+.filter-btn.active {
+  font-weight: var(--font-weight-semibold);
+  position: relative;
+  background: var(--gradient-gold);
+  color: black;
+}
