@@ -4,6 +4,7 @@ import About from "./pages/About";
 import Galerie from "./pages/Galerie";
 import Evenements from "./pages/Evenements";
 import GalerieForm from "./components/galerie/GalerieForm";
+import CalendarTest from "../test/calendarTest";
 
 function App() {
   return (
@@ -14,6 +15,8 @@ function App() {
         <Route path="/Galerie" element={<Galerie />} />
         <Route path="/evenements" element={<Evenements />} />
         <Route path="/galerie-form" element={<GalerieForm />} />
+        {/* route test et debug */}
+        <Route path="/calendar-test" element={<CalendarTest />} />
       </Routes>
     </Router>
   );

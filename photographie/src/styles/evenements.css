@@ -1,6 +1,8 @@
-/* Styles pour la page Événements */
+/* ----------------------------------------------------
+🌟 GÉNÉRAL – Variables & animations
+-----------------------------------------------------*/
 
-/* Animation d'entrée */
+/* Effets de fondu */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -30,7 +32,10 @@
   }
 }
 
-/* En-tête des événements */
+/* ----------------------------------------------------
+🎯 CONTENEUR PRINCIPAL
+-----------------------------------------------------*/
+
 .evenements-container {
   display: flex;
   flex-direction: column;
@@ -39,14 +44,15 @@
   padding-bottom: 4rem;
 }
 
+/* ----------------------------------------------------
+🧭 EN-TÊTE ET TITRES
+-----------------------------------------------------*/
+
 .evenements-titre {
   font-family: "Cinzel", serif;
   font-weight: 900;
   font-size: 3.5rem;
-  margin-top: 4rem;
-  margin-bottom: 2rem;
-  position: relative;
-  display: inline-block;
+  margin: 4rem 0 2rem;
   background: linear-gradient(90deg, #d6c487, #ffe992, #c9b36f);
   background-size: 500% 100%;
   -webkit-background-clip: text;
@@ -54,19 +60,19 @@
   color: transparent;
   animation: shimmer 10s linear infinite;
   text-shadow: 0 0 20px rgba(255, 217, 0, 0.1);
+  text-align: center;
 }
 
 .evenements-titre-divider {
-  content: "";
   width: 40%;
   height: 2px;
+  margin-bottom: 2rem;
   background: linear-gradient(
     90deg,
     transparent,
     rgba(255, 215, 0, 0.2),
     transparent
   );
-  margin-bottom: 2rem;
 }
 
 .evenements-subtitle {
@@ -77,32 +83,35 @@
   letter-spacing: 0.05em;
   color: rgba(255, 255, 255, 0.85);
   max-width: 36rem;
-  margin: 0 auto 2rem;
   text-align: center;
+  margin: 0 auto 2rem;
   animation: slideUp 1.5s ease-out 0.5s both;
 }
 
-/* Filtres d'événements */
+/* ----------------------------------------------------
+🎛️ FILTRES (TOUS / À VENIR / PASSÉS)
+-----------------------------------------------------*/
+
 .evenements-filtres {
-  padding: 0 6vw;
-  margin-bottom: 2rem;
   display: flex;
   justify-content: center;
   gap: 1rem;
+  padding: 0 6vw;
+  margin-bottom: 2rem;
 }
 
 .evenements-filtre-btn {
-  font-family: 'Syncopate', sans-serif;
+  font-family: "Syncopate", sans-serif;
   font-size: 0.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  transition: all 0.3s ease;
   padding: 0.5rem 1rem;
-  cursor: pointer;
   border: none;
-  border-radius: 0.125rem; /* équivalent à rounded-sm */
+  border-radius: 0.125rem;
   background-color: #1a1a20;
   color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .evenements-filtre-btn:hover {
@@ -111,77 +120,103 @@
 
 .evenements-filtre-btn.active {
   font-weight: 600;
-  position: relative;
   background: linear-gradient(to right, #d6c487, #ffe992);
   color: black;
 }
 
-/* Liste des événements */
+/* ----------------------------------------------------
+📋 LISTE DES ÉVÉNEMENTS
+-----------------------------------------------------*/
+
 .evenements-liste {
   width: 100%;
   max-width: 48rem;
   padding: 0 1rem;
 }
 
+/* Carte avec animation */
 .evenement-carte {
-  animation-duration: 0.8s;
-  animation-fill-mode: forwards;
+  animation: fadeIn 0.5s ease-out forwards;
   opacity: 0;
   margin-bottom: 1.5rem;
-  animation: fadeIn 0.5s ease-out forwards;
 }
 
-.evenement-carte:nth-child(1) { animation-delay: 0.1s; }
-.evenement-carte:nth-child(2) { animation-delay: 0.2s; }
-.evenement-carte:nth-child(3) { animation-delay: 0.3s; }
-.evenement-carte:nth-child(4) { animation-delay: 0.4s; }
-.evenement-carte:nth-child(5) { animation-delay: 0.5s; }
+/* Animations différées */
+.evenement-carte:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.evenement-carte:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.evenement-carte:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.evenement-carte:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.evenement-carte:nth-child(5) {
+  animation-delay: 0.5s;
+}
+
+/* ----------------------------------------------------
+🧩 BLOC ÉVÉNEMENT (contenu)
+-----------------------------------------------------*/
 
 .evenement-contenu {
-  background-color: rgba(10, 10, 16, 0.3);
-  padding: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.5s ease;
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  background-color: rgba(10, 10, 16, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  overflow: visible;
   position: relative;
+  transition: all 0.4s ease;
   backdrop-filter: blur(10px);
-  border-radius: 2px;
-  overflow: hidden;
 }
 
-.evenement-contenu::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, transparent, rgba(255, 215, 0, 0.03), transparent);
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  z-index: 1;
-}
-
-.evenement-contenu:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 30px -15px rgba(0, 0, 0, 0.5);
+@media (min-width: 768px) {
+  .evenement-contenu {
+    flex-direction: row;
+  }
 }
 
 .evenement-contenu:hover::before {
   opacity: 1;
 }
 
+.evenement-contenu::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    transparent,
+    rgba(255, 215, 0, 0.03),
+    transparent
+  );
+  opacity: 0;
+  z-index: 1;
+  transition: opacity 0.5s ease;
+}
+
 .evenement-contenu::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
   height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 215, 0, 0.3),
+    transparent
+  );
   transform: scaleX(0);
   transform-origin: right;
-  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
   transition: transform 0.5s ease;
 }
 
@@ -190,32 +225,174 @@
   transform-origin: left;
 }
 
-.evenement-indicateur {
-  width: 0.5rem;
-  height: 0.5rem;
-  margin-top: 0.5rem;
-  margin-right: 1rem;
-  border-radius: 50%;
-  background-color: #e9d28f;
+/* ----------------------------------------------------
+🖼️ IMAGE AFFICHÉE
+-----------------------------------------------------*/
+
+.evenement-affiche {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
 }
 
+@media (min-width: 768px) {
+  .evenement-affiche {
+    width: 40%;
+    height: auto;
+  }
+}
+
+/* ----------------------------------------------------
+📝 INFO DE L'ÉVÉNEMENT
+-----------------------------------------------------*/
+
+.evenement-info {
+  flex: 1;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Titre */
 .evenement-titre {
   font-family: "Cinzel", serif;
   font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  font-weight: 700;
   text-transform: uppercase;
-  background: linear-gradient(90deg, #d1d1d1, #ffe992, #d1d1d1);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  position: relative;
+  color: #ffe992;
+  margin: 0;
 }
 
+/* Description */
 .evenement-description {
   font-family: "Syncopate", sans-serif;
-  font-size: 0.7rem;
-  letter-spacing: 0.03em;
-  line-height: 1.6;
+  font-size: 0.8rem;
+  line-height: 1.5;
   color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+/* Métadonnées : date, lieu, thème */
+.evenement-meta {
+  font-size: 0.75rem;
+  color: #cccccc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.evenement-meta span,
+.evenement-meta a {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.evenement-meta a:hover {
+  text-decoration: underline;
+}
+
+/* Icône effet hover */
+.evenement-meta svg {
+  transition: transform 0.3s ease;
+}
+
+.evenement-meta span:hover svg,
+.evenement-meta a:hover svg {
+  transform: scale(1.1);
+}
+
+/* ----------------------------------------------------
+📅 POPUP CALENDRIER
+-----------------------------------------------------*/
+
+.evenement-calendar-popup {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  z-index: 100;
+}
+
+/* Réglage de style de react-calendar */
+.react-calendar {
+  background-color: #1f1f26;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-family: "Cinzel", serif;
+  font-size: 0.8rem;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.react-calendar__tile--rangeStart,
+.react-calendar__tile--rangeEnd {
+  background-color: #ffe992 !important;
+  color: #000 !important;
+}
+
+/* ----------------------------------------------------
+📅 STYLES DU CALENDRIER
+-----------------------------------------------------*/
+
+/* Styles spécifiques pour le calendrier */
+/* .react-calendar {
+  width: 350px !important;
+  border: none !important;
+  background: #1a1a20 !important;
+  color: white !important;
+  font-family: "Syncopate", sans-serif !important;
+} */
+
+/* En-tête du calendrier */
+.react-calendar__navigation {
+  margin-bottom: 10px !important;
+}
+
+.react-calendar__navigation button {
+  color: var(--photo-gold-200) !important;
+  font-weight: bold !important;
+}
+
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+  background-color: #252530 !important;
+}
+
+/* Jours de la semaine */
+.react-calendar__month-view__weekdays {
+  color: var(--photo-gold-400) !important;
+  font-weight: normal !important;
+  text-transform: uppercase !important;
+  font-size: 0.7em !important;
+}
+
+/* Cases des jours */
+.react-calendar__tile {
+  padding: 10px 6px !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.8em !important;
+}
+
+/* Jours sélectionnés */
+.react-calendar__tile--active,
+.react-calendar__tile--rangeStart,
+.react-calendar__tile--rangeEnd {
+  background: var(--photo-gold-400) !important;
+  color: black !important;
+  font-weight: bold !important;
+}
+
+/* Jours dans la plage */
+.react-calendar__tile--range {
+  background: rgba(214, 196, 135, 0.3) !important;
+}
+
+/* Hover sur les jours */
+.react-calendar__tile:hover {
+  background: #252530 !important;
 }

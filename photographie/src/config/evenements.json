@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "titre": "Festival Photo Pro",
+    "description": "Grand rassemblement autour de la photographie.",
+    "dateDebut": "2024-06-02",
+    "dateFin": "2024-06-06",
+    "lieu": "Paris, France",
+    "theme": "Photographie Urbaine",
+    "urlAffiche": "/images/festival-photo.jpg"
+  },
+  {
+    "id": 2,
+    "titre": "Atelier de photographie",
+    "description": "Atelier de photographie pour débuter.",
+    "dateDebut": "2025-06-02",
+    "dateFin": "2025-06-06",
+    "lieu": "Lyon, France",
+    "theme": "Photographie Urbaine",
+    "urlAffiche": "/images/atelier-photo.jpg"
+  },
+  {
+    "id": 3,
+    "titre": "Atelier de photographie",
+    "description": "Atelier de photographie pour débuter.",
+    "dateDebut": "2025-06-02",
+    "dateFin": "2025-06-06",
+    "lieu": "Lyon, France",
+    "theme": "Photographie Urbaine",
+    "urlAffiche": "/images/atelier-photo1.jpg"
+  },
+  {
+    "id": 4,
+    "titre": "Atelier de photographie",
+    "description": "Atelier de photographie pour débuter.",
+    "dateDebut": "2025-06-02",
+    "dateFin": "2025-06-06",
+    "lieu": "Lyon, France",
+    "theme": "Photographie Urbaine",
+    "urlAffiche": "/images/atelier-photo2.jpg"
+  }
+]
