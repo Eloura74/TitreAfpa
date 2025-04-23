@@ -15,11 +15,14 @@ const ArticlePanier: React.FC<Props> = ({ article }) => {
       <div className="flex items-center gap-4">
         {/* Prévisualisation de l'image si disponible */}
         {article.image && (
-          <img
-            src={article.image}
-            alt={article.nom}
-            className="w-20 h-20 object-cover rounded border border-[#ffe992]"
-          />
+          <div className="group relative">
+            <img
+              src={article.image}
+              alt={article.nom}
+              className="w-20 h-20 object-cover rounded border border-[#ffe992] transition-transform duration-300 group-hover:scale-150 z-10"
+              style={{ cursor: 'pointer' }}
+            />
+          </div>
         )}
         <div>
           <h2 className="font-semibold text-lg text-[#ffe992]">{article.nom}</h2>
@@ -28,7 +31,7 @@ const ArticlePanier: React.FC<Props> = ({ article }) => {
         </div>
       </div>
       <button
-        className="bg-red-400 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+        className="cart-button bg-transparent border border-[#d6c487] text-[#ffe992] px-4 py-2 rounded-sm transition-all duration-300 hover:bg-[#d6c487] hover:text-black"
         onClick={() => retirerArticle(article.id)}
       >
         Retirer
