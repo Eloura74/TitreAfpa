@@ -49,6 +49,7 @@ services:
     environment:
       - MONGO_URI=mongodb://mongodb:27017/
       - STRIPE_SECRET_KEY=sk_test_xxx
+      - JWT_SECRET=admin
     depends_on:
       - mongodb
 
