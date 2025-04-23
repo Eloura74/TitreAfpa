@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import galerieRoutes from "./routes/galerie.js";
+import stripeRoutes from "./routes/stripe.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -40,6 +41,10 @@ app.get("/", (req, res) => {
 // Routes de la galerie
 app.use("/api/galerie", galerieRoutes);
 console.log("✅ Routes /api/galerie montées");
+
+// Route Stripe
+app.use("/api/stripe", stripeRoutes);
+console.log("✅ Route /api/stripe montée");
 
 // Démarrage du serveur
 app.listen(PORT, () => {

@@ -4,6 +4,7 @@ import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { Link } from "react-router-dom";
 import { usePanier } from "../store/panierContext";
+import { createCheckoutSession } from "../services/stripeService";
 
 // Vue principale du panier
 const Panier: React.FC = () => {
@@ -30,7 +31,14 @@ const Panier: React.FC = () => {
             </button>
             <button
               className="cart-button bg-transparent border border-[#d6c487] text-[#ffe992] px-4 py-2 rounded-sm transition-all duration-300 hover:bg-[#d6c487] hover:text-black"
-              onClick={() => alert('Validation du panier à implémenter (Stripe)')}
+              onClick={async () => {
+                try {
+                  const { url } = await createCheckoutSession(articles);
+                  window.location.href = url;
+                } catch (e) {
+                  alert("Erreur lors de la redirection vers Stripe");
+                }
+              }}
             >
               Valider le panier
             </button>
