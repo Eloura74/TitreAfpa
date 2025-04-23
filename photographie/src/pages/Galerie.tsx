@@ -3,6 +3,7 @@ import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import "../styles/globals.css";
 import "../styles/galerie.css";
+import { usePanier } from "../store/panierContext";
 
 // Données locales
 import galerieData from "../config/galerie.json";
@@ -23,6 +24,7 @@ export default function Galerie() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [notification, setNotification] = useState<string | null>(null);
   const [categorieActive, setCategorieActive] = useState<string>("Toutes");
+  const { ajouterArticle } = usePanier(); // Hook panier
 
   useEffect(() => {
     // 1. Données locales
@@ -46,10 +48,23 @@ export default function Galerie() {
       });
   }, []);
 
+  // Ajout d'un article au panier
   const ajouterAuPanier = (photo: Photo) => {
-    console.log(`Photo ajoutée au panier: ${photo.titre} - ${photo.prix}€`);
-    setNotification(`${photo.titre} ajouté au panier`);
-    setTimeout(() => setNotification(null), 3000);
+    try {
+      console.log("Tentative d'ajout au panier", photo);
+      ajouterArticle({
+        id: String(photo._id || photo.id),
+        nom: photo.titre,
+        prix: photo.prix,
+        quantite: 1,
+        image: photo.src, // Ajout automatique de la prévisualisation
+      });
+      setNotification(`${photo.titre} ajouté au panier`);
+      setTimeout(() => setNotification(null), 3000);
+    } catch (e) {
+      console.error("Erreur lors de l'ajout au panier:", e);
+      setNotification("Erreur lors de l'ajout au panier");
+    }
   };
 
   const categories = [
@@ -122,7 +137,7 @@ export default function Galerie() {
                   </span>
                   <button
                     onClick={() => ajouterAuPanier(photo)}
-                    className="cart-button bg-transparent border border-[#d6c487] text-[#ffe992] px-4 py-2 rounded-sm transition-all duration-300 hover:bg-[#d6c487] hover:text-black"
+                    className="cart-button bg-transparent z-50 border border-[#d6c487] text-[#ffe992] px-4 py-2 rounded-sm transition-all duration-300 hover:bg-[#d6c487] hover:text-black"
                   >
                     Ajouter au panier
                   </button>

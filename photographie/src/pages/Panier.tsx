@@ -1,0 +1,40 @@
+import React from 'react';
+import ListeArticlesPanier from '../components/panier/ListeArticlesPanier';
+import Navbar from '../components/layout/Navbar';
+import Footer from '../components/layout/Footer';
+import { Link } from 'react-router-dom';
+import { usePanier } from '../store/panierContext';
+
+// Vue principale du panier
+const Panier: React.FC = () => {
+  const { articles, total, viderPanier } = usePanier();
+
+  return (
+    <div className="min-h-screen bg-[#0a0a10] text-white flex flex-col">
+      <Navbar />
+      <div className="flex-1 container mx-auto p-4">
+        <h1 className="text-3xl font-bold mb-6 text-center text-[#ffe992]">Mon panier</h1>
+        <ListeArticlesPanier articles={articles} />
+        <div className="flex flex-col md:flex-row justify-between items-center mt-8 gap-4">
+          <span className="text-xl font-semibold text-[#ffe992]">Total : {total} €</span>
+          <div className="flex gap-4">
+            <button
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+              onClick={viderPanier}
+            >
+              Vider le panier
+            </button>
+            <Link to="/galerie">
+              <button className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-500 transition">
+                Retour à la galerie
+              </button>
+            </Link>
+          </div>
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
+};
+
+export default Panier;
