@@ -1,15 +1,11 @@
-import express from "express";
-import multer from "multer";
-import path from "path";
-import { fileURLToPath } from "url";
-import Photo from "../models/Photo.js";
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const Photo = require("../models/Photo.js");
 
 // ------------------------------
 // Configuration
 // ------------------------------
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const router = express.Router();
 
 // ------------------------------
@@ -115,4 +111,4 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;

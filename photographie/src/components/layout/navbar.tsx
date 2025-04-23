@@ -1,5 +1,5 @@
 // Import de base
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 // Import des styles
 import "../../styles/navbar.css";
@@ -7,6 +7,11 @@ import "../../styles/navbar.css";
 // Navbar component
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    setIsAdmin(localStorage.getItem("role") === "admin");
+  }, []);
 
   return (
     <nav className="navbar-container">
@@ -57,11 +62,13 @@ export default function Navbar() {
               Inscription/Connexion
             </Link>
           </li>
-          <li className="nav-item">
-            <Link to="/galerie-form" className="nav-link">
-              Gestion Galerie
-            </Link>
-          </li>
+          {isAdmin && (
+            <li className="nav-item">
+              <Link to="/galerie-form" className="nav-link">
+                Gestion Galerie
+              </Link>
+            </li>
+          )}
         </ul>
       </div>
 

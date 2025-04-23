@@ -1,15 +1,13 @@
-import express from "express";
-import cors from "cors";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import galerieRoutes from "./routes/galerie.js";
-import stripeRoutes from "./routes/stripe.js";
-import path from "path";
-import { fileURLToPath } from "url";
+const express = require("express");
+const cors = require("cors");
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+const galerieRoutes = require("./routes/galerie.js");
+const stripeRoutes = require("./routes/stripe.js");
+const authRoutes = require("./routes/auth.js");
+const path = require("path");
 
-// Récupération du chemin courant
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Pas besoin de __filename ni __dirname en CommonJS
 
 // Initialisation de l'app Express
 const app = express();
@@ -41,6 +39,10 @@ app.get("/", (req, res) => {
 // Routes de la galerie
 app.use("/api/galerie", galerieRoutes);
 console.log("✅ Routes /api/galerie montées");
+
+// Route d'authentification
+app.use("/api/auth", authRoutes);
+console.log("✅ Route /api/auth montée");
 
 // Route Stripe
 app.use("/api/stripe", stripeRoutes);

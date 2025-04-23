@@ -8,7 +8,7 @@ services:
     container_name: MongoDB-Server-fabien
     restart: always
     ports:
-      - "27019:27017"
+      - "27017:27017"
     volumes:
       - mongodb_data:/data/db
       - mongodb_config:/data/configdb
@@ -44,14 +44,13 @@ services:
   # Backend
   backend:
     build: ./backend
-    container_name: backend
     ports:
       - "5001:5000"
-    volumes:
-      - ./backend:/app
     environment:
-      - NODE_ENV=development
-      - MONGO_URI=mongodb://admin:password@MongoDB-Server-fabien:27017/
+      - MONGO_URI=mongodb://mongodb:27017/
+      - STRIPE_SECRET_KEY=sk_test_xxx
+    depends_on:
+      - mongodb
 
 # ********************
 # Volumes

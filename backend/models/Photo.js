@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
-const PhotoSchema = new mongoose.Schema({
+const photoSchema = new mongoose.Schema({
   src: { type: String, required: true },
   alt: { type: String, required: true },
   titre: { type: String, required: true },
@@ -9,4 +9,4 @@ const PhotoSchema = new mongoose.Schema({
   categorie: { type: String, required: true },
 });
 
-export default mongoose.model("Photo", PhotoSchema);
+module.exports = mongoose.model("Photo", photoSchema);
