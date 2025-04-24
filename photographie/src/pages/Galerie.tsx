@@ -1,82 +1,129 @@
+// ==============================
+//  Importations des modules et ressources
+// ==============================
+
+// React et ses hooks pour gérer l'état (useState) et le cycle de vie du composant (useEffect)
 import { useState, useEffect } from "react";
-import Navbar from "../components/layout/Navbar";
+
+// Importation des composants de layout
+import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
+
+// Importation des fichiers de styles globaux et spécifiques à la galerie
 import "../styles/globals.css";
 import "../styles/galerie.css";
+
+// Importation du contexte personnalisé pour gérer le panier (state global)
 import { usePanier } from "../store/panierContext";
 
-// Données locales
+// Importation des données locales de la galerie (JSON statique)
 import galerieData from "../config/galerie.json";
 
-// Créer un type pour nos photos
+
+// ==============================
+//  Définition de l'interface TypeScript pour typer les objets "Photo"
+// ==============================
 interface Photo {
-  id?: number; // facultatif pour celles de Mongo
-  _id?: string; // ID Mongo
-  src: string;
-  alt: string;
-  titre: string;
-  description: string;
-  prix: number;
-  categorie: string;
+  id?: number;      // ID local optionnel (pour les données statiques)
+  _id?: string;     // ID MongoDB optionnel (pour les données issues de la base)
+  src: string;      // Chemin ou URL de l'image
+  alt: string;      // Texte alternatif pour l'accessibilité
+  titre: string;    // Titre de la photo
+  description: string; // Description détaillée
+  prix: number;     // Prix en euros
+  categorie: string; // Catégorie de la photo
 }
 
-export default function Galerie() {
-  const [photos, setPhotos] = useState<Photo[]>([]);
-  const [notification, setNotification] = useState<string | null>(null);
-  const [categorieActive, setCategorieActive] = useState<string>("Toutes");
-  const { ajouterArticle } = usePanier(); // Hook panier
 
+// ==============================
+//  Composant principal : Galerie
+// ==============================
+export default function Galerie() {
+  // Gestion des états avec useState :
+  const [photos, setPhotos] = useState<Photo[]>([]);           // Stocke toutes les photos (locales + MongoDB)
+  const [notification, setNotification] = useState<string | null>(null);  // Message temporaire pour feedback utilisateur
+  const [categorieActive, setCategorieActive] = useState<string>("Toutes"); // Catégorie actuellement sélectionnée
+
+  // Récupération de la fonction "ajouterArticle" via le contexte panier
+  const { ajouterArticle } = usePanier();
+
+
+  // ==============================
+  //  useEffect : Chargement des données au montage du composant
+  // ==============================
   useEffect(() => {
-    // 1. Données locales
+    // 1️⃣ Chargement des données locales depuis le fichier JSON
     const photosLocales: Photo[] = galerieData;
 
-    // 2. Données MongoDB (images uploadées)
-    fetch("http://localhost:5000/api/galerie")
-      .then((res) => res.json())
+    // 2️⃣ Récupération des photos stockées sur le serveur (MongoDB)
+    fetch("http://localhost:5001/api/galerie")
+      .then((res) => res.json())   // Conversion de la réponse en JSON
       .then((data: Photo[]) => {
+        // Transformation des données pour corriger le chemin des images issues du serveur
         const photosServeur = data.map((photo) => ({
           ...photo,
-          src: `http://localhost:5000${photo.src}`, // chemin complet
+          src: `http://localhost:5001${photo.src}`,  // On complète le chemin relatif
         }));
 
-        // 3. Fusion des deux sources
+        // 3️⃣ Fusion des deux sources (locales + serveur) et mise à jour de l'état
         setPhotos([...photosLocales, ...photosServeur]);
       })
       .catch((err) => {
+        // En cas d'erreur (ex : serveur hors ligne), fallback sur les données locales uniquement
         console.error("Erreur chargement MongoDB:", err);
-        setPhotos(photosLocales); // fallback uniquement local
+        setPhotos(photosLocales);
       });
-  }, []);
+  }, []);  // [] signifie que ce code ne s'exécute qu'une seule fois (au montage)
 
-  // Ajout d'un article au panier
+
+  // ==============================
+  //  Fonction : Ajouter une photo au panier
+  // ==============================
   const ajouterAuPanier = (photo: Photo) => {
     try {
       console.log("Tentative d'ajout au panier", photo);
+
+      // Appel de la fonction du contexte pour ajouter l'article au panier
       ajouterArticle({
-        id: String(photo._id || photo.id),
+        id: String(photo._id || photo.id),  // On s'assure que l'ID est une chaîne de caractères
         nom: photo.titre,
         prix: photo.prix,
         quantite: 1,
-        image: photo.src, // Ajout automatique de la prévisualisation
+        image: photo.src,   // On stocke aussi l'image pour l'affichage dans le panier
       });
+
+      // Affichage d'une notification temporaire de succès
       setNotification(`${photo.titre} ajouté au panier`);
-      setTimeout(() => setNotification(null), 3000);
+      setTimeout(() => setNotification(null), 3000);  // Disparition après 3 secondes
+
     } catch (e) {
       console.error("Erreur lors de l'ajout au panier:", e);
       setNotification("Erreur lors de l'ajout au panier");
     }
   };
 
+
+  // ==============================
+  //  Génération dynamique des catégories à partir des photos chargées
+  // ==============================
   const categories = [
-    "Toutes",
-    ...Array.from(new Set(photos.map((photo) => photo.categorie))),
+    "Toutes",  // Option par défaut pour afficher toutes les photos
+    ...Array.from(new Set(photos.map((photo) => photo.categorie)))  // Extraction unique des catégories existantes
   ];
 
+
+  // ==============================
+  //  Filtrage des photos selon la catégorie sélectionnée
+  // ==============================
   const photosFiltered =
     categorieActive === "Toutes"
-      ? photos
-      : photos.filter((photo) => photo.categorie === categorieActive);
+      ? photos    // Si "Toutes" est sélectionné, on affiche toutes les photos
+      : photos.filter((photo) => photo.categorie === categorieActive);  // Sinon, filtre par catégorie
 
+
+  // ==============================
+  //  Affichage de la galerie
+  // ==============================
   return (
     <div className="min-h-screen bg-[#0a0a10] text-white">
       <Navbar />

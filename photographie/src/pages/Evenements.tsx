@@ -1,5 +1,15 @@
+// Importations des modules nécessaires
+// React : framework React
+// useState, useRef, useEffect : hooks React pour la gestion du cycle de vie et de l'état
+// Navbar : composant de navigation
+// Footer : composant de footer
+// evenementsData : données locales des événements (JSON)
+// react-calendar : composant de calendrier
+// globals.css, evenements.css : styles globaux et spécifiques
+// Calendar : composant de calendrier
+// CalendarDays, MapPin, Target : icônes de Lucide
 import { useState, useRef, useEffect } from "react";
-import Navbar from "../components/layout/Navbar";
+import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import evenementsData from "../config/evenements.json";
 
@@ -9,11 +19,12 @@ import "../styles/evenements.css";
 import Calendar from "react-calendar";
 import { CalendarDays, MapPin, Target } from "lucide-react";
 
+// Fonction principale du composant Evenements
 export default function Evenements() {
-  const [filter, setFilter] = useState<"à venir" | "passé" | "tous">("tous");
-  const [showCalendarId, setShowCalendarId] = useState<number | null>(null);
-  const [hoveredMapId, setHoveredMapId] = useState<number | null>(null);
-  const calendarRef = useRef<HTMLDivElement>(null);
+  const [filter, setFilter] = useState<"à venir" | "passé" | "tous">("tous"); // État pour le filtre
+  const [showCalendarId, setShowCalendarId] = useState<number | null>(null); // État pour le calendrier
+  const [hoveredMapId, setHoveredMapId] = useState<number | null>(null); // État pour le map
+  const calendarRef = useRef<HTMLDivElement>(null); // Référence au calendrier
 
   // Fermer le calendrier si clic en dehors
   useEffect(() => {
@@ -25,12 +36,12 @@ export default function Evenements() {
         setShowCalendarId(null);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside); // Ferme le calendrier si clic en dehors
+    return () => document.removeEventListener("mousedown", handleClickOutside); // Nettoyage
   }, []);
 
-  const today = new Date().toISOString().split("T")[0];
-  const allEvents = evenementsData;
+  const today = new Date().toISOString().split("T")[0]; // Date actuelle
+  const allEvents = evenementsData; // Données des événements
 
   // Filtrage des événements
   const filteredEvents = allEvents.filter((event) => {
@@ -39,6 +50,7 @@ export default function Evenements() {
     return true;
   });
 
+  // Fonction principale du composant Evenements
   return (
     <div className="page-container">
       <Navbar />

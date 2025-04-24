@@ -1,7 +1,7 @@
 // import de base
 import { useEffect } from "react";
 // import des composants
-import Navbar from "../components/layout/Navbar";
+import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 // import des styles
 import "../styles/globals.css";

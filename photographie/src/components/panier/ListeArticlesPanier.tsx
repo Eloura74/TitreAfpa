@@ -1,7 +1,12 @@
-import React from 'react';
-import ArticlePanier from './ArticlePanier';
-import { ArticlePanierType } from '../../types/panier';
+// Importations des modules nécessaires
+// React : framework React
+// ArticlePanier : composant pour afficher un article du panier
+// ArticlePanierType : type pour les articles du panier
+import React from "react";
+import ArticlePanier from "./ArticlePanier";
+import { ArticlePanierType } from "../../types/panier";
 
+// Interface pour les props du composant
 interface Props {
   articles: ArticlePanierType[];
 }

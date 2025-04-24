@@ -1,15 +1,23 @@
+// ==============================
+//  Importations des modules et ressources
+// ==============================
 import React from "react";
 import ListeArticlesPanier from "../components/panier/ListeArticlesPanier";
-import Navbar from "../components/layout/Navbar";
+import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import { Link } from "react-router-dom";
 import { usePanier } from "../store/panierContext";
 import { createCheckoutSession } from "../services/stripeService";
 
-// Vue principale du panier
+// ==============================
+//  Vue principale du panier
+// ==============================
 const Panier: React.FC = () => {
-  const { articles, total, viderPanier } = usePanier();
+  const { articles, total, viderPanier } = usePanier(); // Récupération des articles du panier
 
+  // ==============================
+  //  Affichage du panier
+  // ==============================
   return (
     <div className="min-h-screen bg-[#0a0a10] text-white flex flex-col mt-18">
       <Navbar />

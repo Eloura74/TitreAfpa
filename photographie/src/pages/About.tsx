@@ -1,11 +1,18 @@
+// Importations des modules nécessaires
+// React : framework React
+// useEffect : hook React pour la gestion du cycle de vie
+// Navbar : composant de navigation
+// Footer : composant de footer
+// globals.css : styles globaux
 import { useEffect } from "react";
-import Navbar from "../components/layout/Navbar";
+import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import "../styles/globals.css";
 
+// Fonction principale du composant About
 export default function About() {
   useEffect(() => {
-    document.title = "Photographe Professionnel | À propos";
+    document.title = "Photographe Professionnel | À propos"; // Mise à jour du titre de la page
   }, []);
 
   return (
