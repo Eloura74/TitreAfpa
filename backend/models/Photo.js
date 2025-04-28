@@ -21,6 +21,12 @@ const photoSchema = new mongoose.Schema({
 
   // Catégorie à laquelle appartient la photo (obligatoire)
   categorie: { type: String, required: true },
+
+  // Référence à l'événement associé (optionnelle)
+  evenement: { type: mongoose.Schema.Types.ObjectId, ref: 'Evenement' },
+
+  // Référence à l'utilisateur propriétaire/auteur (optionnelle)
+  utilisateur: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 });
 
 // Création du modèle "Photo" à partir du schéma défini ci-dessus

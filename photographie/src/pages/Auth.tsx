@@ -8,6 +8,8 @@ import React, { useState } from "react";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import { register, login } from "../services/authService";
+import { useUser } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 // Fonction principale du composant Auth
 const Auth: React.FC = () => {
@@ -16,6 +18,8 @@ const Auth: React.FC = () => {
   const [motdepasse, setMotdepasse] = useState(""); // État pour le mot de passe
   const [message, setMessage] = useState(""); // État pour afficher les messages
   const [loading, setLoading] = useState(false); // État pour le chargement
+  const { setUser } = useUser();
+  const navigate = useNavigate();
 
   // Gestion de la soumission du formulaire
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,8 +38,16 @@ const Auth: React.FC = () => {
         if (res.error) setMessage(res.error); // Gestion des erreurs
         else {
           localStorage.setItem("token", res.token); // Stockage du token
-          localStorage.setItem("role", res.role); // Stockage du rôle
+          // Mise à jour du contexte utilisateur global
+          setUser({
+            isAuthenticated: true,
+            isAdmin: res.role === 'admin',
+            nom: res.nom || email
+          });
           setMessage("Connexion réussie !"); // Message de succès
+          setTimeout(() => {
+            navigate('/');
+          }, 800);
         }
       }
     } catch {
@@ -60,39 +72,33 @@ const Auth: React.FC = () => {
             type="email"
             placeholder="Email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="p-2 rounded bg-[#232336] border border-[#d6c487] text-white focus:outline-none"
+            onChange={e => setEmail(e.target.value)}
+            className="input input-bordered"
             required
           />
           <input
             type="password"
             placeholder="Mot de passe"
             value={motdepasse}
-            onChange={(e) => setMotdepasse(e.target.value)}
-            className="p-2 rounded bg-[#232336] border border-[#d6c487] text-white focus:outline-none"
+            onChange={e => setMotdepasse(e.target.value)}
+            className="input input-bordered"
             required
           />
           <button
             type="submit"
+            className="btn btn-primary"
             disabled={loading}
-            className="cart-button bg-transparent border border-[#d6c487] text-[#ffe992] px-4 py-2 rounded-sm transition-all duration-300 hover:bg-[#d6c487] hover:text-black"
           >
-            {loading
-              ? "Chargement..."
-              : isRegister
-              ? "S'inscrire"
-              : "Se connecter"}
+            {loading ? 'Chargement...' : (isRegister ? "S'inscrire" : "Se connecter")}
           </button>
           <button
             type="button"
-            className="text-xs underline text-[#ffe992]"
+            className="btn btn-secondary"
             onClick={() => setIsRegister(!isRegister)}
           >
-            {isRegister ? "Déjà inscrit ? Se connecter" : "Créer un compte"}
+            {isRegister ? "Déjà inscrit ? Se connecter" : "Pas encore de compte ? S'inscrire"}
           </button>
-          {message && (
-            <div className="text-center text-red-400 mt-2">{message}</div>
-          )}
+          {message && <div className="text-center text-red-400 mt-2">{message}</div>}
         </form>
       </div>
       <Footer />

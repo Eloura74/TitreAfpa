@@ -5,6 +5,9 @@ const dotenv = require("dotenv");
 const galerieRoutes = require("./routes/galerie.js");
 const stripeRoutes = require("./routes/stripe.js");
 const authRoutes = require("./routes/auth.js");
+const evenementRoutes = require('./routes/evenement');
+const paiementRoutes = require('./routes/paiement');
+const panierRoutes = require('./routes/panier');
 const path = require("path");
 
 // Pas besoin de __filename ni __dirname en CommonJS
@@ -39,6 +42,12 @@ app.get("/", (req, res) => {
 // Routes de la galerie
 app.use("/api/galerie", galerieRoutes);
 console.log("✅ Routes /api/galerie montées");
+
+// Routes CRUD pour la gestion avancée
+app.use('/api/evenements', evenementRoutes);
+app.use('/api/paiements', paiementRoutes);
+app.use('/api/paniers', panierRoutes);
+console.log("✅ Routes /api/evenements, /api/paiements, /api/paniers montées");
 
 // Route d'authentification
 app.use("/api/auth", authRoutes);
