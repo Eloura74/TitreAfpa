@@ -178,7 +178,13 @@ export default function GalerieForm() {
 
         {form.src && (
           <img
-            src={`http://localhost:5001${form.src}`}
+            src={
+              form.src.startsWith("http")
+                ? form.src
+                : form.src.startsWith("/")
+                ? `http://localhost:5001${form.src}`
+                : `http://localhost:5001/uploads/${form.src}`
+            }
             alt="Aperçu"
             className="w-64 h-auto mt-2 rounded border border-gray-600"
           />
@@ -262,7 +268,13 @@ export default function GalerieForm() {
           >
             <div className="flex items-center gap-4">
               <img
-                src={`http://localhost:5001${photo.src}`}
+                src={
+                  photo.src.startsWith("http")
+                    ? photo.src
+                    : photo.src.startsWith("/")
+                    ? `http://localhost:5001${photo.src}`
+                    : `http://localhost:5001/uploads/${photo.src}`
+                }
                 alt={photo.alt}
                 className="w-16 h-16 object-cover rounded shadow"
               />
