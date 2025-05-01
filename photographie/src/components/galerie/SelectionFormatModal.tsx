@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tarif } from '@/types/tarif';
-import { useTarifs } from '@/utils/useTarifs';
+import { useTarifs } from "../../utils/useTarifs";
 
 interface SelectionFormatModalProps {
   type: Tarif['type']; // ex : 'tirage', 'poster', etc.

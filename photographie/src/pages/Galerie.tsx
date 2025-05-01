@@ -19,6 +19,11 @@ import { usePanier } from "../store/panierContext";
 // Importation des données locales de la galerie (JSON statique)
 import galerieData from "../config/galerie.json";
 
+// Importation de la modale de sélection de format
+import { SelectionFormatModal } from "../components/galerie/SelectionFormatModal";
+
+// Importation du type Tarif
+import { Tarif } from "../types/tarif";
 
 // ==============================
 //  Définition de l'interface TypeScript pour typer les objets "Photo"
@@ -32,8 +37,20 @@ interface Photo {
   description: string; // Description détaillée
   prix: number;     // Prix en euros
   categorie: string; // Catégorie de la photo
+  type: string;     // Type de la photo
 }
 
+// ==============================
+//  Définition de l'interface TypeScript pour typer les objets "Tarif"
+// ==============================
+interface Tarif {
+  id: string;
+  nom: string;
+  format: string;
+  support: string;
+  prix: number;
+  type: string;
+}
 
 // ==============================
 //  Composant principal : Galerie
@@ -43,10 +60,14 @@ export default function Galerie() {
   const [photos, setPhotos] = useState<Photo[]>([]);           // Stocke toutes les photos (locales + MongoDB)
   const [notification, setNotification] = useState<string | null>(null);  // Message temporaire pour feedback utilisateur
   const [categorieActive, setCategorieActive] = useState<string>("Toutes"); // Catégorie actuellement sélectionnée
+  const [photoSelectionnee, setPhotoSelectionnee] = useState<Photo | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   // Récupération de la fonction "ajouterArticle" via le contexte panier
   const { ajouterArticle } = usePanier();
 
+  // Le hook useTarifs est utilisé dans la SelectionFormatModal, donc pas besoin d'importer les tarifs ici.
+  // Si jamais tu veux utiliser les tarifs côté Galerie, utilise le hook useTarifs ou passe-les en props depuis la modale.
 
   // ==============================
   //  useEffect : Chargement des données au montage du composant
@@ -79,29 +100,45 @@ export default function Galerie() {
   // ==============================
   //  Fonction : Ajouter une photo au panier
   // ==============================
-  const ajouterAuPanier = (photo: Photo) => {
+  const ajouterAuPanier = (photo: Photo, tarifSelectionne?: Tarif) => {
     try {
-      console.log("Tentative d'ajout au panier", photo);
-
-      // Appel de la fonction du contexte pour ajouter l'article au panier
-      ajouterArticle({
-        id: String(photo._id || photo.id),  // On s'assure que l'ID est une chaîne de caractères
-        nom: photo.titre,
-        prix: photo.prix,
-        quantite: 1,
-        image: photo.src,   // On stocke aussi l'image pour l'affichage dans le panier
-      });
-
-      // Affichage d'une notification temporaire de succès
-      setNotification(`${photo.titre} ajouté au panier`);
-      setTimeout(() => setNotification(null), 3000);  // Disparition après 3 secondes
-
+      // Si un tarif est sélectionné (via la modale), on l'utilise pour le prix/support/format
+      const articlePanier = tarifSelectionne
+        ? {
+            id: String(photo._id || photo.id) + '-' + tarifSelectionne.id, // identifiant unique par photo+tarif
+            nom: `${photo.titre} - ${tarifSelectionne.nom} (${tarifSelectionne.format}, ${tarifSelectionne.support})`,
+            prix: tarifSelectionne.prix,
+            quantite: 1,
+            image: photo.src,
+          }
+        : {
+            id: String(photo._id || photo.id),
+            nom: photo.titre,
+            prix: photo.prix,
+            quantite: 1,
+            image: photo.src,
+          };
+      ajouterArticle(articlePanier);
+      setNotification(`${articlePanier.nom} ajouté au panier`);
+      setTimeout(() => setNotification(null), 3000);
     } catch (e) {
       console.error("Erreur lors de l'ajout au panier:", e);
       setNotification("Erreur lors de l'ajout au panier");
     }
   };
 
+  const handleAjouterAuPanier = (photo: Photo) => {
+    setPhotoSelectionnee(photo);
+    setModalVisible(true);
+  };
+
+  const handleSelectFormat = (tarif: Tarif) => {
+    if (photoSelectionnee) {
+      ajouterAuPanier(photoSelectionnee, tarif);
+      setPhotoSelectionnee(null);
+      setModalVisible(false);
+    }
+  };
 
   // ==============================
   //  Génération dynamique des catégories à partir des photos chargées
@@ -183,7 +220,7 @@ export default function Galerie() {
                     {photo.prix}€
                   </span>
                   <button
-                    onClick={() => ajouterAuPanier(photo)}
+                    onClick={() => handleAjouterAuPanier(photo)}
                     className="cart-button bg-transparent z-50 border border-[#d6c487] text-[#ffe992] px-4 py-2 rounded-sm transition-all duration-300 hover:bg-[#d6c487] hover:text-black"
                   >
                     Ajouter au panier
@@ -199,6 +236,14 @@ export default function Galerie() {
         <div className="notification fixed bottom-8 right-8 bg-[#d6c487] text-black px-6 py-3 rounded-sm shadow-lg">
           {notification}
         </div>
+      )}
+
+      {modalVisible && photoSelectionnee && (
+        <SelectionFormatModal
+          type={photoSelectionnee.type as Tarif['type']}
+          onSelect={handleSelectFormat}
+          onClose={() => setModalVisible(false)}
+        />
       )}
 
       <Footer />
