@@ -1,0 +1,71 @@
+# 🚀 Contexte personnel
+1. Mon nom est Quentin. Je suis développeur en formation, travaillant sur un projet React Vite Tailwind.
+2. Adapte tes suggestions à mon niveau : je suis encore en apprentissage, mais je veux apprendre vite et bien.
+3. Préviens-moi si je fais une erreur fréquente, ou si une meilleure pratique existe.
+
+# 🧠 Mémoire contextuelle
+4. Souviens-toi de mes erreurs passées pour ne pas me les reproposer.
+5. Si une solution a déjà échoué, ne me la redonne pas. Propose une variante ou corrige-la.
+6. Rappelle-moi les conventions que j’ai choisies pour mes projets (React, Tailwind, etc.).
+
+# 📁 Structure de projet React moderne (2025)
+7. Utilise Vite comme bundler et Tailwind v4 pour le style.
+8. Respecte les conventions de structure : `components/`, `pages/`, `store/`, `utils/`, `types/`.
+9. Nomme les fichiers composants en PascalCase (ex : `UserCard.tsx`) et les dossiers en kebab-case (`user-profile/`).
+
+# 🧑‍🎨 UI et composants
+10. Utilise Tailwind CSS pour tous les styles.
+11. Utilise Shadcn UI pour les composants réutilisables.
+12. Propose une structure responsive et accessible (mobile-first).
+13. Implémente dark mode avec les classes `dark:` de Tailwind.
+
+# 🧠 Logique et TypeScript
+14. Utilise TypeScript strict (aucun `any` autorisé).
+15. Préfère les `interface` plutôt que `type`.
+16. Structure les composants fonctionnels avec props typées.
+17. Regroupe les types dans `src/types`.
+
+# 🧪 Données, Formulaires et Validation
+18. Utilise React Hook Form pour les formulaires.
+19. Utilise Zod pour la validation de schémas.
+20. Utilise TanStack Query (react-query) pour le fetching de données.
+
+# 🧼 Style et linting
+21. Formate avec Prettier (standard 2025) et ESLint Airbnb config.
+22. Supprime les imports inutilisés automatiquement.
+23. Pas de console.log dans les livrables finaux.
+
+# 🧩 Exportations
+24. Toujours préférer les exports nommés aux exports par défaut.
+25. Un seul composant exporté par fichier.
+
+# 🧰 Suggestions contextuelles intelligentes
+26. Si je travaille sur un composant, propose des hooks ou des patterns récents.
+27. Si je tape une erreur, explique pourquoi et propose une meilleure version.
+28. Propose des composants partagés si un pattern se répète dans plusieurs fichiers.
+
+# 🛠️ Tests
+29. Propose des tests unitaires avec Vitest pour les composants et fonctions critiques.
+30. Structure les tests dans un dossier `__tests__` ou `test/`.
+
+# 🧾 Documentation
+31. Utilise JSDoc pour décrire les fonctions critiques ou utilitaires complexes.
+32. Si une méthode est trop longue ou complexe, suggère de la diviser en fonctions pures.
+
+# 🧬 Accessibilité et bonnes pratiques UI
+33. Respecte les règles ARIA et accessibilité dès le début.
+34. Vérifie que les composants sont accessibles au clavier.
+35. Préviens-moi si un bouton ou champ manque d’accessibilité.
+
+# 🔁 Interaction continue
+36. Propose des alternatives si tu détectes un anti-pattern ou un code redondant.
+37. Si j’écris du code long ou peu lisible, propose une refactorisation modulaire.
+38. Si j’oublie une bonne pratique, rappelle-la gentiment.
+
+# 📦 Bonus (Docker / backend si présent)
+39. Si un fichier docker-compose est présent, propose des optimisations pour un environnement de dev rapide.
+40. Si un backend Express ou MongoDB est présent, structure-le en MVC.
+
+# 🧠 Final
+41. Ne me donne jamais de code inutile. Sois synthétique mais intelligent.
+42. Encourage-moi à comprendre mes erreurs et à apprendre de chaque blocage.

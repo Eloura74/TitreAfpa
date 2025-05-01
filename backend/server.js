@@ -8,6 +8,7 @@ const authRoutes = require("./routes/auth.js");
 const evenementRoutes = require('./routes/evenement');
 const paiementRoutes = require('./routes/paiement');
 const panierRoutes = require('./routes/panier');
+const tarifsRoutes = require('./routes/tarifs');
 const path = require("path");
 
 // Pas besoin de __filename ni __dirname en CommonJS
@@ -56,6 +57,10 @@ console.log("✅ Route /api/auth montée");
 // Route Stripe
 app.use("/api/stripe", stripeRoutes);
 console.log("✅ Route /api/stripe montée");
+
+// Route tarifs (ajout non intrusif)
+app.use('/api/tarifs', tarifsRoutes);
+console.log("✅ Route /api/tarifs montée");
 
 // Démarrage du serveur
 app.listen(PORT, () => {

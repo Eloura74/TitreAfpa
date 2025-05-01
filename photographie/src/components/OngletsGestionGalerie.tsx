@@ -2,6 +2,7 @@ import GalerieForm from "./galerie/GalerieForm";
 import GestionEvenements from "./GestionEvenements";
 import GestionPaiements from "./GestionPaiements";
 import GestionPaniers from "./GestionPaniers";
+import GestionTarifs from "./GestionTarifs";
 import { useState } from "react";
 
 const onglets = [
@@ -9,6 +10,7 @@ const onglets = [
   { nom: "Événements", composant: <GestionEvenements /> },
   { nom: "Paiements", composant: <GestionPaiements /> },
   { nom: "Paniers", composant: <GestionPaniers /> },
+  { nom: "Tarifs", composant: <GestionTarifs /> },
 ];
 
 export default function OngletsGestionGalerie() {
