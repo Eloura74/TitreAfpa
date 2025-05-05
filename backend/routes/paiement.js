@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/paiementController');
-const auth = require('../middleware/auth');
+const auth = require('../middleware/auth').authenticate;
 const isAdmin = require('../middleware/isAdmin');
 
 // Toutes les routes protégées par auth + admin

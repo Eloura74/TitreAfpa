@@ -1,14 +1,14 @@
-const express = require('express');
-const Tarif = require('../models/Tarif');
-const { isAdmin } = require('../middlewares/auth');
-const fs = require('fs');
-const path = require('path');
+const express = require("express");
+const Tarif = require("../models/Tarif");
+const { isAdmin } = require("../middleware/auth");
+const fs = require("fs");
+const path = require("path");
 const router = express.Router();
 
 // Fonction de sauvegarde automatique des tarifs avant modification
 const backupTarifs = async () => {
   const tarifs = await Tarif.find();
-  const backupDir = path.join(__dirname, '../backups');
+  const backupDir = path.join(__dirname, "../backups");
   if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir);
   fs.writeFileSync(
     path.join(backupDir, `tarifs-backup-${Date.now()}.json`),
@@ -17,16 +17,16 @@ const backupTarifs = async () => {
 };
 
 // GET public (liste tarifs actifs)
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   const tarifs = await Tarif.find({ actif: true });
   res.json(tarifs);
 });
 
-// ADMIN : CRUD
+// ADMIN : CRUD protégé
 router.use(isAdmin);
 
 // POST (ajout d'un tarif)
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   await backupTarifs();
   const tarif = new Tarif(req.body);
   await tarif.save();
@@ -34,14 +34,16 @@ router.post('/', async (req, res) => {
 });
 
 // PUT (modification d'un tarif)
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   await backupTarifs();
-  const tarif = await Tarif.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  const tarif = await Tarif.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
   res.json(tarif);
 });
 
 // DELETE (suppression d'un tarif)
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   await backupTarifs();
   await Tarif.findByIdAndDelete(req.params.id);
   res.status(204).end();

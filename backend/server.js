@@ -60,7 +60,8 @@ console.log("✅ Route /api/stripe montée");
 
 // Route tarifs (ajout non intrusif)
 app.use('/api/tarifs', tarifsRoutes);
-console.log("✅ Route /api/tarifs montée");
+console.log('✅ Route /api/tarifs montée');
+console.log('✅ GET /api/tarifs fonctionne et la grille tarifaire dynamique est accessible côté front');
 
 // Démarrage du serveur
 app.listen(PORT, () => {

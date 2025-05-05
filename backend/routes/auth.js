@@ -13,6 +13,9 @@ const jwt = require("jsonwebtoken");
 // Importation du modèle User pour interagir avec la collection des utilisateurs dans MongoDB
 const User = require("../models/User.js");
 
+// Importation du middleware d'authentification
+const { authenticate } = require("../middleware/auth");
+
 // ==========================
 // Route POST : Inscription
 // ==========================
@@ -76,6 +79,11 @@ router.post("/login", async (req, res) => {
     // Gestion des erreurs avec une réponse 400 en cas de problème
     res.status(400).json({ error: err.message });
   }
+});
+
+// Route de test protégée
+router.get('/me', authenticate, (req, res) => {
+  res.json({ user: req.user });
 });
 
 // Exportation du routeur pour pouvoir l'utiliser dans l'application principale (app.js ou server.js)
