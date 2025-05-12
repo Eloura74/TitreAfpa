@@ -1,12 +1,16 @@
 // Import de base
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useUser } from '../../context/UserContext';
 // Import des styles
 import "../../styles/navbar.css";
 
 // Navbar component
 export default function Navbar() {
+  const location = useLocation();
+  // On détecte si on est dans l'univers graphisme ou sur la galerie graphique unique
+  const isGraphisme = location.pathname.startsWith("/graphisme") || location.pathname === "/galerie-graphique";
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user } = useUser();
 
@@ -34,10 +38,17 @@ export default function Navbar() {
               Accueil
             </Link>
           </li>
+          {/* Lien galerie dynamique selon l'univers */}
           <li className="nav-item">
-            <Link to="/galerie" className="nav-link">
-              Galerie
-            </Link>
+            {isGraphisme ? (
+              <Link to="/galerie-graphique" className="nav-link">
+                Galerie graphique
+              </Link>
+            ) : (
+              <Link to="/galerie" className="nav-link">
+                Galerie
+              </Link>
+            )}
           </li>
           <li className="nav-item">
             <Link to="/evenements" className="nav-link">

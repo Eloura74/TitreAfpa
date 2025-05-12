@@ -7,6 +7,7 @@ import Photographie from "./pages/Photographie";
 import Graphisme from "./pages/Graphisme";
 import About from "./pages/About";
 import Galerie from "./pages/Galerie";
+import GalerieGraphique from "./pages/GalerieGraphique"; // Galerie graphique unique
 import Evenements from "./pages/Evenements";
 import GalerieForm from "./components/galerie/GalerieForm";
 import CalendarTest from "../test/calendarTest";
@@ -49,6 +50,8 @@ function App() {
                 <GestionGalerie />
               </RouteAdminOnly>
             } />
+            {/* Route pour la nouvelle galerie graphique unique */}
+            <Route path="/galerie-graphique" element={<GalerieGraphique />} />
           </Routes>
         </Router>
       </PanierProvider>

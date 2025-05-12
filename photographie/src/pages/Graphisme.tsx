@@ -52,11 +52,12 @@ export default function Graphisme() {
             </Link>
           </div>
 
+          {/* Lien mis à jour vers la nouvelle galerie graphique unique */}
           <div className="service-card">
-            <Link to="/galerie">
+            <Link to="/galerie-graphique">
               <h3 className="service-title">Galerie graphique</h3>
               <p className="service-description">
-                Œuvres graphiques originales, prix fixes.
+                Œuvres uniques, prix individuel pour chaque création.
               </p>
             </Link>
           </div>
