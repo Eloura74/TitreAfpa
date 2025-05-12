@@ -7,13 +7,22 @@ const path = require("path");
 const fs = require("fs");
 
 console.log("✅ Route oeuvresGraphique.js bien chargée !");
-// Configuration de Multer pour les uploads (optionnel, à activer si tu veux gérer les images uploadées)
+// Configuration de Multer pour les uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "../uploads"));
+    // Création du dossier uploads s'il n'existe pas
+    const uploadDir = path.join(__dirname, "../uploads");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+      console.log("✅ Dossier uploads créé : ", uploadDir);
+    }
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
+    // Normalisation du nom de fichier (espaces -> underscores)
+    const fileName = Date.now() + "-" + file.originalname.replace(/\s/g, "_");
+    console.log("📸 Nom du fichier généré : ", fileName);
+    cb(null, fileName);
   },
 });
 const upload = multer({ storage });
@@ -78,12 +87,26 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// (Optionnel) POST pour upload d'image seule (à activer côté front si besoin)
+// POST pour upload d'image seule
 router.post("/upload", upload.single("image"), (req, res) => {
   if (!req.file) {
+    console.error("❌ Erreur upload : aucun fichier reçu");
     return res.status(400).json({ message: "Aucun fichier envoyé." });
   }
+  
   const imagePath = `/uploads/${req.file.filename}`;
+  
+  // Vérification que le fichier existe bien après upload
+  const filePath = path.join(__dirname, "../uploads", req.file.filename);
+  console.log("📁 Fichier uploadé : ", filePath);
+  console.log("🔗 Chemin d'accès public : ", imagePath);
+  
+  if (fs.existsSync(filePath)) {
+    console.log("✅ Vérification : le fichier existe bien sur le disque");
+  } else {
+    console.error("❌ Erreur : le fichier n'existe pas sur le disque après upload");
+  }
+  
   res.status(200).json({ imagePath });
 });
 

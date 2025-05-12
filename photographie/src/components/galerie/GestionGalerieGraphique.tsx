@@ -57,6 +57,12 @@ export default function GestionGalerieGraphique() {
     setLoading(true);
     setMessage(null);
     let imagePath = form.image;
+    // Correction : forcer l’upload d’image pour chaque ajout
+    if (!editId && !imageFile) {
+      setMessage("Merci de sélectionner une image à importer.");
+      setLoading(false);
+      return;
+    }
     if (imageFile) {
       const uploaded = await handleUploadImage(imageFile);
       if (!uploaded) {
@@ -125,37 +131,52 @@ export default function GestionGalerieGraphique() {
         <input
           type="file"
           accept="image/*"
-          onChange={e => setImageFile(e.target.files?.[0] || null)}
-          className="input"
+          onChange={(e) => {
+            if (e.target.files && e.target.files[0]) {
+              setImageFile(e.target.files[0]);
+            }
+          }}
+          className="mb-2"
         />
+        {/* Aperçu image locale avant upload */}
+        {imageFile && (
+          <div className="mb-2 flex justify-center">
+            <img
+              src={URL.createObjectURL(imageFile)}
+              alt="Aperçu"
+              className="h-32 rounded shadow"
+              style={{ objectFit: "contain" }}
+            />
+          </div>
+        )}
         <input
           type="text"
           placeholder="Titre"
           value={form.titre}
-          onChange={e => setForm(f => ({ ...f, titre: e.target.value }))}
+          onChange={(e) => setForm((f) => ({ ...f, titre: e.target.value }))}
           className="input"
           required
         />
         <textarea
           placeholder="Description"
           value={form.description}
-          onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
           className="input"
         />
         <input
           type="number"
           placeholder="Prix (€)"
           value={form.prix}
-          onChange={e => setForm(f => ({ ...f, prix: Number(e.target.value) }))}
+          onChange={(e) => setForm((f) => ({ ...f, prix: Number(e.target.value) }))}
           className="input"
           required
         />
         <button
           type="submit"
-          disabled={loading}
-          className="bg-yellow-400 text-black font-bold px-6 py-2 rounded hover:bg-yellow-300 transition"
+          className="bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2 px-4 rounded w-full transition"
+          disabled={loading || (!editId && !imageFile)}
         >
-          {editId ? "Modifier l’œuvre" : loading ? "Ajout en cours..." : "Ajouter l’œuvre"}
+          {editId ? "Modifier l’œuvre" : "Ajouter l’œuvre"}
         </button>
         {message && <div className="text-center text-sm mt-2 text-yellow-400">{message}</div>}
       </form>

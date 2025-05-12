@@ -77,7 +77,7 @@ export default function Galerie() {
     const photosLocales: Photo[] = galerieData;
 
     // 2️⃣ Récupération des photos stockées sur le serveur (MongoDB)
-    fetch("http://localhost:5001/api/galerie")
+    fetch("http://localhost:5001/api/galerie") 
       .then((res) => res.json())   // Conversion de la réponse en JSON
       .then((data: Photo[]) => {
         // Transformation des données pour corriger le chemin des images issues du serveur
