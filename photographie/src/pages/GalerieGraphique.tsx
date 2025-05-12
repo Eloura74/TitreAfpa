@@ -13,32 +13,33 @@ interface OeuvreGraphique {
 
 export default function GalerieGraphique() {
   const [oeuvres, setOeuvres] = useState<OeuvreGraphique[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [erreur, setErreur] = useState<string | null>(null);
 
   useEffect(() => {
-    // À remplacer par un fetch backend plus tard
-    setOeuvres([
-      {
-        id: "1",
-        titre: "Œuvre Unique 1",
-        image: "../public/images/oeuvre1.png",
-        prix: 350,
-        description: "Technique mixte sur toile.",
-      },
-      {
-        id: "2",
-        titre: "Œuvre Unique 2",
-        image: "../public/images/oeuvre2.png",
-        prix: 350,
-        description: "Acrylique sur papier texturé.",
-      },
-      {
-        id: "3",
-        titre: "Œuvre Unique 3",
-        image: "public/images/oeuvre3.png",
-        prix: 350,
-        description: "Encre et collage.",
-      },
-    ]);
+    // TODO: Créer une route backend dédiée (ex: /api/oeuvres-graphique)
+    // Ici, on simule un fetch comme pour la galerie photo
+    fetch("/api/oeuvres-graphique")
+      .then((res) => {
+        if (!res.ok) throw new Error("Erreur réseau ou API");
+        return res.json();
+      })
+      .then((data: any[]) => {
+        // Mapping identique à la galerie photo
+        const oeuvresFormatees = data.map((oeuvre) => ({
+          id: oeuvre._id || oeuvre.id,
+          titre: oeuvre.titre,
+          image: oeuvre.image && oeuvre.image.startsWith("/uploads/") ? oeuvre.image : `/uploads/placeholder.jpg`,
+          prix: oeuvre.prix,
+          description: oeuvre.description,
+        }));
+        setOeuvres(oeuvresFormatees);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setErreur("Impossible de charger les œuvres graphiques. Vérifiez l’API ou la connexion serveur.");
+        setLoading(false);
+      });
   }, []);
 
   return (
@@ -54,33 +55,47 @@ export default function GalerieGraphique() {
         </p>
       </div>
 
-      {/* Grille des œuvres graphiques */}
-      <div className="galerie-grid">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {oeuvres.map((oeuvre) => (
-            <div
-              key={oeuvre.id}
-              className="photo-card group relative bg-[#151520] rounded-sm overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-[#d6c48733] flex flex-col items-center"
-            >
-              <div className="h-64 overflow-hidden w-full">
-                <img
-                  src={oeuvre.image}
-                  alt={oeuvre.titre}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-              </div>
-              <div className="p-6 w-full flex flex-col items-center">
-                <h2 className="photo-title mb-2 text-xl font-semibold">{oeuvre.titre}</h2>
-                <p className="text-yellow-400 text-lg font-bold mb-2">{oeuvre.prix} €</p>
-                <p className="text-gray-300 text-center mb-4">{oeuvre.description}</p>
-                <button className="bg-yellow-400 text-black px-4 py-2 rounded font-bold hover:bg-yellow-300 transition">
-                  Acheter / En savoir +
-                </button>
-              </div>
-            </div>
-          ))}
+      {/* Affichage du chargement ou des erreurs */}
+      {loading && (
+        <div className="text-center text-yellow-300 py-12 text-lg animate-pulse">
+          Chargement des œuvres graphiques…
         </div>
-      </div>
+      )}
+      {erreur && !loading && (
+        <div className="text-center text-red-400 py-12 text-lg">
+          {erreur}
+        </div>
+      )}
+
+      {/* Grille des œuvres graphiques */}
+      {!loading && !erreur && (
+        <div className="galerie-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {oeuvres.map((oeuvre) => (
+              <div
+                key={oeuvre.id}
+                className="photo-card group relative bg-[#151520] rounded-sm overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-[#d6c48733] flex flex-col items-center"
+              >
+                <div className="h-64 overflow-hidden w-full">
+                  <img
+                    src={oeuvre.image}
+                    alt={oeuvre.titre}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                </div>
+                <div className="p-6 w-full flex flex-col items-center">
+                  <h2 className="photo-title mb-2 text-xl font-semibold">{oeuvre.titre}</h2>
+                  <p className="text-yellow-400 text-lg font-bold mb-2">{oeuvre.prix} €</p>
+                  <p className="text-gray-300 text-center mb-4">{oeuvre.description}</p>
+                  <button className="bg-yellow-400 text-black px-4 py-2 rounded font-bold hover:bg-yellow-300 transition">
+                    Acheter / En savoir +
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Pied de page */}
       <Footer />

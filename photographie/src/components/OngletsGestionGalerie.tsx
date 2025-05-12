@@ -1,5 +1,6 @@
 // Importation des composants de gestion à afficher dans les onglets
 import GalerieForm from "./galerie/GalerieForm";
+import GestionGalerieGraphique from "./galerie/GestionGalerieGraphique";
 import GestionEvenements from "./GestionEvenements";
 import GestionPaiements from "./GestionPaiements";
 import GestionPaniers from "./GestionPaniers";
@@ -12,6 +13,7 @@ import { useState } from "react";
 ------------------------------------------------------------------------- */
 const onglets = [
   { nom: "Galerie", composant: <GalerieForm /> },
+  { nom: "Galerie Graphique", composant: <GestionGalerieGraphique /> },
   { nom: "Événements", composant: <GestionEvenements /> },
   { nom: "Paiements", composant: <GestionPaiements /> },
   { nom: "Paniers", composant: <GestionPaniers /> },

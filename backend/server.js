@@ -3,6 +3,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const galerieRoutes = require("./routes/galerie.js");
+const oeuvresGraphiqueRoutes = require("./routes/oeuvresGraphique.js"); // Route œuvres graphiques uniques
 const stripeRoutes = require("./routes/stripe.js");
 const authRoutes = require("./routes/auth.js");
 const evenementRoutes = require('./routes/evenement');
@@ -43,6 +44,10 @@ app.get("/", (req, res) => {
 // Routes de la galerie
 app.use("/api/galerie", galerieRoutes);
 console.log("✅ Routes /api/galerie montées");
+
+// Route œuvres graphiques uniques
+app.use("/api/oeuvres-graphique", oeuvresGraphiqueRoutes);
+console.log("✅ Route /api/oeuvres-graphique montée");
 
 // Routes CRUD pour la gestion avancée
 app.use('/api/evenements', evenementRoutes);
