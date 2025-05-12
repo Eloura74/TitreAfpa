@@ -61,6 +61,7 @@ export default function GalerieForm() {
     // Vérification des champs obligatoires
     if (
       !form.src ||
+      !form.src.startsWith("/uploads/") ||
       !form.titre ||
       !form.alt ||
       !form.description ||
@@ -236,26 +237,14 @@ export default function GalerieForm() {
 
         <button
           onClick={handleSubmit}
+          disabled={!form.src || !form.src.startsWith("/uploads/") || !form.titre || !form.alt || !form.description || !form.categorie || form.prix <= 0}
           className={`px-4 py-2 rounded font-bold transition w-full ${
-            !form.src ||
-            !form.titre ||
-            !form.alt ||
-            !form.description ||
-            !form.categorie ||
-            form.prix <= 0
-              ? "bg-[#aa9f69] text-gray-700 cursor-not-allowed"
-              : "bg-[#ffe992] text-black hover:bg-yellow-300"
+            !form.src || !form.src.startsWith("/uploads/") || !form.titre || !form.alt || !form.description || !form.categorie || form.prix <= 0
+              ? "bg-gray-600 cursor-not-allowed"
+              : "bg-yellow-400 text-black hover:bg-yellow-500"
           }`}
-          disabled={
-            !form.src ||
-            !form.titre ||
-            !form.alt ||
-            !form.description ||
-            !form.categorie ||
-            form.prix <= 0
-          }
         >
-          {editId ? "Modifier" : "Ajouter"}
+          {editId ? "Modifier" : "Valider"}
         </button>
       </div>
 

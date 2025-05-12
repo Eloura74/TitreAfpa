@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "dotenv": "^16.5.0",
+    "framer-motion": "^12.10.5",
     "lucide-react": "^0.487.0",
     "mongoose": "^8.14.0",
     "multer": "^1.4.5-lts.2",

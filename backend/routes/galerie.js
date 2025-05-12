@@ -3,6 +3,7 @@ const express = require("express"); // Framework pour gérer les routes HTTP
 const multer = require("multer"); // Middleware pour gérer l'upload de fichiers
 const path = require("path"); // Module Node.js pour gérer les chemins de fichiers
 const Photo = require("../models/Photo.js"); // Modèle Mongoose pour interagir avec les photos en base
+const fs = require("fs"); // Module Node.js pour gérer les fichiers
 
 // ------------------------------
 // Initialisation du routeur Express
@@ -68,6 +69,12 @@ router.post("/", async (req, res) => {
     // Vérification que tous les champs requis sont présents
     if (!src || !alt || !titre || !description || !prix || !categorie) {
       return res.status(400).json({ message: "Champs requis manquants" });
+    }
+
+    // Vérification supplémentaire : le fichier existe-t-il réellement ?
+    const filePath = path.join(__dirname, "..", src);
+    if (!fs.existsSync(filePath)) {
+      return res.status(400).json({ message: "Le fichier image n'existe pas sur le serveur." });
     }
 
     // Création d'une nouvelle instance de Photo avec les données reçues

@@ -3,6 +3,8 @@
 // ==============================
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
+import Photographie from "./pages/Photographie";
+import Graphisme from "./pages/Graphisme";
 import About from "./pages/About";
 import Galerie from "./pages/Galerie";
 import Evenements from "./pages/Evenements";
@@ -23,6 +25,10 @@ function App() {
           <Routes>
             {/* Route pour la page d'accueil */}
             <Route path="/" element={<Home />} />
+            {/* Univers Photographie */}
+            <Route path="/photographie" element={<Photographie />} />
+            {/* Univers Graphisme */}
+            <Route path="/graphisme" element={<Graphisme />} />
             {/* Route pour la page "A propos" */}
             <Route path="/about" element={<About />} />
             {/* Route pour la page "Galerie" */}

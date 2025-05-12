@@ -17,10 +17,12 @@ import "../styles/globals.css";
 import "../styles/evenements.css";
 import Calendar from "react-calendar";
 import { CalendarDays, MapPin, Target } from "lucide-react";
+import type { Evenement } from "../types/evenement";
 
 // Fonction principale du composant Evenements
 export default function Evenements() {
-  const [evenements, setEvenements] = useState([]); // Liste dynamique des événements
+  // Typage de l'état des événements
+  const [evenements, setEvenements] = useState<Evenement[]>([]);
   const [filter, setFilter] = useState<"à venir" | "passé" | "tous">("tous"); // État pour le filtre
   const [showCalendarId, setShowCalendarId] = useState<string | null>(null); // État pour le calendrier
   const [hoveredMapId, setHoveredMapId] = useState<string | null>(null); // État pour le map
@@ -28,15 +30,23 @@ export default function Evenements() {
 
   // Récupération des événements via l'API backend
   useEffect(() => {
-    axios.get("http://localhost:5001/api/evenements")
-      .then(res => setEvenements(res.data))
-      .catch(() => setEvenements([]));
+    const fetchEvenements = async () => {
+      const res = await axios.get("http://localhost:5001/api/evenements");
+      const data = res.data;
+      // Normalise _id -> id
+      const events: Evenement[] = data.map((ev: any) => ({
+        ...ev,
+        id: ev._id || ev.id,
+      }));
+      setEvenements(events);
+    };
+    fetchEvenements();
   }, []);
 
   const today = new Date().toISOString().split("T")[0]; // Date actuelle
 
-  // Filtrage dynamique des événements selon le filtre sélectionné
-  const filteredEvents = evenements.filter((event: any) => {
+  // Typage du tableau filtré
+  const filteredEvents: Evenement[] = evenements.filter((event: Evenement) => {
     if (filter === "à venir") return event.date >= today;
     if (filter === "passé") return event.date < today;
     return true;
@@ -129,10 +139,11 @@ export default function Evenements() {
                                 </button>
                               </div>
                               <Calendar
-                                defaultValue={[
-                                  new Date(event.dateDebut),
-                                  new Date(event.dateFin),
-                                ]}
+                                defaultValue={
+                                  event.dateDebut && event.dateFin
+                                    ? [new Date(event.dateDebut), new Date(event.dateFin)]
+                                    : undefined
+                                }
                                 selectRange
                                 tileDisabled={() => true}
                                 className="custom-calendar border-2 border-red-500"
@@ -157,7 +168,7 @@ export default function Evenements() {
                           <div className="absolute top-full left-0 mt-2 z-50 w-64 h-40 rounded overflow-hidden shadow-lg border border-[#333]">
                             <iframe
                               src={`https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_API_KEY&q=${encodeURIComponent(
-                                event.lieu
+                                event.lieu ?? ""
                               )}`}
                               width="100%"
                               height="100%"
