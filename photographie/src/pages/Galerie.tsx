@@ -29,27 +29,15 @@ import { Tarif } from "../types/tarif";
 //  Définition de l'interface TypeScript pour typer les objets "Photo"
 // ==============================
 interface Photo {
-  id?: number;      // ID local optionnel (pour les données statiques)
-  _id?: string;     // ID MongoDB optionnel (pour les données issues de la base)
-  src: string;      // Chemin ou URL de l'image
-  alt: string;      // Texte alternatif pour l'accessibilité
-  titre: string;    // Titre de la photo
+  id?: number; // ID local optionnel (pour les données statiques)
+  _id?: string; // ID MongoDB optionnel (pour les données issues de la base)
+  src: string; // Chemin ou URL de l'image
+  alt: string; // Texte alternatif pour l'accessibilité
+  titre: string; // Titre de la photo
   description: string; // Description détaillée
-  prix: number;     // Prix en euros
+  prix: number; // Prix en euros
   categorie: string; // Catégorie de la photo
-  type: string;     // Type de la photo
-}
-
-// ==============================
-//  Définition de l'interface TypeScript pour typer les objets "Tarif"
-// ==============================
-interface Tarif {
-  id: string;
-  nom: string;
-  format: string;
-  support: string;
-  prix: number;
-  type: string;
+  type: string; // Type de la photo
 }
 
 // ==============================
@@ -57,10 +45,12 @@ interface Tarif {
 // ==============================
 export default function Galerie() {
   // Gestion des états avec useState :
-  const [photos, setPhotos] = useState<Photo[]>([]);           // Stocke toutes les photos (locales + MongoDB)
-  const [notification, setNotification] = useState<string | null>(null);  // Message temporaire pour feedback utilisateur
+  const [photos, setPhotos] = useState<Photo[]>([]); // Stocke toutes les photos (locales + MongoDB)
+  const [notification, setNotification] = useState<string | null>(null); // Message temporaire pour feedback utilisateur
   const [categorieActive, setCategorieActive] = useState<string>("Toutes"); // Catégorie actuellement sélectionnée
-  const [photoSelectionnee, setPhotoSelectionnee] = useState<Photo | null>(null);
+  const [photoSelectionnee, setPhotoSelectionnee] = useState<Photo | null>(
+    null
+  );
   const [modalVisible, setModalVisible] = useState(false);
 
   // Récupération de la fonction "ajouterArticle" via le contexte panier
@@ -74,16 +64,19 @@ export default function Galerie() {
   // ==============================
   useEffect(() => {
     // 1️⃣ Chargement des données locales depuis le fichier JSON
-    const photosLocales: Photo[] = galerieData;
+    const photosLocales: Photo[] = galerieData.map((photo) => ({
+      ...photo,
+      type: "standard", // Assigne simplement une valeur par défaut
+    }));
 
     // 2️⃣ Récupération des photos stockées sur le serveur (MongoDB)
-    fetch("http://localhost:5001/api/galerie") 
-      .then((res) => res.json())   // Conversion de la réponse en JSON
+    fetch("http://localhost:5001/api/galerie")
+      .then((res) => res.json()) // Conversion de la réponse en JSON
       .then((data: Photo[]) => {
         // Transformation des données pour corriger le chemin des images issues du serveur
         const photosServeur = data.map((photo) => ({
           ...photo,
-          src: `http://localhost:5001${photo.src}`,  // On complète le chemin relatif
+          src: `http://localhost:5001${photo.src}`, // On complète le chemin relatif
         }));
 
         // 3️⃣ Fusion des deux sources (locales + serveur) et mise à jour de l'état
@@ -94,8 +87,7 @@ export default function Galerie() {
         console.error("Erreur chargement MongoDB:", err);
         setPhotos(photosLocales);
       });
-  }, []);  // [] signifie que ce code ne s'exécute qu'une seule fois (au montage)
-
+  }, []); // [] signifie que ce code ne s'exécute qu'une seule fois (au montage)
 
   // ==============================
   //  Fonction : Ajouter une photo au panier
@@ -105,7 +97,7 @@ export default function Galerie() {
       // Si un tarif est sélectionné (via la modale), on l'utilise pour le prix/support/format
       const articlePanier = tarifSelectionne
         ? {
-            id: String(photo._id || photo.id) + '-' + tarifSelectionne.id, // identifiant unique par photo+tarif
+            id: String(photo._id || photo.id) + "-" + tarifSelectionne.id, // identifiant unique par photo+tarif
             nom: `${photo.titre} - ${tarifSelectionne.nom} (${tarifSelectionne.format}, ${tarifSelectionne.support})`,
             prix: tarifSelectionne.prix,
             quantite: 1,
@@ -144,19 +136,17 @@ export default function Galerie() {
   //  Génération dynamique des catégories à partir des photos chargées
   // ==============================
   const categories = [
-    "Toutes",  // Option par défaut pour afficher toutes les photos
-    ...Array.from(new Set(photos.map((photo) => photo.categorie)))  // Extraction unique des catégories existantes
+    "Toutes", // Option par défaut pour afficher toutes les photos
+    ...Array.from(new Set(photos.map((photo) => photo.categorie))), // Extraction unique des catégories existantes
   ];
-
 
   // ==============================
   //  Filtrage des photos selon la catégorie sélectionnée
   // ==============================
   const photosFiltered =
     categorieActive === "Toutes"
-      ? photos    // Si "Toutes" est sélectionné, on affiche toutes les photos
-      : photos.filter((photo) => photo.categorie === categorieActive);  // Sinon, filtre par catégorie
-
+      ? photos // Si "Toutes" est sélectionné, on affiche toutes les photos
+      : photos.filter((photo) => photo.categorie === categorieActive); // Sinon, filtre par catégorie
 
   // ==============================
   //  Affichage de la galerie
@@ -240,7 +230,6 @@ export default function Galerie() {
 
       {modalVisible && photoSelectionnee && (
         <SelectionFormatModal
-          type={photoSelectionnee.type as Tarif['type']}
           onSelect={handleSelectFormat}
           onClose={() => setModalVisible(false)}
         />
