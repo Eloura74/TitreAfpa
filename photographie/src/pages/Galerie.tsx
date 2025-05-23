@@ -56,8 +56,47 @@ export default function Galerie() {
   // Récupération de la fonction "ajouterArticle" via le contexte panier
   const { ajouterArticle } = usePanier();
 
-  // Le hook useTarifs est utilisé dans la SelectionFormatModal, donc pas besoin d'importer les tarifs ici.
-  // Si jamais tu veux utiliser les tarifs côté Galerie, utilise le hook useTarifs ou passe-les en props depuis la modale.
+  // Import dynamique des tarifs pour la logique d’ajout automatique
+  // (On évite un double appel si la modale est utilisée, mais c’est OK pour la logique UX)
+  const [tarifs, setTarifs] = useState<any[]>([]);
+  useEffect(() => {
+    fetch("/api/tarifs")
+      .then(res => res.json())
+      .then(setTarifs)
+      .catch(() => setTarifs([]));
+  }, []);
+
+  /**
+   * Filtre les tarifs applicables à une photo selon la logique métier (ex : par nom, catégorie, etc.)
+   * Ici, on filtre par titre strict, à adapter selon besoin !
+   */
+  function getTarifsPourPhoto(photo: Photo) {
+    return tarifs.filter(tarif => tarif.nom === photo.titre && tarif.actif);
+  }
+
+  /**
+   * Handler amélioré pour l’ajout au panier depuis la galerie
+   * - Ajoute direct si un seul format/support
+   * - Sinon ouvre la modale de sélection
+   */
+  function handleAjouterAuPanier(photo: Photo) {
+    const tarifsPourPhoto = getTarifsPourPhoto(photo);
+    if (tarifsPourPhoto.length === 1) {
+      // Ajout direct au panier
+      ajouterArticle({
+        id: crypto.randomUUID(),
+        nom: `${photo.titre} (${tarifsPourPhoto[0].format})`,
+        prix: tarifsPourPhoto[0].prix,
+        quantite: 1,
+        image: photo.src,
+      });
+      setNotification("Ajouté au panier !");
+    } else {
+      // Plusieurs choix : ouverture de la modale
+      setPhotoSelectionnee(photo);
+      setModalVisible(true);
+    }
+  }
 
   // ==============================
   //  useEffect : Chargement des données au montage du composant
@@ -117,13 +156,12 @@ export default function Galerie() {
       console.error("Erreur lors de l'ajout au panier:", e);
       setNotification("Erreur lors de l'ajout au panier");
     }
+    setModalVisible(false);
   };
 
-  const handleAjouterAuPanier = (photo: Photo) => {
-    setPhotoSelectionnee(photo);
-    setModalVisible(true);
-  };
-
+  // ==============================
+  //  Handler : sélection d’un format dans la modale
+  // ==============================
   const handleSelectFormat = (tarif: Tarif) => {
     if (photoSelectionnee) {
       ajouterAuPanier(photoSelectionnee, tarif);

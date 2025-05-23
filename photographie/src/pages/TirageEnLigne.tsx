@@ -1,38 +1,62 @@
 // Page TirageEnLigne.tsx : page moderne, claire, et conforme à la charte du projet
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import "../styles/home.css"; // Pour la grille et le style général
 import "../styles/tirage.css"; // (À créer/adapter si besoin pour affiner le style tirage)
 import { Link } from "react-router-dom";
+import { ModalTirage, FormatOption } from "../components/tirage/ModalTirage";
 
 // Données typées pour les offres principales
 const offres = [
+  // Les images doivent être dans /public/images/ et accessibles via "/images/..."
+  // (évite d'utiliser "../public/..." qui ne fonctionne pas en prod Vite)
   {
     titre: "Tirages",
     description: "formats standards",
     prix: "à partir de 0,22 €",
-    image: "../public/images/tirages.png",
+    image: "/images/tirages.png",
   },
   {
     titre: "Posters",
     description: "et agrandissements",
     prix: "à partir de 8,02 €",
-    image: "../public/images/poster.png",
+    image: "/images/poster.png",
   },
   {
     titre: "Toile",
     description: "sur châssis bois",
     prix: "à partir de 39,16 €",
-    image: "../public/images/toile.png",
+    image: "/images/toile.png",
   },
   {
     titre: "Cartes postales",
     description: "10 x 15 cm",
     prix: "à partir de 10,75 €",
-    image: "../public/images/cartes.png",
+    image: "/images/cartes.png",
   },
 ];
+
+// Formats/supports proposés par offre (clé = titre de l'offre)
+const FORMATS_PAR_OFFRE: Record<string, FormatOption[]> = {
+  Tirages: [
+    { label: "10x15 cm (standard)", value: "10x15", prix: 0.22 },
+    { label: "13x18 cm", value: "13x18", prix: 0.39 },
+    { label: "15x21 cm", value: "15x21", prix: 0.65 },
+  ],
+  Posters: [
+    { label: "30x40 cm", value: "30x40", prix: 8.02 },
+    { label: "40x60 cm", value: "40x60", prix: 12.99 },
+  ],
+  Toile: [
+    { label: "30x40 cm sur châssis", value: "30x40", prix: 39.16 },
+    { label: "50x70 cm sur châssis", value: "50x70", prix: 59.99 },
+  ],
+  "Cartes postales": [
+    { label: "10 cartes 10x15 cm", value: "10x15", prix: 10.75 },
+    { label: "20 cartes 10x15 cm", value: "20x15", prix: 19.99 },
+  ],
+};
 
 // Données typées pour les tarifs (à compléter selon besoins)
 const tarifs = [
@@ -65,9 +89,25 @@ const tarifs = [
 ];
 
 const TirageEnLigne: React.FC = () => {
+  // État pour gérer l'ouverture du modal et l'offre sélectionnée
+  const [modalOpen, setModalOpen] = useState(false);
+  const [offreActive, setOffreActive] = useState<typeof offres[0] | null>(null);
+
   useEffect(() => {
     document.title = "Tirage en ligne | Fabien Photographie";
   }, []);
+
+  // Fonction pour ouvrir le modal avec l'offre sélectionnée
+  const handleOpenModal = (offre: typeof offres[0]) => {
+    setOffreActive(offre);
+    setModalOpen(true);
+  };
+
+  // Fonction pour fermer le modal
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setOffreActive(null);
+  };
 
   return (
     <div className="home-page min-h-screen flex flex-col bg-neutral-900">
@@ -85,9 +125,18 @@ const TirageEnLigne: React.FC = () => {
           </span>
         </p>
         {/* Grille des offres */}
+        {/* Grille des offres principales (clic = ouverture du modal de commande) */}
         <section className="services-grid mb-12">
           {offres.map((offre) => (
-            <div key={offre.titre} className="service-card group">
+            <div
+              key={offre.titre}
+              className="service-card group cursor-pointer"
+              onClick={() => handleOpenModal(offre)}
+              tabIndex={0}
+              role="button"
+              aria-label={`Commander ${offre.titre}`}
+              onKeyDown={e => (e.key === "Enter" || e.key === " ") && handleOpenModal(offre)}
+            >
               <img
                 src={offre.image}
                 alt={offre.titre}
@@ -101,6 +150,18 @@ const TirageEnLigne: React.FC = () => {
             </div>
           ))}
         </section>
+
+        {/* Modal de commande tirage/poster/toile/carte postale */}
+        {modalOpen && offreActive && (
+          <ModalTirage
+            open={modalOpen}
+            onClose={handleCloseModal}
+            offre={{
+              ...offreActive,
+              formats: FORMATS_PAR_OFFRE[offreActive.titre as keyof typeof FORMATS_PAR_OFFRE] || [],
+            }}
+          />
+        )}
 
         {/* Étapes du process */}
         <section className="mb-12 max-w-2xl w-full">

@@ -7,15 +7,26 @@ import { useNavigate } from "react-router-dom";
 import galerieData from "../../config/galerie.json";
 
 // Interface pour les photos (structure des objets photo)
+// Interface pour un tarif (format/support/prix)
+interface TarifOeuvre {
+  id: string;
+  format: string;
+  support: string;
+  prix: number;
+}
+
+// Interface pour les photos (structure des objets photo)
 interface Photo {
   _id?: string; // ID optionnel (défini par MongoDB)
   src: string; // URL ou chemin de l'image
   alt: string; // Texte alternatif pour l'accessibilité
   titre: string; // Titre de la photo
   description: string; // Description détaillée
-  prix: number; // Prix de la photo
+  prix: number; // Prix par défaut (optionnel, pour compat)
   categorie: string; // Catégorie de la photo
+  tarifs: TarifOeuvre[]; // Liste des formats/supports/prix
 }
+
 
 export default function GalerieForm() {
   // État pour la liste des photos (tableau d'objets Photo)
@@ -28,7 +39,30 @@ export default function GalerieForm() {
     description: "",
     prix: 0,
     categorie: "",
+    tarifs: [], // Initialisation des tarifs
   });
+
+  // Gestion des tarifs dynamiques
+  // Ajout d’un tarif (format/support/prix)
+  const ajouterTarif = () => setForm((f) => ({
+    ...f,
+    tarifs: [...(f.tarifs || []), { id: crypto.randomUUID(), format: "", support: "", prix: 0 }],
+  }));
+
+  // Modification d’un tarif (format/support/prix)
+  const modifierTarif = (idx: number, champ: keyof TarifOeuvre, valeur: string | number) => {
+    setForm((f) => {
+      const copie: TarifOeuvre[] = [...(f.tarifs || [])];
+      copie[idx] = { ...copie[idx], [champ]: valeur };
+      return { ...f, tarifs: copie };
+    });
+  };
+
+  // Suppression d’un tarif
+  const supprimerTarif = (idx: number) => setForm((f) => ({
+    ...f,
+    tarifs: (f.tarifs || []).filter((_, i) => i !== idx),
+  }));
 
   // État pour savoir si on édite une photo (sinon null)
   const [editId, setEditId] = useState<string | null>(null);
@@ -46,6 +80,7 @@ export default function GalerieForm() {
   }, []);
 
   // Gestion des changements dans le formulaire (tous les champs)
+  // Gestion des changements dans le formulaire (tous les champs sauf tarifs)
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -104,6 +139,7 @@ export default function GalerieForm() {
         description: "",
         prix: 0,
         categorie: "",
+        tarifs: [],
       });
 
       alert("Photo enregistrée avec succès !");
@@ -234,6 +270,43 @@ export default function GalerieForm() {
             <option key={index} value={cat} />
           ))}
         </datalist>
+
+        {/* Bloc dynamique pour les formats/supports/prix */}
+        <div className="bg-[#23232b] p-3 rounded">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-bold text-yellow-300">Formats / Supports / Prix</span>
+            <button type="button" onClick={ajouterTarif} className="btn btn-xs btn-primary">+ Ajouter</button>
+          </div>
+          {form.tarifs.length === 0 && <div className="text-gray-400 text-sm">Aucun format/support ajouté.</div>}
+          {form.tarifs.map((tarif, idx) => (
+            <div key={tarif.id} className="flex gap-2 mb-2">
+              <input
+                type="text"
+                placeholder="Format (ex: 20x30)"
+                value={tarif.format}
+                onChange={e => modifierTarif(idx, "format", e.target.value)}
+                className="input input-xs"
+              />
+              <input
+                type="text"
+                placeholder="Support (ex: Papier, Alu...)"
+                value={tarif.support}
+                onChange={e => modifierTarif(idx, "support", e.target.value)}
+                className="input input-xs"
+              />
+              <input
+                type="number"
+                placeholder="Prix (€)"
+                value={tarif.prix}
+                onChange={e => modifierTarif(idx, "prix", Number(e.target.value))}
+                className="input input-xs w-20"
+                min={0}
+                step={0.01}
+              />
+              <button type="button" onClick={() => supprimerTarif(idx)} className="btn btn-xs btn-danger">Supprimer</button>
+            </div>
+          ))}
+        </div>
 
         <button
           onClick={handleSubmit}
