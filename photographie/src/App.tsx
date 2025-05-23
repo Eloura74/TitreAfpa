@@ -17,6 +17,7 @@ import { PanierProvider } from "./store/panierContext";
 import { UserProvider } from "./context/UserContext";
 import GestionGalerie from "./pages/GestionGalerie";
 import RouteAdminOnly from "./components/RouteAdminOnly";
+import TirageEnLigne from "./pages/TirageEnLigne"; // Ajout de la page tirage en ligne
 
 function App() {
   return (
@@ -52,6 +53,8 @@ function App() {
             } />
             {/* Route pour la nouvelle galerie graphique unique */}
             <Route path="/galerie-graphique" element={<GalerieGraphique />} />
+            {/* Route pour la page Tirage en ligne */}
+            <Route path="/tirage" element={<TirageEnLigne />} />
           </Routes>
         </Router>
       </PanierProvider>
