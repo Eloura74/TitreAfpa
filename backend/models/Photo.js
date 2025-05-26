@@ -1,35 +1,111 @@
-// Importation de la bibliothèque Mongoose, qui permet de gérer la connexion et les opérations avec MongoDB
+// Importation de la bibliothèque Mongoose
 const mongoose = require("mongoose");
 
-// Définition du schéma (structure) pour les documents de la collection "Photo"
-// Un schéma définit les champs que chaque document devra contenir ainsi que leurs types et contraintes
+// ------------------------------
+// Sous-schéma pour les tarifs associés à une photo
+// ------------------------------
+const TarifOeuvreSchema = new mongoose.Schema(
+  {
+    id: {
+      type: String,
+      required: true, // ← identifiant du tarif requis
+      default: "tarif-default",
+      trim: true,
+    },
+    format: {
+      type: String,
+      required: true, // ← format requis pour être exploitable côté front
+      default: "Standard",
+      trim: true,
+    },
+    support: {
+      type: String,
+      required: true,
+      default: "Papier",
+      trim: true,
+    },
+    prix: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0, // ← empêche un prix négatif
+    },
+  },
+  { _id: false } // ← pas de sous-id pour les objets tarifs
+);
+
+// ------------------------------
+// Schéma principal de Photo
+// ------------------------------
 const photoSchema = new mongoose.Schema({
-  // Chemin ou URL de l'image (obligatoire)
-  src: { type: String, required: true },
+  // Chemin de l'image
+  src: {
+    type: String,
+    required: true,
+    trim: true,
+    default: "/uploads/default.jpg",
+  },
 
-  // Texte alternatif pour l'image, utile pour l'accessibilité et le SEO (obligatoire)
-  alt: { type: String, required: true },
+  // Texte alternatif
+  alt: {
+    type: String,
+    required: true,
+    trim: true,
+    default: "Photo sans description",
+  },
 
-  // Titre de la photo (obligatoire)
-  titre: { type: String, required: true },
+  // Titre de l'image
+  titre: {
+    type: String,
+    required: true,
+    trim: true,
+    default: "Sans titre",
+  },
 
-  // Description détaillée de la photo (obligatoire)
-  description: { type: String, required: true },
+  // Description détaillée
+  description: {
+    type: String,
+    required: false,
+    trim: true,
+    default: "",
+  },
 
-  // Prix associé à la photo, de type numérique (obligatoire)
-  prix: { type: Number, required: true },
+  // Catégorie
+  categorie: {
+    type: String,
+    required: true,
+    trim: true,
+    default: "Divers",
+  },
 
-  // Catégorie à laquelle appartient la photo (obligatoire)
-  categorie: { type: String, required: true },
+  // Tarifs dynamiques associés à la photo
+  tarifs: {
+    type: [TarifOeuvreSchema],
+    default: [],
+  },
 
-  // Référence à l'événement associé (optionnelle)
-  evenement: { type: mongoose.Schema.Types.ObjectId, ref: 'Evenement' },
+  // Prix de base pour compatibilité (non utilisé si tarifs est rempli)
+  prix: {
+    type: Number,
+    required: false,
+    default: 0,
+    min: 0,
+  },
 
-  // Référence à l'utilisateur propriétaire/auteur (optionnelle)
-  utilisateur: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  // Référence à un événement lié
+  evenement: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Evenement",
+  },
+
+  // Référence à un utilisateur (auteur/gestionnaire)
+  utilisateur: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
 });
 
-// Création du modèle "Photo" à partir du schéma défini ci-dessus
-// Le modèle permet d'interagir avec la collection "photos" dans MongoDB (Mongoose ajoute automatiquement un 's' pour le nom de la collection)
-// Grâce à ce modèle, on pourra effectuer des opérations comme : créer, lire, mettre à jour ou supprimer des documents
+// ------------------------------
+// Export du modèle
+// ------------------------------
 module.exports = mongoose.model("Photo", photoSchema);

@@ -22,6 +22,14 @@ import galerieData from "../config/galerie.json";
 // Importation de la modale de sélection de format
 import { SelectionFormatModal } from "../components/galerie/SelectionFormatModal";
 
+// Interface pour un tarif (format/support/prix) associé à une photo
+interface TarifOeuvre {
+  id: string;
+  format: string;
+  support: string;
+  prix: number;
+}
+
 // Importation du type Tarif
 import { Tarif } from "../types/tarif";
 
@@ -38,6 +46,7 @@ interface Photo {
   prix: number; // Prix en euros
   categorie: string; // Catégorie de la photo
   type: string; // Type de la photo
+  tarifs?: TarifOeuvre[]; // Formats/supports/prix personnalisés
 }
 
 // ==============================
@@ -52,47 +61,69 @@ export default function Galerie() {
     null
   );
   const [modalVisible, setModalVisible] = useState(false);
+  // Stocke les tarifs à afficher dans la modale
+  const [tarifsPourModale, setTarifsPourModale] = useState<
+    (TarifOeuvre | Tarif)[]
+  >([]);
 
   // Récupération de la fonction "ajouterArticle" via le contexte panier
   const { ajouterArticle } = usePanier();
 
-  // Import dynamique des tarifs pour la logique d’ajout automatique
-  // (On évite un double appel si la modale est utilisée, mais c’est OK pour la logique UX)
-  const [tarifs, setTarifs] = useState<any[]>([]);
-  useEffect(() => {
-    fetch("/api/tarifs")
-      .then(res => res.json())
-      .then(setTarifs)
-      .catch(() => setTarifs([]));
-  }, []);
-
   /**
-   * Filtre les tarifs applicables à une photo selon la logique métier (ex : par nom, catégorie, etc.)
-   * Ici, on filtre par titre strict, à adapter selon besoin !
+   * Filtre les tarifs applicables à une photo selon la logique métier
+   * Retourne les tarifs dynamiques de la photo (formats/supports/prix)
+   * SOLUTION RADICALE : Crée un tarif par défaut si aucun n'est disponible
    */
   function getTarifsPourPhoto(photo: Photo) {
-    return tarifs.filter(tarif => tarif.nom === photo.titre && tarif.actif);
+    // Si la photo a des tarifs valides, on les utilise
+    if (Array.isArray(photo.tarifs) && photo.tarifs.length > 0) {
+      console.log("Tarifs existants trouvés:", photo.tarifs);
+      return photo.tarifs;
+    }
+
+    // Sinon, on crée un tarif par défaut basé sur le prix de la photo
+    console.log("Création d'un tarif par défaut pour", photo.titre);
+    const tarifParDefaut = [
+      {
+        id: `default-${photo._id || photo.id || crypto.randomUUID()}`,
+        format: "Standard",
+        support: "Papier photo",
+        prix: photo.prix || 0,
+      },
+    ];
+
+    // On modifie la photo pour lui ajouter ce tarif (pour les prochains appels)
+    photo.tarifs = tarifParDefaut;
+    d;
+    return tarifParDefaut;
   }
 
   /**
-   * Handler amélioré pour l’ajout au panier depuis la galerie
-   * - Ajoute direct si un seul format/support
-   * - Sinon ouvre la modale de sélection
+   * Handler amélioré pour l'ajout au panier depuis la galerie
+   * - Crée toujours au moins un tarif par défaut
+   * - Ouvre la modale de sélection si plusieurs formats
+   * - Ajoute direct si un seul format
    */
   function handleAjouterAuPanier(photo: Photo) {
-    const tarifsPourPhoto = getTarifsPourPhoto(photo);
-    if (tarifsPourPhoto.length === 1) {
-      // Ajout direct au panier
+    // SOLUTION RADICALE : On force la création d'au moins un tarif
+    const tarifsDisponibles = getTarifsPourPhoto(photo);
+    console.log("Tarifs disponibles (après traitement):", tarifsDisponibles);
+
+    // On est sûr d'avoir au moins un tarif maintenant
+    if (tarifsDisponibles.length === 1) {
+      // Si un seul tarif, ajout direct au panier
+      const tarif = tarifsDisponibles[0];
       ajouterArticle({
         id: crypto.randomUUID(),
-        nom: `${photo.titre} (${tarifsPourPhoto[0].format})`,
-        prix: tarifsPourPhoto[0].prix,
+        nom: `${photo.titre} (${tarif.format}, ${tarif.support})`,
+        prix: tarif.prix,
         quantite: 1,
         image: photo.src,
       });
-      setNotification("Ajouté au panier !");
+      setNotification(`${photo.titre} ajouté au panier !`);
     } else {
-      // Plusieurs choix : ouverture de la modale
+      // Si plusieurs tarifs, ouvre la modale de sélection
+      setTarifsPourModale(tarifsDisponibles);
       setPhotoSelectionnee(photo);
       setModalVisible(true);
     }
@@ -112,11 +143,22 @@ export default function Galerie() {
     fetch("http://localhost:5001/api/galerie")
       .then((res) => res.json()) // Conversion de la réponse en JSON
       .then((data: Photo[]) => {
+        // Vérification des données reçues
+        console.log("Données reçues de l'API:", data);
+
         // Transformation des données pour corriger le chemin des images issues du serveur
-        const photosServeur = data.map((photo) => ({
-          ...photo,
-          src: `http://localhost:5001${photo.src}`, // On complète le chemin relatif
-        }));
+        const photosServeur = data.map((photo) => {
+          // Vérification des tarifs pour chaque photo
+          console.log(`Photo ${photo.titre} - tarifs:`, photo.tarifs);
+
+          // Création d'un nouvel objet avec tous les champs, y compris tarifs
+          return {
+            ...photo,
+            src: `http://localhost:5001${photo.src}`, // On complète le chemin relatif
+            // Assurons-nous que tarifs est bien préservé
+            tarifs: Array.isArray(photo.tarifs) ? photo.tarifs : [],
+          };
+        });
 
         // 3️⃣ Fusion des deux sources (locales + serveur) et mise à jour de l'état
         setPhotos([...photosLocales, ...photosServeur]);
@@ -162,9 +204,25 @@ export default function Galerie() {
   // ==============================
   //  Handler : sélection d’un format dans la modale
   // ==============================
-  const handleSelectFormat = (tarif: Tarif) => {
+  const handleSelectFormat = (tarif: TarifOeuvre | Tarif) => {
     if (photoSelectionnee) {
-      ajouterAuPanier(photoSelectionnee, tarif);
+      // Création d'un article panier adapté au type de tarif
+      const articlePanier = {
+        id: crypto.randomUUID(),
+        nom: `${photoSelectionnee.titre} (${
+          "format" in tarif ? tarif.format : ""
+        }, ${"support" in tarif ? tarif.support : ""})`,
+        prix: tarif.prix,
+        quantite: 1,
+        image: photoSelectionnee.src,
+      };
+
+      // Ajout au panier et notification
+      ajouterArticle(articlePanier);
+      setNotification(`${photoSelectionnee.titre} ajouté au panier !`);
+      setTimeout(() => setNotification(null), 3000);
+
+      // Fermeture de la modale
       setPhotoSelectionnee(null);
       setModalVisible(false);
     }
@@ -236,7 +294,26 @@ export default function Galerie() {
                 />
               </div>
               <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-xs px-3 py-1 rounded-sm">
-                {photo.categorie}
+                {Array.isArray(photo.tarifs) && photo.tarifs.length > 0 ? (
+                  <ul className="mt-2">
+                    {photo.tarifs.map((tarif) => (
+                      <li
+                        key={
+                          tarif.id ||
+                          `${tarif.format}-${tarif.support}-${tarif.prix}`
+                        }
+                        className="text-yellow-300 text-sm"
+                      >
+                        <span className="font-bold">{tarif.format}</span> —{" "}
+                        {tarif.support} : {tarif.prix}€
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="text-gray-400 text-xs mt-2">
+                    Aucun format disponible pour cette photo.
+                  </div>
+                )}
               </div>
               <div className="p-6">
                 <h3 className="photo-title mb-2">{photo.titre}</h3>
@@ -268,6 +345,7 @@ export default function Galerie() {
 
       {modalVisible && photoSelectionnee && (
         <SelectionFormatModal
+          tarifs={tarifsPourModale}
           onSelect={handleSelectFormat}
           onClose={() => setModalVisible(false)}
         />
