@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import galerieData from "../../config/galerie.json";
+const API_URL = "/api/galerie"; // ← pas besoin de localhost:5001 ici
 
 // --- TYPE PRINCIPAL DU FORMULAIRE ---
 interface FormType {
@@ -78,7 +79,7 @@ export default function GalerieForm() {
   // État pour savoir si on édite une photo (sinon null)
   const [editId, setEditId] = useState<string | null>(null);
   // URL de l'API backend pour la galerie
-  const API_URL = "http://localhost:5001/api/galerie";
+  // const API_URL = "http://localhost:5001/api/galerie";
   // Hook pour rediriger l'utilisateur après une action
   const navigate = useNavigate();
 
@@ -204,17 +205,17 @@ export default function GalerieForm() {
             "Création en deux temps - Étape 1: photo minimale sans tarifs",
             formAvecTarifs
           );
-          
+
           // Étape 1: Création d'une photo SANS les tarifs (qui posent problème)
           const photoMinimale = {
             src: formAvecTarifs.src,
             alt: formAvecTarifs.alt,
             titre: formAvecTarifs.titre,
             description: formAvecTarifs.description,
-            categorie: formAvecTarifs.categorie
+            categorie: formAvecTarifs.categorie,
             // tarifs volontairement omis ici
           };
-          
+
           // Envoi de la requête minimale
           const res = await fetch(API_URL, {
             method: "POST",
@@ -246,15 +247,18 @@ export default function GalerieForm() {
             alert(errorMessage);
             return;
           }
-          
+
           // Étape 1 réussie : Photo créée sans tarifs
           let photoCreee = JSON.parse(responseText);
           console.log("Photo créée avec succès (sans tarifs):", photoCreee);
 
           try {
             // ÉTAPE 2: Mise à jour de la photo avec les tarifs
-            console.log("Création en deux temps - Étape 2: ajout des tarifs", formAvecTarifs.tarifs);
-            
+            console.log(
+              "Création en deux temps - Étape 2: ajout des tarifs",
+              formAvecTarifs.tarifs
+            );
+
             // Si la photo a bien été créée et a un ID
             if (photoCreee && photoCreee._id) {
               // Requête PUT pour mettre à jour la photo avec les tarifs
@@ -263,28 +267,39 @@ export default function GalerieForm() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ tarifs: formAvecTarifs.tarifs }),
               });
-              
+
               const updateResponseText = await updateRes.text();
-              console.log("Réponse brute du serveur étape 2:", updateResponseText);
-              
+              console.log(
+                "Réponse brute du serveur étape 2:",
+                updateResponseText
+              );
+
               if (!updateRes.ok) {
-                console.warn("Attention: Les tarifs n'ont pas pu être ajoutés, mais la photo a été créée.");
+                console.warn(
+                  "Attention: Les tarifs n'ont pas pu être ajoutés, mais la photo a été créée."
+                );
                 // On continue quand même car la photo existe déjà
               } else {
                 // Mise à jour réussie
                 try {
                   photoCreee = JSON.parse(updateResponseText);
-                  console.log("Photo mise à jour avec succès (avec tarifs):", photoCreee);
+                  console.log(
+                    "Photo mise à jour avec succès (avec tarifs):",
+                    photoCreee
+                  );
                 } catch (e) {
                   console.error("Erreur de parsing de la réponse étape 2:", e);
                 }
               }
             }
           } catch (updateErr) {
-            console.warn("Erreur lors de la mise à jour avec les tarifs:", updateErr);
+            console.warn(
+              "Erreur lors de la mise à jour avec les tarifs:",
+              updateErr
+            );
             // On continue quand même car la photo existe déjà
           }
-          
+
           // Dans tous les cas, on ajoute la photo créée à la liste
           setPhotos((prevPhotos) => [...prevPhotos, photoCreee]);
         }

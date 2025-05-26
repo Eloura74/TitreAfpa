@@ -36,6 +36,8 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("🟢 MongoDB connecté"))
   .catch((err) => console.error("🔴 Erreur de connexion MongoDB:", err));
+
+// --- Middleware JSON (doit être AVANT les routes !) ---
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 

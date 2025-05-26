@@ -41,7 +41,7 @@ const photoSchema = new mongoose.Schema({
   // Chemin de l'image
   src: {
     type: String,
-    required: true,
+    required: false,
     trim: true,
     default: "/uploads/default.jpg",
   },
@@ -49,7 +49,7 @@ const photoSchema = new mongoose.Schema({
   // Texte alternatif
   alt: {
     type: String,
-    required: true,
+    required: false,
     trim: true,
     default: "Photo sans description",
   },
@@ -57,7 +57,7 @@ const photoSchema = new mongoose.Schema({
   // Titre de l'image
   titre: {
     type: String,
-    required: true,
+    required: false,
     trim: true,
     default: "Sans titre",
   },
@@ -73,7 +73,7 @@ const photoSchema = new mongoose.Schema({
   // Catégorie
   categorie: {
     type: String,
-    required: true,
+    required: false,
     trim: true,
     default: "Divers",
   },
