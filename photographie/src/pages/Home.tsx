@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import homeImages from "../config/images.json";
-import eclair from "/public/images/eclair2.png";
+import eclair from "/images/eclair2.png";
 import "../styles/home.css";
 import HomeIntro from "../components/HomeIntro";
 
@@ -96,7 +96,10 @@ export default function Home() {
       <div className="md:hidden fixed inset-0 z-0 bg-black/70 pointer-events-none" />
       {/* Mobile : split vertical amélioré et lisible */}
       <div className="md:hidden flex flex-col h-full w-full z-10 px-4 py-8 gap-8 relative">
-        <Link to="/photographie" className="group focus:outline-none focus:ring-2 focus:ring-yellow-400">
+        <Link
+          to="/photographie"
+          className="group focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        >
           <div className="w-full bg-black/80 rounded-2xl shadow-lg flex flex-col items-center justify-center py-8 px-4">
             <h1 className="text-3xl font-bold text-center text-yellow-200 drop-shadow-lg mb-3 break-words">
               Fabien Photographe
@@ -106,7 +109,10 @@ export default function Home() {
             </p>
           </div>
         </Link>
-        <Link to="/graphisme" className="group focus:outline-none focus:ring-2 focus:ring-yellow-400">
+        <Link
+          to="/graphisme"
+          className="group focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        >
           <div className="w-full bg-black/80 rounded-2xl shadow-lg flex flex-col items-center justify-center py-8 px-4">
             <h1 className="text-3xl font-bold text-center text-yellow-200 drop-shadow-lg mb-3 break-words">
               Fabien Graphiste
