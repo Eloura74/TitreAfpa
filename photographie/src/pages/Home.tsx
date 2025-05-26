@@ -92,25 +92,27 @@ export default function Home() {
         />
       </div>
 
-      {/* Mobile : split vertical */}
-      <div className="md:hidden flex flex-col h-full w-full z-10">
-        <Link to="/photographie" className="flex-1 group">
-          <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-b from-blue-900 to-blue-600 transition-colors duration-500 group-hover:from-blue-700 cursor-pointer">
-            <h1 className="hero-title">
-              <span className="hero-title-gradient">Fabien Photographie</span>
+      {/* Overlay sombre mobile pour garantir la lisibilité des blocs */}
+      <div className="md:hidden fixed inset-0 z-0 bg-black/70 pointer-events-none" />
+      {/* Mobile : split vertical amélioré et lisible */}
+      <div className="md:hidden flex flex-col h-full w-full z-10 px-4 py-8 gap-8 relative">
+        <Link to="/photographie" className="group focus:outline-none focus:ring-2 focus:ring-yellow-400">
+          <div className="w-full bg-black/80 rounded-2xl shadow-lg flex flex-col items-center justify-center py-8 px-4">
+            <h1 className="text-3xl font-bold text-center text-yellow-200 drop-shadow-lg mb-3 break-words">
+              Fabien Photographe
             </h1>
-            <p className="hero-subtitle">
-              Événements · Tirage en ligne · Galerie actuelle
+            <p className="text-base text-yellow-100 text-center bg-black/40 rounded px-2 py-1 drop-shadow">
+              Événements · Tirage en ligne · Galerie photo
             </p>
           </div>
         </Link>
-        <Link to="/graphisme" className="flex-1 group">
-          <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-b from-purple-800 to-yellow-400 transition-colors duration-500 group-hover:from-purple-700 cursor-pointer">
-            <h1 className="hero-title">
-              <span className="hero-title-gradient">Fabien Graphiste</span>
+        <Link to="/graphisme" className="group focus:outline-none focus:ring-2 focus:ring-yellow-400">
+          <div className="w-full bg-black/80 rounded-2xl shadow-lg flex flex-col items-center justify-center py-8 px-4">
+            <h1 className="text-3xl font-bold text-center text-yellow-200 drop-shadow-lg mb-3 break-words">
+              Fabien Graphiste
             </h1>
-            <p className="hero-subtitle">
-              Événements · Tirage en ligne · Galerie graphique
+            <p className="text-base text-yellow-100 text-center bg-black/40 rounded px-2 py-1 drop-shadow">
+              Événements · Galerie graphique · A propos
             </p>
           </div>
         </Link>

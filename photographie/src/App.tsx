@@ -17,7 +17,7 @@ import { PanierProvider } from "./store/panierContext";
 import { UserProvider } from "./context/UserContext";
 import GestionGalerie from "./pages/GestionGalerie";
 import RouteAdminOnly from "./components/RouteAdminOnly";
-import TirageEnLigne from "./pages/TirageEnLigne"; // Ajout de la page tirage en ligne
+import TirageEnLigne from "./pages/TirageEnLigne";
 
 function App() {
   return (
@@ -46,11 +46,14 @@ function App() {
             {/* Route pour inscription/connexion */}
             <Route path="/inscription" element={<Auth />} />
             {/* Route protégée admin pour la gestion galerie */}
-            <Route path="/admin/gestion-galerie" element={
-              <RouteAdminOnly>
-                <GestionGalerie />
-              </RouteAdminOnly>
-            } />
+            <Route
+              path="/admin/gestion-galerie"
+              element={
+                <RouteAdminOnly>
+                  <GestionGalerie />
+                </RouteAdminOnly>
+              }
+            />
             {/* Route pour la nouvelle galerie graphique unique */}
             <Route path="/galerie-graphique" element={<GalerieGraphique />} />
             {/* Route pour la page Tirage en ligne */}

@@ -1,197 +1,156 @@
-// Importations des modules nécessaires
-// React : framework React
-// useState, useEffect : hooks React pour la gestion du cycle de vie et de l'état
-// Navbar : composant de navigation
-// Footer : composant de footer
-// axios : bibliothèque pour les requêtes HTTP
-// react-calendar : composant de calendrier
-// globals.css, evenements.css : styles globaux et spécifiques
-// Calendar : composant de calendrier
-// CalendarDays, MapPin, Target : icônes de Lucide
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import "react-calendar/dist/Calendar.css";
 import "../styles/globals.css";
 import "../styles/evenements.css";
-import Calendar from "react-calendar";
 import { CalendarDays, MapPin, Target } from "lucide-react";
 import type { Evenement } from "../types/evenement";
 
-// Fonction principale du composant Evenements
+// ------------------------------------------------------------
+// Composant principal de la page des événements
+// ------------------------------------------------------------
 export default function Evenements() {
-  // Typage de l'état des événements
+  // Liste des événements récupérée via l'API
   const [evenements, setEvenements] = useState<Evenement[]>([]);
-  const [filter, setFilter] = useState<"à venir" | "passé" | "tous">("tous"); // État pour le filtre
-  const [showCalendarId, setShowCalendarId] = useState<string | null>(null); // État pour le calendrier
-  const [hoveredMapId, setHoveredMapId] = useState<string | null>(null); // État pour le map
-  const calendarRef = useRef<HTMLDivElement>(null); // Référence au calendrier
+  // État du filtre ("tous" | "à venir" | "passé")
+  const [filter, setFilter] = useState<"à venir" | "passé" | "tous">("tous");
 
-  // Récupération des événements via l'API backend
+  // ----------------------------------------------------------
+  // Récupération asynchrone des événements au montage du composant
+  // ----------------------------------------------------------
   useEffect(() => {
     const fetchEvenements = async () => {
-      const res = await axios.get("http://localhost:5001/api/evenements");
-      const data = res.data;
-      // Normalise _id -> id
-      const events: Evenement[] = data.map((ev: any) => ({
-        ...ev,
-        id: ev._id || ev.id,
-      }));
-      setEvenements(events);
+      try {
+        const res = await axios.get("http://localhost:5001/api/evenements");
+        const data = res.data;
+        // Normalisation des champs pour le front
+        const events: Evenement[] = data.map((ev: any) => ({
+          ...ev,
+          id: ev._id || ev.id,
+          lieu: ev.lieu || ev.location || ev.place || "",
+        }));
+        setEvenements(events);
+      } catch (error) {
+        // Gestion d’erreur simple
+        console.error("Erreur lors de la récupération des événements :", error);
+        setEvenements([]);
+      }
     };
     fetchEvenements();
   }, []);
 
-  const today = new Date().toISOString().split("T")[0]; // Date actuelle
+  // Date du jour au format AAAA-MM-JJ
+  const today = new Date().toISOString().split("T")[0];
 
-  // Typage du tableau filtré
+  // Filtrage dynamique des événements selon le filtre choisi
   const filteredEvents: Evenement[] = evenements.filter((event: Evenement) => {
     if (filter === "à venir") return event.date >= today;
     if (filter === "passé") return event.date < today;
     return true;
   });
 
-  // Fonction principale du composant Evenements
+  // ----------------------------------------------------------
+  // Rendu principal de la page
+  // ----------------------------------------------------------
   return (
-    <div className="page-container">
+    <div className="page-container min-h-screen flex flex-col">
+      {/* Barre de navigation */}
       <Navbar />
-      <main className="main-content evenements-container">
-        <h1 className="evenements-titre">ÉVÉNEMENTS</h1>
-        <div className="evenements-titre-divider"></div>
-        <p className="evenements-subtitle">
+
+      {/* Contenu principal centré, largeur limitée (gérée par .main-content) */}
+      <main className="main-content flex-1 flex flex-col p-0">
+        {/* Titre et sous-titre responsives */}
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#ffe992] text-center leading-tight break-words">
+          ÉVÉNEMENTS
+        </h1>
+        <div className="evenements-titre-divider mx-auto my-2 w-20 h-1 bg-[#ffe992] rounded"></div>
+        <p className="evenements-subtitle text-center text-base text-white/80 mb-4">
           Retrouvez ici les prochains événements à venir :
         </p>
 
-        {/* Filtres */}
-        <div className="evenements-filtres">
+        {/* Filtres full width mobile, gap réduit */}
+        <div className="flex flex-row gap-2 w-full px-2 mb-4">
           {["tous", "à venir", "passé"].map((cat) => (
             <button
               key={cat}
-              onClick={() => setFilter(cat as any)}
-              className={`evenements-filtre-btn ${
-                filter === cat ? "active" : ""
-              }`}
+              onClick={() => setFilter(cat as "à venir" | "passé" | "tous")}
+              className={`flex-1 py-2 rounded font-semibold transition-colors duration-150 border border-[#ffe992]/20
+                ${
+                  filter === cat
+                    ? "bg-[#ffe992] text-black"
+                    : "bg-[#232336] text-[#ffe992] hover:bg-[#ffe992]/30"
+                }`}
             >
               {cat.toUpperCase()}
             </button>
           ))}
         </div>
 
-        {/* Liste des événements */}
-        <div className="evenements-liste">
-          {filteredEvents.length === 0 ? (
-            <p className="text-gray-400 text-center">Aucun événement trouvé.</p>
-          ) : (
-            filteredEvents.map((event) => (
-              <div key={event.id} className="evenement-carte animate-fadeIn">
-                <div className="evenement-contenu">
-                  {/* Image de l’événement */}
+        {/* Grille responsive mobile-first */}
+        <div className="w-full flex-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+            {filteredEvents.length === 0 ? (
+              <p className="text-gray-400 text-center col-span-full">
+                Aucun événement trouvé.
+              </p>
+            ) : (
+              filteredEvents.map((event) => (
+                <div
+                  key={event.id}
+                  className="bg-black/90 rounded-xl shadow-lg overflow-hidden flex flex-col w-full min-w-0"
+                >
+                  {/* Image de l’événement (fallback si image absente) */}
                   <img
-                    src={event.urlAffiche}
-                    alt={event.titre}
-                    className="evenement-affiche"
+                    src={event.urlAffiche || ""}
+                    alt={event.titre || "Affiche événement"}
+                    className="w-full h-40 sm:h-56 object-cover object-center bg-gray-900"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.src = "";
+                      e.currentTarget.classList.add("bg-gray-800");
+                    }}
                   />
-
-                  {/* Informations de l’événement */}
-                  <div className="evenement-info">
-                    <h2 className="evenement-titre">{event.titre}</h2>
-                    <p className="evenement-description">{event.description}</p>
-
-                    <div className="evenement-meta">
-                      {/* Affichage calendrier au clic */}
-                      <div className="relative">
-                        <span
-                          className="flex items-center gap-2 cursor-pointer hover:text-yellow-200"
-                          onClick={() =>
-                            setShowCalendarId(
-                              showCalendarId === event.id ? null : event.id
-                            )
-                          }
-                        >
-                          <CalendarDays size={16} className="text-yellow-300" />
-                          Du {event.dateDebut} au {event.dateFin}
-                        </span>
-
-                        {showCalendarId === event.id && (
-                          <div
-                            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999]"
-                            onClick={(e) => {
-                              if (e.target === e.currentTarget) {
-                                setShowCalendarId(null);
-                              }
-                            }}
-                          >
-                            <div
-                              ref={calendarRef}
-                              className="bg-[#1a1a20] border-2 border-[#d6c487] rounded-md p-4 shadow-lg max-w-md mx-auto"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-yellow-300 font-bold">
-                                  Dates de l'événement
-                                </h3>
-                                <button
-                                  onClick={() => setShowCalendarId(null)}
-                                  className="text-gray-400 hover:text-white text-lg font-bold"
-                                >
-                                  ✕
-                                </button>
-                              </div>
-                              <Calendar
-                                defaultValue={
-                                  event.dateDebut && event.dateFin
-                                    ? [new Date(event.dateDebut), new Date(event.dateFin)]
-                                    : undefined
-                                }
-                                selectRange
-                                tileDisabled={() => true}
-                                className="custom-calendar border-2 border-red-500"
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Affichage Google Maps au survol */}
-                      <div
-                        className="relative"
-                        onMouseEnter={() => setHoveredMapId(event.id)}
-                        onMouseLeave={() => setHoveredMapId(null)}
-                      >
-                        <span className="flex items-center gap-2 cursor-pointer text-blue-300 hover:underline">
-                          <MapPin size={16} className="text-yellow-300" />
-                          {event.lieu}
-                        </span>
-
-                        {hoveredMapId === event.id && (
-                          <div className="absolute top-full left-0 mt-2 z-50 w-64 h-40 rounded overflow-hidden shadow-lg border border-[#333]">
-                            <iframe
-                              src={`https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_API_KEY&q=${encodeURIComponent(
-                                event.lieu ?? ""
-                              )}`}
-                              width="100%"
-                              height="100%"
-                              loading="lazy"
-                              allowFullScreen
-                            ></iframe>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Thème de l’événement */}
-                      <span className="flex items-center gap-2">
-                        <Target size={16} className="text-yellow-300" />
-                        Thème : {event.theme}
+                  {/* Infos principales de l'événement */}
+                  <div className="p-3 flex flex-col gap-2 flex-1">
+                    <h2 className="text-base sm:text-lg font-bold text-[#ffe992]">
+                      {event.titre}
+                    </h2>
+                    <p className="text-white/90 text-xs sm:text-sm">
+                      {event.description}
+                    </p>
+                    <div className="flex flex-col gap-1 mt-2">
+                      <span className="flex items-center gap-2 text-[#d6c487] text-xs sm:text-sm">
+                        <CalendarDays size={16} className="text-[#d6c487]" />
+                        Du {event.dateDebut || "-"} au {event.dateFin || "-"}
                       </span>
+                      <span className="flex items-center gap-2 text-[#d6c487] text-xs sm:text-sm">
+                        <MapPin size={16} className="text-[#d6c487]" />
+                        {event.lieu ? (
+                          event.lieu
+                        ) : (
+                          <span className="italic text-gray-500">
+                            Lieu non renseigné
+                          </span>
+                        )}
+                      </span>
+                      {event.theme && (
+                        <span className="flex items-center gap-2 text-[#d6c487] text-xs sm:text-sm">
+                          <Target size={16} className="text-[#d6c487]" />
+                          {event.theme}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-            ))
-          )}
+              ))
+            )}
+          </div>
         </div>
       </main>
+
+      {/* Footer collé en bas */}
       <Footer />
     </div>
   );

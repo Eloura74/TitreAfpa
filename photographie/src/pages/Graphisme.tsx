@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/layout/navbar";
+import { CalendarDays, GalleryHorizontal, ShoppingCart, Info } from "lucide-react";
 import Footer from "../components/layout/Footer";
 import homeImages from "../config/images.json";
 import "../styles/home.css";
@@ -42,41 +43,39 @@ export default function Graphisme() {
             Sélectionnez un menu ci-dessous pour explorer chaque fonctionnalité.
           </span>
         </p>
-        <nav className="services-grid">
-          <div className="service-card">
-            <Link to="/evenements">
-              <h3 className="service-title">Événements</h3>
-              <p className="service-description">
-                Ateliers et événements graphiques à venir.
-              </p>
-            </Link>
-          </div>
-
-          {/* Lien mis à jour vers la nouvelle galerie graphique unique */}
-          <div className="service-card">
-            <Link to="/galerie-graphique">
-              <h3 className="service-title">Galerie graphique</h3>
-              <p className="service-description">
-                Œuvres uniques, prix individuel pour chaque création.
-              </p>
-            </Link>
-          </div>
-          <div className="service-card">
-            <Link to="/panier">
-              <h3 className="service-title">Panier</h3>
-              <p className="service-description">
-                Gérez vos achats graphiques.
-              </p>
-            </Link>
-          </div>
-          <div className="service-card">
-            <Link to="/about">
-              <h3 className="service-title">A propos</h3>
-              <p className="service-description">
-                Plus d’informations sur moi.
-              </p>
-            </Link>
-          </div>
+        <nav className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 px-2 py-2 md:grid-cols-4 md:gap-8 md:px-0 md:w-auto">
+          <Link
+            to="/evenements"
+            className="w-full bg-gradient-to-b from-yellow-900/70 to-black/80 rounded-2xl shadow-xl px-4 py-6 text-yellow-200 text-center flex flex-col gap-2 items-center transition-transform hover:scale-105 hover:shadow-yellow-400/30 focus:outline-none focus:ring-2 focus:ring-yellow-400 md:rounded-xl md:shadow-lg"
+          >
+            <CalendarDays className="w-7 h-7 mb-1 text-[#d6c487]" aria-hidden="true" />
+            <span className="text-lg font-semibold">Événements</span>
+            <span className="text-sm text-yellow-100">Ateliers et événements graphiques à venir.</span>
+          </Link>
+          <Link
+            to="/galerie-graphique"
+            className="w-full bg-gradient-to-b from-yellow-900/70 to-black/80 rounded-2xl shadow-xl px-4 py-6 text-yellow-200 text-center flex flex-col gap-2 items-center transition-transform hover:scale-105 hover:shadow-yellow-400/30 focus:outline-none focus:ring-2 focus:ring-yellow-400 md:rounded-xl md:shadow-lg"
+          >
+            <GalleryHorizontal className="w-7 h-7 mb-1 text-[#d6c487]" aria-hidden="true" />
+            <span className="text-lg font-semibold">Galerie graphique</span>
+            <span className="text-sm text-yellow-100">Œuvres uniques, prix individuel pour chaque création.</span>
+          </Link>
+          <Link
+            to="/panier"
+            className="w-full bg-gradient-to-b from-yellow-900/70 to-black/80 rounded-2xl shadow-xl px-4 py-6 text-yellow-200 text-center flex flex-col gap-2 items-center transition-transform hover:scale-105 hover:shadow-yellow-400/30 focus:outline-none focus:ring-2 focus:ring-yellow-400 md:rounded-xl md:shadow-lg"
+          >
+            <ShoppingCart className="w-7 h-7 mb-1 text-[#d6c487]" aria-hidden="true" />
+            <span className="text-lg font-semibold">Panier</span>
+            <span className="text-sm text-yellow-100">Gérez vos achats graphiques.</span>
+          </Link>
+          <Link
+            to="/about"
+            className="w-full bg-gradient-to-b from-yellow-900/70 to-black/80 rounded-2xl shadow-xl px-4 py-6 text-yellow-200 text-center flex flex-col gap-2 items-center transition-transform hover:scale-105 hover:shadow-yellow-400/30 focus:outline-none focus:ring-2 focus:ring-yellow-400 md:rounded-xl md:shadow-lg"
+          >
+            <Info className="w-7 h-7 mb-1 text-[#d6c487]" aria-hidden="true" />
+            <span className="text-lg font-semibold">A propos</span>
+            <span className="text-sm text-yellow-100">Plus d’informations sur moi.</span>
+          </Link>
         </nav>
       </main>
       <Footer />

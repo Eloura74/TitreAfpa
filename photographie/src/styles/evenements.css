@@ -39,7 +39,7 @@
 .evenements-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */
   padding-top: 2rem;
   padding-bottom: 4rem;
 }
@@ -82,7 +82,7 @@
   font-weight: 400;
   letter-spacing: 0.05em;
   color: rgba(255, 255, 255, 0.85);
-  max-width: 36rem;
+  /* max-width: 36rem; */
   text-align: center;
   margin: 0 auto 2rem;
   animation: slideUp 1.5s ease-out 0.5s both;
@@ -130,7 +130,7 @@
 
 .evenements-liste {
   width: 100%;
-  max-width: 48rem;
+  /* max-width: 48rem; */
   padding: 0 1rem;
 }
 
