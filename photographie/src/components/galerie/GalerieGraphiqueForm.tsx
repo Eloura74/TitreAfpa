@@ -18,7 +18,7 @@ export default function GalerieGraphiqueForm() {
     const formData = new FormData();
     formData.append("image", file);
     try {
-      const res = await axios.post("/api/oeuvres-graphique/upload", formData, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/oeuvres-graphique/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data.imagePath;
@@ -43,7 +43,7 @@ export default function GalerieGraphiqueForm() {
       imagePath = uploaded;
     }
     try {
-      await axios.post("/api/oeuvres-graphique", {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/oeuvres-graphique`, {
         titre,
         image: imagePath,
         prix: Number(prix),
@@ -70,6 +70,13 @@ export default function GalerieGraphiqueForm() {
         onChange={e => setImage(e.target.files?.[0] || null)}
         className="block w-full bg-gray-800 text-white rounded px-3 py-2"
       />
+      {image && (
+        <img
+          src={URL.createObjectURL(image)}
+          alt="Aperçu"
+          className="w-64 h-auto mt-2 rounded border border-gray-600"
+        />
+      )}
       <input
         type="text"
         placeholder="Titre"

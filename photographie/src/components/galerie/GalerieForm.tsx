@@ -5,7 +5,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import galerieData from "../../config/galerie.json";
-const API_URL = "/api/galerie"; //
+const API_URL = `${import.meta.env.VITE_API_URL}/api/galerie`; //
+const uploadUrl = `${import.meta.env.VITE_API_URL}/api/galerie/upload`; //
 
 // --- TYPE PRINCIPAL DU FORMULAIRE ---
 interface FormType {
@@ -88,14 +89,14 @@ export default function GalerieForm() {
     const fetchData = async () => {
       try {
         // Récupération des photos
-        const resPhotos = await fetch(API_URL);
+        const resPhotos = await fetch(API_URL); // OK, déjà corrigé
         const dataPhotos = await resPhotos.json();
         setPhotos(dataPhotos);
 
         // Récupération des tarifs prédéfinis
         const resTarifs = await fetch(
           `${import.meta.env.VITE_API_URL}/api/tarifs`
-        );
+        ); // OK, déjà corrigé
         const dataTarifs = await resTarifs.json();
         console.log("Tarifs prédéfinis récupérés:", dataTarifs);
         setTarifsPredéfinis(dataTarifs.filter((t: TarifPredefini) => t.actif));

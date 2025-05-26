@@ -29,7 +29,7 @@ export default function GestionGalerieGraphique() {
 
   async function fetchOeuvres() {
     try {
-      const { data } = await axios.get("/api/oeuvres-graphique");
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/oeuvres-graphique`);
       setOeuvres(data);
     } catch (err) {
       setMessage("Erreur lors du chargement des œuvres.");
@@ -41,7 +41,7 @@ export default function GestionGalerieGraphique() {
     const formData = new FormData();
     formData.append("image", file);
     try {
-      const res = await axios.post("/api/oeuvres-graphique/upload", formData, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/oeuvres-graphique/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data.imagePath;
@@ -74,7 +74,7 @@ export default function GestionGalerieGraphique() {
     try {
       if (editId) {
         // Modification
-        const { data } = await axios.put(`/api/oeuvres-graphique/${editId}`,
+        const { data } = await axios.put(`${import.meta.env.VITE_API_URL}/api/oeuvres-graphique/${editId}`,
           { ...form, image: imagePath }
         );
         setOeuvres((prev) => prev.map((o) => (o._id === editId ? data : o)));
@@ -82,7 +82,7 @@ export default function GestionGalerieGraphique() {
         setEditId(null);
       } else {
         // Ajout
-        const { data } = await axios.post("/api/oeuvres-graphique", {
+        const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/oeuvres-graphique`, {
           ...form,
           image: imagePath,
         });
@@ -116,7 +116,7 @@ export default function GestionGalerieGraphique() {
     if (!id) return;
     if (!window.confirm("Supprimer cette œuvre ?")) return;
     try {
-      await axios.delete(`/api/oeuvres-graphique/${id}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/oeuvres-graphique/${id}`);
       setOeuvres((prev) => prev.filter((o) => o._id !== id));
       setMessage("Œuvre supprimée !");
     } catch {

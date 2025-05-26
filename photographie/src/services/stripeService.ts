@@ -13,7 +13,7 @@ export async function createCheckoutSession(articles: ArticlePanierType[]) {
   }));
 
   const response = await fetch(
-    "http://localhost:5001/api/stripe/create-checkout-session",
+    `${import.meta.env.VITE_API_URL}/api/stripe/create-checkout-session`,
     {
       method: "POST", // Méthode HTTP
       headers: { "Content-Type": "application/json" }, // En-têtes HTTP

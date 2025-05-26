@@ -57,7 +57,7 @@ export default function GestionTarifs() {
   const mutation = useMutation({
     mutationFn: async (data: TarifForm) => {
       const method = data.id ? "PUT" : "POST";
-      const url = data.id ? `/api/tarifs/${data.id}` : "/api/tarifs";
+      const url = data.id ? `${import.meta.env.VITE_API_URL}/api/tarifs/${data.id}` : `${import.meta.env.VITE_API_URL}/api/tarifs`;
       const token = localStorage.getItem("token");
       const res = await fetch(url, {
         method,
