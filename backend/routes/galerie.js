@@ -47,24 +47,20 @@ router.get("/", async (req, res) => {
   }
 });
 
-// --- POST : upload d'image uniquement ---
-router.post("/upload", upload.single("image"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "Aucun fichier envoyé." });
-  }
-  const imagePath = `/uploads/${req.file.filename}`;
-  console.log("📸 Fichier reçu :", imagePath);
-  res.status(200).json({ imagePath });
-});
-
-// --- POST : upload d'une image (Multer uniquement ici) ---
-router.post("/upload", upload.single("file"), (req, res) => {
-  // Cette route gère uniquement l'upload du fichier image
-  if (!req.file) {
-    return res.status(400).json({ message: "Aucun fichier reçu" });
-  }
-  console.log("📸 Fichier reçu :", req.file.path);
-  res.status(200).json({ src: `/uploads/${req.file.filename}` });
+// --- POST : upload d'image (accepte 'image' ou 'file') ---
+router.post("/upload", (req, res, next) => {
+  upload.single("image")(req, res, function (err) {
+    if (!req.file) {
+      upload.single("file")(req, res, function (err2) {
+        if (!req.file) {
+          return res.status(400).json({ message: "Aucun fichier reçu" });
+        }
+        return res.status(200).json({ src: `/uploads/${req.file.filename}` });
+      });
+    } else {
+      return res.status(200).json({ src: `/uploads/${req.file.filename}` });
+    }
+  });
 });
 
 // --- POST : ajout d'une photo (JSON pur, PAS de Multer) ---
