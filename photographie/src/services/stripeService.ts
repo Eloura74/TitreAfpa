@@ -1,13 +1,13 @@
 // ==============================
 //  Service pour communiquer avec l'API Stripe côté backend
 // ==============================
-import { ArticlePanierType } from '../types/panier';
+import { ArticlePanierType } from "../types/panier";
 
 export async function createCheckoutSession(articles: ArticlePanierType[]) {
   // Adaptation des articles pour Stripe
   const articlesStripe = articles.map((article) => ({
     nom: article.nom,
-    image: article.image || '',
+    image: article.image || "",
     prix: article.prix, // prix en euros (sera multiplié par 100 côté backend)
     quantite: article.quantite || 1,
   }));
