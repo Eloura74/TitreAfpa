@@ -139,7 +139,7 @@ export default function Galerie() {
     }));
 
     // 2️⃣ Récupération des photos stockées sur le serveur (MongoDB)
-    fetch("http://localhost:5001/api/galerie")
+    fetch(`${import.meta.env.VITE_API_URL}/api/galerie`)
       .then((res) => res.json()) // Conversion de la réponse en JSON
       .then((data: Photo[]) => {
         // Vérification des données reçues
@@ -153,7 +153,7 @@ export default function Galerie() {
           // Création d'un nouvel objet avec tous les champs, y compris tarifs
           return {
             ...photo,
-            src: `http://localhost:5001${photo.src}`, // On complète le chemin relatif
+            src: `${import.meta.env.VITE_API_URL}${photo.src}`, // On complète le chemin relatif
             // Assurons-nous que tarifs est bien préservé
             tarifs: Array.isArray(photo.tarifs) ? photo.tarifs : [],
           };

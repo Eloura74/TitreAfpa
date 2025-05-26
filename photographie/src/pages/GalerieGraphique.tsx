@@ -18,7 +18,7 @@ export default function GalerieGraphique() {
 
   useEffect(() => {
     // Utilisation de l'URL complète avec le domaine comme dans Galerie.tsx
-    fetch("http://localhost:5001/api/oeuvres-graphique")
+    fetch(`${import.meta.env.VITE_API_URL}/api/oeuvres-graphique`)
       .then((res) => {
         if (!res.ok) throw new Error("Erreur réseau ou API");
         return res.json();
@@ -30,7 +30,7 @@ export default function GalerieGraphique() {
           titre: oeuvre.titre,
           image:
             oeuvre.image && oeuvre.image.startsWith("/uploads/")
-              ? `http://localhost:5001${oeuvre.image}`
+              ? `${import.meta.env.VITE_API_URL}${oeuvre.image}`
               : `/uploads/placeholder.jpg`,
           prix: oeuvre.prix,
           description: oeuvre.description,

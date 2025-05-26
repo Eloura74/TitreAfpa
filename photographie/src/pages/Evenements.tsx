@@ -23,7 +23,9 @@ export default function Evenements() {
   useEffect(() => {
     const fetchEvenements = async () => {
       try {
-        const res = await axios.get("http://localhost:5001/api/evenements");
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/evenements`
+        );
         const data = res.data;
         // Normalisation des champs pour le front
         const events: Evenement[] = data.map((ev: any) => ({

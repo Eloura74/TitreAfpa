@@ -13,7 +13,8 @@ interface Panier {
 }
 
 // URL de l'API REST côté serveur
-const API_URL = "http://localhost:5001/api/paniers";
+// const API_URL = "http://localhost:5001/api/paniers";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/paniers`;
 
 /* -------------------------------------------------------------------------
    📦 Composant principal : gestion des paniers (CRUD complet)

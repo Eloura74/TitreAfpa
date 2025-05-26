@@ -25,7 +25,12 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 // Activation de CORS pour toutes les requêtes
-app.use(cors());
+app.use(
+  cors({
+    origin: "*", // pour tester, autorise tout le monde
+    credentials: true,
+  })
+);
 
 // // Middleware JSON
 // app.use(express.json({ limit: "10mb" }));

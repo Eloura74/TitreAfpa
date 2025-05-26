@@ -11,8 +11,8 @@ interface Evenement {
 }
 
 // URL de l'API pour interagir avec les événements
-const API_URL = "http://localhost:5001/api/evenements";
-
+// const API_URL = "http://localhost:5001/api/evenements";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/evenements`;
 export default function GestionEvenements() {
   // Liste des événements récupérés depuis l'API
   const [evenements, setEvenements] = useState<Evenement[]>([]);

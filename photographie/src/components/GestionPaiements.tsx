@@ -14,7 +14,8 @@ interface Paiement {
 }
 
 // URL de l'API REST pour accéder aux paiements
-const API_URL = "http://localhost:5001/api/paiements";
+// const API_URL = "http://localhost:5001/api/paiements";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/paiements`;
 
 export default function GestionPaiements() {
   /* -------------------------------------------------------------------------

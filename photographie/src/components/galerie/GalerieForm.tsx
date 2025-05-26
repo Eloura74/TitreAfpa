@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import galerieData from "../../config/galerie.json";
-const API_URL = "/api/galerie"; // ← pas besoin de localhost:5001 ici
+const API_URL = "/api/galerie"; //
 
 // --- TYPE PRINCIPAL DU FORMULAIRE ---
 interface FormType {
@@ -93,7 +93,9 @@ export default function GalerieForm() {
         setPhotos(dataPhotos);
 
         // Récupération des tarifs prédéfinis
-        const resTarifs = await fetch("http://localhost:5001/api/tarifs");
+        const resTarifs = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/tarifs`
+        );
         const dataTarifs = await resTarifs.json();
         console.log("Tarifs prédéfinis récupérés:", dataTarifs);
         setTarifsPredéfinis(dataTarifs.filter((t: TarifPredefini) => t.actif));
@@ -474,8 +476,8 @@ export default function GalerieForm() {
               form.src.startsWith("http")
                 ? form.src
                 : form.src.startsWith("/")
-                ? `http://localhost:5001${form.src}`
-                : `http://localhost:5001/uploads/${form.src}`
+                ? `${import.meta.env.VITE_API_URL}${form.src}`
+                : `${import.meta.env.VITE_API_URL}/uploads/${form.src}`
             }
             alt="Aperçu"
             className="w-64 h-auto mt-2 rounded border border-gray-600"
@@ -559,8 +561,8 @@ export default function GalerieForm() {
                     photo.src.startsWith("http")
                       ? photo.src
                       : photo.src.startsWith("/")
-                      ? `http://localhost:5001${photo.src}`
-                      : `http://localhost:5001/uploads/${photo.src}`
+                      ? `${import.meta.env.VITE_API_URL}${photo.src}`
+                      : `${import.meta.env.VITE_API_URL}/uploads/${photo.src}`
                   }
                   alt={photo.alt || ""}
                   className="w-16 h-16 object-cover rounded shadow"
