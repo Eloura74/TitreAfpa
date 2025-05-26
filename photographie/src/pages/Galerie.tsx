@@ -94,7 +94,6 @@ export default function Galerie() {
 
     // On modifie la photo pour lui ajouter ce tarif (pour les prochains appels)
     photo.tarifs = tarifParDefaut;
-    d;
     return tarifParDefaut;
   }
 
@@ -173,33 +172,33 @@ export default function Galerie() {
   // ==============================
   //  Fonction : Ajouter une photo au panier
   // ==============================
-  const ajouterAuPanier = (photo: Photo, tarifSelectionne?: Tarif) => {
-    try {
-      // Si un tarif est sélectionné (via la modale), on l'utilise pour le prix/support/format
-      const articlePanier = tarifSelectionne
-        ? {
-            id: String(photo._id || photo.id) + "-" + tarifSelectionne.id, // identifiant unique par photo+tarif
-            nom: `${photo.titre} - ${tarifSelectionne.nom} (${tarifSelectionne.format}, ${tarifSelectionne.support})`,
-            prix: tarifSelectionne.prix,
-            quantite: 1,
-            image: photo.src,
-          }
-        : {
-            id: String(photo._id || photo.id),
-            nom: photo.titre,
-            prix: photo.prix,
-            quantite: 1,
-            image: photo.src,
-          };
-      ajouterArticle(articlePanier);
-      setNotification(`${articlePanier.nom} ajouté au panier`);
-      setTimeout(() => setNotification(null), 3000);
-    } catch (e) {
-      console.error("Erreur lors de l'ajout au panier:", e);
-      setNotification("Erreur lors de l'ajout au panier");
-    }
-    setModalVisible(false);
-  };
+  // const ajouterAuPanier = (photo: Photo, tarifSelectionne?: Tarif) => {
+  //   try {
+  //     // Si un tarif est sélectionné (via la modale), on l'utilise pour le prix/support/format
+  //     const articlePanier = tarifSelectionne
+  //       ? {
+  //           id: String(photo._id || photo.id) + "-" + tarifSelectionne.id, // identifiant unique par photo+tarif
+  //           nom: `${photo.titre} - ${tarifSelectionne.nom} (${tarifSelectionne.format}, ${tarifSelectionne.support})`,
+  //           prix: tarifSelectionne.prix,
+  //           quantite: 1,
+  //           image: photo.src,
+  //         }
+  //       : {
+  //           id: String(photo._id || photo.id),
+  //           nom: photo.titre,
+  //           prix: photo.prix,
+  //           quantite: 1,
+  //           image: photo.src,
+  //         };
+  //     ajouterArticle(articlePanier);
+  //     setNotification(`${articlePanier.nom} ajouté au panier`);
+  //     setTimeout(() => setNotification(null), 3000);
+  //   } catch (e) {
+  //     console.error("Erreur lors de l'ajout au panier:", e);
+  //     setNotification("Erreur lors de l'ajout au panier");
+  //   }
+  //   setModalVisible(false);
+  // };
 
   // ==============================
   //  Handler : sélection d’un format dans la modale

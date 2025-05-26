@@ -193,7 +193,7 @@ const TirageEnLigne: React.FC = () => {
         <section className="max-w-3xl w-full mb-8">
           <h2 className="text-xl font-bold mb-4 text-yellow-300">Tarifs</h2>
           <div className="tarifs-accordion">
-            {tarifs.map((cat, idx) => (
+            {tarifs.map((cat) => (
               <details
                 key={cat.categorie}
                 className="tarif-category mb-2 bg-[#232336] rounded overflow-hidden"

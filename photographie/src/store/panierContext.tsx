@@ -3,7 +3,7 @@
 // ==============================
 
 // React : Importation des fonctions nécessaires pour créer un contexte et gérer l'état
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 
 // Importation du type TypeScript pour définir la structure d'un article dans le panier
 import { ArticlePanierType } from "../types/panier";

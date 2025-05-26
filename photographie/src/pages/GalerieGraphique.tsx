@@ -38,7 +38,7 @@ export default function GalerieGraphique() {
         setOeuvres(oeuvresFormatees);
         setLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setErreur(
           "Impossible de charger les œuvres graphiques. Vérifiez l’API ou la connexion serveur."
         );

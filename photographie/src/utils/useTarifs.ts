@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Tarif } from "../types/tarif";
+// import inutilisé supprimé : import { Tarif } from "../types/tarif";
 
 export function useTarifs() {
   return useQuery({

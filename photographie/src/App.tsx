@@ -10,7 +10,7 @@ import Galerie from "./pages/Galerie";
 import GalerieGraphique from "./pages/GalerieGraphique"; // Galerie graphique unique
 import Evenements from "./pages/Evenements";
 import GalerieForm from "./components/galerie/GalerieForm";
-import CalendarTest from "../test/calendarTest";
+// import CalendarTest from "../test/calendarTest";
 import Panier from "./pages/Panier";
 import Auth from "./pages/Auth";
 import { PanierProvider } from "./store/panierContext";
@@ -40,7 +40,7 @@ function App() {
             {/* Route pour la page "GalerieForm" */}
             <Route path="/galerie-form" element={<GalerieForm />} />
             {/* route test et debug */}
-            <Route path="/calendar-test" element={<CalendarTest />} />
+            {/* <Route path="/calendar-test" element={<CalendarTest />} /> */}
             {/* Route pour le panier */}
             <Route path="/panier" element={<Panier />} />
             {/* Route pour inscription/connexion */}
