@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import homeImages from "../config/images.json";
-import eclair from "/images/eclair2.png";
 import "../styles/home.css";
 import HomeIntro from "../components/HomeIntro";
 
@@ -125,8 +124,8 @@ export default function Home() {
       </div>
       {/* Séparateur éclair central */}
       <img
-        src={eclair}
-        alt="Séparation éclair"
+        src="/images/eclair2.png"
+        alt="Eclair"
         aria-hidden="true"
         className="absolute left-1/2 top-0 h-full w-auto z-30 pointer-events-none select-none lightning-separator hidden md:block"
         style={{
