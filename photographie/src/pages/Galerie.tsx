@@ -153,10 +153,12 @@ export default function Galerie() {
           // Création d'un nouvel objet avec tous les champs, y compris tarifs
           return {
             ...photo,
-            // Correction : ne concatène pas l’URL API si le src est déjà une URL Cloudinary ou un chemin absolu
-            src: photo.src.startsWith('http')
+            // Correction robuste : Cloudinary, local absolu ou nom de fichier
+            // Quentin, pense à vérifier si le chemin commence déjà par '/images/' ou 'http' pour éviter les erreurs
+            src:
+              photo.src && photo.src.startsWith("http")
                 ? photo.src
-                : photo.src.startsWith('/images/')
+                : photo.src && photo.src.startsWith("/images/")
                 ? photo.src
                 : `/images/${photo.src}`,
             // Assurons-nous que tarifs est bien préservé
@@ -291,18 +293,19 @@ export default function Galerie() {
               className="photo-card group relative bg-[#151520] rounded-sm overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-[#d6c48733]"
             >
               <div className="h-64 overflow-hidden">
-                  {/* Affichage intelligent : Cloudinary (URL complète) ou fichier local */}
-                  <img
-                    src={
-                      photo.src.startsWith('http')
-                        ? photo.src // URL Cloudinary
-                        : photo.src.startsWith('/images/')
-                        ? photo.src // Chemin déjà correct
-                        : `/images/${photo.src}` // Sinon, on préfixe
-                    }
-                    alt={photo.alt}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
+                {/* Affichage intelligent : Cloudinary, chemin absolu ou nom de fichier local */}
+                <img
+                  src={
+                    photo.src && photo.src.startsWith("http")
+                      ? photo.src
+                      : photo.src && photo.src.startsWith("/images/")
+                      ? photo.src
+                      : `/images/${photo.src}`
+                  }
+                  alt={photo.alt}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  // Astuce : vérifie la valeur de photo.src dans la console si tu as un carré vide
+                />
               </div>
               <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-xs px-3 py-1 rounded-sm">
                 {Array.isArray(photo.tarifs) && photo.tarifs.length > 0 ? (
