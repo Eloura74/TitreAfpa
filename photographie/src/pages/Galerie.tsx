@@ -153,7 +153,12 @@ export default function Galerie() {
           // Création d'un nouvel objet avec tous les champs, y compris tarifs
           return {
             ...photo,
-            src: `${import.meta.env.VITE_API_URL}${photo.src}`, // On complète le chemin relatif
+            // Correction : ne concatène pas l’URL API si le src est déjà une URL Cloudinary ou un chemin absolu
+            src: photo.src.startsWith('http')
+                ? photo.src
+                : photo.src.startsWith('/images/')
+                ? photo.src
+                : `/images/${photo.src}`,
             // Assurons-nous que tarifs est bien préservé
             tarifs: Array.isArray(photo.tarifs) ? photo.tarifs : [],
           };
