@@ -465,9 +465,15 @@ export default function GalerieForm() {
                 }
               );
               const data = await res.json();
-              // Ici, data.url est l’URL Cloudinary
-              setForm((prev) => ({ ...prev, src: data.url }));
+              // Sécurisation : vérifie que l'URL Cloudinary existe
+              if (data.url && typeof data.url === "string") {
+                setForm((prev) => ({ ...prev, src: data.url }));
+              } else {
+                setForm((prev) => ({ ...prev, src: "" }));
+                alert("L'upload a échoué, pas d'URL Cloudinary reçue.");
+              }
             } catch (err) {
+              setForm((prev) => ({ ...prev, src: "" }));
               alert("Erreur lors de l'envoi de l'image.");
               console.error(err);
             }
@@ -475,31 +481,10 @@ export default function GalerieForm() {
           className="input"
         />
 
-        {/* Prévisualisation de l'image après upload */}
+        {/* Prévisualisation unique de l'image après upload */}
         {form.src && (
           <img
-            src={
-              form.src.startsWith("http")
-                ? form.src
-                : form.src.startsWith("/")
-                ? `${import.meta.env.VITE_API_URL}${form.src}`
-                : `${import.meta.env.VITE_API_URL}/uploads/${form.src}`
-            }
-            alt="Aperçu"
-            className="w-64 h-auto mt-2 rounded border border-gray-600"
-          />
-        )}
-
-        {/* Prévisualisation de l'image après upload */}
-        {form.src && (
-          <img
-            src={
-              form.src.startsWith("http")
-                ? form.src
-                : form.src.startsWith("/")
-                ? `${import.meta.env.VITE_API_URL}${form.src}`
-                : `${import.meta.env.VITE_API_URL}/uploads/${form.src}`
-            }
+            src={form.src}
             alt="Aperçu"
             className="w-64 h-auto mt-2 rounded border border-gray-600"
           />
@@ -544,8 +529,8 @@ export default function GalerieForm() {
         {/* Bloc de validation détaillé et bouton Valider */}
         <button
           onClick={handleSubmit}
+          // Désactive le bouton seulement si un champ vraiment obligatoire est manquant
           disabled={
-            !form.src ||
             !form.src ||
             !form.titre ||
             !form.alt ||
