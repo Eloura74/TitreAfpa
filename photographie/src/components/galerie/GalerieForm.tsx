@@ -456,13 +456,17 @@ export default function GalerieForm() {
             formData.append("image", file);
 
             try {
-              const res = await fetch(`${API_URL}/upload`, {
-                method: "POST",
-                body: formData,
-              });
-
+              // Appel vers la nouvelle route d’upload Cloudinary
+              const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/upload-cloudinary`,
+                {
+                  method: "POST",
+                  body: formData,
+                }
+              );
               const data = await res.json();
-              setForm((prev) => ({ ...prev, src: data.imagePath }));
+              // Ici, data.url est l’URL Cloudinary
+              setForm((prev) => ({ ...prev, src: data.url }));
             } catch (err) {
               alert("Erreur lors de l'envoi de l'image.");
               console.error(err);
@@ -471,6 +475,22 @@ export default function GalerieForm() {
           className="input"
         />
 
+        {/* Prévisualisation de l'image après upload */}
+        {form.src && (
+          <img
+            src={
+              form.src.startsWith("http")
+                ? form.src
+                : form.src.startsWith("/")
+                ? `${import.meta.env.VITE_API_URL}${form.src}`
+                : `${import.meta.env.VITE_API_URL}/uploads/${form.src}`
+            }
+            alt="Aperçu"
+            className="w-64 h-auto mt-2 rounded border border-gray-600"
+          />
+        )}
+
+        {/* Prévisualisation de l'image après upload */}
         {form.src && (
           <img
             src={
@@ -521,6 +541,7 @@ export default function GalerieForm() {
           ))}
         </datalist>
 
+        {/* Bloc de validation détaillé et bouton Valider */}
         <button
           onClick={handleSubmit}
           disabled={
@@ -529,8 +550,8 @@ export default function GalerieForm() {
             !form.titre ||
             !form.alt ||
             !form.description ||
-            !form.categorie // ||
-            // form.prix <= 0
+            !form.categorie ||
+            tarifsSélectionnés.length === 0
           }
           className={`px-4 py-2 rounded font-bold transition w-full ${
             !form.src ||
@@ -538,78 +559,44 @@ export default function GalerieForm() {
             !form.titre ||
             !form.alt ||
             !form.description ||
-            !form.categorie // ||
-              ? // form.prix <= 0
-                "bg-gray-600 cursor-not-allowed"
+            !form.categorie ||
+            tarifsSélectionnés.length === 0
+              ? "bg-gray-600 cursor-not-allowed"
               : "bg-yellow-400 text-black hover:bg-yellow-500"
           }`}
         >
           {editId ? "Modifier" : "Valider"}
         </button>
-      </div>
-
-      {/* Liste avec miniatures */}
-      <div className="space-y-4">
-        {photos.map((photo) => (
-          <div
-            key={photo._id}
-            className="p-4 border border-gray-700 rounded flex justify-between items-center gap-4"
-          >
-            <div className="flex items-center gap-4">
-              {photo.src && (
-                <img
-                  src={
-                    photo.src.startsWith("http")
-                      ? photo.src
-                      : photo.src.startsWith("/")
-                      ? `${import.meta.env.VITE_API_URL}${photo.src}`
-                      : `${import.meta.env.VITE_API_URL}/uploads/${photo.src}`
-                  }
-                  alt={photo.alt || ""}
-                  className="w-16 h-16 object-cover rounded shadow"
-                />
-              )}
-              <div>
-                <strong>{photo.titre}</strong> — <em>{photo.categorie}</em>
-                {/* Affichage des tarifs dynamiques */}
-                {Array.isArray(photo.tarifs) && photo.tarifs.length > 0 ? (
-                  <ul className="mt-1 text-sm">
-                    {photo.tarifs.map((tarif) => (
-                      <li
-                        key={
-                          tarif.id ||
-                          `${tarif.format}-${tarif.support}-${tarif.prix}`
-                        }
-                        className="text-yellow-200"
-                      >
-                        <span className="font-bold">{tarif.format}</span> —{" "}
-                        {tarif.support} : {tarif.prix}€
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="text-gray-400 text-xs">
-                    Aucun format disponible.
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="space-x-2">
-              <button
-                onClick={() => handleEdit(photo)}
-                className="text-blue-300 hover:text-blue-500"
-              >
-                Modifier
-              </button>
-              <button
-                onClick={() => handleDelete(photo._id!)}
-                className="text-red-400 hover:text-red-600"
-              >
-                Supprimer
-              </button>
-            </div>
+        {tarifsSélectionnés.length === 0 && (
+          <div className="text-red-400 text-xs mt-1">
+            Sélectionne au moins un tarif pour valider la photo.
           </div>
-        ))}
+        )}
+        {(!form.src || !form.src.startsWith("/uploads/")) && (
+          <div className="text-red-400 text-xs mt-1">
+            Ajoute une image (upload obligatoire).
+          </div>
+        )}
+        {!form.titre && (
+          <div className="text-red-400 text-xs mt-1">Le titre est requis.</div>
+        )}
+        {!form.alt && (
+          <div className="text-red-400 text-xs mt-1">
+            Le texte alternatif est requis.
+          </div>
+        )}
+        {!form.description && (
+          <div className="text-red-400 text-xs mt-1">
+            La description est requise.
+          </div>
+        )}
+        {!form.categorie && (
+          <div className="text-red-400 text-xs mt-1">
+            La catégorie est requise.
+          </div>
+        )}
+
+        {/* Liste avec miniatures */}
       </div>
     </div>
   );

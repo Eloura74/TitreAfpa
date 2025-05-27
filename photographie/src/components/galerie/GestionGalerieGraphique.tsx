@@ -63,6 +63,16 @@ export default function GestionGalerieGraphique() {
       setLoading(false);
       return;
     }
+    if (form.titre.trim() === "") {
+      setMessage("Le titre est requis.");
+      setLoading(false);
+      return;
+    }
+    if (form.prix <= 0) {
+      setMessage("Le prix doit être supérieur à 0.");
+      setLoading(false);
+      return;
+    }
     if (imageFile) {
       const uploaded = await handleUploadImage(imageFile);
       if (!uploaded) {
@@ -171,13 +181,20 @@ export default function GestionGalerieGraphique() {
           className="input"
           required
         />
+        {form.prix <= 0 && <div className="text-red-400 text-xs">Le prix doit être supérieur à 0.</div>}
         <button
           type="submit"
           className="bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2 px-4 rounded w-full transition"
-          disabled={loading || (!editId && !imageFile)}
+          disabled={
+            loading ||
+            form.titre.trim() === "" ||
+            (!editId && !imageFile) ||
+            form.prix <= 0
+          }
         >
           {editId ? "Modifier l’œuvre" : "Ajouter l’œuvre"}
         </button>
+        {!editId && !imageFile && <div className="text-red-400 text-xs">Sélectionne une image à importer.</div>}
         {message && <div className="text-center text-sm mt-2 text-yellow-400">{message}</div>}
       </form>
       {/* Liste des œuvres graphiques */}

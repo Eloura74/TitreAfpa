@@ -11,11 +11,15 @@ const paiementRoutes = require("./routes/paiement");
 const panierRoutes = require("./routes/panier");
 const tarifsRoutes = require("./routes/tarifs");
 const path = require("path");
+const uploadCloudinaryRoutes = require("./routes/upload");
 
 // Pas besoin de __filename ni __dirname en CommonJS
 
 // Initialisation de l'app Express
 const app = express();
+
+// cloudinary route
+app.use("/api/upload-cloudinary", uploadCloudinaryRoutes);
 
 // Middleware pour exposer les fichiers dans /uploads
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
