@@ -13,11 +13,29 @@ const tarifsRoutes = require("./routes/tarifs");
 const path = require("path");
 const uploadCloudinaryRoutes = require("./routes/upload");
 
-// Pas besoin de __filename ni __dirname en CommonJS
-
 // Initialisation de l'app Express
 const app = express();
 
+// Activation de CORS AVANT toute route :
+// En production, on autorise uniquement le frontend Vercel pour la sécurité
+app.use(
+  cors({
+    origin: ["https://titre-afpa.vercel.app"],
+    credentials: true,
+  })
+);
+app.options("*", cors());
+
+// Middleware de log global pour debug
+app.use((req, res, next) => {
+  console.log(`[${req.method}] ${req.path}`);
+  next();
+});
+
+// Route GET de test CORS
+app.get("/api/cors-test", (req, res) => {
+  res.json({ ok: true });
+});
 // cloudinary route
 app.use("/api/upload-cloudinary", uploadCloudinaryRoutes);
 
@@ -27,14 +45,6 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
-
-// Activation de CORS pour toutes les requêtes
-app.use(
-  cors({
-    origin: "*", // pour tester, autorise tout le monde
-    credentials: true,
-  })
-);
 
 // // Middleware JSON
 // app.use(express.json({ limit: "10mb" }));

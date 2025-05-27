@@ -123,9 +123,9 @@ export default function GalerieForm() {
   // Soumission du formulaire : ajout ou modification d'une photo
   const handleSubmit = async () => {
     // Vérification des champs obligatoires
+    // Correction : on accepte désormais toute URL Cloudinary ou chemin d'image valide
     if (
       !form.src ||
-      !form.src.startsWith("/uploads/") ||
       !form.titre ||
       !form.alt ||
       !form.description ||
@@ -546,7 +546,7 @@ export default function GalerieForm() {
           onClick={handleSubmit}
           disabled={
             !form.src ||
-            !form.src.startsWith("/uploads/") ||
+            !form.src ||
             !form.titre ||
             !form.alt ||
             !form.description ||
