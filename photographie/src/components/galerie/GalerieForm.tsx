@@ -526,7 +526,7 @@ export default function GalerieForm() {
           ))}
         </datalist>
 
-        {/* Bloc de validation détaillé et bouton Valider */}
+        {/* Bloc de validation détaillé et bouton Valider  */}
         <button
           onClick={handleSubmit}
           disabled={
