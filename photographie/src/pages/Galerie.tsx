@@ -286,11 +286,12 @@ export default function Galerie() {
               className="photo-card group relative bg-[#151520] rounded-sm overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-[#d6c48733]"
             >
               <div className="h-64 overflow-hidden">
-                <img
-                  src={photo.src}
-                  alt={photo.alt}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
+                  {/* Affichage intelligent : Cloudinary (URL complète) ou fichier local */}
+                  <img
+                    src={photo.src.startsWith('http') ? photo.src : `/images/${photo.src}`}
+                    alt={photo.alt}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
               </div>
               <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-xs px-3 py-1 rounded-sm">
                 {Array.isArray(photo.tarifs) && photo.tarifs.length > 0 ? (
