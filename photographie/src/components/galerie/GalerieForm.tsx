@@ -529,7 +529,6 @@ export default function GalerieForm() {
         {/* Bloc de validation détaillé et bouton Valider */}
         <button
           onClick={handleSubmit}
-          // Désactive le bouton seulement si un champ vraiment obligatoire est manquant
           disabled={
             !form.src ||
             !form.titre ||
@@ -540,7 +539,6 @@ export default function GalerieForm() {
           }
           className={`px-4 py-2 rounded font-bold transition w-full ${
             !form.src ||
-            !form.src.startsWith("/uploads/") ||
             !form.titre ||
             !form.alt ||
             !form.description ||
@@ -557,7 +555,7 @@ export default function GalerieForm() {
             Sélectionne au moins un tarif pour valider la photo.
           </div>
         )}
-        {(!form.src || !form.src.startsWith("/uploads/")) && (
+        {!form.src && (
           <div className="text-red-400 text-xs mt-1">
             Ajoute une image (upload obligatoire).
           </div>
