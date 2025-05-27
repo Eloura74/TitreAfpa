@@ -288,7 +288,13 @@ export default function Galerie() {
               <div className="h-64 overflow-hidden">
                   {/* Affichage intelligent : Cloudinary (URL complète) ou fichier local */}
                   <img
-                    src={photo.src.startsWith('http') ? photo.src : `/images/${photo.src}`}
+                    src={
+                      photo.src.startsWith('http')
+                        ? photo.src // URL Cloudinary
+                        : photo.src.startsWith('/images/')
+                        ? photo.src // Chemin déjà correct
+                        : `/images/${photo.src}` // Sinon, on préfixe
+                    }
                     alt={photo.alt}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
