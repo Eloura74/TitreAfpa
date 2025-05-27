@@ -293,18 +293,22 @@ export default function Galerie() {
               className="photo-card group relative bg-[#151520] rounded-sm overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-[#d6c48733]"
             >
               <div className="h-64 overflow-hidden">
-                {/* Affichage intelligent : Cloudinary, chemin absolu ou nom de fichier local */}
+                {/* Affichage intelligent + fallback placeholder si image absente ou cassée */}
                 <img
                   src={
-                    photo.src && photo.src.startsWith("http")
+                    photo.src && (photo.src.startsWith("http") || photo.src.startsWith("/images/"))
                       ? photo.src
-                      : photo.src && photo.src.startsWith("/images/")
-                      ? photo.src
-                      : `/images/${photo.src}`
+                      : photo.src
+                      ? `/images/${photo.src}`
+                      : "/placeholder.jpg"
                   }
-                  alt={photo.alt}
+                  alt={photo.alt || "Image non disponible"}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   // Astuce : vérifie la valeur de photo.src dans la console si tu as un carré vide
+                  onError={e => {
+                    e.currentTarget.onerror = null; // Empêche la boucle infinie
+                    e.currentTarget.src = "/placeholder.jpg";
+                  }}
                 />
               </div>
               <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-xs px-3 py-1 rounded-sm">
