@@ -8,8 +8,8 @@ import React, { useState } from "react";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import { register, login } from "../services/authService";
-import { useAuthStore } from '../store/authStore';
-import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from "../store/authStore";
+import { useNavigate } from "react-router-dom";
 
 // Fonction principale du composant Auth
 const Auth: React.FC = () => {
@@ -19,7 +19,7 @@ const Auth: React.FC = () => {
   const [message, setMessage] = useState(""); // État pour afficher les messages
   const [loading, setLoading] = useState(false); // État pour le chargement
   // Récupération des setters Zustand
-  const { setEmail, choix } = useAuthStore();
+  const { setEmail: setEmailAuth, choix } = useAuthStore();
   const navigate = useNavigate();
 
   // Gestion de la soumission du formulaire
@@ -45,10 +45,10 @@ const Auth: React.FC = () => {
           setMessage("Connexion réussie !");
           // Redirection selon le choix utilisateur (photographie ou photo-graphiste)
           setTimeout(() => {
-            if (choix === 'photo-graphiste') {
-              navigate('/graphisme');
+            if (choix === "photo-graphiste") {
+              navigate("/graphisme");
             } else {
-              navigate('/photographie');
+              navigate("/photographie");
             }
           }, 800);
         }
@@ -77,7 +77,7 @@ const Auth: React.FC = () => {
             type="email"
             placeholder="Email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             className="input input-bordered"
             required
             autoComplete="email"
@@ -88,26 +88,30 @@ const Auth: React.FC = () => {
             type="password"
             placeholder="Mot de passe"
             value={motdepasse}
-            onChange={e => setMotdepasse(e.target.value)}
+            onChange={(e) => setMotdepasse(e.target.value)}
             className="input input-bordered"
             required
             autoComplete={isRegister ? "new-password" : "current-password"}
           />
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={loading}
-          >
-            {loading ? 'Chargement...' : (isRegister ? "S'inscrire" : "Se connecter")}
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            {loading
+              ? "Chargement..."
+              : isRegister
+              ? "S'inscrire"
+              : "Se connecter"}
           </button>
           <button
             type="button"
             className="btn btn-secondary"
             onClick={() => setIsRegister(!isRegister)}
           >
-            {isRegister ? "Déjà inscrit ? Se connecter" : "Pas encore de compte ? S'inscrire"}
+            {isRegister
+              ? "Déjà inscrit ? Se connecter"
+              : "Pas encore de compte ? S'inscrire"}
           </button>
-          {message && <div className="text-center text-red-400 mt-2">{message}</div>}
+          {message && (
+            <div className="text-center text-red-400 mt-2">{message}</div>
+          )}
         </form>
       </div>
       <Footer />
