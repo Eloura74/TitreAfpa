@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from "../store/authStore";
 import homeImages from "../config/images.json";
 import "../styles/home.css";
 import HomeIntro from "../components/HomeIntro";
@@ -18,9 +18,9 @@ export default function Home() {
   }, []);
 
   // Handler pour choisir l'univers et mémoriser le choix
-  const handleChoix = (choix: 'photographie' | 'photo-graphiste') => {
+  const handleChoix = (choix: "photographie" | "photo-graphiste") => {
     setChoix(choix);
-    navigate('/connexion');
+    navigate("/connexion");
   };
 
   return (
@@ -48,7 +48,7 @@ export default function Home() {
         {/* Bloc gauche cliquable : Photographie */}
         <button
           type="button"
-          onClick={() => handleChoix('photographie')}
+          onClick={() => handleChoix("photographie")}
           className="flex-1 flex flex-col items-center justify-center z-10 group transition-all duration-500 bg-transparent border-none outline-none cursor-pointer"
           style={{ position: "relative" }}
         >
@@ -73,7 +73,7 @@ export default function Home() {
         {/* Bloc droit cliquable */}
         <button
           type="button"
-          onClick={() => handleChoix('photo-graphiste')}
+          onClick={() => handleChoix("photo-graphiste")}
           className="flex-1 flex flex-col items-center justify-center z-10 group transition-all duration-500 bg-transparent border-none outline-none cursor-pointer"
           style={{ position: "relative" }}
         >
@@ -94,7 +94,7 @@ export default function Home() {
             <span>-</span>
             <span>A Propos</span>
           </div>
-        </Link>
+        </button>
         {/* Image de fond */}
         <img
           src={homeImages.hero}
