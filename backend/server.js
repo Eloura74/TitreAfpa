@@ -39,7 +39,7 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "titre-afpa-git-auth-faberquentingmailcoms-projects.vercel.app",
+      "https://titre-afpa-git-auth-faberquentingmailcoms-projects.vercel.app",
       "http://localhost:5173", // ton front local (pour dev)
     ],
     credentials: true, // Permet l’envoi de cookies si besoin
