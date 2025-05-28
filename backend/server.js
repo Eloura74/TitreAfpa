@@ -38,7 +38,10 @@ const app = express();
 // Autorise UNIQUEMENT le domaine frontend Vercel à faire des requêtes
 app.use(
   cors({
-    origin: ["https://titre-afpa.vercel.app"],
+    origin: [
+      "https://titre-afpa-8gat6qmfx-faberquentingmailcoms-projects.vercel.app/galerie",
+      "http://localhost:5173", // ton front local (pour dev)
+    ],
     credentials: true, // Permet l’envoi de cookies si besoin
   })
 );
