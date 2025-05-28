@@ -19,7 +19,8 @@ const Auth: React.FC = () => {
   const [message, setMessage] = useState(""); // État pour afficher les messages
   const [loading, setLoading] = useState(false); // État pour le chargement
   // Récupération des setters Zustand
-  const { setEmail: setEmailAuth, choix } = useAuthStore();
+  // Récupère le setter Zustand avec alias pour éviter tout conflit
+const { setEmail: setEmailAuth, choix } = useAuthStore();
   const navigate = useNavigate();
 
   // Gestion de la soumission du formulaire
@@ -41,7 +42,7 @@ const Auth: React.FC = () => {
           localStorage.setItem("token", res.token); // Stockage du token
           // Mise à jour du contexte utilisateur global
           // On sauvegarde l'email dans le store global Zustand
-          setEmail(email);
+          setEmailAuth(email); // Utilise l'alias pour Zustand
           setMessage("Connexion réussie !");
           // Redirection selon le choix utilisateur (photographie ou photo-graphiste)
           setTimeout(() => {
