@@ -1,7 +1,7 @@
 // Import de base
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useUser } from '../../context/UserContext';
+import { useAuthStore } from "../../store/authStore";
 // Import des styles
 import "../../styles/navbar.css";
 
@@ -9,10 +9,12 @@ import "../../styles/navbar.css";
 export default function Navbar() {
   const location = useLocation();
   // On détecte si on est dans l'univers graphisme ou sur la galerie graphique unique
-  const isGraphisme = location.pathname.startsWith("/graphisme") || location.pathname === "/galerie-graphique";
+  const isGraphisme =
+    location.pathname.startsWith("/graphisme") ||
+    location.pathname === "/galerie-graphique";
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useUser();
+  const { email, isAdmin, logout } = useAuthStore();
 
   return (
     <nav className="navbar-container">
@@ -66,12 +68,26 @@ export default function Navbar() {
             </Link>
           </li>
           <li className="nav-item">
-            {/* Correction : redirige vers /connexion pour éviter l'erreur 404, la page Auth gère les deux modes */}
-<Link to="/connexion" className="nav-link">
-  Inscription/Connexion
-</Link>
+            {email ? (
+              <div className="flex items-center gap-2">
+                <span className="nav-link font-semibold text-yellow-400">
+                  {email}
+                </span>
+                <button
+                  onClick={logout}
+                  className="nav-link text-xs px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                  aria-label="Se déconnecter"
+                >
+                  Déconnexion
+                </button>
+              </div>
+            ) : (
+              <Link to="/connexion" className="nav-link">
+                Inscription/Connexion
+              </Link>
+            )}
           </li>
-          {user.isAuthenticated && user.isAdmin && (
+          {isAdmin && (
             <li className="nav-item">
               <Link to="/admin/gestion-galerie" className="nav-link">
                 Gestion Galerie

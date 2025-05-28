@@ -20,7 +20,7 @@ const Auth: React.FC = () => {
   const [loading, setLoading] = useState(false); // État pour le chargement
   // Récupération des setters Zustand
   // Récupère le setter Zustand avec alias pour éviter tout conflit
-const { setEmail: setEmailAuth, choix } = useAuthStore();
+const { setEmail: setEmailAuth, setIsAdmin: setIsAdminAuth, choix } = useAuthStore();
   const navigate = useNavigate();
 
   // Gestion de la soumission du formulaire
@@ -43,6 +43,8 @@ const { setEmail: setEmailAuth, choix } = useAuthStore();
           // Mise à jour du contexte utilisateur global
           // On sauvegarde l'email dans le store global Zustand
           setEmailAuth(email); // Utilise l'alias pour Zustand
+          // On récupère le rôle admin renvoyé par le backend (booléen)
+          setIsAdminAuth(!!res.isAdmin); // Sécurise le typage
           setMessage("Connexion réussie !");
           // Redirection selon le choix utilisateur (photographie ou photo-graphiste)
           setTimeout(() => {
