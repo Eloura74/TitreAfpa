@@ -158,6 +158,8 @@ export default function Galerie() {
             src:
               photo.src && photo.src.startsWith("http")
                 ? photo.src
+                : photo.src && photo.src.startsWith("/uploads/")
+                ? `${import.meta.env.VITE_API_URL}${photo.src}`
                 : photo.src && photo.src.startsWith("/images/")
                 ? photo.src
                 : `/images/${photo.src}`,

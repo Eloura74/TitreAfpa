@@ -1,15 +1,15 @@
 // ============================================================================
 // 📦 IMPORTATIONS DES MODULES ET COMPOSANTS
 // ============================================================================
-import { useState, useEffect } from "react";            // Hooks React : état et effet de cycle de vie
-import axios from "axios";                              // Librairie HTTP pour appels API
-import Navbar from "../components/layout/navbar";       // Barre de navigation
-import Footer from "../components/layout/Footer";       // Pied de page
+import { useState, useEffect } from "react"; // Hooks React : état et effet de cycle de vie
+import axios from "axios"; // Librairie HTTP pour appels API
+import Navbar from "../components/layout/navbar"; // Barre de navigation
+import Footer from "../components/layout/Footer"; // Pied de page
 
 // Styles CSS importés
-import "react-calendar/dist/Calendar.css";              // Style de calendrier (non utilisé ici)
-import "../styles/globals.css";                         // Styles globaux de l'app
-import "../styles/evenements.css";                      // Styles spécifiques à cette page
+import "react-calendar/dist/Calendar.css"; // Style de calendrier (non utilisé ici)
+import "../styles/globals.css"; // Styles globaux de l'app
+import "../styles/evenements.css"; // Styles spécifiques à cette page
 
 // Icônes importées depuis la librairie Lucide
 import { CalendarDays, MapPin, Target } from "lucide-react";
@@ -24,7 +24,7 @@ export default function Evenements() {
   // ----------------------------------------------------------------------------
   // 🧠 ÉTATS LOCAUX
   // ----------------------------------------------------------------------------
-  const [evenements, setEvenements] = useState<Evenement[]>([]);  // Liste des événements récupérés
+  const [evenements, setEvenements] = useState<Evenement[]>([]); // Liste des événements récupérés
   const [filter, setFilter] = useState<"à venir" | "passé" | "tous">("tous"); // Filtre actif
 
   // ----------------------------------------------------------------------------
@@ -33,7 +33,9 @@ export default function Evenements() {
   useEffect(() => {
     const fetchEvenements = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/evenements`);
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/evenements`
+        );
         const data = res.data;
 
         // Normalisation : transformation des données brutes pour uniformiser les clés
@@ -122,16 +124,30 @@ export default function Evenements() {
                   className="bg-black/90 rounded-xl shadow-lg overflow-hidden flex flex-col"
                 >
                   {/* 🖼️ Image d’affiche (avec fallback si absente) */}
-                  <img
-                    src={event.urlAffiche || ""}
-                    alt={event.titre || "Affiche événement"}
-                    className="w-full h-40 sm:h-56 object-cover object-center bg-gray-900"
-                    loading="lazy"
-                    onError={(e) => {
-                      e.currentTarget.src = "";
-                      e.currentTarget.classList.add("bg-gray-800");
-                    }}
-                  />
+                  {(() => {
+                    const urlAffiche =
+                      event.urlAffiche && event.urlAffiche.startsWith("http")
+                        ? event.urlAffiche
+                        : event.urlAffiche &&
+                          event.urlAffiche.startsWith("/uploads/")
+                        ? `${import.meta.env.VITE_API_URL}${event.urlAffiche}`
+                        : event.urlAffiche &&
+                          event.urlAffiche.startsWith("/images/")
+                        ? event.urlAffiche
+                        : `/images/${event.urlAffiche || "placeholder.jpg"}`;
+                    return (
+                      <img
+                        src={urlAffiche}
+                        alt={event.titre || "Affiche événement"}
+                        className="w-full h-40 sm:h-56 object-cover object-center bg-gray-900"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.src = "";
+                          e.currentTarget.classList.add("bg-gray-800");
+                        }}
+                      />
+                    );
+                  })()}
 
                   {/* 📋 Détails de l’événement (titre, description, date, lieu, thème) */}
                   <div className="p-3 flex flex-col gap-2 flex-1">

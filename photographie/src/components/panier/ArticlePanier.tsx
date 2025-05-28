@@ -18,17 +18,27 @@ const ArticlePanier: React.FC<Props> = ({ article }) => {
       {/* === Partie gauche : image + infos article === */}
       <div className="flex items-center gap-4">
         {/* Affiche l’image de l’article si disponible */}
-        {article.image && (
-          <div className="group relative">
-            <img
-              src={article.image} // Chemin de l’image
-              alt={article.nom} // Texte alternatif pour accessibilité
-              className="w-20 h-20 object-cover rounded border border-[#ffe992] 
-                         transition-transform duration-300 group-hover:scale-150 z-10"
-              style={{ cursor: "pointer" }} // Curseur type "main" pour indiquer qu'on peut zoomer
-            />
-          </div>
-        )}
+        {article.image && (() => {
+            const urlImage =
+              article.image && article.image.startsWith("http")
+                ? article.image
+                : article.image && article.image.startsWith("/uploads/")
+                ? `${import.meta.env.VITE_API_URL}${article.image}`
+                : article.image && article.image.startsWith("/images/")
+                ? article.image
+                : `/images/${article.image}`;
+            return (
+              <div className="group relative">
+                <img
+                  src={urlImage} // Chemin d’image corrigé
+                  alt={article.nom} // Texte alternatif pour accessibilité
+                  className="w-20 h-20 object-cover rounded border border-[#ffe992] 
+                             transition-transform duration-300 group-hover:scale-150 z-10"
+                  style={{ cursor: "pointer" }}
+                />
+              </div>
+            );
+          })()}
 
         {/* Informations textuelles de l’article */}
         <div>
