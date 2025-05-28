@@ -66,9 +66,10 @@ export default function Navbar() {
             </Link>
           </li>
           <li className="nav-item">
-            <Link to="/inscription" className="nav-link">
-              Inscription/Connexion
-            </Link>
+            {/* Correction : redirige vers /connexion pour éviter l'erreur 404, la page Auth gère les deux modes */}
+<Link to="/connexion" className="nav-link">
+  Inscription/Connexion
+</Link>
           </li>
           {user.isAuthenticated && user.isAdmin && (
             <li className="nav-item">
