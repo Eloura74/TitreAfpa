@@ -8,7 +8,7 @@ import React, { useState } from "react";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import { register, login } from "../services/authService";
-import { useUser } from '../context/UserContext';
+import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
 
 // Fonction principale du composant Auth
@@ -18,7 +18,8 @@ const Auth: React.FC = () => {
   const [motdepasse, setMotdepasse] = useState(""); // État pour le mot de passe
   const [message, setMessage] = useState(""); // État pour afficher les messages
   const [loading, setLoading] = useState(false); // État pour le chargement
-  const { setUser } = useUser();
+  // Récupération des setters Zustand
+  const { setEmail, choix } = useAuthStore();
   const navigate = useNavigate();
 
   // Gestion de la soumission du formulaire
@@ -39,14 +40,16 @@ const Auth: React.FC = () => {
         else {
           localStorage.setItem("token", res.token); // Stockage du token
           // Mise à jour du contexte utilisateur global
-          setUser({
-            isAuthenticated: true,
-            isAdmin: res.role === 'admin',
-            nom: res.nom || email
-          });
-          setMessage("Connexion réussie !"); // Message de succès
+          // On sauvegarde l'email dans le store global Zustand
+          setEmail(email);
+          setMessage("Connexion réussie !");
+          // Redirection selon le choix utilisateur (photographie ou photo-graphiste)
           setTimeout(() => {
-            navigate('/');
+            if (choix === 'photo-graphiste') {
+              navigate('/graphisme');
+            } else {
+              navigate('/photographie');
+            }
           }, 800);
         }
       }

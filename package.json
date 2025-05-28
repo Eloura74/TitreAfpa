@@ -5,6 +5,7 @@
     "lucide-react": "^0.487.0",
     "mongoose": "^8.14.0",
     "multer": "^1.4.5-lts.2",
-    "react-calendar": "^5.1.0"
+    "react-calendar": "^5.1.0",
+    "zustand": "^5.0.5"
   }
 }

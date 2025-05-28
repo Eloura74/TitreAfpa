@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthStore } from '../store/authStore';
 import homeImages from "../config/images.json";
 import "../styles/home.css";
 import HomeIntro from "../components/HomeIntro";
@@ -9,10 +10,18 @@ import HomeIntro from "../components/HomeIntro";
  */
 export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
+  const navigate = useNavigate();
+  const { setChoix } = useAuthStore();
 
   useEffect(() => {
     document.title = "Photographe Professionnel | Accueil";
   }, []);
+
+  // Handler pour choisir l'univers et mémoriser le choix
+  const handleChoix = (choix: 'photographie' | 'photo-graphiste') => {
+    setChoix(choix);
+    navigate('/connexion');
+  };
 
   return (
     <div className="home-page">
@@ -36,9 +45,11 @@ export default function Home() {
         style={{ minHeight: "80vh" }}
       >
         {/* Bloc gauche cliquable */}
-        <Link
-          to="/photographie"
-          className="flex-1 flex flex-col items-center justify-center z-10 group transition-all duration-500"
+        {/* Bloc gauche cliquable : Photographie */}
+        <button
+          type="button"
+          onClick={() => handleChoix('photographie')}
+          className="flex-1 flex flex-col items-center justify-center z-10 group transition-all duration-500 bg-transparent border-none outline-none cursor-pointer"
           style={{ position: "relative" }}
         >
           <h1
@@ -57,12 +68,13 @@ export default function Home() {
             <span>-</span>
             <span>Galerie Photo</span>
           </div>
-        </Link>
+        </button>
 
         {/* Bloc droit cliquable */}
-        <Link
-          to="/graphisme"
-          className="flex-1 flex flex-col items-center justify-center z-10 group transition-all duration-500"
+        <button
+          type="button"
+          onClick={() => handleChoix('photo-graphiste')}
+          className="flex-1 flex flex-col items-center justify-center z-10 group transition-all duration-500 bg-transparent border-none outline-none cursor-pointer"
           style={{ position: "relative" }}
         >
           <h1
