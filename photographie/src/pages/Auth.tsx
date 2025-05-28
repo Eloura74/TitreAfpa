@@ -59,7 +59,9 @@ const Auth: React.FC = () => {
 
           // ✅ Mise à jour de l'état global (Zustand)
           setEmailAuth(email);                     // Enregistre l'email
-          setIsAdminAuth(!!res.isAdmin);           // Enregistre si admin ou non (conversion sécurisée)
+          // Correction : accepte aussi le champ 'role' (string) du backend
+          const isAdmin = res.isAdmin !== undefined ? !!res.isAdmin : res.role === "admin";
+          setIsAdminAuth(isAdmin);                 // Enregistre si admin ou non (conversion sécurisée)
 
           setMessage("Connexion réussie !");
 
