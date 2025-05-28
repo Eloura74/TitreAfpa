@@ -9,7 +9,7 @@ export interface AuthState {
   email: string | null; // Email de l'utilisateur connecté
   isAdmin: boolean; // Rôle administrateur
   choix: 'photographie' | 'photo-graphiste' | null; // Choix initial
-  setEmail: (email: string) => void;
+  setEmail: (email: string | null) => void;
   setIsAdmin: (isAdmin: boolean) => void; // Setter admin
   setChoix: (choix: 'photographie' | 'photo-graphiste') => void;
   logout: () => void;
@@ -35,3 +35,21 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ email: null, isAdmin: false, choix: null });
   },
 }));
+
+// Hook utilitaire pour forcer la réactivité de Zustand avec localStorage
+import { useEffect } from 'react';
+export function useAuthSync() {
+  const setEmail = useAuthStore((s) => s.setEmail);
+  const setIsAdmin = useAuthStore((s) => s.setIsAdmin);
+  useEffect(() => {
+    const sync = () => {
+      const email = localStorage.getItem('email');
+      const isAdmin = localStorage.getItem('isAdmin') === 'true';
+      setEmail(email || null);
+      setIsAdmin(isAdmin);
+    };
+    window.addEventListener('storage', sync);
+    return () => window.removeEventListener('storage', sync);
+  }, [setEmail, setIsAdmin]);
+}
+

@@ -1,12 +1,14 @@
 // Import de base
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuthStore } from "../../store/authStore";
+import { useAuthStore, useAuthSync } from "../../store/authStore";
 // Import des styles
 import "../../styles/navbar.css";
 
 // Navbar component
 export default function Navbar() {
+  useAuthSync(); // Synchronise l'état auth avec le localStorage à chaque render
+
   const location = useLocation();
   // On détecte si on est dans l'univers graphisme ou sur la galerie graphique unique
   const isGraphisme =
