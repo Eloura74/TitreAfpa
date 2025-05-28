@@ -67,26 +67,29 @@ export default function Navbar() {
               Panier
             </Link>
           </li>
+          {!email && (
           <li className="nav-item">
-            {email ? (
-              <div className="flex items-center gap-2">
-                <span className="nav-link font-semibold text-yellow-400">
-                  {email}
-                </span>
-                <button
-                  onClick={logout}
-                  className="nav-link text-xs px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                  aria-label="Se déconnecter"
-                >
-                  Déconnexion
-                </button>
-              </div>
-            ) : (
-              <Link to="/connexion" className="nav-link">
-                Inscription/Connexion
-              </Link>
-            )}
+            <Link to="/connexion" className="nav-link">
+              Inscription/Connexion
+            </Link>
           </li>
+        )}
+        {email && (
+          <li className="nav-item">
+            <div className="flex items-center gap-2">
+              <span className="nav-link font-semibold text-yellow-400">
+                {email}
+              </span>
+              <button
+                onClick={logout}
+                className="nav-link text-xs px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                aria-label="Se déconnecter"
+              >
+                Déconnexion
+              </button>
+            </div>
+          </li>
+        )}
           {isAdmin && (
             <li className="nav-item">
               <Link to="/admin/gestion-galerie" className="nav-link">
