@@ -1,70 +1,86 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import Navbar from "../components/layout/navbar";
-import Footer from "../components/layout/Footer";
-import "react-calendar/dist/Calendar.css";
-import "../styles/globals.css";
-import "../styles/evenements.css";
+// ============================================================================
+// 📦 IMPORTATIONS DES MODULES ET COMPOSANTS
+// ============================================================================
+import { useState, useEffect } from "react";            // Hooks React : état et effet de cycle de vie
+import axios from "axios";                              // Librairie HTTP pour appels API
+import Navbar from "../components/layout/navbar";       // Barre de navigation
+import Footer from "../components/layout/Footer";       // Pied de page
+
+// Styles CSS importés
+import "react-calendar/dist/Calendar.css";              // Style de calendrier (non utilisé ici)
+import "../styles/globals.css";                         // Styles globaux de l'app
+import "../styles/evenements.css";                      // Styles spécifiques à cette page
+
+// Icônes importées depuis la librairie Lucide
 import { CalendarDays, MapPin, Target } from "lucide-react";
+
+// Type TypeScript pour sécuriser les objets événements
 import type { Evenement } from "../types/evenement";
 
-// ------------------------------------------------------------
-// Composant principal de la page des événements
-// ------------------------------------------------------------
+// ============================================================================
+// 📄 COMPOSANT PRINCIPAL DE LA PAGE ÉVÉNEMENTS
+// ============================================================================
 export default function Evenements() {
-  // Liste des événements récupérée via l'API
-  const [evenements, setEvenements] = useState<Evenement[]>([]);
-  // État du filtre ("tous" | "à venir" | "passé")
-  const [filter, setFilter] = useState<"à venir" | "passé" | "tous">("tous");
+  // ----------------------------------------------------------------------------
+  // 🧠 ÉTATS LOCAUX
+  // ----------------------------------------------------------------------------
+  const [evenements, setEvenements] = useState<Evenement[]>([]);  // Liste des événements récupérés
+  const [filter, setFilter] = useState<"à venir" | "passé" | "tous">("tous"); // Filtre actif
 
-  // ----------------------------------------------------------
-  // Récupération asynchrone des événements au montage du composant
-  // ----------------------------------------------------------
+  // ----------------------------------------------------------------------------
+  // 🔁 useEffect : Récupération des données à l’ouverture de la page
+  // ----------------------------------------------------------------------------
   useEffect(() => {
     const fetchEvenements = async () => {
       try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/evenements`
-        );
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/evenements`);
         const data = res.data;
-        // Normalisation des champs pour le front
+
+        // Normalisation : transformation des données brutes pour uniformiser les clés
         const events: Evenement[] = data.map((ev: any) => ({
           ...ev,
           id: ev._id || ev.id,
           lieu: ev.lieu || ev.location || ev.place || "",
         }));
-        setEvenements(events);
+
+        setEvenements(events); // Mise à jour de l'état
       } catch (error) {
-        // Gestion d’erreur simple
+        // Gestion des erreurs d’API
         console.error("Erreur lors de la récupération des événements :", error);
-        setEvenements([]);
+        setEvenements([]); // État vide si erreur
       }
     };
-    fetchEvenements();
+
+    fetchEvenements(); // Appel au chargement
   }, []);
 
-  // Date du jour au format AAAA-MM-JJ
+  // ----------------------------------------------------------------------------
+  // 📅 Date du jour au format "AAAA-MM-JJ"
+  // Utilisé pour filtrer les événements selon leur date
+  // ----------------------------------------------------------------------------
   const today = new Date().toISOString().split("T")[0];
 
-  // Filtrage dynamique des événements selon le filtre choisi
-  const filteredEvents: Evenement[] = evenements.filter((event: Evenement) => {
+  // ----------------------------------------------------------------------------
+  // 🔎 Filtrage dynamique selon le filtre sélectionné
+  // ----------------------------------------------------------------------------
+  const filteredEvents: Evenement[] = evenements.filter((event) => {
     if (filter === "à venir") return event.date >= today;
     if (filter === "passé") return event.date < today;
     return true;
   });
 
-  // ----------------------------------------------------------
-  // Rendu principal de la page
-  // ----------------------------------------------------------
+  // ----------------------------------------------------------------------------
+  // 🎨 AFFICHAGE JSX
+  // ----------------------------------------------------------------------------
   return (
     <div className="page-container min-h-screen flex flex-col">
-      {/* Barre de navigation */}
+      {/* --- Barre de navigation globale --- */}
       <Navbar />
 
-      {/* Contenu principal centré, largeur limitée (gérée par .main-content) */}
+      {/* --- Contenu principal --- */}
       <main className="main-content flex-1 flex flex-col p-0">
-        {/* Titre et sous-titre responsives */}
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#ffe992] text-center leading-tight break-words">
+        {/* 🔤 Titre principal + séparateur */}
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#ffe992] text-center">
           ÉVÉNEMENTS
         </h1>
         <div className="evenements-titre-divider mx-auto my-2 w-20 h-1 bg-[#ffe992] rounded"></div>
@@ -72,7 +88,7 @@ export default function Evenements() {
           Retrouvez ici les prochains événements à venir :
         </p>
 
-        {/* Filtres full width mobile, gap réduit */}
+        {/* 🔘 Filtres par type d’événements */}
         <div className="flex flex-row gap-2 w-full px-2 mb-4">
           {["tous", "à venir", "passé"].map((cat) => (
             <button
@@ -81,8 +97,8 @@ export default function Evenements() {
               className={`flex-1 py-2 rounded font-semibold transition-colors duration-150 border border-[#ffe992]/20
                 ${
                   filter === cat
-                    ? "bg-[#ffe992] text-black"
-                    : "bg-[#232336] text-[#ffe992] hover:bg-[#ffe992]/30"
+                    ? "bg-[#ffe992] text-black" // Actif
+                    : "bg-[#232336] text-[#ffe992] hover:bg-[#ffe992]/30" // Inactif
                 }`}
             >
               {cat.toUpperCase()}
@@ -90,20 +106,22 @@ export default function Evenements() {
           ))}
         </div>
 
-        {/* Grille responsive mobile-first */}
+        {/* 🧱 Grille responsive pour afficher les cartes d’événements */}
         <div className="w-full flex-1">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+            {/* Cas : aucun événement à afficher */}
             {filteredEvents.length === 0 ? (
               <p className="text-gray-400 text-center col-span-full">
                 Aucun événement trouvé.
               </p>
             ) : (
+              // Sinon on affiche les cartes une à une
               filteredEvents.map((event) => (
                 <div
                   key={event.id}
-                  className="bg-black/90 rounded-xl shadow-lg overflow-hidden flex flex-col w-full min-w-0"
+                  className="bg-black/90 rounded-xl shadow-lg overflow-hidden flex flex-col"
                 >
-                  {/* Image de l’événement (fallback si image absente) */}
+                  {/* 🖼️ Image d’affiche (avec fallback si absente) */}
                   <img
                     src={event.urlAffiche || ""}
                     alt={event.titre || "Affiche événement"}
@@ -114,7 +132,8 @@ export default function Evenements() {
                       e.currentTarget.classList.add("bg-gray-800");
                     }}
                   />
-                  {/* Infos principales de l'événement */}
+
+                  {/* 📋 Détails de l’événement (titre, description, date, lieu, thème) */}
                   <div className="p-3 flex flex-col gap-2 flex-1">
                     <h2 className="text-base sm:text-lg font-bold text-[#ffe992]">
                       {event.titre}
@@ -123,23 +142,26 @@ export default function Evenements() {
                       {event.description}
                     </p>
                     <div className="flex flex-col gap-1 mt-2">
+                      {/* 🗓 Dates de début/fin */}
                       <span className="flex items-center gap-2 text-[#d6c487] text-xs sm:text-sm">
-                        <CalendarDays size={16} className="text-[#d6c487]" />
+                        <CalendarDays size={16} />
                         Du {event.dateDebut || "-"} au {event.dateFin || "-"}
                       </span>
+
+                      {/* 📍 Lieu */}
                       <span className="flex items-center gap-2 text-[#d6c487] text-xs sm:text-sm">
-                        <MapPin size={16} className="text-[#d6c487]" />
-                        {event.lieu ? (
-                          event.lieu
-                        ) : (
+                        <MapPin size={16} />
+                        {event.lieu || (
                           <span className="italic text-gray-500">
                             Lieu non renseigné
                           </span>
                         )}
                       </span>
+
+                      {/* 🎯 Thème (si présent) */}
                       {event.theme && (
                         <span className="flex items-center gap-2 text-[#d6c487] text-xs sm:text-sm">
-                          <Target size={16} className="text-[#d6c487]" />
+                          <Target size={16} />
                           {event.theme}
                         </span>
                       )}
@@ -152,7 +174,7 @@ export default function Evenements() {
         </div>
       </main>
 
-      {/* Footer collé en bas */}
+      {/* --- Pied de page --- */}
       <Footer />
     </div>
   );

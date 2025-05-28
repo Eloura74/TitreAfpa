@@ -1,97 +1,109 @@
-// Import des hooks React et de la bibliothèque Axios pour les appels HTTP
-import { useState, useEffect } from "react";
-import axios from "axios";
+// =======================
+// 📦 Import des modules
+// =======================
+import { useState, useEffect } from "react"; // Hooks React
+import axios from "axios"; // Librairie pour les appels HTTP
 
 /* -------------------------------------------------------------------------
-   🧩 Définition du type Panier (structure d’un panier)
+   🧩 Interface TypeScript : structure d’un panier
 ------------------------------------------------------------------------- */
 interface Panier {
-  _id?: string; // ID généré par la BDD (optionnel avant création)
-  utilisateur: string;
-  articles: string; // Chaîne représentant les articles (à remplacer par un tableau dans une version avancée)
+  _id?: string; // Identifiant MongoDB (optionnel dans le formulaire)
+  utilisateur: string; // Nom de l'utilisateur associé
+  articles: string; // Contenu du panier (simplifié en texte ici)
   total: number; // Montant total du panier
 }
 
-// URL de l'API REST côté serveur
-// const API_URL = "http://localhost:5001/api/paniers";
+// URL d’accès à l’API REST définie dans .env (via Vite)
 const API_URL = `${import.meta.env.VITE_API_URL}/api/paniers`;
 
-/* -------------------------------------------------------------------------
-   📦 Composant principal : gestion des paniers (CRUD complet)
-------------------------------------------------------------------------- */
+// =====================================================================
+// 🎯 Composant principal : gestion CRUD des paniers
+// =====================================================================
 export default function GestionPaniers() {
-  /* 🌐 États pour la gestion */
-  const [paniers, setPaniers] = useState<Panier[]>([]); // Liste des paniers
+  /* -------------------------------------------------------------------------
+     🧠 États utilisés dans le composant
+  ------------------------------------------------------------------------- */
+  const [paniers, setPaniers] = useState<Panier[]>([]); // Liste globale des paniers
   const [form, setForm] = useState<Panier>({
     utilisateur: "",
     articles: "",
     total: 0,
-  }); // Données du formulaire
-  const [editId, setEditId] = useState<string | null>(null); // ID du panier à modifier (null = ajout)
-  const [loading, setLoading] = useState(false); // État de chargement
-  const [error, setError] = useState<string | null>(null); // Gestion des erreurs
+  }); // Données du formulaire (mode ajout/modif)
+  const [editId, setEditId] = useState<string | null>(null); // ID du panier modifié (null = mode ajout)
+  const [loading, setLoading] = useState(false); // Booléen : est-ce qu’on charge ?
+  const [error, setError] = useState<string | null>(null); // Message d’erreur s’il y a un souci
 
   /* -------------------------------------------------------------------------
-     🔃 Chargement initial des paniers à l'ouverture du composant
+     🔃 Récupération initiale des paniers à l’affichage du composant
   ------------------------------------------------------------------------- */
   useEffect(() => {
-    setLoading(true);
+    setLoading(true); // Active le mode "chargement"
     axios
       .get(API_URL, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, // Authentification via token
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Authentification avec JWT local
+        },
       })
       .then((r) => {
-        if (Array.isArray(r.data)) setPaniers(r.data);
-        else setPaniers([]);
+        if (Array.isArray(r.data)) setPaniers(r.data); // Stocke les paniers
+        else setPaniers([]); // Sûreté si la réponse n’est pas un tableau
       })
       .catch((e) => {
         setError(
           e?.response?.data?.message || "Erreur lors du chargement des paniers."
         );
-        setPaniers([]);
+        setPaniers([]); // Vide la liste si erreur
       })
-      .finally(() => setLoading(false));
+      .finally(() => setLoading(false)); // On désactive le "loading"
   }, []);
 
   /* -------------------------------------------------------------------------
-     📝 Gestion des champs du formulaire
+     ✏️ Mise à jour des champs lors de la saisie dans le formulaire
   ------------------------------------------------------------------------- */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({ ...form, [e.target.name]: e.target.value }); // Mise à jour dynamique
   };
 
-  // Réinitialise le formulaire et désactive le mode édition
+  // 🧼 Réinitialise le formulaire et sort du mode édition
   const resetForm = () => {
     setForm({ utilisateur: "", articles: "", total: 0 });
     setEditId(null);
   };
 
   /* -------------------------------------------------------------------------
-     ✅ Soumission du formulaire (ajout ou modification)
+     ✅ Envoi du formulaire : création ou mise à jour selon editId
   ------------------------------------------------------------------------- */
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Empêche le rechargement de la page
     setLoading(true);
     setError(null);
+
     try {
       if (editId) {
-        // Mise à jour d’un panier existant
+        // Mode édition → mise à jour (PUT)
         await axios.put(`${API_URL}/${editId}`, form, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         });
       } else {
-        // Création d’un nouveau panier
+        // Mode création → ajout (POST)
         await axios.post(API_URL, form, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         });
       }
 
-      // Rafraîchissement des paniers après l’opération
+      // 🔄 Recharge les paniers depuis l'API après modification
       const res = await axios.get(API_URL, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
       setPaniers(Array.isArray(res.data) ? res.data : []);
-      resetForm(); // Vide le formulaire après enregistrement
+      resetForm(); // Réinitialise les champs
     } catch (e: any) {
       setError(
         e?.response?.data?.message ||
@@ -103,7 +115,7 @@ export default function GestionPaniers() {
   };
 
   /* -------------------------------------------------------------------------
-     ✏️ Préparer la modification d’un panier
+     🖊️ Clique sur le bouton "Modifier" → Pré-remplit le formulaire
   ------------------------------------------------------------------------- */
   const handleEdit = (p: Panier) => {
     setForm(p);
@@ -111,15 +123,20 @@ export default function GestionPaniers() {
   };
 
   /* -------------------------------------------------------------------------
-     ❌ Supprimer un panier existant
+     ❌ Suppression d’un panier avec confirmation backend
   ------------------------------------------------------------------------- */
   const handleDelete = async (id: string) => {
     setLoading(true);
     setError(null);
+
     try {
       await axios.delete(`${API_URL}/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
+
+      // Mise à jour de l'état local après suppression
       setPaniers(paniers.filter((p) => p._id !== id));
       resetForm();
     } catch (e: any) {
@@ -132,14 +149,14 @@ export default function GestionPaniers() {
   };
 
   /* -------------------------------------------------------------------------
-     🎨 Affichage du formulaire et du tableau
+     🎨 Rendu visuel du formulaire et du tableau
   ------------------------------------------------------------------------- */
   return (
     <div>
-      {/* Affichage des erreurs éventuelles */}
+      {/* Affiche une erreur si elle est présente */}
       {error && <div className="text-red-500 mb-2">{error}</div>}
 
-      {/* Formulaire de création / modification de panier */}
+      {/* Formulaire pour créer ou modifier un panier */}
       <form className="flex flex-col gap-2 mb-4" onSubmit={handleSubmit}>
         <input
           name="utilisateur"
@@ -166,6 +183,8 @@ export default function GestionPaniers() {
           className="input input-bordered"
           required
         />
+
+        {/* Boutons : Ajouter/Modifier + Annuler (si édition) */}
         <div className="flex gap-2">
           <button type="submit" className="btn btn-primary" disabled={loading}>
             {editId ? "Modifier" : "Ajouter"}
@@ -182,7 +201,7 @@ export default function GestionPaniers() {
         </div>
       </form>
 
-      {/* Affichage du tableau des paniers */}
+      {/* Affichage conditionnel du tableau ou d’un message de chargement */}
       {loading ? (
         <div className="text-center">Chargement...</div>
       ) : paniers.length === 0 ? (
@@ -204,6 +223,7 @@ export default function GestionPaniers() {
                 <td>{p.articles}</td>
                 <td>{p.total}</td>
                 <td>
+                  {/* Boutons d'action : édition et suppression */}
                   <button
                     className="btn btn-xs btn-warning mr-2"
                     onClick={() => handleEdit(p)}

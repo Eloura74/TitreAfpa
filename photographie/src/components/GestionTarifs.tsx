@@ -1,99 +1,96 @@
-// Import des hooks react-query pour la gestion des données asynchrones (fetch / mutation / cache)
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
-// Type Tarif centralisé dans un fichier de types partagés
-import { Tarif } from "../types/tarif";
-
-// Import de React Hook Form pour la gestion de formulaire réactive
-import { useForm } from "react-hook-form";
-
-// Intégration de Zod pour la validation de schéma de formulaire
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-
-// Hook pour gérer l'état d'édition
-import { useState } from "react";
+// ===================================================
+// 🔌 Importations des librairies et hooks nécessaires
+// ===================================================
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; // Gestion de cache / API
+import { Tarif } from "../types/tarif"; // Type centralisé du tarif
+import { useForm } from "react-hook-form"; // Hook de formulaire réactif
+import { zodResolver } from "@hookform/resolvers/zod"; // Liaison Zod <-> RHF
+import { z } from "zod"; // Validation de schéma
+import { useState } from "react"; // Hook local d’édition
 
 /* -------------------------------------------------------------------------
-   📦 Définition du schéma de validation avec Zod
+   🧩 Schéma de validation Zod (formulaire tarif)
 ------------------------------------------------------------------------- */
 const tarifSchema = z.object({
-  nom: z.string().min(2), // Nom requis (au moins 2 caractères)
-  type: z.enum(["tirage", "poster", "toile", "cadeau", "textile"]), // Choix parmi une liste fermée
-  format: z.string().min(2), // Format requis
-  prix: z.number().positive(), // Prix positif obligatoire
-  support: z.string().min(2), // Support requis
-  actif: z.boolean(), // Booléen actif/inactif
-  imageUrl: z.string().url().optional().or(z.literal("")), // URL optionnelle ou vide
+  nom: z.string().min(2),
+  type: z.enum(["tirage", "poster", "toile", "cadeau", "textile"]),
+  format: z.string().min(2),
+  prix: z.number().positive(),
+  support: z.string().min(2),
+  actif: z.boolean(),
+  imageUrl: z.string().url().optional().or(z.literal("")), // Permet "" ou une URL valide
 });
 
-// Typage TypeScript généré automatiquement à partir du schéma
-type TarifForm = z.infer<typeof tarifSchema> & { id?: string }; // Ajout optionnel de l'ID pour édition
+// 🧠 Typage TypeScript du formulaire
+type TarifForm = z.infer<typeof tarifSchema> & { id?: string };
 
-/* -------------------------------------------------------------------------
-   🎯 Composant principal : gestion des tarifs
-------------------------------------------------------------------------- */
+// =====================================================================
+// 📦 Composant principal : CRUD des tarifs avec React Query
+// =====================================================================
 export default function GestionTarifs() {
-  // Accès au cache client de React Query
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // Accès au cache de requêtes React Query
+
+  // 🖊️ Mode édition (si rempli, le formulaire modifie un tarif existant)
+  const [edit, setEdit] = useState<TarifForm | null>(null);
 
   /* -------------------------------------------------------------------------
-     🔁 useQuery : Récupération des tarifs depuis l'API
+     📥 Récupération des tarifs (GET) via React Query
   ------------------------------------------------------------------------- */
   const { data: tarifs, isLoading } = useQuery({
     queryKey: ["tarifs"],
     queryFn: async () => {
-      const res = await fetch("/api/tarifs");
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tarifs`);
       return res.json();
     },
   });
 
-  // État local pour savoir si on est en mode édition
-  const [edit, setEdit] = useState<TarifForm | null>(null);
-
   /* -------------------------------------------------------------------------
-     ✅ useMutation : Création / mise à jour des tarifs
+     🔄 Création ou mise à jour d’un tarif (POST ou PUT)
   ------------------------------------------------------------------------- */
   const mutation = useMutation({
     mutationFn: async (data: TarifForm) => {
       const method = data.id ? "PUT" : "POST";
-      const url = data.id ? `${import.meta.env.VITE_API_URL}/api/tarifs/${data.id}` : `${import.meta.env.VITE_API_URL}/api/tarifs`;
-      const token = localStorage.getItem("token");
+      const url = data.id
+        ? `${import.meta.env.VITE_API_URL}/api/tarifs/${data.id}`
+        : `${import.meta.env.VITE_API_URL}/api/tarifs`;
+
       const res = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify(data),
       });
+
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tarifs"] }); // Rafraîchit les données après mutation
-      setEdit(null); // Sortie du mode édition
-      reset(); // Réinitialise le formulaire
+      queryClient.invalidateQueries({ queryKey: ["tarifs"] }); // 🔁 Rechargement des tarifs
+      setEdit(null); // Fin de l’édition
+      reset(); // Réinitialisation du formulaire
     },
   });
 
   /* -------------------------------------------------------------------------
-     ❌ useMutation : Suppression d’un tarif
+     ❌ Suppression d’un tarif via son ID
   ------------------------------------------------------------------------- */
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const token = localStorage.getItem("token");
-      await fetch(`/api/tarifs/${id}`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/tarifs/${id}`, {
         method: "DELETE",
         headers: {
-          Authorization: token ? `Bearer ${token}` : "",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tarifs"] }), // Rafraîchit après suppression
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tarifs"] }); // 🔁 Rafraîchit la liste
+    },
   });
 
   /* -------------------------------------------------------------------------
-     📋 Initialisation du formulaire React Hook Form + Zod
+     📝 Gestion du formulaire avec React Hook Form et validation Zod
   ------------------------------------------------------------------------- */
   const {
     register,
@@ -101,7 +98,7 @@ export default function GestionTarifs() {
     reset,
     formState: { errors },
   } = useForm<TarifForm>({
-    resolver: zodResolver(tarifSchema), // Validation avec Zod
+    resolver: zodResolver(tarifSchema),
     defaultValues: {
       nom: "",
       type: "tirage",
@@ -113,32 +110,33 @@ export default function GestionTarifs() {
     },
   });
 
-  // Lorsqu'on clique sur "Éditer", on charge les données dans le formulaire
+  // ✏️ Active le mode édition et préremplit le formulaire
   function handleEdit(tarif: Tarif) {
     setEdit({ ...tarif });
     reset({ ...tarif });
   }
 
-  // Lorsqu'on clique sur "Annuler"
+  // 🔄 Annule l’édition et réinitialise le formulaire
   function handleCancel() {
     setEdit(null);
     reset();
   }
 
   /* -------------------------------------------------------------------------
-     🎨 Rendu HTML / JSX
+     🎨 Rendu JSX
   ------------------------------------------------------------------------- */
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">Gestion des tarifs</h2>
 
-      {/* Formulaire d'ajout / modification */}
+      {/* FORMULAIRE : Ajout ou modification */}
       <form
         onSubmit={handleSubmit((data) =>
           mutation.mutate({ ...data, id: edit?.id })
         )}
         className="grid md:grid-cols-3 gap-4 mb-6"
       >
+        {/* Champs texte */}
         <input
           {...register("nom")}
           placeholder="Nom"
@@ -173,12 +171,12 @@ export default function GestionTarifs() {
           className="input input-bordered"
         />
 
-        {/* Champ case à cocher */}
+        {/* Case à cocher */}
         <label className="flex items-center gap-2">
           <input type="checkbox" {...register("actif")} /> Actif
         </label>
 
-        {/* Boutons */}
+        {/* Boutons : soumettre / annuler */}
         <div className="md:col-span-3 flex gap-2">
           <button type="submit" className="btn btn-primary">
             {edit ? "Modifier" : "Ajouter"}
@@ -195,14 +193,14 @@ export default function GestionTarifs() {
         </div>
       </form>
 
-      {/* Affichage des erreurs de validation */}
+      {/* Affichage des erreurs */}
       <div className="text-red-500 mb-2">
         {Object.values(errors).map((e) => (
           <div key={e.message}>{e.message}</div>
         ))}
       </div>
 
-      {/* Tableau des tarifs existants */}
+      {/* TABLEAU : Liste des tarifs */}
       <div className="overflow-x-auto">
         <table className="table w-full">
           <thead>

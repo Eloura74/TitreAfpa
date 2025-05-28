@@ -1,34 +1,58 @@
-const express = require("express");
-const router = express.Router();
-const multer = require("multer");
-const cloudinary = require("cloudinary").v2;
+// Route Express pour l’upload d’image vers Cloudinary
+// Cette route permet à un client (navigateur ou frontend) d’envoyer une image,
+// qui sera temporairement stockée en mémoire (RAM) puis transférée à Cloudinary.
 
-// Configure Cloudinary
+const express = require("express");
+const router = express.Router(); // Initialisation du routeur Express
+
+const multer = require("multer"); // Multer est utilisé pour gérer l’envoi de fichiers via formulaire
+const cloudinary = require("cloudinary").v2; // Cloudinary gère l’hébergement et le traitement des images
+
+// -------------------------------------------------------------
+// CONFIGURATION DE CLOUDINARY À PARTIR DES VARIABLES D'ENVIRONNEMENT
+// -------------------------------------------------------------
+// Ces variables sont à définir dans ton fichier `.env` ou dans Render/Vercel
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, // Nom de ton compte Cloudinary
+  api_key: process.env.CLOUDINARY_API_KEY, // Clé API publique
+  api_secret: process.env.CLOUDINARY_API_SECRET, // Clé secrète API (ne jamais exposer côté frontend)
 });
 
-// Configure Multer pour lire le fichier temporairement
+// -------------------------------------------------------------
+// CONFIGURATION DE MULTER POUR GÉRER L’UPLOAD EN MÉMOIRE
+// -------------------------------------------------------------
+// Le fichier est temporairement gardé en mémoire (pas stocké sur le disque)
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ storage }); // Middleware pour une image unique dans le champ "image"
 
-// Route POST /api/upload-cloudinary
+// -------------------------------------------------------------
+// POST /api/upload-cloudinary
+// -------------------------------------------------------------
+// Cette route reçoit un fichier image depuis un formulaire ou un appel frontend
 router.post("/", upload.single("image"), async (req, res) => {
   try {
-    // Buffer image (stockée temporairement en RAM)
+    // 1. Convertit le fichier en base64 à partir du buffer en RAM
     const fileStr = req.file.buffer.toString("base64");
+
+    // 2. Envoie l’image à Cloudinary avec le bon format MIME
     const uploadResponse = await cloudinary.uploader.upload(
-      `data:${req.file.mimetype};base64,${fileStr}`,
-      { folder: "galerie" } // Optionnel: pour classer dans un dossier
+      `data:${req.file.mimetype};base64,${fileStr}`, // Format d’encodage complet
+      {
+        folder: "galerie", // (facultatif) organise les images dans un dossier "galerie"
+      }
     );
-    // Retourne l’URL Cloudinary
+
+    // 3. Retourne l’URL sécurisée de l’image hébergée (https)
     res.json({ url: uploadResponse.secure_url });
   } catch (err) {
+    // Gestion des erreurs : problème avec l’upload ou les identifiants API
     console.error(err);
     res.status(500).json({ message: "Erreur upload Cloudinary" });
   }
 });
 
+// -------------------------------------------------------------
+// EXPORT DU ROUTEUR
+// -------------------------------------------------------------
+// Ce fichier est monté dans app.js via : app.use('/api/upload-cloudinary', ...)
 module.exports = router;

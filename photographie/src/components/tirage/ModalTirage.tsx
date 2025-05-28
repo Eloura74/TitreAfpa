@@ -2,77 +2,90 @@
 // ModalTirage : Composant modal pour commander un tirage/poster/toile/carte postale
 // Permet l'upload d'une image, le choix du format/support, la quantité, et l'ajout au panier
 // -----------------------------------------------------------------------------
-import React, { useRef, useState } from "react";
-import { usePanier } from "../../store/panierContext";
-import { ArticlePanierType } from "../../types/panier";
-import { v4 as uuidv4 } from "uuid"; // Pour générer un id unique
 
-// Définition du type pour les formats disponibles
+// === Importations ===
+import React, { useRef, useState } from "react"; // React + gestion des états locaux et refs
+import { usePanier } from "../../store/panierContext"; // Hook personnalisé pour gérer le panier
+import { ArticlePanierType } from "../../types/panier"; // Typage TS pour un article du panier
+import { v4 as uuidv4 } from "uuid"; // Librairie pour générer des identifiants uniques
+
+// === Définition d’un format de tirage ===
+// Chaque option de format contient : un label, une valeur (clé technique), et un prix
 export interface FormatOption {
   label: string;
   value: string;
   prix: number;
 }
 
-// Props du composant ModalTirage
+// === Définition des props attendues par le composant ===
 interface ModalTirageProps {
-  open: boolean;
-  onClose: () => void;
+  open: boolean; // Contrôle l'ouverture ou la fermeture du modal
+  onClose: () => void; // Fonction à appeler pour fermer la modal
   offre: {
-    titre: string;
-    formats: FormatOption[];
-    image: string;
+    titre: string; // Titre du tirage (ex : "Poster Photo")
+    formats: FormatOption[]; // Liste des formats/supports disponibles
+    image: string; // Image par défaut associée à cette offre
   };
 }
 
-// Composant principal
+// === Composant ModalTirage ===
 export const ModalTirage: React.FC<ModalTirageProps> = ({ open, onClose, offre }) => {
+  // Référence vers l’input fichier (permet d’y accéder directement si besoin)
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // État local pour l’image à imprimer (prévisualisation)
   const [image, setImage] = useState<string | null>(null);
+
+  // Format sélectionné (initialisé avec le 1er format de l'offre)
   const [format, setFormat] = useState<string>(offre.formats[0]?.value || "");
+
+  // Quantité souhaitée (défaut : 1)
   const [quantite, setQuantite] = useState<number>(1);
 
-  // Récupération du hook panier
+  // Récupère la fonction d’ajout au panier via le contexte
   const { ajouterArticle } = usePanier();
 
-  // Si le modal n'est pas ouvert, ne rien afficher
+  // Si la modal est fermée, on ne rend rien
   if (!open) return null;
 
-  // Gestion de l'upload d'image (aperçu inclus)
+  // === Gère le changement de fichier image par l’utilisateur ===
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0]; // Récupère le 1er fichier sélectionné
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => setImage(ev.target?.result as string);
-      reader.readAsDataURL(file);
+      const reader = new FileReader(); // Utilitaire JS pour lire un fichier
+      reader.onload = (ev) => setImage(ev.target?.result as string); // Stocke l’image encodée en base64
+      reader.readAsDataURL(file); // Lance la lecture du fichier
     }
   };
 
-  // Soumission du formulaire : ajout réel au panier
+  // === Gère la validation du formulaire ===
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Recherche du format sélectionné pour récupérer le prix
-    const formatObj = offre.formats.find(f => f.value === format);
-    if (!formatObj) return;
-    // Création de l'article à ajouter au panier
+    e.preventDefault(); // Empêche le rechargement de page
+    const formatObj = offre.formats.find(f => f.value === format); // Récupère l'objet complet du format sélectionné
+    if (!formatObj) return; // Si le format est invalide, on sort
+
+    // Création de l’article à ajouter dans le panier
     const nouvelArticle: ArticlePanierType = {
-      id: uuidv4(), // Génère un id unique pour l'article
-      nom: `${offre.titre} (${formatObj.label})`,
+      id: uuidv4(), // ID unique généré automatiquement
+      nom: `${offre.titre} (${formatObj.label})`, // Exemple : "Poster (30x40)"
       prix: formatObj.prix,
       quantite,
-      image: image || offre.image, // Preview utilisateur ou image de l'offre par défaut
+      image: image || offre.image, // Soit l’image uploadée, soit l’image par défaut
     };
-    // Ajout au panier via le contexte
+
+    // Ajout de l’article dans le contexte global du panier
     ajouterArticle(nouvelArticle);
-    // Feedback utilisateur (optionnel)
-    // alert(`Ajouté au panier : ${nouvelArticle.nom}`);
+
+    // Fermeture de la modal après ajout
     onClose();
   };
 
+  // === Affichage JSX de la modal ===
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+      {/* Conteneur de la boîte modale */}
       <div className="bg-[#191923] rounded-xl shadow-xl p-8 w-full max-w-md relative">
-        {/* Bouton de fermeture accessible */}
+        {/* Bouton pour fermer la modal */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-yellow-400 hover:text-yellow-200 text-2xl"
@@ -80,9 +93,14 @@ export const ModalTirage: React.FC<ModalTirageProps> = ({ open, onClose, offre }
         >
           ×
         </button>
+
+        {/* Titre de l’offre */}
         <h2 className="text-2xl font-bold mb-4 text-yellow-300">{offre.titre}</h2>
+
+        {/* === Formulaire d’ajout au panier === */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* Upload image */}
+
+          {/* Upload de l’image à imprimer */}
           <label className="block">
             <span className="font-semibold text-white">Votre photo à imprimer</span>
             <input
@@ -91,10 +109,11 @@ export const ModalTirage: React.FC<ModalTirageProps> = ({ open, onClose, offre }
               ref={fileInputRef}
               onChange={handleFileChange}
               className="block w-full mt-2 text-white"
-              required
+              required // Empêche l'envoi sans image
             />
           </label>
-          {/* Aperçu de l'image sélectionnée */}
+
+          {/* Aperçu de l’image sélectionnée */}
           {image && (
             <img
               src={image}
@@ -102,7 +121,8 @@ export const ModalTirage: React.FC<ModalTirageProps> = ({ open, onClose, offre }
               className="w-full h-48 object-contain rounded border border-yellow-300 bg-black mb-2"
             />
           )}
-          {/* Sélection du format/support */}
+
+          {/* Sélection du format/support (ex : Poster, Toile, etc.) */}
           <label className="block">
             <span className="font-semibold text-white">Format / Support</span>
             <select
@@ -117,7 +137,8 @@ export const ModalTirage: React.FC<ModalTirageProps> = ({ open, onClose, offre }
               ))}
             </select>
           </label>
-          {/* Sélection de la quantité */}
+
+          {/* Choix de la quantité */}
           <label className="block">
             <span className="font-semibold text-white">Quantité</span>
             <input
@@ -128,7 +149,8 @@ export const ModalTirage: React.FC<ModalTirageProps> = ({ open, onClose, offre }
               className="w-24 mt-2 rounded bg-[#232336] text-white px-3 py-2"
             />
           </label>
-          {/* Bouton de validation */}
+
+          {/* Bouton de validation final */}
           <button
             type="submit"
             className="btn-main w-full mt-4"

@@ -1,13 +1,55 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- Améliore l'affichage sur les écrans mobiles -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Titre de la page (important pour le SEO) -->
+    <title>Photographie</title>
+
+    <!-- Description concise pour les moteurs de recherche -->
+    <meta
+      name="description"
+      content="Projet React avec Vite et TypeScript, application web moderne et accessible."
+    />
+
+    <!-- Balises Open Graph pour le partage sur les réseaux sociaux -->
+    <meta property="og:title" content="Photographie" />
+    <meta
+      property="og:description"
+      content="Projet React avec Vite et TypeScript, application web moderne et accessible."
+    />
+    <meta property="og:type" content="website" />
+    <!-- Optionnel : ajoute une URL et une image pour les réseaux sociaux -->
+    <!-- <meta property="og:url" content="https://mon-site-exemple.com" /> -->
+    <!-- <meta property="og:image" content="https://mon-site-exemple.com/preview.png" /> -->
+
+    <!-- Favicon et icônes (favicon.ico est bien pour compatibilité) -->
+    <link rel="icon" href="/favicon.ico" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+
+    <!-- Lien vers une feuille de style accessible, si tu en as -->
+    <!-- <link rel="stylesheet" href="/styles/accessibility.css" /> -->
+
+    <!-- Déclaration du langage pour l’assistant vocal et SEO -->
+    <meta http-equiv="Content-Language" content="fr" />
+
+    <!-- Indique que le site est mobile friendly -->
+    <meta name="HandheldFriendly" content="true" />
+
+    <!-- Robots SEO : autorise l’indexation et le suivi des liens -->
+    <meta name="robots" content="index, follow" />
+
+    <!-- Préchargement éventuel des polices ou scripts critiques -->
+    <!-- <link rel="preload" href="/fonts/ma-police.woff2" as="font" type="font/woff2" crossorigin="anonymous" /> -->
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Main landmark important pour l’accessibilité -->
+    <main id="root" role="main" tabindex="-1"></main>
+
+    <!-- Chargement du script principal -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,41 +1,53 @@
-// Importations des modules nécessaires
-// React : framework React
-// useEffect : hook React pour la gestion du cycle de vie
-// Navbar : composant de navigation
-// Footer : composant de footer
-// globals.css : styles globaux
-import { useEffect } from "react";
-import Navbar from "../components/layout/navbar";
-import Footer from "../components/layout/Footer";
-import "../styles/globals.css";
+// ==========================================================================
+// 📦 IMPORTS ESSENTIELS
+// ==========================================================================
+import { useEffect } from "react"; // Hook pour gérer les effets de bord (ex : changer le titre)
+import Navbar from "../components/layout/navbar"; // Composant de navigation
+import Footer from "../components/layout/Footer"; // Pied de page
+import "../styles/globals.css"; // Styles globaux pour tout le site
 
-// Fonction principale du composant About
+// ==========================================================================
+// 📄 COMPOSANT PRINCIPAL : PAGE "À propos du photographe"
+// ==========================================================================
 export default function About() {
+  // ------------------------------------------------------------------------
+  // 🎯 useEffect : modification du titre de l’onglet lors du montage
+  // ------------------------------------------------------------------------
   useEffect(() => {
-    document.title = "Photographe Professionnel | À propos"; // Mise à jour du titre de la page
+    document.title = "Photographe Professionnel | À propos"; // ✅ Mise à jour du titre de l'onglet
   }, []);
 
   return (
     <div className="page-container">
+      {/* Barre de navigation principale */}
       <Navbar />
 
+      {/* ---------------------------------------------------------------------
+         💡 CONTENU PRINCIPAL CENTRÉ
+         --------------------------------------------------------------------- */}
       <main className="main-content flex flex-col items-center text-center">
-        {/* Titre principal avec animation shimmer */}
+        {/* Titre principal animé */}
         <h1 className="title-primary text-4xl md:text-5xl font-cinzel uppercase tracking-wider animate-shimmer mb-4">
           À propos
         </h1>
+
+        {/* Ligne de séparation décorative */}
         <div className="title-divider"></div>
 
-        {/* Sous-titre */}
+        {/* Sous-titre d’accroche */}
         <p className="sous-titre mb-10 max-w-2xl">
           Photographe professionnel spécialisé dans les événements, portraits et
           galeries artistiques. Transformez vos souvenirs en véritables œuvres
           d'art.
         </p>
 
-        {/* Bloc principal avec photo à gauche et texte à droite */}
+        {/* ---------------------------------------------------------------------
+           📸 SECTION PRINCIPALE : BIOGRAPHIE + IMAGE
+           --------------------------------------------------------------------- */}
         <div className="flex flex-col md:flex-row items-start gap-8 mt-8">
-          {/* Photo à gauche, avec effet d'ombre/dégradé sombre à droite */}
+          {/* ---------------------------
+             📷 IMAGE DU PHOTOGRAPHE
+             --------------------------- */}
           <div className="relative min-w-[180px] max-w-[220px] w-full h-[320px] md:h-[350px] flex-shrink-0 md:-ml-12 overflow-visible ml-20">
             <img
               src="/images/fabien.jpg"
@@ -43,7 +55,7 @@ export default function About() {
               className="object-cover w-full h-full rounded-sm shadow-xl"
               style={{ objectPosition: "left center" }}
             />
-            {/* Dégradé sombre à droite de l'image pour une intégration douce */}
+            {/* Dégradé sombre à droite de l’image pour une transition douce */}
             <div
               className="absolute top-0 right-0 h-full w-2/5 pointer-events-none rounded-r-sm"
               style={{
@@ -52,18 +64,28 @@ export default function About() {
               }}
             />
           </div>
-          {/* Cadre jaune avec texte */}
+
+          {/* ---------------------------
+             📝 TEXTE DE PRÉSENTATION
+             --------------------------- */}
           <div className="bg-[rgba(10,10,16,0.85)] border gold-border rounded-sm p-8 max-w-3xl text-left animate-fadeInUp flex-1">
+            {/* Titre de section */}
             <h2 className="gold-text font-cinzel text-xl mb-4">Mon parcours</h2>
+
+            {/* Paragraphe d’introduction */}
             <p className="text-[var(--photo-gray-300)] font-syncopate text-sm leading-relaxed mb-4">
               Plongé dans l'univers captivant de la photographie depuis mon plus
               jeune âge, je suis un photographe passionné établi à{" "}
               <strong>Pignans dans le Var</strong>.
             </p>
+
+            {/* Parcours professionnel varié */}
             <p className="text-[var(--photo-gray-300)] font-syncopate text-sm leading-relaxed mb-4">
               Tantôt reporter-photographe, photographe de mode, photographe
               animalier, mon métier recouvre une multitude de possibilités !
             </p>
+
+            {/* Liste non exhaustive des prestations proposées */}
             <p className="text-[var(--photo-gray-300)] font-syncopate text-sm leading-relaxed mb-4">
               En tant que professionnel, je maîtrise l’art d’immortaliser un
               visage, un sportif en action, une nouvelle marque, un artiste sur
@@ -72,6 +94,8 @@ export default function About() {
               oublier les événements privés (mariage, baptême, repas de famille,
               etc.).
             </p>
+
+            {/* Mention spéciale : studio mobile */}
             <p className="text-[var(--photo-gray-300)] font-syncopate text-sm leading-relaxed mb-4">
               Je pratique également <strong>la photographie de studio</strong>,
               capturant l'essence d'un portrait seul, d'un duo, ou d'une
@@ -81,12 +105,16 @@ export default function About() {
               des compositions artistiques destinées à l'exposition, des
               packshots produits et bien d'autres projets.
             </p>
+
+            {/* Conclusion inspirante */}
             <p className="text-[var(--photo-gray-300)] font-syncopate text-sm leading-relaxed mb-4">
               Chaque instant capturé est une histoire à raconter, une émotion à
               partager. Bienvenue dans mon univers photographique, où la
               diversité de la vie se reflète à travers l'objectif, transformant
               chaque instant en un souvenir inoubliable.
             </p>
+
+            {/* Argumentaire sur la valeur artistique des tirages */}
             <p className="text-[var(--photo-gray-300)] font-syncopate text-sm leading-relaxed">
               Offrez-vous des impressions uniques en commandant les tirages de
               mes photographies. Le prix englobe non seulement les coûts de
@@ -97,9 +125,10 @@ export default function About() {
           </div>
         </div>
 
-        {/* Espace supplémentaire ou ajout de photo/portrait dans le futur */}
+        {/* 🔧 Zone extensible : ajout futur d’éléments visuels ou textes complémentaires */}
       </main>
 
+      {/* Pied de page */}
       <Footer />
     </div>
   );

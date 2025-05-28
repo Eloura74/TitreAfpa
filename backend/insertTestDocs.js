@@ -1,45 +1,77 @@
-// Script pour insérer un document test dans chaque collection manquante
-// Permet de faire apparaître les collections dans Mongo Express
+// ================================
+// SCRIPT DE PEUPLEMENT INITIAL
+// Objectif : forcer l’apparition des collections dans MongoDB/Mongo Express
+// en insérant des documents fictifs (données minimales valides)
+// ================================
 
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-dotenv.config();
+// ------------------------------
+// 1. IMPORT DES DÉPENDANCES
+// ------------------------------
+const mongoose = require("mongoose"); // Librairie pour manipuler MongoDB
+const dotenv = require("dotenv"); // Pour charger les variables d’environnement
+dotenv.config(); // Charge les variables depuis le fichier .env
 
-// Connexion à la base MongoDB via la même URI que le backend
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+// ------------------------------
+// 2. CONNEXION À MONGODB
+// ------------------------------
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
-// Importation des modèles
-const Evenement = require('./models/Evenement');
-const Panier = require('./models/Panier');
-const Paiement = require('./models/Paiement');
+mongoose.connection.on("connected", () => {
+  console.log("✅ Connexion MongoDB réussie !");
+});
 
+mongoose.connection.on("error", (err) => {
+  console.error("❌ Erreur de connexion MongoDB :", err);
+});
+
+// ------------------------------
+// 3. IMPORTATION DES MODÈLES MONGOOSE
+// ------------------------------
+const Evenement = require("./models/Evenement"); // Modèle pour les événements
+const Panier = require("./models/Panier"); // Modèle pour les paniers
+const Paiement = require("./models/Paiement"); // Modèle pour les paiements
+
+// ------------------------------
+// 4. FONCTION PRINCIPALE : INSÉRER UN ÉCHANTILLON DANS CHAQUE COLLECTION
+// ------------------------------
 async function insererDocumentsTests() {
   try {
-    // Insertion d'un document test dans la collection Evenement
+    // === EVENEMENT ===
     await Evenement.create({
-      titre: "Titre test",
-      description: "Description test",
-      date: new Date() // Ajout du champ requis 'date'
+      titre: "Titre test", // Champ requis
+      description: "Description test", // Champ optionnel
+      date: new Date(), // Champ requis : date actuelle
     });
+    console.log("✅ Document 'Evenement' inséré");
 
-    // Insertion d'un document test dans la collection Panier
+    // === PANIER ===
     await Panier.create({
-      utilisateur: "Utilisateur test",
-      articles: []
+      utilisateur: new mongoose.Types.ObjectId(), // ID fictif utilisateur (valide)
+      articles: [], // Liste vide d’articles (valide)
     });
+    console.log("✅ Document 'Panier' inséré");
 
-    // Insertion d'un document test dans la collection Paiement
+    // === PAIEMENT ===
     await Paiement.create({
-      montant: 10,
-      statut: "en attente"
+      utilisateur: new mongoose.Types.ObjectId(), // ID utilisateur fictif
+      montant: 10, // Champ requis
+      statut: "en attente", // Valeur par défaut autorisée
     });
-
-    console.log("Documents insérés avec succès dans chaque collection !");
-    mongoose.connection.close();
+    console.log("✅ Document 'Paiement' inséré");
   } catch (erreur) {
-    console.error("Erreur lors de l'insertion :", erreur);
-    mongoose.connection.close();
+    console.error("❌ Erreur lors de l'insertion :", erreur.message);
+  } finally {
+    // Fermeture de la connexion Mongo proprement
+    mongoose.connection.close(() => {
+      console.log("🔌 Connexion Mongo fermée.");
+    });
   }
 }
 
+// ------------------------------
+// 5. LANCEMENT DU SCRIPT
+// ------------------------------
 insererDocumentsTests();

@@ -1,48 +1,53 @@
-// Import de base
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { useAuthStore, useAuthSync } from "../../store/authStore";
-// Import des styles
-import "../../styles/navbar.css";
+// === Importations de base React et React Router ===
+import { useState } from "react"; // Pour gérer l'ouverture/fermeture du menu
+import { Link, useLocation } from "react-router-dom"; // Pour naviguer entre les pages sans recharger
+import { useAuthStore, useAuthSync } from "../../store/authStore"; // Store Zustand pour gérer l'authentification
+import "../../styles/navbar.css"; // Fichier CSS spécifique à la Navbar
 
-// Navbar component
+// === Composant principal de la barre de navigation ===
 export default function Navbar() {
-  useAuthSync(); // Synchronise l'état auth avec le localStorage à chaque render
+  useAuthSync(); // Synchronisation automatique entre Zustand et le localStorage à chaque rendu
 
-  const location = useLocation();
-  // On détecte si on est dans l'univers graphisme ou sur la galerie graphique unique
+  const location = useLocation(); // Donne accès à l'URL actuelle
+
+  // Détecte si on se trouve dans l'univers "graphisme"
   const isGraphisme =
-    location.pathname.startsWith("/graphisme") ||
-    location.pathname === "/galerie-graphique";
+    location.pathname.startsWith("/graphisme") || // Page commençant par /graphisme
+    location.pathname === "/galerie-graphique"; // Ou page de galerie graphique unique
 
+  // État local pour contrôler l'ouverture du menu sur mobile
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Récupération des infos de connexion via Zustand
   const { email, isAdmin, logout } = useAuthStore();
 
   return (
     <nav className="navbar-container">
       <div className="navbar-content">
-        {/* Logo et nom du site */}
+        {/* === Logo / Nom du site à gauche === */}
         <Link to="/" className="navbar-brand">
           Photographe Pro
         </Link>
 
-        {/* Bouton menu mobile */}
+        {/* === Bouton pour ouvrir/fermer le menu mobile === */}
         <button
           className="navbar-toggle"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          onClick={() => setIsMenuOpen(!isMenuOpen)} // Inverse l'état au clic
           aria-label="Menu de navigation"
         >
           ☰
         </button>
 
-        {/* Menu de navigation */}
+        {/* === Menu de navigation (visible ou non selon isMenuOpen) === */}
         <ul className={`navbar-menu ${isMenuOpen ? "open" : ""}`}>
+          {/* Lien vers l'accueil */}
           <li className="nav-item">
             <Link to="/" className="nav-link">
               Accueil
             </Link>
           </li>
-          {/* Lien galerie dynamique selon l'univers */}
+
+          {/* Lien conditionnel : Galerie ou Galerie Graphique selon l'univers courant */}
           <li className="nav-item">
             {isGraphisme ? (
               <Link to="/galerie-graphique" className="nav-link">
@@ -54,6 +59,8 @@ export default function Navbar() {
               </Link>
             )}
           </li>
+
+          {/* Liens vers autres pages communes */}
           <li className="nav-item">
             <Link to="/evenements" className="nav-link">
               Événements
@@ -69,29 +76,37 @@ export default function Navbar() {
               Panier
             </Link>
           </li>
+
+          {/* === Bloc affiché si l’utilisateur n’est pas connecté === */}
           {!email && (
-          <li className="nav-item">
-            <Link to="/connexion" className="nav-link">
-              Inscription/Connexion
-            </Link>
-          </li>
-        )}
-        {email && (
-          <li className="nav-item">
-            <div className="flex items-center gap-2">
-              <span className="nav-link font-semibold text-yellow-400">
-                {email}
-              </span>
-              <button
-                onClick={logout}
-                className="nav-link text-xs px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                aria-label="Se déconnecter"
-              >
-                Déconnexion
-              </button>
-            </div>
-          </li>
-        )}
+            <li className="nav-item">
+              <Link to="/connexion" className="nav-link">
+                Inscription/Connexion
+              </Link>
+            </li>
+          )}
+
+          {/* === Bloc affiché si l’utilisateur est connecté === */}
+          {email && (
+            <li className="nav-item">
+              <div className="flex items-center gap-2">
+                {/* Affiche l'email de l'utilisateur connecté */}
+                <span className="nav-link font-semibold text-yellow-400">
+                  {email}
+                </span>
+                {/* Bouton pour se déconnecter */}
+                <button
+                  onClick={logout}
+                  className="nav-link text-xs px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                  aria-label="Se déconnecter"
+                >
+                  Déconnexion
+                </button>
+              </div>
+            </li>
+          )}
+
+          {/* === Lien d’administration visible uniquement si l’utilisateur est admin === */}
           {isAdmin && (
             <li className="nav-item">
               <Link to="/admin/gestion-galerie" className="nav-link">
@@ -102,7 +117,7 @@ export default function Navbar() {
         </ul>
       </div>
 
-      {/* Élément décoratif */}
+      {/* === Élément visuel décoratif en bas de la navbar === */}
       <div className="navbar-accent"></div>
     </nav>
   );

@@ -1,70 +1,72 @@
-version: "3.8"
+version: "3.8"  # Version de la syntaxe Docker Compose utilisée
 
-services:
+services:  # Déclaration des services (conteneurs) à lancer
+
   # *********************
-  # MongoDB
+  # Service MongoDB : base de données NoSQL document store
   mongodb:
-    image: mongo:latest
-    container_name: MongoDB-Server-fabien
-    restart: always
+    image: mongo:latest  # Image officielle MongoDB la plus récente
+    container_name: MongoDB-Server-fabien  # Nom personnalisé du conteneur
+    restart: always  # Redémarre automatiquement si le conteneur plante
     ports:
-      - "27017:27017"
+      - "27017:27017"  # Expose le port 27017 (par défaut MongoDB) sur la machine hôte
     volumes:
-      - mongodb_data:/data/db
-      - mongodb_config:/data/configdb
+      - mongodb_data:/data/db  # Persistance des données MongoDB dans un volume Docker nommé
+      - mongodb_config:/data/configdb  # Persistance des fichiers de configuration
 
   # ********************
-  # Mongo Express
+  # Service Mongo Express : interface web pour gérer MongoDB
   mongo-express:
-    image: mongo-express
-    container_name: Mongo-Express-fabien
+    image: mongo-express  # Image officielle mongo-express
+    container_name: Mongo-Express-fabien  # Nom personnalisé du conteneur
     restart: always
     ports:
-      - "8089:8081"
+      - "8089:8081"  # Le port 8081 du conteneur est exposé sur le port 8089 de la machine hôte
     environment:
       - ME_CONFIG_MONGODB_URL=mongodb://MongoDB-Server-fabien:27017
-      - ME_CONFIG_BASICAUTH=false
+        # URL de connexion à la base MongoDB dans le réseau Docker (utilise le nom du service MongoDB)
+      - ME_CONFIG_BASICAUTH=false  # Désactive l’authentification basique (pas recommandé en prod)
 
   # ********************
-  # Neo4j
+  # Service Neo4j : base de données graphe
   neo4j:
-    image: neo4j:latest
+    image: neo4j:latest  # Image officielle Neo4j
     container_name: Neo4j-Server-fabien
     environment:
-      - NEO4J_AUTH=admin/000000 # Remplacez "password123" par un mot de passe sécurisé
+      - NEO4J_AUTH=admin/000000  # Identifiants par défaut admin/motdepasse (changez-le en prod)
     ports:
-      - "7474:7474" # Interface web de Neo4j
-      - "7687:7687" # Port du protocole Bolt (pour les requêtes depuis vos applications)
+      - "7474:7474"  # Port interface web Neo4j exposé sur la machine hôte
+      - "7687:7687"  # Port pour le protocole Bolt (accès via applications)
     volumes:
-      - neo4j_data:/data
-      - neo4j_logs:/logs
-      - neo4j_conf:/var/lib/neo4j/conf
+      - neo4j_data:/data  # Stockage persistant des données Neo4j
+      - neo4j_logs:/logs  # Stockage persistant des logs
+      - neo4j_conf:/var/lib/neo4j/conf  # Stockage persistant de la configuration
 
   # ********************
-  # Backend
+  # Service Backend : serveur d'API Node.js (ou autre) custom
   backend:
-    build: ./backend
+    build: ./backend  # Construction de l'image Docker à partir du dossier ./backend
     ports:
-      - "5001:5000"
+      - "5001:5000"  # Expose le port 5000 du conteneur sur le port 5001 de l’hôte
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/
-      - STRIPE_SECRET_KEY=sk_test_xxx
-      - JWT_SECRET=admin
+      - MONGO_URI=mongodb://mongodb:27017/  # URL de connexion MongoDB dans le réseau Docker (service "mongodb")
+      - STRIPE_SECRET_KEY=sk_test_xxx  # Clé secrète Stripe (à remplacer par ta vraie clé)
+      - JWT_SECRET=admin  # Secret JWT pour l’authentification (changer en production)
     depends_on:
-      - mongodb
+      - mongodb  # Démarre MongoDB avant le backend (dépendance)
     volumes:
-      - ./backend/uploads:/app/uploads
+      - ./backend/uploads:/app/uploads  # Partage le dossier uploads entre la machine hôte et le conteneur
 
 # ********************
-# Volumes
+# Déclaration des volumes Docker pour la persistance des données
 volumes:
   mongodb_data:
-    name: mongodb_data_volume
+    name: mongodb_data_volume  # Volume nommé pour les données MongoDB
   mongodb_config:
-    name: mongodb_config_volume
+    name: mongodb_config_volume  # Volume nommé pour config MongoDB
   neo4j_data:
-    name: neo4j_data_volume
+    name: neo4j_data_volume  # Volume nommé pour données Neo4j
   neo4j_logs:
-    name: neo4j_logs_volume
+    name: neo4j_logs_volume  # Volume nommé pour logs Neo4j
   neo4j_conf:
-    name: neo4j_conf_volume
+    name: neo4j_conf_volume  # Volume nommé pour config Neo4j

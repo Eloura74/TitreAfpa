@@ -1,80 +1,117 @@
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-const galerieRoutes = require("./routes/galerie.js");
-const oeuvresGraphiqueRoutes = require("./routes/oeuvresGraphique.js"); // Route œuvres graphiques uniques
-const stripeRoutes = require("./routes/stripe.js");
-const authRoutes = require("./routes/auth.js");
-const evenementRoutes = require("./routes/evenement");
-const paiementRoutes = require("./routes/paiement");
-const panierRoutes = require("./routes/panier");
-const tarifsRoutes = require("./routes/tarifs");
-const path = require("path");
-const uploadCloudinaryRoutes = require("./routes/upload");
+// ================================
+// IMPORTS ET CONFIGURATION GÉNÉRALE
+// ================================
 
-// Initialisation de l'app Express
+// Import du framework web Express
+const express = require("express");
+
+// Module pour autoriser les requêtes Cross-Origin (CORS)
+const cors = require("cors");
+
+// ORM pour MongoDB
+const mongoose = require("mongoose");
+
+// Chargement des variables d’environnement (.env)
+const dotenv = require("dotenv");
+
+// Import des différentes routes de l’application
+const galerieRoutes = require("./routes/galerie.js");
+const oeuvresGraphiqueRoutes = require("./routes/oeuvresGraphique.js"); // Routes pour les œuvres graphiques uniques
+const stripeRoutes = require("./routes/stripe.js"); // Routes pour les paiements Stripe
+const authRoutes = require("./routes/auth.js"); // Routes pour l’authentification JWT
+const evenementRoutes = require("./routes/evenement"); // Routes CRUD pour les événements
+const paiementRoutes = require("./routes/paiement"); // Routes CRUD pour les paiements
+const panierRoutes = require("./routes/panier"); // Routes CRUD pour les paniers
+const tarifsRoutes = require("./routes/tarifs"); // Routes CRUD pour la grille tarifaire
+const uploadCloudinaryRoutes = require("./routes/upload"); // Routes d’upload vers Cloudinary
+
+// Module pour gérer les chemins de fichiers
+const path = require("path");
+
+// Création de l’application Express
 const app = express();
 
-// Activation de CORS AVANT toute route :
-// En production, on autorise uniquement le frontend Vercel pour la sécurité
+// ================================
+// CONFIGURATION DE CORS (sécurité frontend/backend)
+// ================================
+
+// Autorise UNIQUEMENT le domaine frontend Vercel à faire des requêtes
 app.use(
   cors({
     origin: ["https://titre-afpa.vercel.app"],
-    credentials: true,
+    credentials: true, // Permet l’envoi de cookies si besoin
   })
 );
+
+// Accepte toutes les requêtes OPTIONS pour le prévol (navigateurs)
 app.options("*", cors());
 
-// Middleware de log global pour debug
+// ================================
+// MIDDLEWARE GLOBAL DE LOG (pour debug)
+// ================================
 app.use((req, res, next) => {
-  console.log(`[${req.method}] ${req.path}`);
-  next();
+  console.log(`[${req.method}] ${req.path}`); // Affiche chaque requête reçue
+  next(); // Passe au middleware suivant
 });
 
-// Route GET de test CORS
+// ================================
+// ROUTE DE TEST POUR VÉRIFIER CORS
+// ================================
 app.get("/api/cors-test", (req, res) => {
   res.json({ ok: true });
 });
-// cloudinary route
+
+// ================================
+// ROUTE CLOUDINARY POUR UPLOAD D'IMAGES EN LIGNE
+// ================================
 app.use("/api/upload-cloudinary", uploadCloudinaryRoutes);
 
-// Middleware pour exposer les fichiers dans /uploads
+// ================================
+// SERVIR LES FICHIERS STATIQUES : les images uploadées
+// ================================
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// ================================
+// CHARGEMENT DU .env et configuration du port
+// ================================
 dotenv.config();
-
 const PORT = process.env.PORT || 5000;
 
-// // Middleware JSON
-// app.use(express.json({ limit: "10mb" }));
-// app.use(express.urlencoded({ extended: true }));
+// ================================
+// MIDDLEWARES POUR LECTURE DES CORPS JSON / FORMULAIRES
+// ================================
+// Ces middlewares permettent d’analyser les corps de requêtes POST/PUT
+app.use(express.json({ limit: "10mb" })); // JSON (application/json)
+app.use(express.urlencoded({ extended: true, limit: "10mb" })); // Formulaires (x-www-form-urlencoded)
 
-// Connexion à MongoDB
+// ================================
+// CONNEXION À MONGODB
+// ================================
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("🟢 MongoDB connecté"))
   .catch((err) => console.error("🔴 Erreur de connexion MongoDB:", err));
 
-// --- Middleware JSON (doit être AVANT les routes !) ---
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-
-// Route de test
+// ================================
+// ROUTE DE TEST SIMPLE
+// ================================
 app.get("/", (req, res) => {
   res.send("🚀 Connexion réussie avec le backend !");
 });
 
-// ROUTE D'URGENCE pour ajouter des photos sans validation
+// ================================
+// ROUTE SPÉCIALE : AJOUT DIRECT DE PHOTO SANS VALIDATION
+// Permet d’insérer rapidement une image sans passer par la route standard
+// Utilisée pour tests ou migration rapide
+// ================================
 const Photo = require("./models/Photo");
 
-// Création d'une route spéciale AVANT le montage des autres routes
 app.post("/api/photos-direct", async (req, res) => {
   try {
     console.log("=== ROUTE DIRECTE PHOTOS ACTIVÉE ===");
     console.log("Données reçues:", req.body);
 
-    // Création directe sans validation
+    // Création brute sans contrôle de validation (usage limité)
     const photo = await Photo.create(req.body);
     console.log("Photo créée avec succès via route directe:", photo);
 
@@ -88,36 +125,42 @@ app.post("/api/photos-direct", async (req, res) => {
   }
 });
 
-// Routes de la galerie normales (maintenues pour compatibilité)
+// ================================
+// ROUTES MONTÉES (api/xxx)
+// ================================
+
+// Route principale pour la galerie (photos + upload local)
 app.use("/api/galerie", galerieRoutes);
 console.log("✅ Routes /api/galerie montées");
 
-// Route œuvres graphiques uniques
+// Route des œuvres graphiques uniques
 app.use("/api/oeuvres-graphique", oeuvresGraphiqueRoutes);
 console.log("✅ Route /api/oeuvres-graphique montée");
 
-// Routes CRUD pour la gestion avancée
+// Routes événements, paiements, paniers
 app.use("/api/evenements", evenementRoutes);
 app.use("/api/paiements", paiementRoutes);
 app.use("/api/paniers", panierRoutes);
 console.log("✅ Routes /api/evenements, /api/paiements, /api/paniers montées");
 
-// Route d'authentification
+// Authentification des utilisateurs (login, register, JWT)
 app.use("/api/auth", authRoutes);
 console.log("✅ Route /api/auth montée");
 
-// Route Stripe
+// Paiement Stripe
 app.use("/api/stripe", stripeRoutes);
 console.log("✅ Route /api/stripe montée");
 
-// Route tarifs (ajout non intrusif)
+// Grille tarifaire dynamique
 app.use("/api/tarifs", tarifsRoutes);
 console.log("✅ Route /api/tarifs montée");
 console.log(
   "✅ GET /api/tarifs fonctionne et la grille tarifaire dynamique est accessible côté front"
 );
 
-// Démarrage du serveur
+// ================================
+// DÉMARRAGE DU SERVEUR BACKEND
+// ================================
 app.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur le port ${PORT}`);
 });

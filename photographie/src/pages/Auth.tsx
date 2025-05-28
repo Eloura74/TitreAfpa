@@ -1,79 +1,106 @@
-// Importations des modules nécessaires
-// React : framework React
-// useState : hook React pour la gestion de l'état
-// Navbar : composant de navigation
-// Footer : composant de footer
-// register, login : services d'authentification
-import React, { useState } from "react";
-import Navbar from "../components/layout/navbar";
-import Footer from "../components/layout/Footer";
+// ==========================================================================
+// 📦 IMPORTS ESSENTIELS
+// ==========================================================================
+import React, { useState } from "react"; // Import de React + hook useState pour gérer les états locaux
+import Navbar from "../components/layout/navbar"; // Composant d'en-tête de navigation
+import Footer from "../components/layout/Footer"; // Composant de pied de page
+
+// Fonctions API d'authentification
 import { register, login } from "../services/authService";
+
+// Store Zustand pour gérer l'état global d'authentification
 import { useAuthStore } from "../store/authStore";
+
+// Hook de navigation (React Router) pour rediriger après login
 import { useNavigate } from "react-router-dom";
 
-// Fonction principale du composant Auth
+// ==========================================================================
+// 📄 COMPOSANT PRINCIPAL : Formulaire d'inscription et de connexion
+// ==========================================================================
 const Auth: React.FC = () => {
-  const [isRegister, setIsRegister] = useState(false); // État pour le mode d'inscription ou de connexion
-  const [email, setEmail] = useState(""); // État pour l'email
-  const [motdepasse, setMotdepasse] = useState(""); // État pour le mot de passe
-  const [message, setMessage] = useState(""); // État pour afficher les messages
-  const [loading, setLoading] = useState(false); // État pour le chargement
-  // Récupération des setters Zustand
-  // Récupère le setter Zustand avec alias pour éviter tout conflit
-const { setEmail: setEmailAuth, setIsAdmin: setIsAdminAuth, choix } = useAuthStore();
+  // ------------------------------------------------------------------------
+  // 💡 ÉTATS LOCAUX
+  // ------------------------------------------------------------------------
+  const [isRegister, setIsRegister] = useState(false); // Mode actif : inscription ou connexion
+  const [email, setEmail] = useState("");              // Saisie de l'email
+  const [motdepasse, setMotdepasse] = useState("");    // Saisie du mot de passe
+  const [message, setMessage] = useState("");          // Message de retour (succès / erreur)
+  const [loading, setLoading] = useState(false);       // Indique si une requête est en cours
+
+  // ------------------------------------------------------------------------
+  // 🌐 Zustand : récupération des setters depuis le store global
+  // ------------------------------------------------------------------------
+  const { setEmail: setEmailAuth, setIsAdmin: setIsAdminAuth, choix } = useAuthStore();
+
+  // Navigation programmatique (vers une autre page)
   const navigate = useNavigate();
 
-  // Gestion de la soumission du formulaire
+  // ------------------------------------------------------------------------
+  // 🧾 Fonction de soumission du formulaire
+  // ------------------------------------------------------------------------
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Empêche le rechargement de la page
-    setLoading(true); // Démarre le chargement
-    setMessage(""); // Réinitialise le message
+    e.preventDefault();         // Empêche le rechargement de la page
+    setLoading(true);           // Active l'état de chargement
+    setMessage("");             // Réinitialise le message de retour
+
     try {
       if (isRegister) {
-        // Si on est en mode inscription
-        const res = await register(email, motdepasse); // Appel de l'API d'inscription
-        if (res.error) setMessage(res.error); // Gestion des erreurs
-        else setMessage("Inscription réussie, vous pouvez vous connecter."); // Message de succès
+        // 🟢 Mode inscription
+        const res = await register(email, motdepasse); // Appel API
+        if (res.error) setMessage(res.error);          // Affiche l'erreur renvoyée
+        else setMessage("Inscription réussie, vous pouvez vous connecter.");
       } else {
-        // Sinon, on est en mode connexion
-        const res = await login(email, motdepasse); // Appel de l'API de connexion
-        if (res.error) setMessage(res.error); // Gestion des erreurs
+        // 🔵 Mode connexion
+        const res = await login(email, motdepasse);
+        if (res.error) setMessage(res.error);          // Erreur côté API
         else {
-          localStorage.setItem("token", res.token); // Stockage du token
-          // Mise à jour du contexte utilisateur global
-          // On sauvegarde l'email dans le store global Zustand
-          setEmailAuth(email); // Utilise l'alias pour Zustand
-          // On récupère le rôle admin renvoyé par le backend (booléen)
-          setIsAdminAuth(!!res.isAdmin); // Sécurise le typage
+          // 🔐 Stockage du token JWT dans le navigateur
+          localStorage.setItem("token", res.token);
+
+          // ✅ Mise à jour de l'état global (Zustand)
+          setEmailAuth(email);                     // Enregistre l'email
+          setIsAdminAuth(!!res.isAdmin);           // Enregistre si admin ou non (conversion sécurisée)
+
           setMessage("Connexion réussie !");
-          // Redirection selon le choix utilisateur (photographie ou photo-graphiste)
+
+          // 🔄 Redirection automatique selon le choix utilisateur
           setTimeout(() => {
             if (choix === "photo-graphiste") {
               navigate("/graphisme");
             } else {
               navigate("/photographie");
             }
-          }, 800);
+          }, 800); // Délai léger pour laisser le message s'afficher
         }
       }
     } catch {
-      setMessage("Erreur serveur, réessayez."); // Gestion des erreurs
+      setMessage("Erreur serveur, réessayez."); // Cas d’erreur inattendue (réseau ou serveur)
     } finally {
-      setLoading(false); // Arrête le chargement
+      setLoading(false); // Fin du chargement
     }
   };
 
+  // ------------------------------------------------------------------------
+  // 🎨 AFFICHAGE JSX : formulaire + navbar + footer
+  // ------------------------------------------------------------------------
   return (
     <div className="min-h-screen bg-[#0a0a10] text-white flex flex-col">
+      {/* Barre de navigation en haut */}
       <Navbar />
+
+      {/* Section principale centrée verticalement */}
       <div className="flex-1 flex flex-col items-center justify-center">
+        {/* FORMULAIRE D'AUTHENTIFICATION */}
         <form
           onSubmit={handleSubmit}
           className="bg-[#181824] p-8 rounded shadow-lg flex flex-col gap-4 w-full max-w-md"
         >
+          {/* Titre du formulaire (dynamique selon le mode) */}
           <h2 className="text-2xl font-bold text-[#ffe992] text-center mb-2">
             {isRegister ? "Inscription" : "Connexion"}
           </h2>
+
+          {/* Champ de saisie : email */}
           <input
             id="auth-email"
             name="email"
@@ -85,6 +112,8 @@ const { setEmail: setEmailAuth, setIsAdmin: setIsAdminAuth, choix } = useAuthSto
             required
             autoComplete="email"
           />
+
+          {/* Champ de saisie : mot de passe */}
           <input
             id="auth-password"
             name="motdepasse"
@@ -96,6 +125,8 @@ const { setEmail: setEmailAuth, setIsAdmin: setIsAdminAuth, choix } = useAuthSto
             required
             autoComplete={isRegister ? "new-password" : "current-password"}
           />
+
+          {/* Bouton principal (connexion ou inscription) */}
           <button type="submit" className="btn btn-primary" disabled={loading}>
             {loading
               ? "Chargement..."
@@ -103,6 +134,8 @@ const { setEmail: setEmailAuth, setIsAdmin: setIsAdminAuth, choix } = useAuthSto
               ? "S'inscrire"
               : "Se connecter"}
           </button>
+
+          {/* Bouton secondaire pour changer de mode (inscription <-> connexion) */}
           <button
             type="button"
             className="btn btn-secondary"
@@ -112,14 +145,21 @@ const { setEmail: setEmailAuth, setIsAdmin: setIsAdminAuth, choix } = useAuthSto
               ? "Déjà inscrit ? Se connecter"
               : "Pas encore de compte ? S'inscrire"}
           </button>
+
+          {/* Affichage du message (erreur ou succès) */}
           {message && (
             <div className="text-center text-red-400 mt-2">{message}</div>
           )}
         </form>
       </div>
+
+      {/* Pied de page */}
       <Footer />
     </div>
   );
 };
 
+// --------------------------------------------------------------------------
+// Export du composant
+// --------------------------------------------------------------------------
 export default Auth;

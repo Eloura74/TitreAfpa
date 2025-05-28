@@ -1,48 +1,48 @@
-// Import des hooks React nécessaires et de la bibliothèque Axios pour les requêtes HTTP
-import { useState, useEffect } from "react";
-import axios from "axios";
+// =======================
+// 📦 Import des modules
+// =======================
+import { useState, useEffect } from "react"; // Hooks pour gérer l'état et les effets
+import axios from "axios"; // Librairie pour les requêtes HTTP
 
 /* -------------------------------------------------------------------------
-   🧩 Interface TypeScript : structure d’un paiement
-   - "_id" est optionnel car généré côté backend
+   🧩 Type TypeScript représentant un paiement
 ------------------------------------------------------------------------- */
 interface Paiement {
-  _id?: string;
-  montant: number;
-  date: string;
-  utilisateur: string;
+  _id?: string; // ID unique généré par MongoDB (optionnel pour le formulaire)
+  montant: number; // Montant du paiement
+  date: string; // Date du paiement (format YYYY-MM-DD)
+  utilisateur: string; // Nom de l’utilisateur qui a payé
 }
 
-// URL de l'API REST pour accéder aux paiements
-// const API_URL = "http://localhost:5001/api/paiements";
+// URL de l’API, configurée via la variable d’environnement
 const API_URL = `${import.meta.env.VITE_API_URL}/api/paiements`;
 
+// =====================================================================
+// 🎯 Composant principal de gestion des paiements
+// =====================================================================
 export default function GestionPaiements() {
-  /* -------------------------------------------------------------------------
-     🧠 États React pour la gestion du CRUD
-  ------------------------------------------------------------------------- */
-  const [paiements, setPaiements] = useState<Paiement[]>([]); // Liste des paiements récupérés
+  // === États React ===
+  const [paiements, setPaiements] = useState<Paiement[]>([]); // Liste complète
   const [form, setForm] = useState<Paiement>({
     montant: 0,
     date: "",
     utilisateur: "",
-  }); // Formulaire
-  const [editId, setEditId] = useState<string | null>(null); // ID du paiement en cours de modification
-  const [loading, setLoading] = useState(false); // Indicateur de chargement
-  const [error, setError] = useState<string | null>(null); // Message d'erreur éventuel
+  }); // Formulaire actif
+  const [editId, setEditId] = useState<string | null>(null); // Mode édition ?
+  const [loading, setLoading] = useState(false); // Chargement en cours ?
+  const [error, setError] = useState<string | null>(null); // Message d’erreur ?
 
-  /* -------------------------------------------------------------------------
-     📦 Chargement initial des paiements à la première ouverture du composant
-  ------------------------------------------------------------------------- */
+  // =====================================================
+  // 🔁 Chargement initial des paiements à l’ouverture
+  // =====================================================
   useEffect(() => {
     setLoading(true);
     axios
       .get(API_URL, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, // Auth via token localStorage
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((r) => {
-        if (Array.isArray(r.data)) setPaiements(r.data);
-        else setPaiements([]);
+        setPaiements(Array.isArray(r.data) ? r.data : []);
       })
       .catch((e) => {
         setError(
@@ -54,44 +54,46 @@ export default function GestionPaiements() {
       .finally(() => setLoading(false));
   }, []);
 
-  /* -------------------------------------------------------------------------
-     📝 Mise à jour des champs du formulaire lors de la saisie
-  ------------------------------------------------------------------------- */
+  // =====================================================
+  // 📝 Gestion dynamique des champs du formulaire
+  // =====================================================
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Réinitialisation du formulaire et sortie du mode édition
+  // Remise à zéro du formulaire et sortie du mode édition
   const resetForm = () => {
     setForm({ montant: 0, date: "", utilisateur: "" });
     setEditId(null);
   };
 
-  /* -------------------------------------------------------------------------
-     ✅ Soumission du formulaire : ajout ou modification
-  ------------------------------------------------------------------------- */
+  // =====================================================
+  // ✅ Soumission du formulaire (création ou modification)
+  // =====================================================
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Empêche le rechargement de la page
     setLoading(true);
     setError(null);
+
     try {
       if (editId) {
-        // Modification d’un paiement existant
+        // 🔁 Modification d’un paiement existant
         await axios.put(`${API_URL}/${editId}`, form, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
       } else {
-        // Création d’un nouveau paiement
+        // ➕ Création d’un nouveau paiement
         await axios.post(API_URL, form, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
       }
-      // Rechargement de la liste après modification
+
+      // 🔄 Rafraîchissement de la liste
       const res = await axios.get(API_URL, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setPaiements(Array.isArray(res.data) ? res.data : []);
-      resetForm(); // Vide le formulaire
+      resetForm();
     } catch (e: any) {
       setError(
         e?.response?.data?.message ||
@@ -102,25 +104,27 @@ export default function GestionPaiements() {
     }
   };
 
-  /* -------------------------------------------------------------------------
-     ✏️ Préparation de l’édition d’un paiement (remplit le formulaire)
-  ------------------------------------------------------------------------- */
+  // =====================================================
+  // ✏️ Pré-remplissage du formulaire pour l’édition
+  // =====================================================
   const handleEdit = (p: Paiement) => {
     setForm(p);
     setEditId(p._id || null);
   };
 
-  /* -------------------------------------------------------------------------
-     ❌ Suppression d’un paiement
-  ------------------------------------------------------------------------- */
+  // =====================================================
+  // ❌ Suppression d’un paiement
+  // =====================================================
   const handleDelete = async (id: string) => {
     setLoading(true);
     setError(null);
+
     try {
       await axios.delete(`${API_URL}/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      // Mise à jour locale : filtre le paiement supprimé
+
+      // Mise à jour de la liste localement
       setPaiements(paiements.filter((p) => p._id !== id));
       resetForm();
     } catch (e: any) {
@@ -133,15 +137,15 @@ export default function GestionPaiements() {
     }
   };
 
-  /* -------------------------------------------------------------------------
-     🎨 Rendu de l’interface utilisateur
-  ------------------------------------------------------------------------- */
+  // =====================================================
+  // 🖥️ Rendu visuel du formulaire + tableau des paiements
+  // =====================================================
   return (
     <div>
-      {/* Affichage des erreurs éventuelles */}
+      {/* Affichage d’un message d’erreur si besoin */}
       {error && <div className="text-red-500 mb-2">{error}</div>}
 
-      {/* Formulaire de création / modification */}
+      {/* Formulaire de saisie ou de modification */}
       <form className="flex flex-col gap-2 mb-4" onSubmit={handleSubmit}>
         <input
           name="montant"
@@ -169,7 +173,7 @@ export default function GestionPaiements() {
           required
         />
 
-        {/* Boutons d’action du formulaire */}
+        {/* Boutons Ajouter / Modifier + Annuler */}
         <div className="flex gap-2">
           <button type="submit" className="btn btn-primary" disabled={loading}>
             {editId ? "Modifier" : "Ajouter"}
@@ -186,7 +190,7 @@ export default function GestionPaiements() {
         </div>
       </form>
 
-      {/* Tableau des paiements */}
+      {/* Tableau récapitulatif */}
       {loading ? (
         <div className="text-center">Chargement...</div>
       ) : paiements.length === 0 ? (

@@ -1,109 +1,134 @@
-// Import des hooks React et d'Axios pour les requêtes HTTP
+// =======================
+// 📦 Import des modules
+// =======================
+
+// Hooks React pour gérer les états et effets
 import { useState, useEffect } from "react";
+// Librairie Axios pour faire des requêtes HTTP
 import axios from "axios";
 
-// Interface TypeScript décrivant la structure d'un événement
+// ============================
+// 🧩 Définition du type Evenement
+// ============================
 interface Evenement {
-  _id?: string; // ID optionnel (présent uniquement après création en BDD)
-  titre: string;
-  date: string;
-  description: string;
+  _id?: string; // L’ID est optionnel car il est généré par MongoDB
+  titre: string; // Titre de l’événement
+  date: string; // Date de l’événement (au format texte ISO)
+  description: string; // Description de l’événement
 }
 
-// URL de l'API pour interagir avec les événements
-// const API_URL = "http://localhost:5001/api/evenements";
+// URL de base de l’API, récupérée depuis les variables d’environnement Vite
 const API_URL = `${import.meta.env.VITE_API_URL}/api/evenements`;
+
+// ==========================================
+// 🎯 Composant principal de gestion des événements
+// ==========================================
 export default function GestionEvenements() {
-  // Liste des événements récupérés depuis l'API
+  // === ÉTATS ===
+
+  // Liste des événements à afficher
   const [evenements, setEvenements] = useState<Evenement[]>([]);
-  // Données du formulaire en cours (ajout ou modification)
+
+  // Formulaire actuel (titre, date, description)
   const [form, setForm] = useState<Evenement>({
     titre: "",
     date: "",
     description: "",
   });
-  // ID de l’événement en cours de modification (null = ajout)
+
+  // ID de l’événement qu’on édite actuellement (null = on ajoute)
   const [editId, setEditId] = useState<string | null>(null);
-  // État de chargement pour afficher un indicateur
+
+  // Affichage du chargement (utile pendant les appels API)
   const [loading, setLoading] = useState(false);
-  // Gestion des erreurs (affichées en haut de l'interface)
+
+  // Message d’erreur à afficher si une requête échoue
   const [error, setError] = useState<string | null>(null);
 
-  // Chargement des événements au montage du composant
+  // ================================
+  // 🔁 Chargement initial des événements
+  // ================================
   useEffect(() => {
-    setLoading(true); // Affiche l’indicateur de chargement
+    setLoading(true);
     axios
       .get(API_URL, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, // Envoie le token d'authentification
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((r) => {
         if (Array.isArray(r.data))
-          setEvenements(r.data); // Si la réponse est bien un tableau
+          setEvenements(r.data); // Vérifie qu'on a bien un tableau
         else setEvenements([]);
       })
       .catch((e) => {
-        setError(
-          e?.response?.data?.message ||
-            "Erreur lors du chargement des événements."
-        );
+        setError(e?.response?.data?.message || "Erreur lors du chargement.");
         setEvenements([]);
       })
-      .finally(() => setLoading(false)); // Termine le chargement
+      .finally(() => setLoading(false));
   }, []);
 
-  // Gestion des champs de formulaire (champ modifié dynamiquement)
+  // ================================
+  // 🎯 Mise à jour du formulaire lors d’une saisie
+  // ================================
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Réinitialisation du formulaire et de l'état d'édition
+  // Réinitialise le formulaire
   const resetForm = () => {
     setForm({ titre: "", date: "", description: "" });
     setEditId(null);
   };
 
-  // Soumission du formulaire (ajout ou modification)
+  // ================================
+  // ✅ Envoi du formulaire (ajout ou modification)
+  // ================================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     try {
       if (editId) {
-        // Si on est en mode édition → requête PUT
+        // Mode édition : on met à jour un événement existant
         await axios.put(`${API_URL}/${editId}`, form, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
       } else {
-        // Sinon, on ajoute un nouvel événement → requête POST
+        // Mode ajout : on ajoute un nouvel événement
         await axios.post(API_URL, form, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
       }
-      // Mise à jour de la liste après opération
+
+      // Recharge la liste à jour depuis le serveur
       const res = await axios.get(API_URL, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
+
       setEvenements(Array.isArray(res.data) ? res.data : []);
-      resetForm(); // On vide le formulaire après ajout/modif
+      resetForm(); // On vide le formulaire
     } catch (e: any) {
       setError(
-        e?.response?.data?.message ||
-          "Erreur lors de l'enregistrement de l'événement."
+        e?.response?.data?.message || "Erreur lors de l'enregistrement."
       );
     } finally {
       setLoading(false);
     }
   };
 
-  // Clique sur le bouton "modifier" → on remplit le formulaire avec l'événement sélectionné
+  // ================================
+  // ✏️ Remplit le formulaire avec un événement existant
+  // ================================
   const handleEdit = (evt: Evenement) => {
-    setForm(evt); // Remplit les champs avec les données de l’événement
-    setEditId(evt._id || null); // Active le mode édition
+    setForm(evt);
+    setEditId(evt._id || null);
   };
 
-  // Suppression d’un événement
+  // ================================
+  // 🗑️ Supprime un événement
+  // ================================
   const handleDelete = async (id: string) => {
     setLoading(true);
     setError(null);
@@ -111,37 +136,37 @@ export default function GestionEvenements() {
       await axios.delete(`${API_URL}/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      // Mise à jour locale de la liste après suppression
+
+      // Mise à jour de la liste côté frontend
       setEvenements(evenements.filter((e) => e._id !== id));
       resetForm();
     } catch (e: any) {
-      setError(
-        e?.response?.data?.message ||
-          "Erreur lors de la suppression de l'événement."
-      );
+      setError(e?.response?.data?.message || "Erreur lors de la suppression.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Affichage de l’interface
+  // ================================
+  // 🖥️ Affichage de l’interface
+  // ================================
   return (
     <div className="bg-[#181824] rounded-lg shadow-lg p-6 max-w-2xl mx-auto mt-6 border border-[#ffe992]/20">
       <h2 className="text-2xl font-bold mb-4 text-[#ffe992]">
         Gestion <span className="text-white">des Événements</span>
       </h2>
 
-      {/* Affichage des erreurs */}
+      {/* Affiche les erreurs éventuelles */}
       {error && <div className="text-red-400 mb-2">{error}</div>}
 
-      {/* Formulaire d'ajout / modification */}
+      {/* Formulaire de création ou modification */}
       <form className="flex flex-col gap-3 mb-6" onSubmit={handleSubmit}>
         <input
           name="titre"
           placeholder="Titre"
           value={form.titre}
           onChange={handleChange}
-          className="bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#ffe992] transition"
+          className="bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white"
           required
         />
         <input
@@ -149,7 +174,7 @@ export default function GestionEvenements() {
           type="date"
           value={form.date}
           onChange={handleChange}
-          className="bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#ffe992] transition"
+          className="bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white"
           required
         />
         <textarea
@@ -157,10 +182,10 @@ export default function GestionEvenements() {
           placeholder="Description"
           value={form.description}
           onChange={handleChange}
-          className="bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#ffe992] transition resize-none"
+          className="bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white resize-none"
           required
         />
-        {/* Boutons Ajouter/Modifier et Annuler */}
+        {/* Boutons Ajouter/Modifier + Annuler */}
         <div className="flex gap-2 mt-2">
           <button
             type="submit"
@@ -181,7 +206,7 @@ export default function GestionEvenements() {
         </div>
       </form>
 
-      {/* Liste des événements */}
+      {/* Affichage de la liste des événements */}
       {loading ? (
         <div className="text-center text-gray-400">Chargement...</div>
       ) : evenements.length === 0 ? (
@@ -206,14 +231,14 @@ export default function GestionEvenements() {
                 <td className="px-2 py-1 text-white">{evt.date}</td>
                 <td className="px-2 py-1 text-white">{evt.description}</td>
                 <td className="px-2 py-1">
-                  {/* Bouton modifier */}
+                  {/* Bouton Modifier */}
                   <button
                     className="bg-yellow-300 text-black rounded px-2 py-1 mr-2 hover:bg-yellow-200 transition"
                     onClick={() => handleEdit(evt)}
                   >
                     ✏️
                   </button>
-                  {/* Bouton supprimer */}
+                  {/* Bouton Supprimer */}
                   <button
                     className="bg-red-500 text-white rounded px-2 py-1 hover:bg-red-600 transition"
                     onClick={() => evt._id && handleDelete(evt._id)}
