@@ -36,12 +36,50 @@ const app = express();
 // ================================
 
 // Autorise UNIQUEMENT le domaine frontend Vercel à faire des requêtes
+// app.use(
+//   cors({
+//     origin: [
+//       "https://titre-afpa-git-auth-faberquentingmailcoms-projects.vercel.app",
+//       "http://localhost:5173", // ton front local (pour dev)
+//     ],
+//     credentials: true, // Permet l’envoi de cookies si besoin
+//   })
+// );
+
+// // Accepte toutes les requêtes OPTIONS pour le prévol (navigateurs)
+// app.options("*", cors());
+
+// ================================
+// CONFIGURATION DE CORS (sécurité frontend/backend)
+// ================================
+
+// Liste blanche pour la prod et le local
+const allowedOrigins = [
+  "https://titre-afpa.vercel.app", // domaine principal prod
+  "http://localhost:5173", // dev local
+];
+
+// Fonction dynamique pour CORS
+function checkOrigin(origin, callback) {
+  // Autorise prod et local
+  if (allowedOrigins.includes(origin)) return callback(null, true);
+
+  // Autorise tous les sous-domaines previews Vercel (https obligatoire)
+  if (
+    origin &&
+    origin.startsWith("https://") &&
+    origin.endsWith(".vercel.app")
+  ) {
+    return callback(null, true);
+  }
+
+  // Sinon, refuse
+  return callback(new Error("Not allowed by CORS"));
+}
+
 app.use(
   cors({
-    origin: [
-      "https://titre-afpa-git-auth-faberquentingmailcoms-projects.vercel.app",
-      "http://localhost:5173", // ton front local (pour dev)
-    ],
+    origin: checkOrigin,
     credentials: true, // Permet l’envoi de cookies si besoin
   })
 );
