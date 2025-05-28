@@ -72,20 +72,26 @@ const Auth: React.FC = () => {
             {isRegister ? "Inscription" : "Connexion"}
           </h2>
           <input
+            id="auth-email"
+            name="email"
             type="email"
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
             className="input input-bordered"
             required
+            autoComplete="email"
           />
           <input
+            id="auth-password"
+            name="motdepasse"
             type="password"
             placeholder="Mot de passe"
             value={motdepasse}
             onChange={e => setMotdepasse(e.target.value)}
             className="input input-bordered"
             required
+            autoComplete={isRegister ? "new-password" : "current-password"}
           />
           <button
             type="submit"
