@@ -77,10 +77,27 @@ function checkOrigin(origin, callback) {
   return callback(new Error("Not allowed by CORS"));
 }
 
+// ================================
+// 1. CORS SPÉCIFIQUE POUR LES IMAGES (uploads) : autorise uniquement GET, sans credentials
+// ================================
 app.use(
+  "/uploads",
   cors({
     origin: checkOrigin,
-    credentials: true, // Permet l’envoi de cookies si besoin
+    methods: ["GET"],
+    credentials: false, // Pas de cookies pour les images
+  }),
+  express.static(path.join(__dirname, "uploads"))
+);
+
+// ================================
+// 2. CORS GLOBAL POUR LES ROUTES API UNIQUEMENT
+// ================================
+app.use(
+  "/api",
+  cors({
+    origin: checkOrigin,
+    credentials: true, // Cookies/token autorisés pour les routes API
   })
 );
 
@@ -108,9 +125,18 @@ app.get("/api/cors-test", (req, res) => {
 app.use("/api/upload-cloudinary", uploadCloudinaryRoutes);
 
 // ================================
-// SERVIR LES FICHIERS STATIQUES : les images uploadées
+// SERVIR LES FICHIERS STATIQUES : les images uploadées avec CORS sécurisé
 // ================================
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// On autorise explicitement CORS sur /uploads pour permettre l'affichage des images depuis le front (Vercel/local)
+app.use(
+  "/uploads",
+  cors({
+    origin: checkOrigin, // Utilise la même whitelist dynamique
+    methods: ["GET"],   // On autorise uniquement la lecture d'images
+    credentials: false,  // Pas besoin de cookies pour les images
+  }),
+  express.static(path.join(__dirname, "uploads"))
+);
 
 // ================================
 // CHARGEMENT DU .env et configuration du port
