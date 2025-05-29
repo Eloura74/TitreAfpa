@@ -4,7 +4,7 @@
 import React, { useState } from "react"; // Import de React + hook useState pour gérer les états locaux
 import Navbar from "../components/layout/navbar"; // Composant d'en-tête de navigation
 import Footer from "../components/layout/Footer"; // Composant de pied de page
-
+import { useUser } from "../context/UserContext";
 // Fonctions API d'authentification
 import { register, login } from "../services/authService";
 
@@ -18,6 +18,11 @@ import { useNavigate } from "react-router-dom";
 // 📄 COMPOSANT PRINCIPAL : Formulaire d'inscription et de connexion
 // ==========================================================================
 const Auth: React.FC = () => {
+  // ------------------------------------------------------------------------
+  // 🎯 Récupération du setter utilisateur global (UserContext)
+  // Toujours appeler les hooks React au niveau racine du composant !
+  // (Jamais dans une fonction, un if, une boucle, etc.)
+  const { setUser } = useUser();
   // ------------------------------------------------------------------------
   // 💡 ÉTATS LOCAUX
   // ------------------------------------------------------------------------
@@ -62,7 +67,20 @@ const Auth: React.FC = () => {
           // 🔐 Stockage du token JWT dans le navigateur
           localStorage.setItem("token", res.token);
 
-          // ✅ Mise à jour de l'état global (Zustand)
+          // ✅ Mise à jour de l'état utilisateur global (UserContext)
+          // On utilise directement setUser récupéré en haut du composant (meilleure pratique React)
+          setUser({
+            isAuthenticated: !!res.token, // Authentifié si le token existe
+            isAdmin: res.role === "admin", // Admin si le rôle est "admin"
+            nom: res.nom || "", // Nom récupéré ou chaîne vide
+          });
+
+          // 👉 Navigation vers la page d'accueil ou admin selon le rôle
+          if (res.role === "admin") {
+            navigate("/admin/gestion-galerie");
+          } else {
+            navigate("/");
+          }
           setEmailAuth(email); // Enregistre l'email
           // Correction : accepte aussi le champ 'role' (string) du backend
           const isAdmin =
