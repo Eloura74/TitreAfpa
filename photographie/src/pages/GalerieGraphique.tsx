@@ -99,12 +99,23 @@ export default function GalerieGraphique() {
               >
                 {/* 🖼️ Image de l'œuvre */}
                 <div className="h-64 overflow-hidden w-full">
+                  {/* Affichage robuste de l'image + fallback local si erreur */}
                   <img
-                    src={oeuvre.image}
+                    src={
+                      oeuvre.image && (oeuvre.image.startsWith("http") || oeuvre.image.startsWith("/images/"))
+                        ? oeuvre.image
+                        : oeuvre.image && oeuvre.image.startsWith("/uploads/")
+                        ? `${import.meta.env.VITE_API_URL}${oeuvre.image}`
+                        : "/images/placeholder.jpg"
+                    }
                     alt={oeuvre.titre || "Œuvre graphique"}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     onError={(e) => {
-                      e.currentTarget.src = "/uploads/placeholder.jpg"; // Fallback si image absente
+                      // Empêche la boucle infinie si le placeholder échoue aussi
+                      if (!e.currentTarget.src.endsWith("/images/placeholder.jpg")) {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "/images/placeholder.jpg";
+                      }
                     }}
                   />
                 </div>
