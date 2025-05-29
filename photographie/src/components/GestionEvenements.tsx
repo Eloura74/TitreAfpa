@@ -10,12 +10,8 @@ import axios from "axios";
 // ============================
 // 🧩 Définition du type Evenement
 // ============================
-interface Evenement {
-  _id?: string; // L’ID est optionnel car il est généré par MongoDB
-  titre: string; // Titre de l’événement
-  date: string; // Date de l’événement (au format texte ISO)
-  description: string; // Description de l’événement
-}
+// On importe le type Evenement depuis le dossier types
+import { Evenement } from "../types/evenement";
 
 // URL de base de l’API, récupérée depuis les variables d’environnement Vite
 const API_URL = `${import.meta.env.VITE_API_URL}/api/evenements`;
@@ -29,12 +25,21 @@ export default function GestionEvenements() {
   // Liste des événements à afficher
   const [evenements, setEvenements] = useState<Evenement[]>([]);
 
-  // Formulaire actuel (titre, date, description)
+  // Formulaire actuel (correspond au type Evenement)
   const [form, setForm] = useState<Evenement>({
+    id: "",
     titre: "",
-    date: "",
     description: "",
+    dateDebut: "",
+    dateFin: "",
+    image: "",
+    lieu: "",
+    photos: [],
+    theme: "",
   });
+
+  // Prévisualisation de l'image uploadée
+  const [imagePreview, setImagePreview] = useState<string>("");
 
   // ID de l’événement qu’on édite actuellement (null = on ajoute)
   const [editId, setEditId] = useState<string | null>(null);
@@ -75,10 +80,36 @@ export default function GestionEvenements() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Réinitialise le formulaire
+  // Réinitialise le formulaire (tous les champs)
   const resetForm = () => {
-    setForm({ titre: "", date: "", description: "" });
+    setForm({
+      id: "",
+      titre: "",
+      description: "",
+      dateDebut: "",
+      dateFin: "",
+      image: "",
+      lieu: "",
+      photos: [],
+      theme: "",
+    });
+    setImagePreview("");
     setEditId(null);
+  };
+
+  // ================================
+  // 📷 Gestion de l'upload et de la prévisualisation de l'image
+  // ================================
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+        setForm((prev) => ({ ...prev, image: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // ================================
@@ -122,8 +153,19 @@ export default function GestionEvenements() {
   // ✏️ Remplit le formulaire avec un événement existant
   // ================================
   const handleEdit = (evt: Evenement) => {
-    setForm(evt);
-    setEditId(evt._id || null);
+    setForm({
+      ...evt,
+      id: evt.id || "",
+      dateDebut: evt.dateDebut || "",
+      dateFin: evt.dateFin || "",
+      image: evt.image || "",
+      lieu: evt.lieu || "",
+      description: evt.description || "",
+      photos: evt.photos || [],
+      theme: evt.theme || "",
+    });
+    setImagePreview(evt.image || "");
+    setEditId(evt.id || null);
   };
 
   // ================================
@@ -138,7 +180,7 @@ export default function GestionEvenements() {
       });
 
       // Mise à jour de la liste côté frontend
-      setEvenements(evenements.filter((e) => e._id !== id));
+      setEvenements(evenements.filter((e) => e.id !== id));
       resetForm();
     } catch (e: any) {
       setError(e?.response?.data?.message || "Erreur lors de la suppression.");
@@ -161,6 +203,21 @@ export default function GestionEvenements() {
 
       {/* Formulaire de création ou modification */}
       <form className="flex flex-col gap-3 mb-6" onSubmit={handleSubmit}>
+        {/* Champ image de couverture */}
+        <input
+          name="image"
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white"
+        />
+        {imagePreview && (
+          <img
+            src={imagePreview}
+            alt="Prévisualisation"
+            className="w-32 h-20 object-cover rounded"
+          />
+        )}
         <input
           name="titre"
           placeholder="Titre"
@@ -169,10 +226,20 @@ export default function GestionEvenements() {
           className="bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white"
           required
         />
+        {/* Champ date de début */}
         <input
-          name="date"
+          name="dateDebut"
           type="date"
-          value={form.date}
+          value={form.dateDebut}
+          onChange={handleChange}
+          className="bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white"
+          required
+        />
+        {/* Champ date de fin */}
+        <input
+          name="dateFin"
+          type="date"
+          value={form.dateFin}
           onChange={handleChange}
           className="bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white"
           required
@@ -216,32 +283,32 @@ export default function GestionEvenements() {
           <thead>
             <tr className="text-[#ffe992] text-lg">
               <th className="px-2">Titre</th>
-              <th className="px-2">Date</th>
+              <th className="px-2">Début</th>
+              <th className="px-2">Fin</th>
               <th className="px-2">Description</th>
               <th className="px-2">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {evenements.map((evt) => (
+            {evenements.map((event) => (
               <tr
-                key={evt._id}
+                key={event.id}
                 className="bg-[#232336] hover:bg-[#ffe992]/10 transition rounded"
               >
-                <td className="px-2 py-1 text-white">{evt.titre}</td>
-                <td className="px-2 py-1 text-white">{evt.date}</td>
-                <td className="px-2 py-1 text-white">{evt.description}</td>
+                <td className="px-2 py-1 text-white">{event.titre}</td>
+                <td className="px-2 py-1 text-white">{event.dateDebut}</td>
+                <td className="px-2 py-1 text-white">{event.dateFin}</td>
+                <td className="px-2 py-1 text-white">{event.description}</td>
                 <td className="px-2 py-1">
-                  {/* Bouton Modifier */}
                   <button
                     className="bg-yellow-300 text-black rounded px-2 py-1 mr-2 hover:bg-yellow-200 transition"
-                    onClick={() => handleEdit(evt)}
+                    onClick={() => handleEdit(event)}
                   >
                     ✏️
                   </button>
-                  {/* Bouton Supprimer */}
                   <button
                     className="bg-red-500 text-white rounded px-2 py-1 hover:bg-red-600 transition"
-                    onClick={() => evt._id && handleDelete(evt._id)}
+                    onClick={() => event.id && handleDelete(event.id)}
                   >
                     🗑️
                   </button>
@@ -251,6 +318,18 @@ export default function GestionEvenements() {
           </tbody>
         </table>
       )}
+      {/* 🖼️ Image de couverture (avec fallback si absente) */}
+      {evenements.map((event) => (
+        <div key={event.id}>
+          {event.image && (
+            <img
+              src={event.image}
+              alt={event.titre}
+              className="w-full h-32 object-cover rounded-t"
+            />
+          )}
+        </div>
+      ))}
     </div>
   );
 }

@@ -3,11 +3,11 @@ export interface Evenement {
   id: string; // Normalisé depuis _id MongoDB
   titre: string;
   description?: string;
-  date: string;
-  dateDebut?: string;
-  dateFin?: string;
+  dateDebut: string; // Date de début (obligatoire)
+  dateFin: string;   // Date de fin (obligatoire)
   lieu?: string;
-  urlAffiche?: string;
+  image?: string;    // URL de l'image de couverture (optionnelle)
   photos?: string[];
-  theme?: string; // Ajout du champ optionnel theme
+  theme?: string;    // Thème optionnel
 }
+

@@ -10,15 +10,31 @@ const mongoose = require("mongoose"); // Import de la bibliothèque Mongoose
 // Le schéma définit les champs et les types attendus pour chaque document "événement"
 const evenementSchema = new mongoose.Schema({
   // Champ "titre" : chaîne de caractères obligatoire
+  // Titre de l'événement (obligatoire)
   titre: { type: String, required: true }, // Exemple : "Mariage de Julie & Tom"
 
   // Champ "description" : chaîne de caractères optionnelle
+  // Description de l'événement (optionnelle)
   description: { type: String }, // Exemple : "Un mariage en plein air dans les Cévennes"
 
-  // Champ "date" : de type Date, obligatoire
-  date: { type: Date, required: true }, // Exemple : "2025-08-15"
-
+  // Champ "dateDebut" : date de début de l'événement (obligatoire)
+  // Date de début de l'événement (obligatoire)
+  dateDebut: {
+    type: Date,
+    required: true,
+  },
+  // Date de fin de l'événement (obligatoire)
+  dateFin: {
+    type: Date,
+    required: true,
+  },
+  // URL de l'image de couverture (optionnelle)
+  image: {
+    type: String,
+    required: false,
+  },
   // Champ "lieu" : chaîne de caractères optionnelle
+  // Lieu de l'événement (optionnel)
   lieu: { type: String }, // Exemple : "Domaine de la Grangette, Montpellier"
 
   // Champ "photos" : tableau d'identifiants d'objets (références à des documents de la collection "Photo")

@@ -12,7 +12,7 @@ import "../styles/globals.css"; // Styles globaux de l'app
 import "../styles/evenements.css"; // Styles spécifiques à cette page
 
 // Icônes importées depuis la librairie Lucide
-import { CalendarDays, MapPin, Target } from "lucide-react";
+import { MapPin, Target } from "lucide-react";
 
 // Type TypeScript pour sécuriser les objets événements
 import type { Evenement } from "../types/evenement";
@@ -66,8 +66,8 @@ export default function Evenements() {
   // 🔎 Filtrage dynamique selon le filtre sélectionné
   // ----------------------------------------------------------------------------
   const filteredEvents: Evenement[] = evenements.filter((event) => {
-    if (filter === "à venir") return event.date >= today;
-    if (filter === "passé") return event.date < today;
+    if (filter === "à venir") return event.dateDebut >= today;
+    if (filter === "passé") return event.dateDebut < today;
     return true;
   });
 
@@ -124,30 +124,13 @@ export default function Evenements() {
                   className="bg-black/90 rounded-xl shadow-lg overflow-hidden flex flex-col"
                 >
                   {/* 🖼️ Image d’affiche (avec fallback si absente) */}
-                  {(() => {
-                    const urlAffiche =
-                      event.urlAffiche && event.urlAffiche.startsWith("http")
-                        ? event.urlAffiche
-                        : event.urlAffiche &&
-                          event.urlAffiche.startsWith("/uploads/")
-                        ? `${import.meta.env.VITE_API_URL}${event.urlAffiche}`
-                        : event.urlAffiche &&
-                          event.urlAffiche.startsWith("/images/")
-                        ? event.urlAffiche
-                        : `/images/${event.urlAffiche || "placeholder.jpg"}`;
-                    return (
-                      <img
-                        src={urlAffiche}
-                        alt={event.titre || "Affiche événement"}
-                        className="w-full h-40 sm:h-56 object-cover object-center bg-gray-900"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.currentTarget.src = "";
-                          e.currentTarget.classList.add("bg-gray-800");
-                        }}
-                      />
-                    );
-                  })()}
+                  {event.image && (
+                    <img
+                      src={event.image}
+                      alt={event.titre}
+                      className="w-full h-32 object-cover rounded-t"
+                    />
+                  )}
 
                   {/* 📋 Détails de l’événement (titre, description, date, lieu, thème) */}
                   <div className="p-3 flex flex-col gap-2 flex-1">
@@ -159,9 +142,8 @@ export default function Evenements() {
                     </p>
                     <div className="flex flex-col gap-1 mt-2">
                       {/* 🗓 Dates de début/fin */}
-                      <span className="flex items-center gap-2 text-[#d6c487] text-xs sm:text-sm">
-                        <CalendarDays size={16} />
-                        Du {event.dateDebut || "-"} au {event.dateFin || "-"}
+                      <span className="text-xs text-gray-400">
+                        Du {event.dateDebut} au {event.dateFin}
                       </span>
 
                       {/* 📍 Lieu */}
