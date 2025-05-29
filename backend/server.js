@@ -62,6 +62,7 @@ const allowedOrigins = [
 // Fonction dynamique pour CORS
 function checkOrigin(origin, callback) {
   // Autorise prod et local
+  if (!origin) return callback(null, true); // <--- AJOUT : accepte les accès directs sans Origin (navigateurs)
   if (allowedOrigins.includes(origin)) return callback(null, true);
 
   // Autorise tous les sous-domaines previews Vercel (https obligatoire)
@@ -76,7 +77,6 @@ function checkOrigin(origin, callback) {
   // Sinon, refuse
   return callback(new Error("Not allowed by CORS"));
 }
-
 // ================================
 // 1. CORS SPÉCIFIQUE POUR LES IMAGES (uploads) : autorise uniquement GET, sans credentials
 // ================================
@@ -132,8 +132,8 @@ app.use(
   "/uploads",
   cors({
     origin: checkOrigin, // Utilise la même whitelist dynamique
-    methods: ["GET"],   // On autorise uniquement la lecture d'images
-    credentials: false,  // Pas besoin de cookies pour les images
+    methods: ["GET"], // On autorise uniquement la lecture d'images
+    credentials: false, // Pas besoin de cookies pour les images
   }),
   express.static(path.join(__dirname, "uploads"))
 );
