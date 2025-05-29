@@ -26,6 +26,7 @@ interface Props {
 export default function RouteAdminOnly({ children }: Props) {
   // 📥 Récupération de l'état utilisateur depuis le contexte global
   const { user } = useUser(); // `user` contient des infos comme : isAuthenticated, isAdmin, email, etc.
+  console.log(user);
 
   /* -------------------------------------------------------------------------
      🚫 Vérification des autorisations :
