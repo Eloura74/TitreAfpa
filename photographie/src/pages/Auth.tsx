@@ -22,15 +22,19 @@ const Auth: React.FC = () => {
   // 💡 ÉTATS LOCAUX
   // ------------------------------------------------------------------------
   const [isRegister, setIsRegister] = useState(false); // Mode actif : inscription ou connexion
-  const [email, setEmail] = useState("");              // Saisie de l'email
-  const [motdepasse, setMotdepasse] = useState("");    // Saisie du mot de passe
-  const [message, setMessage] = useState("");          // Message de retour (succès / erreur)
-  const [loading, setLoading] = useState(false);       // Indique si une requête est en cours
+  const [email, setEmail] = useState(""); // Saisie de l'email
+  const [motdepasse, setMotdepasse] = useState(""); // Saisie du mot de passe
+  const [message, setMessage] = useState(""); // Message de retour (succès / erreur)
+  const [loading, setLoading] = useState(false); // Indique si une requête est en cours
 
   // ------------------------------------------------------------------------
   // 🌐 Zustand : récupération des setters depuis le store global
   // ------------------------------------------------------------------------
-  const { setEmail: setEmailAuth, setIsAdmin: setIsAdminAuth, choix } = useAuthStore();
+  const {
+    setEmail: setEmailAuth,
+    setIsAdmin: setIsAdminAuth,
+    choix,
+  } = useAuthStore();
 
   // Navigation programmatique (vers une autre page)
   const navigate = useNavigate();
@@ -39,29 +43,32 @@ const Auth: React.FC = () => {
   // 🧾 Fonction de soumission du formulaire
   // ------------------------------------------------------------------------
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();         // Empêche le rechargement de la page
-    setLoading(true);           // Active l'état de chargement
-    setMessage("");             // Réinitialise le message de retour
+    e.preventDefault(); // Empêche le rechargement de la page
+    setLoading(true); // Active l'état de chargement
+    setMessage(""); // Réinitialise le message de retour
 
     try {
       if (isRegister) {
         // 🟢 Mode inscription
         const res = await register(email, motdepasse); // Appel API
-        if (res.error) setMessage(res.error);          // Affiche l'erreur renvoyée
+        if (res.error) setMessage(res.error); // Affiche l'erreur renvoyée
         else setMessage("Inscription réussie, vous pouvez vous connecter.");
       } else {
         // 🔵 Mode connexion
         const res = await login(email, motdepasse);
-        if (res.error) setMessage(res.error);          // Erreur côté API
+        console.log(res);
+        if (res.error) setMessage(res.error); // Erreur côté API
         else {
           // 🔐 Stockage du token JWT dans le navigateur
           localStorage.setItem("token", res.token);
 
           // ✅ Mise à jour de l'état global (Zustand)
-          setEmailAuth(email);                     // Enregistre l'email
+          setEmailAuth(email); // Enregistre l'email
           // Correction : accepte aussi le champ 'role' (string) du backend
-          const isAdmin = res.isAdmin !== undefined ? !!res.isAdmin : res.role === "admin";
-          setIsAdminAuth(isAdmin);                 // Enregistre si admin ou non (conversion sécurisée)
+          const isAdmin =
+            res.isAdmin !== undefined ? !!res.isAdmin : res.role === "admin";
+          console.log(isAdmin);
+          setIsAdminAuth(isAdmin); // Enregistre si admin ou non (conversion sécurisée)
 
           setMessage("Connexion réussie !");
 
