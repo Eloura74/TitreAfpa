@@ -27,6 +27,7 @@ export default function Graphisme() {
     // Conteneur principal, flex colonne, hauteur minimum égale à la hauteur écran
     <div className="home-page min-h-screen flex flex-col">
       {/* Barre de navigation fixe en haut */}
+      {/* La Navbar détecte automatiquement l'univers courant (graphisme/photographie) et adapte les liens */}
       <Navbar />
 
       {/* Conteneur pour l'image de fond et la texture */}

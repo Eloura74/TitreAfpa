@@ -31,7 +31,8 @@ export default function Photographie() {
   return (
     // Conteneur principal avec une mise en page en colonne et une hauteur minimale sur tout l'écran
     <div className="home-page min-h-screen flex flex-col">
-      <Navbar /> {/* Barre de navigation en haut de page */}
+      {/* La Navbar détecte automatiquement l'univers courant (photographie/graphisme) et adapte les liens */}
+      <Navbar />
       {/* Conteneur de l'image de fond et de la texture */}
       <div className="hero-image-container">
         <img

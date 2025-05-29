@@ -11,9 +11,10 @@ export default function Navbar() {
   const location = useLocation(); // Donne accès à l'URL actuelle
 
   // Détecte si on se trouve dans l'univers "graphisme"
+  // On détecte si l'on est dans l'univers "graphisme" pour adapter la navbar
   const isGraphisme =
-    location.pathname.startsWith("/graphisme") || // Page commençant par /graphisme
-    location.pathname === "/galerie-graphique"; // Ou page de galerie graphique unique
+    location.pathname.startsWith("/graphisme") ||
+    location.pathname.startsWith("/galerie-graphique");
 
   // État local pour contrôler l'ouverture du menu sur mobile
   const [isMenuOpen, setIsMenuOpen] = useState(false);

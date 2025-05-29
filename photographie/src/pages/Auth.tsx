@@ -53,11 +53,24 @@ const Auth: React.FC = () => {
     setMessage(""); // Réinitialise le message de retour
 
     try {
+      // Détection du contexte d'univers (photographie ou graphisme)
+      const isGraphisme = window.location.pathname.startsWith("/graphisme") || window.location.search.includes("mode=graphisme");
       if (isRegister) {
         // 🟢 Mode inscription
         const res = await register(email, motdepasse); // Appel API
         if (res.error) setMessage(res.error); // Affiche l'erreur renvoyée
-        else setMessage("Inscription réussie, vous pouvez vous connecter.");
+        else {
+          // Connexion réussie : on met à jour le contexte utilisateur
+          setUser(res.user);
+          setEmailAuth(email);
+          setIsAdminAuth(res.user.isAdmin);
+          // Redirection après connexion selon le contexte
+          if (isGraphisme) {
+            navigate("/graphisme");
+          } else {
+            navigate("/photographie");
+          }
+        }
       } else {
         // 🔵 Mode connexion
         const res = await login(email, motdepasse);
