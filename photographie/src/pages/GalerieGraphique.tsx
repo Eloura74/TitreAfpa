@@ -101,12 +101,23 @@ export default function GalerieGraphique() {
                 <div className="h-64 overflow-hidden w-full">
                   {/* Affichage robuste de l'image + fallback local si erreur */}
                   <img
+                    // Affichage de l'image avec la même logique que la galerie photo
                     src={
-                      oeuvre.image && (oeuvre.image.startsWith("http") || oeuvre.image.startsWith("/images/"))
-                        ? oeuvre.image
-                        : oeuvre.image && oeuvre.image.startsWith("/uploads/")
-                        ? `${import.meta.env.VITE_API_URL}${oeuvre.image}`
-                        : "/images/placeholder.jpg"
+                      (() => {
+                        // Debug : affiche l'URL image reçue
+                        console.log("Image graphique reçue:", oeuvre.image);
+                        if (oeuvre.image && oeuvre.image.startsWith("http")) {
+                          return oeuvre.image;
+                        } else if (oeuvre.image && oeuvre.image.startsWith("/uploads/")) {
+                          return `${import.meta.env.VITE_API_URL}${oeuvre.image}`;
+                        } else if (oeuvre.image && oeuvre.image.startsWith("/images/")) {
+                          return oeuvre.image;
+                        } else if (oeuvre.image) {
+                          return `/images/${oeuvre.image}`;
+                        } else {
+                          return "/images/placeholder.jpg";
+                        }
+                      })()
                     }
                     alt={oeuvre.titre || "Œuvre graphique"}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
