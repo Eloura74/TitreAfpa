@@ -11,10 +11,21 @@ export default function Navbar() {
   const location = useLocation(); // Donne accès à l'URL actuelle
 
   // Détecte si on se trouve dans l'univers "graphisme"
-  // On détecte si l'on est dans l'univers "graphisme" pour adapter la navbar
-  const isGraphisme =
-    location.pathname.startsWith("/graphisme") ||
-    location.pathname.startsWith("/galerie-graphique");
+  // On détecte l'univers courant depuis le localStorage (persistant entre les pages)
+  const univers = localStorage.getItem("univers") || (location.pathname.startsWith("/graphisme") ? "graphisme" : "photographie");
+  const isGraphisme = univers === "graphisme";
+
+  // Fonction pour changer d'univers dynamiquement
+  const handleUniversChange = (nouvelUnivers: "photographie" | "graphisme") => {
+    localStorage.setItem("univers", nouvelUnivers);
+    // Redirige vers la page d'accueil de l'univers choisi sans déconnexion
+    if (nouvelUnivers === "graphisme") {
+      window.location.href = "/graphisme";
+    } else {
+      window.location.href = "/photographie";
+    }
+  };
+
 
   // État local pour contrôler l'ouverture du menu sur mobile
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,6 +50,18 @@ export default function Navbar() {
           ☰
         </button>
 
+        {/* === Sélecteur d'univers (photographie/graphisme) === */}
+        <div className="flex items-center gap-3 mr-4">
+          <select
+            className="bg-[#232336] border border-[#ffe992]/30 rounded px-2 py-1 text-white"
+            value={univers}
+            onChange={e => handleUniversChange(e.target.value as "photographie" | "graphisme")}
+            aria-label="Changer d'univers"
+          >
+            <option value="photographie">Photographie</option>
+            <option value="graphisme">Graphisme</option>
+          </select>
+        </div>
         {/* === Menu de navigation (visible ou non selon isMenuOpen) === */}
         <ul className={`navbar-menu ${isMenuOpen ? "open" : ""}`}>
           {/* Lien vers l'accueil */}
