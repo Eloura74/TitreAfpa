@@ -1,76 +1,83 @@
 // --- Importation des hooks et outils nécessaires ---
-import { useState } from "react";         // Hook React pour gérer l'état local
-import axios from "axios";                // Librairie HTTP pour faire des appels API
+import { useState } from "react"; // Hook React pour gérer l'état local
+import axios from "axios"; // Librairie HTTP pour faire des appels API
 
 /**
  * Formulaire d’ajout d’œuvre graphique unique (interface admin)
- * ➤ Permet d’envoyer une œuvre graphique (titre, description, prix, image)
+ * Permet d’envoyer une œuvre graphique (titre, description, prix, image)
  * vers l’API : POST /api/oeuvres-graphique
  */
 export default function GalerieGraphiqueForm() {
   // --- États des champs du formulaire ---
-  const [titre, setTitre] = useState("");                // Titre de l’œuvre
-  const [image, setImage] = useState<File | null>(null); // Image (fichier) sélectionnée
-  const [prix, setPrix] = useState("");                  // Prix de l’œuvre
-  const [description, setDescription] = useState("");    // Description de l’œuvre
-
+  const [titre, setTitre] = useState(""); // Titre de l’œuvre
+  const [image, setImage] = useState<File | null>(null); // Image sélectionnée
+  const [prix, setPrix] = useState(""); // Prix de l’œuvre
+  const [description, setDescription] = useState(""); // Description de l’œuvre
   // --- États de contrôle ---
   const [message, setMessage] = useState<string | null>(null); // Message de succès ou d'erreur
-  const [loading, setLoading] = useState(false);               // Indique si un envoi est en cours
+  const [loading, setLoading] = useState(false); // Indique si un envoi est en cours
 
-  /**
-   * Fonction asynchrone pour uploader l’image sélectionnée vers le backend
-   * @param file - fichier image sélectionné
-   * @returns - chemin de l’image uploadée ou null en cas d’erreur
-   */
+  // Fonction asynchrone pour uploader l’image sélectionnée vers le backend
   async function handleUploadImage(file: File): Promise<string | null> {
-    const formData = new FormData();         // Création d’un objet FormData pour envoi multipart
-    formData.append("image", file);          // Ajout de l’image dans le champ `image`
+    const formData = new FormData(); // Création d’un objet FormData pour envoi multipart
+    formData.append("image", file); // Ajout de l’image dans le champ `image`
 
     try {
-      const res = await axios.post(          // Envoi de la requête POST vers l’endpoint d’upload
+      const res = await axios.post(
+        // Envoi de la requête POST vers l’endpoint d’upload
         `${import.meta.env.VITE_API_URL}/api/oeuvres-graphique/upload`,
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" }, // Nécessaire pour l’envoi de fichier
+          headers: { 
+            "Content-Type": "multipart/form-data", // Nécessaire pour l’envoi de fichier
+            Authorization: `Bearer ${localStorage.getItem("token")}` // Ajout du token d'authentification
+          },
         }
       );
-      return res.data.imagePath;             // Retourne le chemin de l’image généré par le backend
+      return res.data.imagePath; // Retourne le chemin de l’image généré par le backend
     } catch (err) {
+      console.error("Erreur upload image:", err); // Log détaillé de l'erreur
       setMessage("Erreur lors de l’upload de l’image."); // Affiche un message d’erreur
       return null;
     }
   }
 
-  /**
-   * Fonction de gestion de la soumission du formulaire
-   * @param e - événement de soumission
-   */
+  // Fonction de gestion de la soumission du formulaire
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();      // Empêche le rechargement automatique de la page
-    setMessage(null);        // Réinitialise les messages
-    setLoading(true);        // Active l’état de chargement
+    e.preventDefault(); // Empêche le rechargement automatique de la page
+    setMessage(null); // Réinitialise les messages
+    setLoading(true); // Active l’état de chargement
 
-    let imagePath = "";      // Variable temporaire pour stocker le chemin de l’image
+    let imagePath = ""; // Variable temporaire pour stocker le chemin de l’image
 
     // Si une image a été sélectionnée, on tente de l’uploader
     if (image) {
+      // Upload de l’image vers le backend
       const uploaded = await handleUploadImage(image);
+      // Si l’upload échoue, on arrête la fonction
       if (!uploaded) {
-        setLoading(false);   // Arrêt si l’upload échoue
+        setLoading(false); // Arrêt si l’upload échoue
         return;
       }
-      imagePath = uploaded;  // Stocke le chemin de l’image uploadée
+      imagePath = uploaded; // Stocke le chemin de l’image uploadée
     }
 
     // Envoi final de toutes les données du formulaire vers le backend
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/oeuvres-graphique`, {
-        titre,
-        image: imagePath,
-        prix: Number(prix),        // Conversion en nombre
-        description,
-      });
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/oeuvres-graphique`,
+        {
+          titre,
+          image: imagePath,
+          prix: Number(prix), // Conversion en nombre
+          description,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}` // Ajout du token d'authentification
+          }
+        }
+      );
 
       // Réinitialisation complète du formulaire après succès
       setMessage("Œuvre ajoutée avec succès !");
@@ -79,9 +86,10 @@ export default function GalerieGraphiqueForm() {
       setPrix("");
       setDescription("");
     } catch (err) {
-      setMessage("Erreur lors de l’ajout de l’œuvre."); // Message en cas d’échec
+      console.error("Erreur ajout œuvre:", err); // Log détaillé de l'erreur
+      setMessage("Erreur lors de l'ajout de l'œuvre."); // Message en cas d'échec
     } finally {
-      setLoading(false);  // Fin du chargement dans tous les cas
+      setLoading(false); // Fin du chargement dans tous les cas
     }
   }
 

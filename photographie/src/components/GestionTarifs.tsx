@@ -39,7 +39,16 @@ export default function GestionTarifs() {
   const { data: tarifs, isLoading } = useQuery({
     queryKey: ["tarifs"],
     queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tarifs`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tarifs`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Erreur API: ${res.status}`);
+      }
+      
       return res.json();
     },
   });

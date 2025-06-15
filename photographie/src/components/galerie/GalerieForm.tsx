@@ -120,10 +120,209 @@ export default function GalerieForm() {
     });
   };
 
+  // // Soumission du formulaire : ajout ou modification d'une photo
+  // const handleSubmit = async () => {
+  //   // Vérification des champs obligatoires
+  //   if (
+  //     !form.src ||
+  //     !form.titre ||
+  //     !form.alt ||
+  //     !form.description ||
+  //     !form.categorie
+  //   ) {
+  //     alert("Veuillez remplir tous les champs correctement.");
+  //     return;
+  //   }
+  //   console.log(form);
+  //   try {
+  //     // Vérification que des tarifs sont sélectionnés
+  //     if (tarifsSélectionnés.length === 0) {
+  //       alert("Veuillez sélectionner au moins un tarif pour cette photo.");
+  //       return;
+  //     }
+
+  //     // Préparation des tarifs sélectionnés pour l'envoi
+  //     console.log("Tarifs sélectionnés (IDs):", tarifsSélectionnés);
+  //     console.log("Tarifs prédéfinis disponibles:", tarifsPredéfinis);
+
+  //     const tarifsÀEnvoyer = tarifsSélectionnés
+  //       .map((id) => {
+  //         const tarifTrouvé = tarifsPredéfinis.find(
+  //           (t) => t._id === id || t.id === id
+  //         );
+  //         console.log(`Recherche du tarif avec ID ${id}:`, tarifTrouvé);
+
+  //         if (tarifTrouvé) {
+  //           const tarifFormaté = {
+  //             id: tarifTrouvé._id || tarifTrouvé.id,
+  //             format: tarifTrouvé.format,
+  //             support: tarifTrouvé.support,
+  //             prix: tarifTrouvé.prix,
+  //           };
+  //           console.log("Tarif formaté pour l'envoi:", tarifFormaté);
+  //           return tarifFormaté;
+  //         }
+  //         return null;
+  //       })
+  //       .filter((t) => t !== null) as TarifOeuvre[];
+
+  //     console.log("Tarifs finaux à envoyer:", tarifsÀEnvoyer);
+
+  //     // Mise à jour du formulaire avec les tarifs sélectionnés
+  //     // Création d'un objet simple et plat pour l'envoi
+  //     const formAvecTarifs = {
+  //       src: form.src,
+  //       alt: form.alt,
+  //       titre: form.titre,
+  //       description: form.description,
+  //       categorie: form.categorie,
+  //       tarifs: tarifsÀEnvoyer,
+  //     };
+
+  //     // Log du formulaire pour debug
+  //     console.log("Formulaire envoyé:", formAvecTarifs);
+  //     console.log("JSON à envoyer:", JSON.stringify(formAvecTarifs));
+
+  //     try {
+  //       if (editId) {
+  //         // Si editId existe, on modifie une photo existante (PUT)
+  //         const res = await fetch(`${API_URL}/${editId}`, {
+  //           method: "PUT",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify(formAvecTarifs),
+  //         });
+  //         if (!res.ok) {
+  //           const err = await res.text();
+  //           alert("Erreur serveur: " + err);
+  //           return;
+  //         }
+  //         const updated = await res.json();
+  //         setPhotos(
+  //           photos.map((photo) => (photo._id === editId ? updated : photo))
+  //         );
+  //         setEditId(null); // On sort du mode édition
+  //       } else {
+  //         // SOLUTION EN DEUX TEMPS - D'abord créer une photo minimale, puis ajouter les tarifs
+  //         console.log(
+  //           "Création en deux temps - Étape 1: photo minimale sans tarifs",
+  //           formAvecTarifs
+  //         );
+
+  //         // Étape 1: Création d'une photo SANS les tarifs (qui posent problème)
+  //         const photoMinimale = {
+  //           src: formAvecTarifs.src,
+  //           alt: formAvecTarifs.alt,
+  //           titre: formAvecTarifs.titre,
+  //           description: formAvecTarifs.description,
+  //           categorie: formAvecTarifs.categorie,
+  //           // tarifs volontairement omis ici
+  //         };
+
+  //         // Envoi de la requête minimale
+  //         const res = await fetch(API_URL, {
+  //           method: "POST",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify(photoMinimale),
+  //         });
+
+  //         // Récupération du texte de la réponse pour analyse
+  //         const responseText = await res.text();
+  //         console.log("Réponse brute du serveur étape 1:", responseText);
+
+  //         // Si la réponse n'est pas OK pour l'étape 1
+  //         if (!res.ok) {
+  //           let errorMessage = `Erreur étape 1 - ${res.status}: ${res.statusText}`;
+  //           try {
+  //             // Essayer de parser comme JSON si possible
+  //             const errorJson = JSON.parse(responseText);
+  //             errorMessage += `\n\nDétails: ${JSON.stringify(
+  //               errorJson,
+  //               null,
+  //               2
+  //             )}`;
+  //           } catch (e) {
+  //             // Sinon utiliser le texte brut
+  //             errorMessage += `\n\nDétails: ${responseText}`;
+  //           }
+
+  //           console.error("Détails de l'erreur étape 1:", errorMessage);
+  //           alert(errorMessage);
+  //           return;
+  //         }
+
+  //         // Étape 1 réussie : Photo créée sans tarifs
+  //         let photoCreee = JSON.parse(responseText);
+  //         console.log("Photo créée avec succès (sans tarifs):", photoCreee);
+
+  //         try {
+  //           // ÉTAPE 2: Mise à jour de la photo avec les tarifs
+  //           console.log(
+  //             "Création en deux temps - Étape 2: ajout des tarifs",
+  //             formAvecTarifs.tarifs
+  //           );
+
+  //           // Si la photo a bien été créée et a un ID
+  //           if (photoCreee && photoCreee._id) {
+  //             // Requête PUT pour mettre à jour la photo avec les tarifs
+  //             const updateRes = await fetch(`${API_URL}/${photoCreee._id}`, {
+  //               method: "PUT",
+  //               headers: { "Content-Type": "application/json" },
+  //               body: JSON.stringify({ tarifs: formAvecTarifs.tarifs }),
+  //             });
+
+  //             const updateResponseText = await updateRes.text();
+  //             console.log(
+  //               "Réponse brute du serveur étape 2:",
+  //               updateResponseText
+  //             );
+
+  //             if (!updateRes.ok) {
+  //               console.warn(
+  //                 "Attention: Les tarifs n'ont pas pu être ajoutés, mais la photo a été créée."
+  //               );
+  //               // On continue quand même car la photo existe déjà
+  //             } else {
+  //               // Mise à jour réussie
+  //               try {
+  //                 photoCreee = JSON.parse(updateResponseText);
+  //                 console.log(
+  //                   "Photo mise à jour avec succès (avec tarifs):",
+  //                   photoCreee
+  //                 );
+  //               } catch (e) {
+  //                 console.error("Erreur de parsing de la réponse étape 2:", e);
+  //               }
+  //             }
+  //           }
+  //         } catch (updateErr) {
+  //           console.warn(
+  //             "Erreur lors de la mise à jour avec les tarifs:",
+  //             updateErr
+  //           );
+  //           // On continue quand même car la photo existe déjà
+  //         }
+
+  //         // Dans tous les cas, on ajoute la photo créée à la liste
+  //         setPhotos((prevPhotos) => [...prevPhotos, photoCreee]);
+  //       }
+  //     } catch (err) {
+  //       alert("Erreur réseau ou serveur: " + err);
+  //       return;
+  //     }
+
+  //     // Réinitialisation complète du formulaire après succès
+  //     setForm(formInitial);
+  //     setTarifsSélectionnés([]);
+
+  //     alert("Photo enregistrée avec succès !");
+  //   } catch (error) {
+  //     console.error("Erreur lors de l'enregistrement :", error);
+  //     alert("Une erreur est survenue.");
+  //   }
+  // };
   // Soumission du formulaire : ajout ou modification d'une photo
   const handleSubmit = async () => {
     // Vérification des champs obligatoires
-    // Correction : on accepte désormais toute URL Cloudinary ou chemin d'image valide
     if (
       !form.src ||
       !form.titre ||
@@ -134,7 +333,6 @@ export default function GalerieForm() {
       alert("Veuillez remplir tous les champs correctement.");
       return;
     }
-    console.log(form);
     try {
       // Vérification que des tarifs sont sélectionnés
       if (tarifsSélectionnés.length === 0) {
@@ -143,16 +341,11 @@ export default function GalerieForm() {
       }
 
       // Préparation des tarifs sélectionnés pour l'envoi
-      console.log("Tarifs sélectionnés (IDs):", tarifsSélectionnés);
-      console.log("Tarifs prédéfinis disponibles:", tarifsPredéfinis);
-
       const tarifsÀEnvoyer = tarifsSélectionnés
         .map((id) => {
           const tarifTrouvé = tarifsPredéfinis.find(
             (t) => t._id === id || t.id === id
           );
-          console.log(`Recherche du tarif avec ID ${id}:`, tarifTrouvé);
-
           if (tarifTrouvé) {
             const tarifFormaté = {
               id: tarifTrouvé._id || tarifTrouvé.id,
@@ -160,14 +353,11 @@ export default function GalerieForm() {
               support: tarifTrouvé.support,
               prix: tarifTrouvé.prix,
             };
-            console.log("Tarif formaté pour l'envoi:", tarifFormaté);
             return tarifFormaté;
           }
           return null;
         })
         .filter((t) => t !== null) as TarifOeuvre[];
-
-      console.log("Tarifs finaux à envoyer:", tarifsÀEnvoyer);
 
       // Mise à jour du formulaire avec les tarifs sélectionnés
       // Création d'un objet simple et plat pour l'envoi
@@ -179,11 +369,6 @@ export default function GalerieForm() {
         categorie: form.categorie,
         tarifs: tarifsÀEnvoyer,
       };
-
-      // Log du formulaire pour debug
-      console.log("Formulaire envoyé:", formAvecTarifs);
-      console.log("JSON à envoyer:", JSON.stringify(formAvecTarifs));
-
       try {
         if (editId) {
           // Si editId existe, on modifie une photo existante (PUT)
@@ -203,13 +388,10 @@ export default function GalerieForm() {
           );
           setEditId(null); // On sort du mode édition
         } else {
-          // SOLUTION EN DEUX TEMPS - D'abord créer une photo minimale, puis ajouter les tarifs
-          console.log(
-            "Création en deux temps - Étape 1: photo minimale sans tarifs",
-            formAvecTarifs
-          );
+          // SOLUTION EN DEUX TEMPS - D'abord créer une photo minimale,
+          // puis ajouter les tarifs
 
-          // Étape 1: Création d'une photo SANS les tarifs (qui posent problème)
+          // Étape 1: Création d'une photo SANS les tarifs
           const photoMinimale = {
             src: formAvecTarifs.src,
             alt: formAvecTarifs.alt,
@@ -228,7 +410,6 @@ export default function GalerieForm() {
 
           // Récupération du texte de la réponse pour analyse
           const responseText = await res.text();
-          console.log("Réponse brute du serveur étape 1:", responseText);
 
           // Si la réponse n'est pas OK pour l'étape 1
           if (!res.ok) {
@@ -253,30 +434,20 @@ export default function GalerieForm() {
 
           // Étape 1 réussie : Photo créée sans tarifs
           let photoCreee = JSON.parse(responseText);
-          console.log("Photo créée avec succès (sans tarifs):", photoCreee);
 
           try {
             // ÉTAPE 2: Mise à jour de la photo avec les tarifs
-            console.log(
-              "Création en deux temps - Étape 2: ajout des tarifs",
-              formAvecTarifs.tarifs
-            );
-
+            const tarifs = formAvecTarifs.tarifs;
             // Si la photo a bien été créée et a un ID
             if (photoCreee && photoCreee._id) {
               // Requête PUT pour mettre à jour la photo avec les tarifs
               const updateRes = await fetch(`${API_URL}/${photoCreee._id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ tarifs: formAvecTarifs.tarifs }),
+                body: JSON.stringify({ tarifs: tarifs }),
               });
 
               const updateResponseText = await updateRes.text();
-              console.log(
-                "Réponse brute du serveur étape 2:",
-                updateResponseText
-              );
-
               if (!updateRes.ok) {
                 console.warn(
                   "Attention: Les tarifs n'ont pas pu être ajoutés, mais la photo a été créée."
@@ -286,10 +457,6 @@ export default function GalerieForm() {
                 // Mise à jour réussie
                 try {
                   photoCreee = JSON.parse(updateResponseText);
-                  console.log(
-                    "Photo mise à jour avec succès (avec tarifs):",
-                    photoCreee
-                  );
                 } catch (e) {
                   console.error("Erreur de parsing de la réponse étape 2:", e);
                 }
@@ -300,9 +467,7 @@ export default function GalerieForm() {
               "Erreur lors de la mise à jour avec les tarifs:",
               updateErr
             );
-            // On continue quand même car la photo existe déjà
           }
-
           // Dans tous les cas, on ajoute la photo créée à la liste
           setPhotos((prevPhotos) => [...prevPhotos, photoCreee]);
         }

@@ -1,0 +1,99 @@
+Année,Semaine,Statut,Résumé des tâches,Branches concernées
+2025,12,Initialisation,"
+- first commit",
+2025,12,À classifier,"
+- changement gallerie style
+- changement style plus design
+- changement style plus design v2",
+2025,12,À faire,"
+- ajout de gallerie",
+2025,14,En cours,"
+- Sauvegarde temporaire avant de passer sur main",
+2025,14,À faire,"
+- ajout de la gestion de la galerie
+- ajout de la gestion de levenement",
+2025,17,À classifier,"
+- Début du développement backend
+- Début du développement backend v2",
+2025,17,À faire,"
+- ajout du pannier
+- ajout du pannier style
+- ajout du pannier v2
+- ajout des commentaire detaillées",", dev, dev"
+2025,18,En cours,"
+- save avant modification backend
+- save avant modif pannier
+- save avant modif pannier",
+2025,18,Terminé,"
+- Version propre sans fichier volumineux
+- Version propre sans fichier volumineux",
+2025,18,À faire,"
+- evenement add
+- ajout de la gestion de la grille tariffaire
+- ajout de la gestion de la grille tariffaireV2",
+2025,19,À faire,"
+- ajout des tarifs",
+2025,20,À faire,"
+- feature home page destination
+- feature gallerie graphique
+- feature add gallerie admin
+- feature add gestion gallerie garphisme
+- ajout de base questionnaire",", devBackend, devBackend"
+2025,21,À classifier,"
+- creation branche",
+2025,21,À faire,"
+- feature de tirage en ligne
+- feature de format different gallerie",", feature_dev, feature_dev"
+2025,22,En cours,"
+- correction2.1
+- correction admin
+- correction commentairev6
+- correction commentairev4
+- correction commentairev3
+- correction commentairev2
+- correction commentaire
+- correction2.2
+- correction2.0
+- correction1.4import
+- correction1.4
+- correction1.3
+- correction1.2
+- correction3
+- correction2
+- correction1
+- correction1.5
+- correction gallerie graphiqueV2
+- correction gallerie graphiqueV1
+- correction gallerie graphique
+- correction redirectionV1
+- correction adminV3
+- correction adminV4
+- correction adminV2
+- correction redirection
+- correction gallerie graphiqueV3",", devConnection, devGallerieGraphique, devConnection, devGallerieGraphique, devRedirection, devRedirection, devPhoto, devPhoto, auth, auth"
+2025,22,À classifier,"
+- Initial commit deploiement render1
+- Initial commit deploiement render
+- Initial commit deploiement v3
+- Initial commit deploiement v2
+- Initial commit deploiement v3
+- Mon commit sur la branche deploiement
+- Début du développement sur la branche devPhoto
+- Mon commit sur la branche auth",", deploiement, deploiement"
+2025,22,À faire,"
+- feature api deploiement render
+- add responsive
+- feature correction bug'
+- feature tarif
+- feature api deploiement render v2
+- feature api deploiement render v3
+- feature backend fonctionnel none-3
+- feature backend fonctionnel none-2
+- feature backend fonctionnel none-1
+- feature correction de lajout image visuel
+- feature api deploiement clooudinary
+- feature api deploiement clooudinary v6
+- feature api deploiement clooudinary V5
+- feature api deploiement clooudinary v 3
+- feature api deploiement clooudinary v6
+- feature evenement creation",", devEvenement, devEvenement, devTarif, main, main"

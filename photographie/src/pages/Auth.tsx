@@ -54,7 +54,9 @@ const Auth: React.FC = () => {
 
     try {
       // Détection du contexte d'univers (photographie ou graphisme)
-      const isGraphisme = window.location.pathname.startsWith("/graphisme") || window.location.search.includes("mode=graphisme");
+      const isGraphisme =
+        window.location.pathname.startsWith("/graphisme") ||
+        window.location.search.includes("mode=graphisme");
       if (isRegister) {
         // 🟢 Mode inscription
         const res = await register(email, motdepasse); // Appel API
@@ -188,7 +190,7 @@ const Auth: React.FC = () => {
 
           {/* Affichage du message (erreur ou succès) */}
           {message && (
-            <div className="text-center text-red-400 mt-2">{message}</div>
+            <div className="text-center text-yellow-600 mt-2">{message}</div>
           )}
         </form>
       </div>

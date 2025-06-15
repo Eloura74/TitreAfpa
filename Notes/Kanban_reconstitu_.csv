@@ -1,0 +1,82 @@
+,Date,Branche(s),Tâche,Statut
+80,2025-03-21,,first commit,Initialisation
+76,2025-03-21,,changement gallerie style,À classifier
+79,2025-03-21,,changement style plus design,À classifier
+78,2025-03-21,,changement style plus design v2,À classifier
+77,2025-03-21,,ajout de gallerie,À faire
+75,2025-04-03,,ajout de la gestion de la galerie,À faire
+74,2025-04-04,,ajout de la gestion de levenement,À faire
+73,2025-04-04,,Sauvegarde temporaire avant de passer sur main,En cours
+72,2025-04-23,,ajout du pannier,À faire
+71,2025-04-23,,ajout du pannier style,À faire
+70,2025-04-23,"dev, dev",ajout du pannier v2,À faire
+69,2025-04-23,,Début du développement backend,À classifier
+68,2025-04-23,,Début du développement backend v2,À classifier
+67,2025-04-24,,ajout des commentaire detaillées,À faire
+66,2025-04-28,,save avant modification backend,En cours
+65,2025-04-28,,evenement add,À faire
+61,2025-04-29,,Version propre sans fichier volumineux,Terminé
+64,2025-04-29,,save avant modif pannier,En cours
+63,2025-04-29,,save avant modif pannier,En cours
+62,2025-04-29,,Version propre sans fichier volumineux,Terminé
+60,2025-05-01,,ajout de la gestion de la grille tariffaire,À faire
+59,2025-05-01,,ajout de la gestion de la grille tariffaireV2,À faire
+58,2025-05-05,,ajout des tarifs,À faire
+57,2025-05-12,,feature home page destination,À faire
+56,2025-05-12,,feature gallerie graphique,À faire
+55,2025-05-12,,feature add gallerie admin,À faire
+54,2025-05-12,,feature add gestion gallerie garphisme,À faire
+53,2025-05-15,"devBackend, devBackend",ajout de base questionnaire,À faire
+52,2025-05-23,,creation branche,À classifier
+51,2025-05-23,,feature de tirage en ligne,À faire
+50,2025-05-23,"feature_dev, feature_dev",feature de format different gallerie,À faire
+42,2025-05-26,,Initial commit deploiement render1,À classifier
+43,2025-05-26,,Initial commit deploiement render,À classifier
+44,2025-05-26,,Initial commit deploiement v3,À classifier
+41,2025-05-26,,feature api deploiement render,À faire
+46,2025-05-26,,Initial commit deploiement v2,À classifier
+47,2025-05-26,devTarif,add responsive,À faire
+48,2025-05-26,,feature correction bug',À faire
+45,2025-05-26,,Initial commit deploiement v3,À classifier
+49,2025-05-26,,feature tarif,À faire
+40,2025-05-26,,feature api deploiement render v2,À faire
+39,2025-05-26,,feature api deploiement render v3,À faire
+30,2025-05-27,"main, main",feature backend fonctionnel none-3,À faire
+31,2025-05-27,,feature backend fonctionnel none-2,À faire
+32,2025-05-27,,feature backend fonctionnel none-1,À faire
+33,2025-05-27,,feature correction de lajout image visuel,À faire
+38,2025-05-27,,feature api deploiement clooudinary,À faire
+35,2025-05-27,,feature api deploiement clooudinary v6,À faire
+36,2025-05-27,,feature api deploiement clooudinary V5,À faire
+37,2025-05-27,,feature api deploiement clooudinary v 3,À faire
+34,2025-05-27,,feature api deploiement clooudinary v6,À faire
+29,2025-05-27,"deploiement, deploiement",Mon commit sur la branche deploiement,À classifier
+18,2025-05-28,,correction2.1,En cours
+10,2025-05-28,,correction admin,En cours
+11,2025-05-28,,Début du développement sur la branche devPhoto,À classifier
+12,2025-05-28,"auth, auth",correction commentairev6,En cours
+13,2025-05-28,,correction commentairev4,En cours
+14,2025-05-28,,correction commentairev3,En cours
+15,2025-05-28,,correction commentairev2,En cours
+16,2025-05-28,,correction commentaire,En cours
+17,2025-05-28,,correction2.2,En cours
+19,2025-05-28,,correction2.0,En cours
+21,2025-05-28,,correction1.4import,En cours
+22,2025-05-28,,correction1.4,En cours
+23,2025-05-28,,correction1.3,En cours
+24,2025-05-28,,correction1.2,En cours
+25,2025-05-28,,correction3,En cours
+26,2025-05-28,,correction2,En cours
+27,2025-05-28,,correction1,En cours
+28,2025-05-28,,Mon commit sur la branche auth,À classifier
+20,2025-05-28,,correction1.5,En cours
+1,2025-05-29,,correction gallerie graphiqueV2,En cours
+2,2025-05-29,,correction gallerie graphiqueV1,En cours
+3,2025-05-29,,correction gallerie graphique,En cours
+4,2025-05-29,"devRedirection, devRedirection",correction redirectionV1,En cours
+8,2025-05-29,,correction adminV3,En cours
+6,2025-05-29,"devEvenement, devEvenement",feature evenement creation,À faire
+7,2025-05-29,"devPhoto, devPhoto",correction adminV4,En cours
+9,2025-05-29,,correction adminV2,En cours
+5,2025-05-29,,correction redirection,En cours
+0,2025-05-29,"devConnection, devGallerieGraphique, devConnection, devGallerieGraphique",correction gallerie graphiqueV3,En cours
