@@ -1,5 +1,5 @@
 // Import des hooks React pour gérer le cycle de vie et la navigation
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Link pour navigation, useNavigate pour redirection
 import { useAuthStore } from "../store/authStore"; // Accès au store Zustand pour gérer le choix utilisateur
 import homeImages from "../config/images.json"; // Import des images statiques depuis un fichier JSON
@@ -148,7 +148,7 @@ export default function Home() {
 
       {/* Éclair vertical décoratif placé au centre sur desktop/tablette */}
       <img
-        src="/images/eclair2.png"
+        src={`${import.meta.env.BASE_URL}images/eclair2.png`} 
         alt="Eclair" // Texte alternatif simple (image décorative)
         aria-hidden="true" // Indique que l'image n'est pas importante pour les lecteurs d'écran
         className="absolute left-1/2 top-0 h-full w-auto z-30 pointer-events-none select-none lightning-separator hidden md:block" // Position et style, visible seulement md et plus
