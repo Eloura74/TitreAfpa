@@ -28,25 +28,25 @@ const offres = [
     titre: "Tirages",
     description: "formats standards",
     prix: "à partir de 0,22 €",
-    image: "/images/tirages.png",
+    image: "/static/tirages.png",
   },
   {
     titre: "Posters",
     description: "et agrandissements",
     prix: "à partir de 8,02 €",
-    image: "/images/poster.png",
+    image: "/static/poster.png",
   },
   {
     titre: "Toile",
     description: "sur châssis bois",
     prix: "à partir de 39,16 €",
-    image: "/images/toile.png",
+    image: "/static/toile.png",
   },
   {
     titre: "Cartes postales",
     description: "10 x 15 cm",
     prix: "à partir de 10,75 €",
-    image: "/images/cartes.png",
+    image: "/static/cartes.png",
   },
 ];
 

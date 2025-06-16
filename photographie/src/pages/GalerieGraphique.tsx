@@ -12,6 +12,7 @@ import "../styles/galerie.css"; // Styles spécifiques à la galerie
 // 🎯 Interface TypeScript pour définir la forme d'une œuvre graphique
 interface OeuvreGraphique {
   id: string;
+  _id?: string; // Ajout du champ _id optionnel pour compatibilité avec l'API MongoDB
   titre: string;
   image: string;
   prix: number;
@@ -34,7 +35,7 @@ export default function GalerieGraphique() {
         if (!res.ok) throw new Error("Erreur réseau ou API");
         return res.json(); // On convertit la réponse en JSON
       })
-      .then((data: any[]) => {
+      .then((data: OeuvreGraphique[]) => {
         // On reformate les données reçues
         const oeuvresFormatees = data.map((oeuvre) => ({
           id: oeuvre._id || oeuvre.id,
@@ -42,7 +43,7 @@ export default function GalerieGraphique() {
           image:
             oeuvre.image && oeuvre.image.startsWith("/uploads/")
               ? `${import.meta.env.VITE_API_URL}${oeuvre.image}`
-              : `/uploads/placeholder.jpg`, // Fallback si l'image est absente
+              : `/static/placeholder.jpg`, // Fallback si l'image est absente
           prix: oeuvre.prix,
           description: oeuvre.description,
         }));
@@ -110,12 +111,12 @@ export default function GalerieGraphique() {
                           return oeuvre.image;
                         } else if (oeuvre.image && oeuvre.image.startsWith("/uploads/")) {
                           return `${import.meta.env.VITE_API_URL}${oeuvre.image}`;
-                        } else if (oeuvre.image && oeuvre.image.startsWith("/images/")) {
+                        } else if (oeuvre.image && oeuvre.image.startsWith("/static/")) {
                           return oeuvre.image;
                         } else if (oeuvre.image) {
-                          return `/images/${oeuvre.image}`;
+                          return `/static/${oeuvre.image}`;
                         } else {
-                          return "/images/placeholder.jpg";
+                          return "/static/placeholder.jpg";
                         }
                       })()
                     }
