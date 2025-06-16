@@ -150,40 +150,100 @@ export default function GestionEvenements() {
   };
 
   // ================================
+  // 🔧 Fonction utilitaire pour formater les dates ISO en yyyy-MM-dd
+  // ================================
+  const formatDateForInput = (dateString: string | undefined): string => {
+    if (!dateString) return "";
+    try {
+      // Extrait seulement la partie YYYY-MM-DD d'une date ISO
+      return dateString.split('T')[0];
+    } catch {
+      return dateString; // Retourner la valeur originale si le format est incorrect
+    }
+  };
+
+  // ================================
   // ✏️ Remplit le formulaire avec un événement existant
   // ================================
   const handleEdit = (evt: Evenement) => {
-    setForm({
-      ...evt,
-      id: evt.id || "",
-      dateDebut: evt.dateDebut || "",
-      dateFin: evt.dateFin || "",
-      image: evt.image || "",
-      lieu: evt.lieu || "",
-      description: evt.description || "",
-      photos: evt.photos || [],
-      theme: evt.theme || "",
-    });
-    setImagePreview(evt.image || "");
-    setEditId(evt.id || null);
+    try {
+      if (!evt || !evt.id) {
+        setError('Impossible de modifier: événement invalide');
+        return;
+      }
+
+      // Formatter les dates pour les champs input[type="date"]
+      const dateDebut = formatDateForInput(evt.dateDebut);
+      const dateFin = formatDateForInput(evt.dateFin);
+
+      setForm({
+        ...evt,
+        id: evt.id || "",
+        dateDebut: dateDebut,
+        dateFin: dateFin,
+        image: evt.image || "",
+        lieu: evt.lieu || "",
+        description: evt.description || "",
+        photos: evt.photos || [],
+        theme: evt.theme || "",
+      });
+      setImagePreview(evt.image || "");
+      setEditId(evt.id);
+      
+      // Faire défiler jusqu'au formulaire pour indiquer visuellement que l'édition est active
+      document.querySelector('form')?.scrollIntoView({ behavior: 'smooth' });
+    } catch (e: any) {
+      console.error('Erreur lors de l\'édition:', e);
+      setError('Impossible de charger les données pour modification');
+    }
   };
 
   // ================================
   // 🗑️ Supprime un événement
   // ================================
   const handleDelete = async (id: string) => {
+    // Demande confirmation avant de supprimer
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      await axios.delete(`${API_URL}/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Veuillez vous connecter pour effectuer cette action');
+      }
 
-      // Mise à jour de la liste côté frontend
-      setEvenements(evenements.filter((e) => e.id !== id));
-      resetForm();
+      console.log('Tentative de suppression de l\'événement avec ID:', id);
+      
+      // Utiliser try-catch spécifique pour la requête API
+      try {
+        const response = await axios.delete(`${API_URL}/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        console.log('Réponse de suppression:', response);
+        
+        // Mise à jour de la liste côté frontend même si le backend ne renvoie pas de réponse
+        setEvenements(evenements.filter((e) => e.id !== id));
+        resetForm();
+        
+        // Message de succès
+        setError(null);
+      } catch (apiError: any) {
+        console.error('Erreur API lors de la suppression:', apiError);
+        if (apiError.response && apiError.response.status === 404) {
+          // Si l'événement n'existe plus, on le retire quand même de la liste locale
+          setEvenements(evenements.filter((e) => e.id !== id));
+          resetForm();
+        } else {
+          throw apiError; // Propager l'erreur pour qu'elle soit gérée plus bas
+        }
+      }
     } catch (e: any) {
-      setError(e?.response?.data?.message || "Erreur lors de la suppression.");
+      console.error('Erreur globale de suppression:', e);
+      setError(e?.response?.data?.message || 'Erreur lors de la suppression.');
     } finally {
       setLoading(false);
     }
@@ -199,7 +259,11 @@ export default function GestionEvenements() {
       </h2>
 
       {/* Affiche les erreurs éventuelles */}
-      {error && <div className="text-red-400 mb-2">{error}</div>}
+      {error && (
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+          <p>{error}</p>
+        </div>
+      )}
 
       {/* Formulaire de création ou modification */}
       <form className="flex flex-col gap-3 mb-6" onSubmit={handleSubmit}>
@@ -302,13 +366,27 @@ export default function GestionEvenements() {
                 <td className="px-2 py-1">
                   <button
                     className="bg-yellow-300 text-black rounded px-2 py-1 mr-2 hover:bg-yellow-200 transition"
-                    onClick={() => handleEdit(event)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Empêcher la propagation de l'événement
+                      if (event.id && event.id.trim() !== '') {
+                        handleEdit(event);
+                      } else {
+                        setError('ID d\'événement invalide');
+                      }
+                    }}
                   >
                     ✏️
                   </button>
                   <button
                     className="bg-red-500 text-white rounded px-2 py-1 hover:bg-red-600 transition"
-                    onClick={() => event.id && handleDelete(event.id)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Empêcher la propagation de l'événement
+                      if (event.id && event.id.trim() !== '') {
+                        handleDelete(event.id);
+                      } else {
+                        setError('ID d\'événement invalide');
+                      }
+                    }}
                   >
                     🗑️
                   </button>
