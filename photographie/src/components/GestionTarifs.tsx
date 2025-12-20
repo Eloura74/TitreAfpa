@@ -126,131 +126,321 @@ export default function GestionTarifs() {
      🎨 Rendu JSX
   ------------------------------------------------------------------------- */
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Gestion des tarifs</h2>
+    <div className="space-y-8">
+      {/* EN-TÊTE DE SECTION */}
+      <div className="flex justify-between items-center border-b border-gray-700 pb-4">
+        <div>
+          <h2 className="text-2xl font-bold text-yellow-400">
+            Gestion des Tarifs
+          </h2>
+          <p className="text-gray-400 text-sm mt-1">
+            Définissez ici les formats et prix disponibles pour vos photos.
+          </p>
+        </div>
+        <div className="text-right">
+          <span className="text-xs text-gray-500 uppercase tracking-wider">
+            Total tarifs
+          </span>
+          <div className="text-xl font-bold text-white">
+            {tarifs?.length || 0}
+          </div>
+        </div>
+      </div>
 
-      {/* FORMULAIRE : Ajout ou modification */}
-      <form
-        onSubmit={handleSubmit((data) =>
-          mutation.mutate({ ...data, id: edit?.id })
-        )}
-        className="grid md:grid-cols-3 gap-4 mb-6"
-      >
-        {/* Champs texte */}
-        <input
-          {...register("nom")}
-          placeholder="Nom"
-          className="input input-bordered"
-        />
-        <select {...register("type")} className="select select-bordered">
-          <option value="tirage">Tirage</option>
-          <option value="poster">Poster</option>
-          <option value="toile">Toile</option>
-          <option value="cadeau">Cadeau</option>
-          <option value="textile">Textile</option>
-        </select>
-        <input
-          {...register("format")}
-          placeholder="Format"
-          className="input input-bordered"
-        />
-        <input
-          {...register("prix", { valueAsNumber: true })}
-          type="number"
-          placeholder="Prix"
-          className="input input-bordered"
-        />
-        <input
-          {...register("support")}
-          placeholder="Support"
-          className="input input-bordered"
-        />
-        <input
-          {...register("imageUrl")}
-          placeholder="URL image (optionnel)"
-          className="input input-bordered"
-        />
-
-        {/* Case à cocher */}
-        <label className="flex items-center gap-2">
-          <input type="checkbox" {...register("actif")} /> Actif
-        </label>
-
-        {/* Boutons : soumettre / annuler */}
-        <div className="md:col-span-3 flex gap-2">
-          <button type="submit" className="btn btn-primary">
-            {edit ? "Modifier" : "Ajouter"}
-          </button>
+      {/* FORMULAIRE : CARTE D'ÉDITION/AJOUT */}
+      <div className="bg-gray-800 rounded-lg shadow-lg border border-gray-700 overflow-hidden">
+        <div className="bg-gray-900/50 px-6 py-4 border-b border-gray-700 flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+            {edit ? (
+              <>
+                <span className="text-blue-400">✏️</span> Modifier un tarif
+              </>
+            ) : (
+              <>
+                <span className="text-green-400">➕</span> Ajouter un nouveau
+                tarif
+              </>
+            )}
+          </h3>
           {edit && (
             <button
-              type="button"
               onClick={handleCancel}
-              className="btn btn-secondary"
+              className="text-xs text-gray-400 hover:text-white underline"
             >
-              Annuler
+              Annuler l'édition
             </button>
           )}
         </div>
-      </form>
 
-      {/* Affichage des erreurs */}
-      <div className="text-red-500 mb-2">
-        {Object.values(errors).map((e) => (
-          <div key={e.message}>{e.message}</div>
-        ))}
+        <form
+          onSubmit={handleSubmit((data) =>
+            mutation.mutate({ ...data, id: edit?.id })
+          )}
+          className="p-6"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            {/* COLONNE 1 : Informations Principales */}
+            <div className="md:col-span-4 space-y-4">
+              <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                Informations
+              </h4>
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text text-gray-300">Nom interne</span>
+                </label>
+                <input
+                  {...register("nom")}
+                  placeholder="Ex: Portrait A4"
+                  className={`input input-bordered w-full bg-gray-900 ${
+                    errors.nom ? "input-error" : ""
+                  }`}
+                />
+                {errors.nom && (
+                  <span className="text-error text-xs mt-1">
+                    {errors.nom.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text text-gray-300">Type</span>
+                </label>
+                <select
+                  {...register("type")}
+                  className="select select-bordered w-full bg-gray-900"
+                >
+                  <option value="tirage">Tirage Papier</option>
+                  <option value="poster">Poster</option>
+                  <option value="toile">Toile</option>
+                  <option value="cadeau">Objet Cadeau</option>
+                  <option value="textile">Textile</option>
+                </select>
+              </div>
+            </div>
+
+            {/* COLONNE 2 : Détails Techniques */}
+            <div className="md:col-span-4 space-y-4">
+              <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                Détails
+              </h4>
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text text-gray-300">Format</span>
+                </label>
+                <input
+                  {...register("format")}
+                  placeholder="Ex: 21x29.7 cm"
+                  className={`input input-bordered w-full bg-gray-900 ${
+                    errors.format ? "input-error" : ""
+                  }`}
+                />
+                {errors.format && (
+                  <span className="text-error text-xs mt-1">
+                    {errors.format.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text text-gray-300">Support</span>
+                </label>
+                <input
+                  {...register("support")}
+                  placeholder="Ex: Papier Glacé"
+                  className={`input input-bordered w-full bg-gray-900 ${
+                    errors.support ? "input-error" : ""
+                  }`}
+                />
+                {errors.support && (
+                  <span className="text-error text-xs mt-1">
+                    {errors.support.message}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* COLONNE 3 : Prix et Options */}
+            <div className="md:col-span-4 space-y-4">
+              <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                Vente
+              </h4>
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text text-gray-300">Prix (€)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    {...register("prix", { valueAsNumber: true })}
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    className={`input input-bordered w-full bg-gray-900 pr-8 ${
+                      errors.prix ? "input-error" : ""
+                    }`}
+                  />
+                  <span className="absolute right-3 top-3 text-gray-500">
+                    €
+                  </span>
+                </div>
+                {errors.prix && (
+                  <span className="text-error text-xs mt-1">
+                    {errors.prix.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="form-control w-full">
+                <label className="label cursor-pointer justify-start gap-4 mt-4">
+                  <input
+                    type="checkbox"
+                    {...register("actif")}
+                    className="checkbox checkbox-primary"
+                  />
+                  <span className="label-text text-white">Tarif Actif</span>
+                </label>
+                <p className="text-xs text-gray-500 mt-1 pl-1">
+                  Si décoché, ce tarif ne sera pas proposé aux clients.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions du formulaire */}
+          <div className="mt-8 flex justify-end gap-3 border-t border-gray-700 pt-4">
+            {edit && (
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="btn btn-ghost hover:bg-gray-700"
+              >
+                Annuler
+              </button>
+            )}
+            <button
+              type="submit"
+              className={`btn ${
+                edit
+                  ? "btn-warning text-black hover:bg-yellow-500"
+                  : "btn-primary hover:bg-blue-700"
+              } px-8`}
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending ? (
+                <span className="loading loading-spinner"></span>
+              ) : edit ? (
+                "Mettre à jour"
+              ) : (
+                "Ajouter ce tarif"
+              )}
+            </button>
+          </div>
+        </form>
       </div>
 
-      {/* TABLEAU : Liste des tarifs */}
-      <div className="overflow-x-auto">
-        <table className="table w-full">
-          <thead>
-            <tr>
-              <th>Nom</th>
-              <th>Type</th>
-              <th>Format</th>
-              <th>Prix</th>
-              <th>Support</th>
-              <th>Actif</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
+      {/* TABLEAU : LISTE DES TARIFS */}
+      <div className="bg-gray-800 rounded-lg shadow-lg border border-gray-700 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="table w-full">
+            {/* En-tête du tableau */}
+            <thead className="bg-gray-900 text-gray-400 uppercase text-xs font-bold">
               <tr>
-                <td colSpan={7}>Chargement...</td>
+                <th className="py-4 pl-6">Nom & Type</th>
+                <th>Format & Support</th>
+                <th>Prix</th>
+                <th>Statut</th>
+                <th className="text-right pr-6">Actions</th>
               </tr>
-            ) : tarifs?.length ? (
-              tarifs.map((tarif: Tarif) => (
-                <tr key={tarif.id}>
-                  <td>{tarif.nom}</td>
-                  <td>{tarif.type}</td>
-                  <td>{tarif.format}</td>
-                  <td>{tarif.prix} €</td>
-                  <td>{tarif.support}</td>
-                  <td>{tarif.actif ? "Oui" : "Non"}</td>
-                  <td className="flex gap-2">
-                    <button
-                      className="btn btn-xs btn-secondary"
-                      onClick={() => handleEdit(tarif)}
-                    >
-                      Éditer
-                    </button>
-                    <button
-                      className="btn btn-xs btn-error"
-                      onClick={() => deleteMutation.mutate(tarif.id)}
-                    >
-                      Supprimer
-                    </button>
+            </thead>
+            <tbody className="divide-y divide-gray-700">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-10 text-gray-500">
+                    <span className="loading loading-spinner loading-lg mb-2"></span>
+                    <p>Chargement des tarifs...</p>
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={7}>Aucun tarif enregistré.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              ) : tarifs?.length ? (
+                tarifs.map((tarif: Tarif) => (
+                  <tr
+                    key={tarif.id}
+                    className="hover:bg-gray-700/50 transition-colors"
+                  >
+                    <td className="pl-6">
+                      <div className="font-bold text-white text-base">
+                        {tarif.nom}
+                      </div>
+                      <div className="text-xs text-gray-500 badge badge-ghost badge-sm mt-1">
+                        {tarif.type}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="text-gray-300">{tarif.format}</div>
+                      <div className="text-xs text-gray-500 italic">
+                        {tarif.support}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="font-bold text-yellow-400 text-lg">
+                        {tarif.prix} €
+                      </div>
+                    </td>
+                    <td>
+                      {tarif.actif ? (
+                        <div className="badge badge-success gap-1 text-xs font-semibold">
+                          Actif
+                        </div>
+                      ) : (
+                        <div className="badge badge-error gap-1 text-xs font-semibold">
+                          Inactif
+                        </div>
+                      )}
+                    </td>
+                    <td className="text-right pr-6">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          className="btn btn-sm btn-square btn-ghost hover:bg-blue-900/30 text-blue-400"
+                          onClick={() => handleEdit(tarif)}
+                          title="Éditer"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          className="btn btn-sm btn-square btn-ghost hover:bg-red-900/30 text-red-400"
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                "Êtes-vous sûr de vouloir supprimer ce tarif ?"
+                              )
+                            ) {
+                              deleteMutation.mutate(tarif.id);
+                            }
+                          }}
+                          title="Supprimer"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="text-center py-10">
+                    <div className="flex flex-col items-center text-gray-500">
+                      <span className="text-4xl mb-2">📭</span>
+                      <p>Aucun tarif enregistré pour le moment.</p>
+                      <p className="text-sm">
+                        Utilisez le formulaire ci-dessus pour en ajouter un.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

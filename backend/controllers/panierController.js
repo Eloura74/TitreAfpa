@@ -71,3 +71,46 @@ exports.remove = async (req, res) => {
     res.status(400).json({ erreur: err.message });
   }
 };
+// ***************************
+// Obtenir le panier de l'utilisateur connecté
+// ***************************
+exports.getMyCart = async (req, res) => {
+  try {
+    // req.user est défini par le middleware auth
+    const panier = await Panier.findOne({ utilisateur: req.user._id }).populate(
+      "articles.photo"
+    );
+    res.json(panier || { articles: [] });
+  } catch (err) {
+    res.status(500).json({ erreur: err.message });
+  }
+};
+
+// ***************************
+// Sauvegarder le panier de l'utilisateur connecté
+// ***************************
+exports.saveMyCart = async (req, res) => {
+  try {
+    const { articles } = req.body;
+
+    // On cherche si un panier existe déjà pour cet utilisateur
+    let panier = await Panier.findOne({ utilisateur: req.user._id });
+
+    if (panier) {
+      // Mise à jour
+      panier.articles = articles;
+      panier.dateCreation = Date.now(); // On met à jour la date
+      await panier.save();
+    } else {
+      // Création
+      panier = await Panier.create({
+        utilisateur: req.user._id,
+        articles: articles,
+      });
+    }
+
+    res.json(panier);
+  } catch (err) {
+    res.status(400).json({ erreur: err.message });
+  }
+};

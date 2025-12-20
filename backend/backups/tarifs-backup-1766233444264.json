@@ -1,0 +1,15 @@
+[
+  {
+    "_id": "6935574c51276165a78ad233",
+    "nom": "portrait",
+    "type": "tirage",
+    "format": "portrait",
+    "prix": 150,
+    "support": "papier",
+    "actif": true,
+    "imageUrl": "",
+    "createdAt": "2025-12-07T10:30:36.121Z",
+    "updatedAt": "2025-12-07T10:30:36.121Z",
+    "__v": 0
+  }
+]

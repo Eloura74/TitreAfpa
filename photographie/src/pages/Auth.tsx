@@ -1,207 +1,369 @@
 // ==========================================================================
 // 📦 IMPORTS ESSENTIELS
 // ==========================================================================
-import React, { useState } from "react"; // Import de React + hook useState pour gérer les états locaux
-import Navbar from "../components/layout/navbar"; // Composant d'en-tête de navigation
-import Footer from "../components/layout/Footer"; // Composant de pied de page
+import React, { useState } from "react";
+import Navbar from "../components/layout/navbar";
+import Footer from "../components/layout/Footer";
 import { useUser } from "../context/UserContext";
-// Fonctions API d'authentification
 import { register, login } from "../services/authService";
-
-// Store Zustand pour gérer l'état global d'authentification
 import { useAuthStore } from "../store/authStore";
-
-// Hook de navigation (React Router) pour rediriger après login
 import { useNavigate } from "react-router-dom";
 
 // ==========================================================================
 // 📄 COMPOSANT PRINCIPAL : Formulaire d'inscription et de connexion
 // ==========================================================================
 const Auth: React.FC = () => {
-  // ------------------------------------------------------------------------
-  // 🎯 Récupération du setter utilisateur global (UserContext)
-  // Toujours appeler les hooks React au niveau racine du composant !
-  // (Jamais dans une fonction, un if, une boucle, etc.)
   const { setUser } = useUser();
+  const navigate = useNavigate();
+  const { setEmail: setEmailAuth, setIsAdmin: setIsAdminAuth, choix } = useAuthStore();
+
   // ------------------------------------------------------------------------
   // 💡 ÉTATS LOCAUX
   // ------------------------------------------------------------------------
-  const [isRegister, setIsRegister] = useState(false); // Mode actif : inscription ou connexion
-  const [email, setEmail] = useState(""); // Saisie de l'email
-  const [motdepasse, setMotdepasse] = useState(""); // Saisie du mot de passe
-  const [message, setMessage] = useState(""); // Message de retour (succès / erreur)
-  const [loading, setLoading] = useState(false); // Indique si une requête est en cours
+  const [isRegister, setIsRegister] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-  // ------------------------------------------------------------------------
-  // 🌐 Zustand : récupération des setters depuis le store global
-  // ------------------------------------------------------------------------
-  const {
-    setEmail: setEmailAuth,
-    setIsAdmin: setIsAdminAuth,
-    choix,
-  } = useAuthStore();
+  // Champs du formulaire
+  const [formData, setFormData] = useState({
+    email: "",
+    motdepasse: "",
+    nom: "",
+    prenom: "",
+    telephone: "",
+    rue: "",
+    ville: "",
+    codePostal: "",
+    pays: "France",
+  });
 
-  // Navigation programmatique (vers une autre page)
-  const navigate = useNavigate();
+  // Gestion des changements dans les inputs
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   // ------------------------------------------------------------------------
   // 🧾 Fonction de soumission du formulaire
   // ------------------------------------------------------------------------
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Empêche le rechargement de la page
-    setLoading(true); // Active l'état de chargement
-    setMessage(""); // Réinitialise le message de retour
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
+    setError("");
 
     try {
-      // Détection du contexte d'univers (photographie ou graphisme)
       const isGraphisme =
         window.location.pathname.startsWith("/graphisme") ||
         window.location.search.includes("mode=graphisme");
+
       if (isRegister) {
         // 🟢 Mode inscription
-        const res = await register(email, motdepasse); // Appel API
-        if (res.error) setMessage(res.error); // Affiche l'erreur renvoyée
-        else {
-          // Connexion réussie : on met à jour le contexte utilisateur
-          setUser(res.user);
-          setEmailAuth(email);
-          setIsAdminAuth(res.user.isAdmin);
-          // Redirection après connexion selon le contexte
-          if (isGraphisme) {
-            navigate("/graphisme");
+        if (formData.motdepasse.length < 6) {
+          setError("Le mot de passe doit contenir au moins 6 caractères.");
+          setLoading(false);
+          return;
+        }
+
+        const adresse = {
+          rue: formData.rue,
+          ville: formData.ville,
+          codePostal: formData.codePostal,
+          pays: formData.pays,
+        };
+
+        const res = await register(
+          formData.email,
+          formData.motdepasse,
+          formData.nom,
+          formData.prenom,
+          formData.telephone,
+          adresse
+        );
+
+        if (res.error) {
+          setError(res.error);
+        } else {
+          const loginRes = await login(formData.email, formData.motdepasse);
+          if (loginRes.error) {
+            setMessage("Inscription réussie, veuillez vous connecter.");
+            setIsRegister(false);
           } else {
-            navigate("/photographie");
+            handleLoginSuccess(loginRes, isGraphisme);
           }
         }
       } else {
         // 🔵 Mode connexion
-        const res = await login(email, motdepasse);
-        console.log(res);
-        if (res.error) setMessage(res.error); // Erreur côté API
-        else {
-          // 🔐 Stockage du token JWT dans le navigateur
-          localStorage.setItem("token", res.token);
-
-          // ✅ Mise à jour de l'état utilisateur global (UserContext)
-          // On utilise directement setUser récupéré en haut du composant (meilleure pratique React)
-          setUser({
-            isAuthenticated: !!res.token, // Authentifié si le token existe
-            isAdmin: res.role === "admin", // Admin si le rôle est "admin"
-            nom: res.nom || "", // Nom récupéré ou chaîne vide
-          });
-
-          // 👉 Navigation vers la page d'accueil ou admin selon le rôle
-          if (res.role === "admin") {
-            navigate("/admin/gestion-galerie");
-          } else {
-            navigate("/");
-          }
-          setEmailAuth(email); // Enregistre l'email
-          // Correction : accepte aussi le champ 'role' (string) du backend
-          const isAdmin =
-            res.isAdmin !== undefined ? !!res.isAdmin : res.role === "admin";
-          console.log(isAdmin);
-          setIsAdminAuth(isAdmin); // Enregistre si admin ou non (conversion sécurisée)
-
-          setMessage("Connexion réussie !");
-
-          // 🔄 Redirection automatique selon le choix utilisateur
-          setTimeout(() => {
-            if (choix === "photo-graphiste") {
-              navigate("/graphisme");
-            } else {
-              navigate("/photographie");
-            }
-          }, 800); // Délai léger pour laisser le message s'afficher
+        const res = await login(formData.email, formData.motdepasse);
+        if (res.error) {
+          setError(res.error);
+        } else {
+          handleLoginSuccess(res, isGraphisme);
         }
       }
-    } catch {
-      setMessage("Erreur serveur, réessayez."); // Cas d’erreur inattendue (réseau ou serveur)
+    } catch (err) {
+      setError("Erreur serveur, veuillez réessayer plus tard.");
     } finally {
-      setLoading(false); // Fin du chargement
+      setLoading(false);
     }
   };
 
+  const handleLoginSuccess = (res: any, isGraphisme: boolean) => {
+    localStorage.setItem("token", res.token);
+
+    setUser({
+      isAuthenticated: !!res.token,
+      isAdmin: res.role === "admin",
+      nom: res.nom || "",
+      prenom: res.prenom,
+      telephone: res.telephone,
+      adresse: res.adresse,
+    });
+
+    setEmailAuth(res.email);
+    const isAdmin = res.isAdmin !== undefined ? !!res.isAdmin : res.role === "admin";
+    setIsAdminAuth(isAdmin);
+
+    setMessage("Connexion réussie !");
+
+    if (res.role === "admin") {
+      navigate("/admin/gestion-galerie");
+    } else {
+      setTimeout(() => {
+        if (choix === "photo-graphiste") {
+          navigate("/graphisme");
+        } else {
+          navigate("/photographie");
+        }
+      }, 800);
+    }
+  };
+
+  // Styles communs pour les inputs
+  const inputClassName = "input w-full bg-black/40 border border-white/10 focus:border-yellow-400/50 focus:ring-1 focus:ring-yellow-400/50 text-white placeholder-gray-500 transition-all duration-300 backdrop-blur-sm";
+  const labelClassName = "label-text text-gray-400 text-xs uppercase tracking-wider font-semibold mb-1 block";
+
   // ------------------------------------------------------------------------
-  // 🎨 AFFICHAGE JSX : formulaire + navbar + footer
+  // 🎨 AFFICHAGE JSX
   // ------------------------------------------------------------------------
   return (
-    <div className="min-h-screen bg-[#0a0a10] text-white flex flex-col">
-      {/* Barre de navigation en haut */}
+    <div className="min-h-screen bg-[#0a0a10] text-white flex flex-col relative overflow-hidden">
+      {/* Éléments de fond décoratifs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-yellow-500/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
+      
       <Navbar />
 
-      {/* Section principale centrée verticalement */}
-      <div className="flex-1 flex flex-col items-center justify-center">
-        {/* FORMULAIRE D'AUTHENTIFICATION */}
-        <form
-          onSubmit={handleSubmit}
-          className="bg-[#181824] p-8 rounded shadow-lg flex flex-col gap-4 w-full max-w-md"
-        >
-          {/* Titre du formulaire (dynamique selon le mode) */}
-          <h2 className="text-2xl font-bold text-[#ffe992] text-center mb-2">
-            {isRegister ? "Inscription" : "Connexion"}
-          </h2>
+      <div className="flex-1 flex flex-col items-center justify-center p-4 mt-16 relative z-10">
+        <div className="w-full max-w-2xl bg-[#12121a]/80 backdrop-blur-xl p-8 md:p-10 rounded-2xl shadow-2xl border border-white/5">
+          
+          {/* En-tête avec dégradé doré */}
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-600 bg-clip-text text-transparent drop-shadow-sm mb-2">
+              {isRegister ? "Créer un compte" : "Connexion"}
+            </h2>
+            <p className="text-gray-400 text-sm">
+              {isRegister 
+                ? "Rejoignez l'univers Fabien Photographie" 
+                : "Accédez à votre espace personnel"}
+            </p>
+          </div>
 
-          {/* Champ de saisie : email */}
-          <input
-            id="auth-email"
-            name="email"
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="input input-bordered"
-            required
-            autoComplete="email"
-          />
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            
+            {/* Section Identifiants */}
+            <div className="grid gap-5">
+              <div className="form-control">
+                <label className={labelClassName}>Email</label>
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="exemple@email.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={inputClassName}
+                  required
+                />
+              </div>
+              <div className="form-control">
+                <label className={labelClassName}>Mot de passe</label>
+                <input
+                  name="motdepasse"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.motdepasse}
+                  onChange={handleChange}
+                  className={inputClassName}
+                  required
+                />
+                {isRegister && (
+                  <span className="text-[10px] text-gray-500 mt-1 ml-1">Minimum 6 caractères</span>
+                )}
+              </div>
+            </div>
 
-          {/* Champ de saisie : mot de passe */}
-          <input
-            id="auth-password"
-            name="motdepasse"
-            type="password"
-            placeholder="Mot de passe"
-            value={motdepasse}
-            onChange={(e) => setMotdepasse(e.target.value)}
-            className="input input-bordered"
-            required
-            autoComplete={isRegister ? "new-password" : "current-password"}
-          />
+            {/* Section Informations Personnelles (Animation fluide) */}
+            <div className={`grid transition-all duration-500 ease-in-out overflow-hidden ${isRegister ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+              <div className="min-h-0">
+                <div className="flex items-center gap-4 mb-6 mt-2">
+                  <div className="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent flex-1" />
+                  <span className="text-xs text-gray-500 font-medium uppercase tracking-widest">Informations</span>
+                  <div className="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent flex-1" />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                  <div className="form-control">
+                    <label className={labelClassName}>Nom</label>
+                    <input
+                      name="nom"
+                      type="text"
+                      placeholder="Votre nom"
+                      value={formData.nom}
+                      onChange={handleChange}
+                      className={inputClassName}
+                      required={isRegister}
+                    />
+                  </div>
+                  <div className="form-control">
+                    <label className={labelClassName}>Prénom</label>
+                    <input
+                      name="prenom"
+                      type="text"
+                      placeholder="Votre prénom"
+                      value={formData.prenom}
+                      onChange={handleChange}
+                      className={inputClassName}
+                      required={isRegister}
+                    />
+                  </div>
+                </div>
 
-          {/* Bouton principal (connexion ou inscription) */}
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading
-              ? "Chargement..."
-              : isRegister
-              ? "S'inscrire"
-              : "Se connecter"}
-          </button>
+                <div className="form-control mb-5">
+                  <label className={labelClassName}>Téléphone</label>
+                  <input
+                    name="telephone"
+                    type="tel"
+                    placeholder="06 12 34 56 78"
+                    value={formData.telephone}
+                    onChange={handleChange}
+                    className={inputClassName}
+                    required={isRegister}
+                  />
+                </div>
 
-          {/* Bouton secondaire pour changer de mode (inscription <-> connexion) */}
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setIsRegister(!isRegister)}
-          >
-            {isRegister
-              ? "Déjà inscrit ? Se connecter"
-              : "Pas encore de compte ? S'inscrire"}
-          </button>
+                <div className="form-control mb-5">
+                  <label className={labelClassName}>Adresse</label>
+                  <input
+                    name="rue"
+                    type="text"
+                    placeholder="N° et nom de rue"
+                    value={formData.rue}
+                    onChange={handleChange}
+                    className={inputClassName}
+                    required={isRegister}
+                  />
+                </div>
 
-          {/* Affichage du message (erreur ou succès) */}
-          {message && (
-            <div className="text-center text-yellow-600 mt-2">{message}</div>
-          )}
-        </form>
+                <div className="grid grid-cols-3 gap-5">
+                  <div className="form-control col-span-1">
+                    <label className={labelClassName}>Code Postal</label>
+                    <input
+                      name="codePostal"
+                      type="text"
+                      placeholder="75000"
+                      value={formData.codePostal}
+                      onChange={handleChange}
+                      className={inputClassName}
+                      required={isRegister}
+                    />
+                  </div>
+                  <div className="form-control col-span-2">
+                    <label className={labelClassName}>Ville</label>
+                    <input
+                      name="ville"
+                      type="text"
+                      placeholder="Paris"
+                      value={formData.ville}
+                      onChange={handleChange}
+                      className={inputClassName}
+                      required={isRegister}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Messages */}
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg flex items-center gap-2 animate-pulse">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                {error}
+              </div>
+            )}
+            {message && (
+              <div className="bg-green-500/10 border border-green-500/20 text-green-400 text-sm p-3 rounded-lg flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                {message}
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="mt-4 space-y-4">
+              <button
+                type="submit"
+                className={`w-full py-3.5 px-6 rounded-lg font-bold text-black uppercase tracking-wide transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-yellow-500/20 ${
+                  loading 
+                    ? "bg-gray-600 cursor-not-allowed" 
+                    : "bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 hover:brightness-110"
+                }`}
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Traitement...
+                  </span>
+                ) : (
+                  isRegister ? "Confirmer l'inscription" : "Se connecter"
+                )}
+              </button>
+              
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRegister(!isRegister);
+                    setError("");
+                    setMessage("");
+                  }}
+                  className="text-sm text-gray-400 hover:text-yellow-400 transition-colors duration-300"
+                >
+                  {isRegister 
+                    ? <span>Déjà membre ? <span className="text-yellow-400 font-semibold underline decoration-yellow-400/30 underline-offset-4">Connectez-vous</span></span>
+                    : <span>Nouveau client ? <span className="text-yellow-400 font-semibold underline decoration-yellow-400/30 underline-offset-4">Créer un compte</span></span>
+                  }
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-
-      {/* Pied de page */}
+      
+      {/* CSS Hack pour l'autofill */}
+      <style>{`
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active{
+            -webkit-box-shadow: 0 0 0 30px #1a1a24 inset !important;
+            -webkit-text-fill-color: white !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+      `}</style>
+      
       <Footer />
     </div>
   );
 };
 
-// --------------------------------------------------------------------------
-// Export du composant
-// --------------------------------------------------------------------------
 export default Auth;

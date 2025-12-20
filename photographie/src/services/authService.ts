@@ -1,12 +1,31 @@
 // ==============================
 //  Service pour s'inscrire (register)
 // ==============================
-export async function register(email: string, motdepasse: string) {
+export async function register(
+  email: string,
+  motdepasse: string,
+  nom?: string,
+  prenom?: string,
+  telephone?: string,
+  adresse?: {
+    rue: string;
+    ville: string;
+    codePostal: string;
+    pays: string;
+  }
+) {
   // Envoi d'une requête POST vers l'API pour créer un nouvel utilisateur
   const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
     method: "POST", // Méthode HTTP utilisée : POST pour envoyer des données
     headers: { "Content-Type": "application/json" }, // Type de contenu envoyé : JSON
-    body: JSON.stringify({ email, motdepasse }), // Corps de la requête converti en JSON
+    body: JSON.stringify({
+      email,
+      motdepasse,
+      nom,
+      prenom,
+      telephone,
+      adresse,
+    }), // Corps de la requête converti en JSON
   });
   // Retourne la réponse de l'API sous forme d'objet JSON
   return res.json();

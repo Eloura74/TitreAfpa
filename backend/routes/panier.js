@@ -19,7 +19,19 @@ const isAdmin = require("../middleware/isAdmin"); // Vérifie si l'utilisateur a
 // Ces routes sont uniquement accessibles par des administrateurs connectés
 
 // ------------------------------------------
-// GET /api/paniers/
+// GET /api/paniers/me
+// ------------------------------------------
+// Récupère le panier de l'utilisateur connecté
+router.get("/me", auth, ctrl.getMyCart);
+
+// ------------------------------------------
+// POST /api/paniers/me
+// ------------------------------------------
+// Sauvegarde le panier de l'utilisateur connecté
+router.post("/me", auth, ctrl.saveMyCart);
+
+// ------------------------------------------
+// ROUTES PROTÉGÉES POUR LA GESTION DES PANIERS (ADMIN)
 // ------------------------------------------
 // Récupère la liste de tous les paniers dans la base MongoDB
 // ⚠️ Nécessite : utilisateur connecté + rôle admin

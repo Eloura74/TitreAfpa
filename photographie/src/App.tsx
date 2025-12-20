@@ -19,6 +19,7 @@ import GestionGalerie from "./pages/GestionGalerie";       // Page admin gestion
 import RouteAdminOnly from "./components/RouteAdminOnly"; // Composant route protégée pour admin uniquement
 import TirageEnLigne from "./pages/TirageEnLigne";         // Page Tirage en ligne
 import GestionTarifs from "./components/GestionTarifs";     // Composant admin gestion tarifs
+import MonCompte from "./pages/MonCompte";                   // Page Espace Client
 
 // ==============================
 //  Composant principal App : configuration des routes
@@ -90,6 +91,9 @@ function App() {
 
             {/* Route pour la page de connexion */}
             <Route path="/connexion" element={<Auth />} />
+
+            {/* Route pour l'espace client */}
+            <Route path="/mon-compte" element={<MonCompte />} />
           </Routes>
         </Router>
       </PanierProvider>

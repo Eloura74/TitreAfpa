@@ -3,7 +3,7 @@
 // ==============================
 
 // React : Importation des fonctions nécessaires pour créer un contexte et gérer l'état
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 // Importation du type TypeScript pour définir la structure d'un article dans le panier
 import { ArticlePanierType } from "../types/panier";
@@ -43,9 +43,95 @@ export const usePanier = () => {
 //   Provider : PanierProvider
 // ==============================
 // Ce composant englobe toute l'application (ou une partie) pour fournir l'accès global au panier
+import axios from "axios";
+import { useAuthStore } from "./authStore";
+
+// ==============================
+//   Provider : PanierProvider
+// ==============================
+// Ce composant englobe toute l'application (ou une partie) pour fournir l'accès global au panier
 export const PanierProvider = ({ children }: { children: ReactNode }) => {
+  const { email } = useAuthStore(); // On récupère l'état de connexion
+
   // State local pour stocker les articles du panier
-  const [articles, setArticles] = useState<ArticlePanierType[]>([]);
+  // Initialisation lazy : on lit le localStorage au démarrage
+  const [articles, setArticles] = useState<ArticlePanierType[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("panier");
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
+  // Sauvegarde automatique dans localStorage à chaque changement
+  useEffect(() => {
+    localStorage.setItem("panier", JSON.stringify(articles));
+  }, [articles]);
+
+  // ==============================
+  //   Synchronisation avec la BDD (Utilisateurs connectés)
+  // ==============================
+  
+  // 1. Au chargement ou changement d'utilisateur : on récupère le panier en BDD
+  useEffect(() => {
+    if (email) {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      axios
+        .get(`${import.meta.env.VITE_API_URL}/api/paniers/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          const dbArticles = res.data.articles;
+          // Si le panier BDD n'est pas vide, on l'utilise (source de vérité)
+          if (dbArticles && dbArticles.length > 0) {
+            // On mappe pour s'assurer du format (notamment si 'photo' est peuplé)
+            const formatted = dbArticles.map((item: any) => ({
+              id: item.photo._id || item.photo, // Gère le cas populé ou non
+              nom: item.photo.nom || "Photo",
+              prix: item.photo.prix || 0,
+              image: item.photo.image || "",
+              format: item.photo.format || "Standard", // À adapter selon votre modèle
+              quantite: item.quantite,
+            }));
+            setArticles(formatted);
+          } else if (articles.length > 0) {
+            // Si BDD vide mais local non vide, on envoie le local vers la BDD
+            saveToDb(articles);
+          }
+        })
+        .catch((err) => console.error("Erreur chargement panier BDD:", err));
+    }
+  }, [email]);
+
+  // 2. Fonction pour sauvegarder en BDD
+  const saveToDb = (currentArticles: ArticlePanierType[]) => {
+    const token = localStorage.getItem("token");
+    if (!email || !token) return;
+
+    // On ne garde que l'ID de la photo et la quantité pour l'envoi
+    const payload = currentArticles.map((a) => ({
+      photo: a.id,
+      quantite: a.quantite,
+    }));
+
+    axios
+      .post(
+        `${import.meta.env.VITE_API_URL}/api/paniers/me`,
+        { articles: payload },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .catch((err) => console.error("Erreur sauvegarde panier BDD:", err));
+  };
+
+  // 3. À chaque changement du panier local, on sauvegarde en BDD si connecté
+  useEffect(() => {
+    if (email) {
+      // Debounce ou sauvegarde directe ? Directe pour l'instant (attention au trafic)
+      saveToDb(articles);
+    }
+  }, [articles, email]);
 
   // ==============================
   //   Calcul dynamique du total du panier

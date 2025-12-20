@@ -115,9 +115,10 @@ export default function Navbar() {
             <li className="nav-item">
               <div className="flex items-center gap-2">
                 {/* Affiche l'email de l'utilisateur connecté */}
-                <span className="nav-link font-semibold text-yellow-400">
+                {/* Affiche l'email de l'utilisateur connecté avec lien vers Mon Compte */}
+                <Link to="/mon-compte" className="nav-link font-semibold text-yellow-400 hover:text-yellow-300 transition">
                   {email}
-                </span>
+                </Link>
                 {/* Bouton pour se déconnecter */}
                 <button
                   onClick={logout}

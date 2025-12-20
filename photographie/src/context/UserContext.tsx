@@ -1,7 +1,7 @@
 // ==========================================================================
 // 📦 Import des éléments React nécessaires à la création d’un contexte
 // ==========================================================================
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 /* ==========================================================================
    🧩 Interface `Utilisateur` : structure des données utilisateur dans l'application
@@ -10,7 +10,15 @@ import { createContext, useContext, useState, ReactNode } from "react";
 export interface Utilisateur {
   isAuthenticated: boolean; // ✔️ Indique si l'utilisateur est connecté (authentifié)
   isAdmin: boolean; // 👑 Indique si l'utilisateur possède les droits administrateur
-  nom: string; // 🧑 Nom affiché dans l'interface (par exemple en haut de page)
+  nom: string; // 🧑 Nom de famille
+  prenom?: string; // Prénom
+  telephone?: string; // Téléphone
+  adresse?: {
+    rue: string;
+    ville: string;
+    codePostal: string;
+    pays: string;
+  };
 }
 
 /* ==========================================================================
@@ -49,13 +57,54 @@ export const useUser = () => {
 ========================================================================== */
 export function UserProvider({ children }: { children: ReactNode }) {
   // 📦 Initialisation du state utilisateur
-  // - L'utilisateur n'est pas connecté par défaut (isAuthenticated: false)
-  // - Pas admin (isAdmin: false), nom vide
   const [user, setUser] = useState<Utilisateur>({
     isAuthenticated: false,
     isAdmin: false,
     nom: "",
+    prenom: "",
+    telephone: "",
+    adresse: undefined,
   });
+
+  // 🔄 Restauration de la session au chargement
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      // On pourrait utiliser axios ici, mais fetch est natif et léger pour ce besoin
+      fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => {
+          if (res.ok) return res.json();
+          throw new Error("Token invalide");
+        })
+        .then((data) => {
+          // data.user contient les infos de l'utilisateur
+          setUser({
+            isAuthenticated: true,
+            isAdmin: data.user.role === "admin",
+            nom: data.user.nom || "",
+            prenom: data.user.prenom || "",
+            telephone: data.user.telephone || "",
+            adresse: data.user.adresse,
+          });
+        })
+        .catch(() => {
+          // Si erreur (token expiré par exemple), on nettoie
+          localStorage.removeItem("token");
+          setUser({
+            isAuthenticated: false,
+            isAdmin: false,
+            nom: "",
+            prenom: "",
+            telephone: "",
+            adresse: undefined,
+          });
+        });
+    }
+  }, []);
 
   return (
     // Fourniture des données utilisateur et du setter à tous les composants enfants

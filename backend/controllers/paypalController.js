@@ -55,6 +55,8 @@ exports.createOrder = async (req, res) => {
   }
 };
 
+const Paiement = require("../models/Paiement"); // Import du modèle Paiement
+
 exports.captureOrder = async (req, res) => {
   const { orderID } = req.params;
 
@@ -63,10 +65,28 @@ exports.captureOrder = async (req, res) => {
 
   try {
     const capture = await client.execute(request);
-    // Ici, vous pouvez enregistrer la commande dans votre base de données
-    // ex: await Commande.create({ ... })
+    const result = capture.result;
+
+    // Extraction des informations du payeur
+    const payer = result.payer;
+    const purchaseUnit = result.purchase_units[0];
+    const amount = purchaseUnit.payments.captures[0].amount.value;
+
+    // Enregistrement du paiement en base de données
+    const nouveauPaiement = await Paiement.create({
+      montant: parseFloat(amount),
+      date: new Date(),
+      statut: "payé",
+      source: "paypal",
+      transactionId: result.id,
+      nomClient: `${payer.name.given_name} ${payer.name.surname}`,
+      emailClient: payer.email_address,
+      // utilisateur: req.user ? req.user._id : undefined // Si on avait l'user connecté
+    });
+
+    console.log("✅ Paiement PayPal enregistré :", nouveauPaiement);
     
-    res.json(capture.result);
+    res.json(result);
   } catch (err) {
     console.error("Erreur capture commande PayPal:", err);
     res.status(500).json({ error: err.message });

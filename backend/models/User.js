@@ -18,6 +18,17 @@ const userSchema = new mongoose.Schema({
     enum: ["admin", "user"], // Limite les valeurs possibles à 'admin' ou 'user'
     default: "user", // Si aucun rôle n'est spécifié, 'user' est attribué
   },
+
+  // Nouveaux champs pour le profil utilisateur
+  nom: { type: String, required: false },
+  prenom: { type: String, required: false },
+  telephone: { type: String, required: false },
+  adresse: {
+    rue: { type: String, required: false },
+    ville: { type: String, required: false },
+    codePostal: { type: String, required: false },
+    pays: { type: String, required: false },
+  },
 });
 
 // Middleware (pré-hook) exécuté **avant la sauvegarde** d'un document utilisateur

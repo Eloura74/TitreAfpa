@@ -9,11 +9,36 @@ const mongoose = require("mongoose"); // Import de la bibliothèque Mongoose
 // *****************************
 const paiementSchema = new mongoose.Schema({
   // Champ "utilisateur" : identifiant unique d’un utilisateur (référence vers la collection "User")
-  // Ce champ permet de savoir quel utilisateur a effectué ce paiement.
+  // Optionnel car un achat peut être fait en invité (PayPal)
   utilisateur: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
+    required: false,
+  },
+
+  // Nom du client (utile pour les invités ou PayPal)
+  nomClient: {
+    type: String,
+    required: false,
+  },
+
+  // Email du client
+  emailClient: {
+    type: String,
+    required: false,
+  },
+
+  // ID de transaction (PayPal ou Stripe)
+  transactionId: {
+    type: String,
+    required: false,
+  },
+
+  // Source du paiement
+  source: {
+    type: String,
+    enum: ["manuel", "paypal", "stripe"],
+    default: "manuel",
   },
 
   // Champ "montant" : montant du paiement (en euros ou autre devise)

@@ -21,8 +21,8 @@ const { authenticate } = require("../middleware/auth");
 // ==========================
 router.post("/register", async (req, res) => {
   try {
-    // Récupération des données envoyées par le client dans le corps de la requête (email et mot de passe)
-    const { email, motdepasse } = req.body;
+    // Récupération des données envoyées par le client dans le corps de la requête
+    const { email, motdepasse, nom, prenom, telephone, adresse } = req.body;
 
     // Définition du rôle par défaut : 'user'
     let role = "user";
@@ -34,7 +34,15 @@ router.post("/register", async (req, res) => {
 
     // Création d'une nouvelle instance de l'utilisateur avec les données fournies
     // Le mot de passe sera automatiquement hashé grâce au middleware défini dans le modèle User
-    const user = new User({ email, motdepasse, role });
+    const user = new User({
+      email,
+      motdepasse,
+      role,
+      nom,
+      prenom,
+      telephone,
+      adresse,
+    });
 
     // Sauvegarde de l'utilisateur dans la base de données MongoDB
     await user.save();
@@ -74,7 +82,15 @@ router.post("/login", async (req, res) => {
     );
 
     // Envoi du token ainsi que des informations de l'utilisateur (email et rôle) au client
-    res.json({ token, email: user.email, role: user.role });
+    res.json({
+      token,
+      email: user.email,
+      role: user.role,
+      nom: user.nom,
+      prenom: user.prenom,
+      telephone: user.telephone,
+      adresse: user.adresse,
+    });
   } catch (err) {
     // Gestion des erreurs avec une réponse 400 en cas de problème
     res.status(400).json({ error: err.message });

@@ -13,6 +13,16 @@ const auth = require("../middleware/auth").authenticate; // Vérifie le token JW
 const isAdmin = require("../middleware/isAdmin"); // Vérifie que l'utilisateur est admin
 
 // ===================================================================
+// ROUTES PROTÉGÉES (USER & ADMIN)
+// ===================================================================
+
+// ----------------------------------------------------
+// GET /api/paiements/me
+// ----------------------------------------------------
+// Récupère l'historique des paiements de l'utilisateur connecté
+router.get("/me", auth, ctrl.getMyPayments);
+
+// ===================================================================
 // ROUTES PROTÉGÉES : seuls les administrateurs authentifiés y accèdent
 // ===================================================================
 
