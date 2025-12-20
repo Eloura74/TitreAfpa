@@ -26,7 +26,13 @@ export default function Home() {
   // Fonction appelée quand l'utilisateur clique sur un univers (photographie ou graphisme)
   const handleChoix = (choix: "photographie" | "photo-graphiste") => {
     setChoix(choix); // On sauvegarde ce choix dans le store global Zustand
-    navigate("/connexion"); // Puis on redirige vers la page de connexion
+    
+    // Redirection vers la galerie correspondante au lieu de la page de connexion
+    if (choix === "photographie") {
+      navigate("/galerie");
+    } else {
+      navigate("/galerie-graphique");
+    }
   };
 
   return (
@@ -117,7 +123,7 @@ export default function Home() {
       <div className="md:hidden flex flex-col h-full w-full z-10 px-4 py-8 gap-8 relative">
         {/* Lien vers Photographie */}
         <Link
-          to="/photographie"
+          to="/galerie"
           className="group focus:outline-none focus:ring-2 focus:ring-yellow-400"
         >
           <div className="w-full bg-black/80 rounded-2xl shadow-lg flex flex-col items-center justify-center py-8 px-4">
@@ -132,7 +138,7 @@ export default function Home() {
 
         {/* Lien vers Graphisme */}
         <Link
-          to="/graphisme"
+          to="/galerie-graphique"
           className="group focus:outline-none focus:ring-2 focus:ring-yellow-400"
         >
           <div className="w-full bg-black/80 rounded-2xl shadow-lg flex flex-col items-center justify-center py-8 px-4">

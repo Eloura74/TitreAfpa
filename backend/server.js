@@ -24,6 +24,7 @@ const paiementRoutes = require("./routes/paiement"); // Routes CRUD pour les pai
 const panierRoutes = require("./routes/panier"); // Routes CRUD pour les paniers
 const tarifsRoutes = require("./routes/tarifs"); // Routes CRUD pour la grille tarifaire
 const uploadCloudinaryRoutes = require("./routes/upload"); // Routes d’upload vers Cloudinary
+const paypalRoutes = require("./routes/paypal"); // Routes pour PayPal
 
 // Module pour gérer les chemins de fichiers
 const path = require("path");
@@ -221,6 +222,10 @@ console.log("✅ Route /api/stripe montée");
 // Grille tarifaire dynamique
 app.use("/api/tarifs", tarifsRoutes);
 console.log("✅ Route /api/tarifs montée");
+
+// Paiement PayPal
+app.use("/api/paypal", paypalRoutes);
+console.log("✅ Route /api/paypal montée");
 console.log(
   "✅ GET /api/tarifs fonctionne et la grille tarifaire dynamique est accessible côté front"
 );

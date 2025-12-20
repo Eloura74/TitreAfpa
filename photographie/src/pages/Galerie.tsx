@@ -16,8 +16,8 @@ import "../styles/galerie.css";
 // Importation du contexte personnalisé pour gérer le panier (state global)
 import { usePanier } from "../store/panierContext";
 
-// Importation des données locales de la galerie (JSON statique)
-import galerieData from "../config/galerie.json";
+// Importation des données locales de la galerie (JSON statique) - DÉSACTIVÉ
+// import galerieData from "../config/galerie.json";
 
 // Importation de la modale de sélection de format
 import { SelectionFormatModal } from "../components/galerie/SelectionFormatModal";
@@ -132,12 +132,6 @@ export default function Galerie() {
   //  useEffect : Chargement des données au montage du composant
   // ==============================
   useEffect(() => {
-    // 1️⃣ Chargement des données locales depuis le fichier JSON
-    const photosLocales: Photo[] = galerieData.map((photo) => ({
-      ...photo,
-      type: "standard", // Assigne simplement une valeur par défaut
-    }));
-
     // 2️⃣ Récupération des photos stockées sur le serveur (MongoDB)
     fetch(`${import.meta.env.VITE_API_URL}/api/galerie`)
       .then((res) => res.json()) // Conversion de la réponse en JSON
@@ -168,13 +162,13 @@ export default function Galerie() {
           };
         });
 
-        // 3️⃣ Fusion des deux sources (locales + serveur) et mise à jour de l'état
-        setPhotos([...photosLocales, ...photosServeur]);
+        // 3️⃣ Mise à jour de l'état avec uniquement les données du serveur
+        setPhotos(photosServeur);
       })
       .catch((err) => {
-        // En cas d'erreur (ex : serveur hors ligne), fallback sur les données locales uniquement
+        // En cas d'erreur (ex : serveur hors ligne)
         console.error("Erreur chargement MongoDB:", err);
-        setPhotos(photosLocales);
+        setPhotos([]); // On n'affiche rien ou un message d'erreur
       });
   }, []); // [] signifie que ce code ne s'exécute qu'une seule fois (au montage)
 

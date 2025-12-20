@@ -5,6 +5,7 @@
 
 // 📦 Import des modules React (hooks) et composants
 import { useEffect, useState } from "react";
+import { usePanier } from "../store/panierContext"; // Hook pour le panier
 import Navbar from "../components/layout/navbar"; // Barre de navigation
 import Footer from "../components/layout/Footer"; // Pied de page
 import "../styles/galerie.css"; // Styles spécifiques à la galerie
@@ -24,6 +25,21 @@ export default function GalerieGraphique() {
   const [oeuvres, setOeuvres] = useState<OeuvreGraphique[]>([]); // Liste des œuvres
   const [loading, setLoading] = useState(true); // État de chargement
   const [erreur, setErreur] = useState<string | null>(null); // Message d'erreur éventuel
+  const [notification, setNotification] = useState<string | null>(null); // Notification ajout panier
+
+  const { ajouterArticle } = usePanier(); // Accès au contexte panier
+
+  const handleAjouterAuPanier = (oeuvre: OeuvreGraphique) => {
+    ajouterArticle({
+      id: oeuvre.id,
+      nom: `${oeuvre.titre} (Oeuvre Graphique)`,
+      prix: oeuvre.prix,
+      quantite: 1,
+      image: oeuvre.image,
+    });
+    setNotification(`${oeuvre.titre} ajouté au panier !`);
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   // 🔄 useEffect : s'exécute au chargement du composant
   useEffect(() => {
@@ -42,7 +58,7 @@ export default function GalerieGraphique() {
           image:
             oeuvre.image && oeuvre.image.startsWith("/uploads/")
               ? `${import.meta.env.VITE_API_URL}${oeuvre.image}`
-              : `/uploads/placeholder.jpg`, // Fallback si l'image est absente
+              : `/images/placeholder.jpg`, // Fallback si l'image est absente
           prix: oeuvre.prix,
           description: oeuvre.description,
         }));
@@ -144,13 +160,24 @@ export default function GalerieGraphique() {
                   </p>
 
                   {/* 🛒 Bouton pour acheter ou en savoir plus */}
-                  <button className="bg-yellow-400 text-black px-4 py-2 rounded font-bold hover:bg-yellow-300 transition">
-                    Acheter / En savoir +
+                  {/* 🛒 Bouton pour acheter */}
+                  <button
+                    onClick={() => handleAjouterAuPanier(oeuvre)}
+                    className="bg-yellow-400 text-black px-4 py-2 rounded font-bold hover:bg-yellow-300 transition relative z-10"
+                  >
+                    Ajouter au panier
                   </button>
                 </div>
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Notification d'ajout au panier */}
+      {notification && (
+        <div className="notification fixed bottom-8 right-8 bg-[#d6c487] text-black px-6 py-3 rounded-sm shadow-lg z-50">
+          {notification}
         </div>
       )}
 

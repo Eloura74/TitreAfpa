@@ -18,6 +18,7 @@ import { UserProvider } from "./context/UserContext";     // Provider pour gére
 import GestionGalerie from "./pages/GestionGalerie";       // Page admin gestion galerie
 import RouteAdminOnly from "./components/RouteAdminOnly"; // Composant route protégée pour admin uniquement
 import TirageEnLigne from "./pages/TirageEnLigne";         // Page Tirage en ligne
+import GestionTarifs from "./components/GestionTarifs";     // Composant admin gestion tarifs
 
 // ==============================
 //  Composant principal App : configuration des routes
@@ -66,6 +67,17 @@ function App() {
                 // Le composant RouteAdminOnly bloque l'accès si l'utilisateur n'est pas admin
                 <RouteAdminOnly>
                   <GestionGalerie />
+                </RouteAdminOnly>
+              }
+            />
+
+            {/* Route protégée uniquement accessible aux admins pour la gestion des tarifs */}
+            <Route
+              path="/admin/tarifs"
+              element={
+                // Le composant RouteAdminOnly bloque l'accès si l'utilisateur n'est pas admin
+                <RouteAdminOnly>
+                  <GestionTarifs />
                 </RouteAdminOnly>
               }
             />

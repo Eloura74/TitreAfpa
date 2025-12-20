@@ -1,77 +1,94 @@
 // ================================
-// SCRIPT DE PEUPLEMENT INITIAL
-// Objectif : forcer l’apparition des collections dans MongoDB/Mongo Express
-// en insérant des documents fictifs (données minimales valides)
+// SCRIPT DE PEUPLEMENT (SEEDING)
 // ================================
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
 
-// ------------------------------
-// 1. IMPORT DES DÉPENDANCES
-// ------------------------------
-const mongoose = require("mongoose"); // Librairie pour manipuler MongoDB
-const dotenv = require("dotenv"); // Pour charger les variables d’environnement
-dotenv.config(); // Charge les variables depuis le fichier .env
+// Chargement des variables d'environnement
+dotenv.config();
 
-// ------------------------------
-// 2. CONNEXION À MONGODB
-// ------------------------------
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+// Import des modèles
+const User = require("./models/User");
+const Evenement = require("./models/Evenement");
+const OeuvreGraphique = require("./models/OeuvreGraphique");
 
-mongoose.connection.on("connected", () => {
-  console.log("✅ Connexion MongoDB réussie !");
-});
+// Connexion à MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ Connecté à MongoDB"))
+  .catch(err => {
+    console.error("❌ Erreur connexion MongoDB:", err);
+    process.exit(1);
+  });
 
-mongoose.connection.on("error", (err) => {
-  console.error("❌ Erreur de connexion MongoDB :", err);
-});
-
-// ------------------------------
-// 3. IMPORTATION DES MODÈLES MONGOOSE
-// ------------------------------
-const Evenement = require("./models/Evenement"); // Modèle pour les événements
-const Panier = require("./models/Panier"); // Modèle pour les paniers
-const Paiement = require("./models/Paiement"); // Modèle pour les paiements
-
-// ------------------------------
-// 4. FONCTION PRINCIPALE : INSÉRER UN ÉCHANTILLON DANS CHAQUE COLLECTION
-// ------------------------------
-async function insererDocumentsTests() {
+async function seedDatabase() {
   try {
-    // === EVENEMENT ===
-    await Evenement.create({
-      titre: "Titre test", // Champ requis
-      description: "Description test", // Champ optionnel
-      date: new Date(), // Champ requis : date actuelle
-    });
-    console.log("✅ Document 'Evenement' inséré");
+    console.log("🔄 Début du peuplement de la base de données...");
 
-    // === PANIER ===
-    await Panier.create({
-      utilisateur: new mongoose.Types.ObjectId(), // ID fictif utilisateur (valide)
-      articles: [], // Liste vide d’articles (valide)
-    });
-    console.log("✅ Document 'Panier' inséré");
+    // ---------------------------------
+    // 1. CRÉATION D'UN UTILISATEUR (ADMIN)
+    // ---------------------------------
+    const adminEmail = "admin@test.com";
+    const userExists = await User.findOne({ email: adminEmail });
+    
+    if (!userExists) {
+      await User.create({
+        email: adminEmail,
+        motdepasse: "admin123", // Le hook 'pre save' va hasher ce mot de passe
+        role: "admin"
+      });
+      console.log(`✅ Utilisateur créé : ${adminEmail} (mdp: admin123)`);
+    } else {
+      console.log(`ℹ️ L'utilisateur ${adminEmail} existe déjà.`);
+    }
 
-    // === PAIEMENT ===
-    await Paiement.create({
-      utilisateur: new mongoose.Types.ObjectId(), // ID utilisateur fictif
-      montant: 10, // Champ requis
-      statut: "en attente", // Valeur par défaut autorisée
-    });
-    console.log("✅ Document 'Paiement' inséré");
-  } catch (erreur) {
-    console.error("❌ Erreur lors de l'insertion :", erreur.message);
+    // ---------------------------------
+    // 2. CRÉATION D'UN ÉVÉNEMENT
+    // ---------------------------------
+    const eventTitle = "Mariage de Alice & Bob";
+    const eventExists = await Evenement.findOne({ titre: eventTitle });
+
+    if (!eventExists) {
+      await Evenement.create({
+        titre: eventTitle,
+        description: "Un mariage féerique au cœur de la Provence.",
+        dateDebut: new Date(),
+        dateFin: new Date(new Date().setDate(new Date().getDate() + 1)), // Demain
+        lieu: "Aix-en-Provence",
+        image: "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80" // Image exemple
+      });
+      console.log("✅ Événement test créé.");
+    } else {
+      console.log("ℹ️ L'événement test existe déjà.");
+    }
+
+    // ---------------------------------
+    // 3. CRÉATION D'UNE ŒUVRE GRAPHIQUE
+    // ---------------------------------
+    const oeuvreTitle = "Lumière Urbaine";
+    const oeuvreExists = await OeuvreGraphique.findOne({ titre: oeuvreTitle });
+
+    if (!oeuvreExists) {
+      await OeuvreGraphique.create({
+        titre: oeuvreTitle,
+        description: "Une composition numérique explorant les néons de la ville.",
+        prix: 150,
+        image: "https://images.unsplash.com/photo-1492571350019-22de08371fd3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1053&q=80" // Image exemple
+      });
+      console.log("✅ Œuvre graphique test créée.");
+    } else {
+      console.log("ℹ️ L'œuvre graphique test existe déjà.");
+    }
+
+    console.log("🎉 Peuplement terminé avec succès !");
+
+  } catch (error) {
+    console.error("❌ Erreur lors du peuplement :", error);
   } finally {
-    // Fermeture de la connexion Mongo proprement
-    mongoose.connection.close(() => {
-      console.log("🔌 Connexion Mongo fermée.");
-    });
+    // Fermeture de la connexion
+    mongoose.connection.close();
+    console.log("🔌 Connexion MongoDB fermée.");
   }
 }
 
-// ------------------------------
-// 5. LANCEMENT DU SCRIPT
-// ------------------------------
-insererDocumentsTests();
+// Lancement du script
+seedDatabase();

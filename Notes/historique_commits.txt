@@ -1,0 +1,81 @@
+f235b28|2025-05-29| (HEAD -> devConnection, origin/devGallerieGraphique, origin/devConnection, devGallerieGraphique)|correction gallerie graphiqueV3
+b1051d1|2025-05-29||correction gallerie graphiqueV2
+d3d6258|2025-05-29||correction gallerie graphiqueV1
+a8e7d8a|2025-05-29||correction gallerie graphique
+d5a5138|2025-05-29| (origin/devRedirection, devRedirection)|correction redirectionV1
+a28c227|2025-05-29||correction redirection
+e263337|2025-05-29| (origin/devEvenement, devEvenement)|feature evenement creation
+c65c4a9|2025-05-29| (origin/devPhoto, devPhoto)|correction adminV4
+04dd1d2|2025-05-29||correction adminV3
+ebdabc7|2025-05-29||correction adminV2
+c076a9b|2025-05-28||correction admin
+f82c3c4|2025-05-28||Début du développement sur la branche devPhoto
+e52a228|2025-05-28| (origin/auth, auth)|correction commentairev6
+570b6a0|2025-05-28||correction commentairev4
+eb88a67|2025-05-28||correction commentairev3
+3719685|2025-05-28||correction commentairev2
+3509cab|2025-05-28||correction commentaire
+73fe3c6|2025-05-28||correction2.2
+56620e0|2025-05-28||correction2.1
+61c7854|2025-05-28||correction2.0
+5a048b9|2025-05-28||correction1.5
+8b8df6c|2025-05-28||correction1.4import
+84508be|2025-05-28||correction1.4
+fa9809f|2025-05-28||correction1.3
+ffc4fa2|2025-05-28||correction1.2
+e0ddd35|2025-05-28||correction3
+e46ced4|2025-05-28||correction2
+551ec3b|2025-05-28||correction1
+ff2d9d0|2025-05-28||Mon commit sur la branche auth
+5a5a580|2025-05-27| (origin/deploiement, deploiement)|Mon commit sur la branche deploiement
+64df363|2025-05-27| (origin/main, main)|feature backend fonctionnel none-3
+944ea04|2025-05-27||feature backend fonctionnel none-2
+f0e86eb|2025-05-27||feature backend fonctionnel none-1
+31e8ba0|2025-05-27||feature correction de lajout image visuel
+744072d|2025-05-27||feature api deploiement clooudinary v6
+f05b7ad|2025-05-27||feature api deploiement clooudinary v6
+2c83a98|2025-05-27||feature api deploiement clooudinary V5
+6f38327|2025-05-27||feature api deploiement clooudinary v 3
+793f07d|2025-05-27||feature api deploiement clooudinary
+dc09050|2025-05-26||feature api deploiement render v3
+fb0e34e|2025-05-26||feature api deploiement render v2
+b346e42|2025-05-26||feature api deploiement render
+44c3d5f|2025-05-26||Initial commit deploiement render1
+b83d3dc|2025-05-26||Initial commit deploiement render
+2e89d61|2025-05-26||Initial commit deploiement v3
+636da12|2025-05-26||Initial commit deploiement v3
+749be3d|2025-05-26||Initial commit deploiement v2
+d69a595|2025-05-26| (origin/devTarif)|add responsive
+9006a53|2025-05-26||feature correction bug'
+5845d71|2025-05-26||feature tarif
+7ba64c7|2025-05-23| (origin/feature_dev, feature_dev)|feature de format different gallerie
+f44d041|2025-05-23||feature de tirage en ligne
+269e961|2025-05-23||creation branche
+5cc8c78|2025-05-15| (origin/devBackend, devBackend)|ajout de base questionnaire
+a04a094|2025-05-12||feature add gestion gallerie garphisme
+7d69819|2025-05-12||feature add gallerie admin
+5bac9f9|2025-05-12||feature gallerie graphique
+8c82b68|2025-05-12||feature home page destination
+8bc5987|2025-05-05||ajout des tarifs
+b1311d1|2025-05-01||ajout de la gestion de la grille tariffaireV2
+b6bdd23|2025-05-01||ajout de la gestion de la grille tariffaire
+50fe82c|2025-04-29||Version propre sans fichier volumineux
+47dc576|2025-04-29||Version propre sans fichier volumineux
+4bd7fed|2025-04-29||save avant modif pannier
+d222fef|2025-04-29||save avant modif pannier
+ee45bf8|2025-04-28||evenement add
+ace5228|2025-04-28||save avant modification backend
+7d5d6f7|2025-04-24||ajout des commentaire detaillées
+831bee0|2025-04-23||Début du développement backend v2
+be70c88|2025-04-23||Début du développement backend
+c8bccc4|2025-04-23| (origin/dev, dev)|ajout du pannier v2
+06bbd4c|2025-04-23||ajout du pannier style
+52d87c4|2025-04-23||ajout du pannier
+b5f1318|2025-04-04||Sauvegarde temporaire avant de passer sur main
+000d20d|2025-04-04||ajout de la gestion de levenement
+ae58c54|2025-04-03||ajout de la gestion de la galerie
+87ea5f3|2025-03-21||changement gallerie style
+cfe8dca|2025-03-21||ajout de gallerie
+5e05c2d|2025-03-21||changement style plus design v2
+8405b82|2025-03-21||changement style plus design
+7b9fbe3|2025-03-21||first commit

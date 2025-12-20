@@ -8,6 +8,8 @@ import Footer from "../components/layout/Footer"; // Pied de page
 import { Link } from "react-router-dom"; // Pour faire des liens entre pages sans recharger
 import { usePanier } from "../store/panierContext"; // Hook personnalisé pour gérer l’état du panier global
 import { createCheckoutSession } from "../services/stripeService"; // Fonction pour démarrer le paiement via Stripe
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import PayPalButton from "../components/paiement/PayPalButton";
 
 // ==============================
 //  Vue principale du panier
@@ -51,6 +53,7 @@ const Panier: React.FC = () => {
             </button>
 
             {/* Bouton pour valider le panier, démarre la session Stripe */}
+            {/* Bouton pour valider le panier (Stripe) - DÉSACTIVÉ TEMPORAIREMENT
             <button
               className="cart-button bg-transparent border border-[#d6c487] text-[#ffe992] px-4 py-2 rounded-sm transition-all duration-300 hover:bg-[#d6c487] hover:text-black"
               onClick={async () => {
@@ -67,6 +70,7 @@ const Panier: React.FC = () => {
             >
               Valider le panier
             </button>
+            */}
 
             {/* Bouton lien vers la galerie photo pour continuer les achats */}
             <Link to="/galerie">
@@ -74,6 +78,23 @@ const Panier: React.FC = () => {
                 Retour à la galerie
               </button>
             </Link>
+          </div>
+        </div>
+
+        {/* Section PayPal */}
+        <div className="mt-8 flex flex-col items-end">
+          <h2 className="text-xl font-semibold text-[#ffe992] mb-4">
+            Payer avec PayPal
+          </h2>
+          <div className="w-full md:w-1/3">
+            <PayPalScriptProvider
+              options={{
+                clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
+                currency: "EUR",
+              }}
+            >
+              <PayPalButton articles={articles} total={total} />
+            </PayPalScriptProvider>
           </div>
         </div>
       </div>
