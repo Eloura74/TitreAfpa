@@ -7,9 +7,6 @@ import Navbar from "../components/layout/navbar"; // Barre de navigation
 import Footer from "../components/layout/Footer"; // Pied de page
 import { Link } from "react-router-dom"; // Pour faire des liens entre pages sans recharger
 import { usePanier } from "../store/panierContext"; // Hook personnalisé pour gérer l’état du panier global
-import { createCheckoutSession } from "../services/stripeService"; // Fonction pour démarrer le paiement via Stripe
-import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import PayPalButton from "../components/paiement/PayPalButton";
 
 // ==============================
 //  Vue principale du panier
@@ -36,65 +33,38 @@ const Panier: React.FC = () => {
         <ListeArticlesPanier articles={articles} />
 
         {/* Zone avec total + boutons d’action */}
-        <div className="flex flex-col md:flex-row justify-between items-center mt-8 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-center mt-8 gap-4 bg-[#151520] p-6 rounded-lg border border-gray-800">
           {/* Affiche le total à payer */}
-          <span className="text-xl font-semibold text-[#ffe992]">
-            Total : {total} €
-          </span>
+          <div className="text-center md:text-left">
+            <p className="text-gray-400 text-sm uppercase tracking-wider">Total estimé</p>
+            <span className="text-3xl font-bold text-[#ffe992]">
+              {total.toFixed(2)} €
+            </span>
+          </div>
 
           {/* Boutons : vider, valider, revenir à la galerie */}
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
             {/* Bouton pour vider le panier */}
             <button
-              className="cart-button bg-transparent border border-[#d6c487] text-[#ffe992] px-4 py-2 rounded-sm transition-all duration-300 hover:bg-[#d6c487] hover:text-black"
-              onClick={viderPanier} // Appelle la fonction qui vide tous les articles
+              className="px-6 py-3 rounded-lg border border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white transition-all duration-300"
+              onClick={viderPanier}
             >
               Vider le panier
             </button>
 
-            {/* Bouton pour valider le panier, démarre la session Stripe */}
-            {/* Bouton pour valider le panier (Stripe) - DÉSACTIVÉ TEMPORAIREMENT
-            <button
-              className="cart-button bg-transparent border border-[#d6c487] text-[#ffe992] px-4 py-2 rounded-sm transition-all duration-300 hover:bg-[#d6c487] hover:text-black"
-              onClick={async () => {
-                try {
-                  // Appel à l’API pour créer une session de paiement
-                  const { url } = await createCheckoutSession(articles);
-                  // Redirection vers la page de paiement Stripe
-                  window.location.href = url;
-                } catch (e) {
-                  // Affiche une alerte si erreur de redirection
-                  alert("Erreur lors de la redirection vers Stripe");
-                }
-              }}
-            >
-              Valider le panier
-            </button>
-            */}
-
             {/* Bouton lien vers la galerie photo pour continuer les achats */}
             <Link to="/galerie">
-              <button className="cart-button bg-transparent border border-[#d6c487] text-[#ffe992] px-4 py-2 rounded-sm transition-all duration-300 hover:bg-[#d6c487] hover:text-black">
-                Retour à la galerie
+              <button className="w-full sm:w-auto px-6 py-3 rounded-lg border border-[#d6c487] text-[#ffe992] hover:bg-[#d6c487]/10 transition-all duration-300">
+                Continuer mes achats
               </button>
             </Link>
-          </div>
-        </div>
 
-        {/* Section PayPal */}
-        <div className="mt-8 flex flex-col items-end">
-          <h2 className="text-xl font-semibold text-[#ffe992] mb-4">
-            Payer avec PayPal
-          </h2>
-          <div className="w-full md:w-1/3">
-            <PayPalScriptProvider
-              options={{
-                clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
-                currency: "EUR",
-              }}
-            >
-              <PayPalButton articles={articles} total={total} />
-            </PayPalScriptProvider>
+            {/* Bouton Valider la commande */}
+            <Link to="/checkout">
+              <button className="w-full sm:w-auto px-8 py-3 rounded-lg bg-gradient-to-r from-[#d6c487] to-[#ffe992] text-black font-bold shadow-lg hover:shadow-[#ffe992]/20 transform hover:scale-[1.02] transition-all duration-300">
+                Procéder au paiement
+              </button>
+            </Link>
           </div>
         </div>
       </div>

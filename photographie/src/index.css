@@ -1,0 +1,12 @@
+
+/* Force PayPal container to be transparent */
+.paypal-button-container iframe,
+iframe[name^="zoid"],
+.zoid-outlet {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.paypal-button-container {
+  background: transparent !important;
+}

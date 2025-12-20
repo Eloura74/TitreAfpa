@@ -146,6 +146,31 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 // ================================
+// MIDDLEWARES DE SÉCURITÉ
+// ================================
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const mongoSanitize = require("express-mongo-sanitize");
+const xss = require("xss-clean");
+
+// 1. Helmet : Définit divers en-têtes HTTP sécurisés
+app.use(helmet());
+
+// 2. Rate Limiting : Limite le nombre de requêtes pour éviter les attaques par force brute
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limite chaque IP à 100 requêtes par fenêtre
+  message: "Trop de requêtes depuis cette IP, veuillez réessayer plus tard.",
+});
+app.use("/api", limiter); // Applique le rate limiting à toutes les routes API
+
+// 3. Mongo Sanitize : Empêche l'injection NoSQL
+app.use(mongoSanitize());
+
+// 4. XSS Clean : Nettoie les entrées utilisateur contre les attaques XSS
+app.use(xss());
+
+// ================================
 // MIDDLEWARES POUR LECTURE DES CORPS JSON / FORMULAIRES
 // ================================
 // Ces middlewares permettent d’analyser les corps de requêtes POST/PUT

@@ -12,6 +12,7 @@ export interface Utilisateur {
   isAdmin: boolean; // 👑 Indique si l'utilisateur possède les droits administrateur
   nom: string; // 🧑 Nom de famille
   prenom?: string; // Prénom
+  email?: string; // 📧 Email de l'utilisateur
   telephone?: string; // Téléphone
   adresse?: {
     rue: string;
@@ -62,6 +63,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     isAdmin: false,
     nom: "",
     prenom: "",
+    email: "",
     telephone: "",
     adresse: undefined,
   });
@@ -87,6 +89,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             isAdmin: data.user.role === "admin",
             nom: data.user.nom || "",
             prenom: data.user.prenom || "",
+            email: data.user.email || "",
             telephone: data.user.telephone || "",
             adresse: data.user.adresse,
           });

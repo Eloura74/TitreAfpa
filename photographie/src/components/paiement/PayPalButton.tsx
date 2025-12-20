@@ -9,7 +9,7 @@ interface PayPalButtonProps {
 const PayPalButton: React.FC<PayPalButtonProps> = ({ articles, total: _total }) => {
   return (
     <PayPalButtons
-      style={{ layout: "vertical", color: "gold", shape: "rect", label: "paypal" }}
+      style={{ layout: "vertical", color: "gold", shape: "rect", label: "paypal", height: 45, tagline: false }}
       createOrder={async (_data, _actions) => {
         try {
           const response = await fetch("/api/paypal/create-order", {

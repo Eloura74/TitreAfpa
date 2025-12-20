@@ -16,44 +16,70 @@ const User = require("../models/User.js");
 // Importation du middleware d'authentification
 const { authenticate } = require("../middleware/auth");
 
+// Importation de express-validator pour la validation des entrées
+const { body, validationResult } = require("express-validator");
+
 // ==========================
 // Route POST : Inscription
 // ==========================
-router.post("/register", async (req, res) => {
-  try {
-    // Récupération des données envoyées par le client dans le corps de la requête
-    const { email, motdepasse, nom, prenom, telephone, adresse } = req.body;
-
-    // Définition du rôle par défaut : 'user'
-    let role = "user";
-
-    // Vérification simple pour attribuer le rôle 'admin' si l'email et le mot de passe correspondent à des valeurs précises
-    if (email === "fabien.licata@gmail.com" && motdepasse === "admin") {
-      role = "admin";
+router.post(
+  "/register",
+  [
+    // Validation des champs
+    body("email").isEmail().withMessage("Email invalide").normalizeEmail(),
+    body("motdepasse")
+      .isLength({ min: 6 })
+      .withMessage("Le mot de passe doit contenir au moins 6 caractères"),
+    body("nom").trim().escape(),
+    body("prenom").trim().escape(),
+    body("telephone").trim().escape(),
+    body("adresse.rue").trim().escape(),
+    body("adresse.ville").trim().escape(),
+    body("adresse.codePostal").trim().escape(),
+    body("adresse.pays").trim().escape(),
+  ],
+  async (req, res) => {
+    // Vérification des erreurs de validation
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    // Création d'une nouvelle instance de l'utilisateur avec les données fournies
-    // Le mot de passe sera automatiquement hashé grâce au middleware défini dans le modèle User
-    const user = new User({
-      email,
-      motdepasse,
-      role,
-      nom,
-      prenom,
-      telephone,
-      adresse,
-    });
+    try {
+      // Récupération des données envoyées par le client dans le corps de la requête
+      const { email, motdepasse, nom, prenom, telephone, adresse } = req.body;
 
-    // Sauvegarde de l'utilisateur dans la base de données MongoDB
-    await user.save();
+      // Définition du rôle par défaut : 'user'
+      let role = "user";
 
-    // Réponse avec un statut 201 (Créé) et un message de succès
-    res.status(201).json({ message: "Utilisateur créé" });
-  } catch (err) {
-    // En cas d'erreur (ex: email déjà utilisé), renvoi d'une réponse avec un statut 400 (Bad Request) et le message d'erreur
-    res.status(400).json({ error: err.message });
+      // Vérification simple pour attribuer le rôle 'admin' si l'email et le mot de passe correspondent à des valeurs précises
+      if (email === "fabien.licata@gmail.com" && motdepasse === "admin") {
+        role = "admin";
+      }
+
+      // Création d'une nouvelle instance de l'utilisateur avec les données fournies
+      // Le mot de passe sera automatiquement hashé grâce au middleware défini dans le modèle User
+      const user = new User({
+        email,
+        motdepasse,
+        role,
+        nom,
+        prenom,
+        telephone,
+        adresse,
+      });
+
+      // Sauvegarde de l'utilisateur dans la base de données MongoDB
+      await user.save();
+
+      // Réponse avec un statut 201 (Créé) et un message de succès
+      res.status(201).json({ message: "Utilisateur créé" });
+    } catch (err) {
+      // En cas d'erreur (ex: email déjà utilisé), renvoi d'une réponse avec un statut 400 (Bad Request) et le message d'erreur
+      res.status(400).json({ error: err.message });
+    }
   }
-});
+);
 
 // ==========================
 // Route POST : Connexion
