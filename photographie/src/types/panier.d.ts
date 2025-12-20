@@ -5,4 +5,7 @@ export interface ArticlePanierType {
   prix: number;
   quantite: number;
   image?: string; // Prévisualisation de l'image
+  photoId?: string; // ID MongoDB de la photo (optionnel)
+  format?: string;
+  support?: string;
 }

@@ -1,247 +1,250 @@
 // =======================
 // 📦 Import des modules
 // =======================
-import { useState, useEffect } from "react"; // Hooks React
-import axios from "axios"; // Librairie pour les appels HTTP
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Trash2, Mail, ShoppingCart, Image as ImageIcon, Package, CreditCard, Ruler, Layers } from "lucide-react";
 
-/* -------------------------------------------------------------------------
-   🧩 Interface TypeScript : structure d’un panier
-------------------------------------------------------------------------- */
-interface Panier {
-  _id?: string; // Identifiant MongoDB (optionnel dans le formulaire)
-  utilisateur: string; // Nom de l'utilisateur associé
-  articles: string; // Contenu du panier (simplifié en texte ici)
-  total: number; // Montant total du panier
+// =======================
+// 🧩 Interfaces TypeScript
+// =======================
+
+interface User {
+  _id: string;
+  nom?: string;
+  prenom?: string;
+  email: string;
 }
 
-// URL d’accès à l’API REST définie dans .env (via Vite)
+interface Photo {
+  _id: string;
+  titre?: string;
+  src?: string;
+  prix?: number;
+}
+
+interface Article {
+  photo: Photo;
+  quantite: number;
+  format?: string;
+  support?: string;
+  prixUnitaire?: number;
+  titre?: string;
+  image?: string;
+  _id?: string;
+}
+
+interface Panier {
+  _id: string;
+  utilisateur: User;
+  articles: Article[];
+  dateCreation?: string;
+}
+
+// URL d’accès à l’API
 const API_URL = `${import.meta.env.VITE_API_URL}/api/paniers`;
 
 // =====================================================================
-// 🎯 Composant principal : gestion CRUD des paniers
+// 🎯 Composant principal : Gestion des Paniers (Admin)
 // =====================================================================
 export default function GestionPaniers() {
-  /* -------------------------------------------------------------------------
-     🧠 États utilisés dans le composant
-  ------------------------------------------------------------------------- */
-  const [paniers, setPaniers] = useState<Panier[]>([]); // Liste globale des paniers
-  const [form, setForm] = useState<Panier>({
-    utilisateur: "",
-    articles: "",
-    total: 0,
-  }); // Données du formulaire (mode ajout/modif)
-  const [editId, setEditId] = useState<string | null>(null); // ID du panier modifié (null = mode ajout)
-  const [loading, setLoading] = useState(false); // Booléen : est-ce qu’on charge ?
-  const [error, setError] = useState<string | null>(null); // Message d’erreur s’il y a un souci
+  const [paniers, setPaniers] = useState<Panier[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  /* -------------------------------------------------------------------------
-     🔃 Récupération initiale des paniers à l’affichage du composant
-  ------------------------------------------------------------------------- */
-  useEffect(() => {
-    setLoading(true); // Active le mode "chargement"
-    axios
-      .get(API_URL, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Authentification avec JWT local
-        },
-      })
-      .then((r) => {
-        if (Array.isArray(r.data)) setPaniers(r.data); // Stocke les paniers
-        else setPaniers([]); // Sûreté si la réponse n’est pas un tableau
-      })
-      .catch((e) => {
-        setError(
-          e?.response?.data?.message || "Erreur lors du chargement des paniers."
-        );
-        setPaniers([]); // Vide la liste si erreur
-      })
-      .finally(() => setLoading(false)); // On désactive le "loading"
-  }, []);
-
-  /* -------------------------------------------------------------------------
-     ✏️ Mise à jour des champs lors de la saisie dans le formulaire
-  ------------------------------------------------------------------------- */
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value }); // Mise à jour dynamique
-  };
-
-  // 🧼 Réinitialise le formulaire et sort du mode édition
-  const resetForm = () => {
-    setForm({ utilisateur: "", articles: "", total: 0 });
-    setEditId(null);
-  };
-
-  /* -------------------------------------------------------------------------
-     ✅ Envoi du formulaire : création ou mise à jour selon editId
-  ------------------------------------------------------------------------- */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Empêche le rechargement de la page
+  // 🔄 Récupération des paniers
+  const fetchPaniers = async () => {
     setLoading(true);
-    setError(null);
-
     try {
-      if (editId) {
-        // Mode édition → mise à jour (PUT)
-        await axios.put(`${API_URL}/${editId}`, form, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-      } else {
-        // Mode création → ajout (POST)
-        await axios.post(API_URL, form, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-      }
-
-      // 🔄 Recharge les paniers depuis l'API après modification
       const res = await axios.get(API_URL, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setPaniers(Array.isArray(res.data) ? res.data : []);
-      resetForm(); // Réinitialise les champs
     } catch (e: any) {
-      setError(
-        e?.response?.data?.message ||
-          "Erreur lors de l'enregistrement du panier."
-      );
+      setError(e?.response?.data?.message || "Erreur lors du chargement des paniers.");
     } finally {
       setLoading(false);
     }
   };
 
-  /* -------------------------------------------------------------------------
-     🖊️ Clique sur le bouton "Modifier" → Pré-remplit le formulaire
-  ------------------------------------------------------------------------- */
-  const handleEdit = (p: Panier) => {
-    setForm(p);
-    setEditId(p._id || null);
-  };
+  useEffect(() => {
+    fetchPaniers();
+  }, []);
 
-  /* -------------------------------------------------------------------------
-     ❌ Suppression d’un panier avec confirmation backend
-  ------------------------------------------------------------------------- */
+  // ❌ Suppression d’un panier
   const handleDelete = async (id: string) => {
-    setLoading(true);
-    setError(null);
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce panier ?")) return;
 
     try {
       await axios.delete(`${API_URL}/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-
-      // Mise à jour de l'état local après suppression
       setPaniers(paniers.filter((p) => p._id !== id));
-      resetForm();
     } catch (e: any) {
-      setError(
-        e?.response?.data?.message || "Erreur lors de la suppression du panier."
-      );
-    } finally {
-      setLoading(false);
+      alert("Erreur lors de la suppression");
     }
   };
 
-  /* -------------------------------------------------------------------------
-     🎨 Rendu visuel du formulaire et du tableau
-  ------------------------------------------------------------------------- */
+  // 🧮 Calcul du total d'articles
+  const getTotalArticles = (articles: Article[]) => {
+    return articles.reduce((acc, item) => acc + item.quantite, 0);
+  };
+
+  // 🧮 Calcul du montant total estimé
+  const getTotalMontant = (articles: Article[]) => {
+    return articles.reduce((acc, item) => acc + (item.prixUnitaire || 0) * item.quantite, 0);
+  };
+
   return (
-    <div>
-      {/* Affiche une erreur si elle est présente */}
-      {error && <div className="text-red-500 mb-2">{error}</div>}
-
-      {/* Formulaire pour créer ou modifier un panier */}
-      <form className="flex flex-col gap-2 mb-4" onSubmit={handleSubmit}>
-        <input
-          name="utilisateur"
-          placeholder="Utilisateur"
-          value={form.utilisateur}
-          onChange={handleChange}
-          className="input input-bordered"
-          required
-        />
-        <input
-          name="articles"
-          placeholder="Articles"
-          value={form.articles}
-          onChange={handleChange}
-          className="input input-bordered"
-          required
-        />
-        <input
-          name="total"
-          type="number"
-          placeholder="Total"
-          value={form.total}
-          onChange={handleChange}
-          className="input input-bordered"
-          required
-        />
-
-        {/* Boutons : Ajouter/Modifier + Annuler (si édition) */}
-        <div className="flex gap-2">
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {editId ? "Modifier" : "Ajouter"}
-          </button>
-          {editId && (
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={resetForm}
-            >
-              Annuler
-            </button>
-          )}
+    <div className="p-6 min-h-screen bg-base-100">
+      <div className="max-w-7xl mx-auto">
+        {/* En-tête */}
+        <div className="flex items-center gap-3 mb-8 pb-4 border-b border-base-300">
+          <div className="p-3 bg-primary/10 rounded-xl">
+            <ShoppingCart className="w-8 h-8 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold">Gestion des Paniers</h2>
+            <p className="text-gray-500">Suivi des commandes en cours et paniers abandonnés</p>
+          </div>
         </div>
-      </form>
 
-      {/* Affichage conditionnel du tableau ou d’un message de chargement */}
-      {loading ? (
-        <div className="text-center">Chargement...</div>
-      ) : paniers.length === 0 ? (
-        <div className="text-center text-gray-500">Aucun panier trouvé.</div>
-      ) : (
-        <table className="table-auto w-full">
-          <thead>
-            <tr>
-              <th>Utilisateur</th>
-              <th>Articles</th>
-              <th>Total</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paniers.map((p) => (
-              <tr key={p._id}>
-                <td>{p.utilisateur}</td>
-                <td>{p.articles}</td>
-                <td>{p.total}</td>
-                <td>
-                  {/* Boutons d'action : édition et suppression */}
-                  <button
-                    className="btn btn-xs btn-warning mr-2"
-                    onClick={() => handleEdit(p)}
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    className="btn btn-xs btn-error"
-                    onClick={() => p._id && handleDelete(p._id)}
-                  >
-                    🗑️
-                  </button>
-                </td>
-              </tr>
+        {error && <div className="alert alert-error mb-6 shadow-lg">{error}</div>}
+
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <span className="loading loading-spinner loading-lg text-primary"></span>
+          </div>
+        ) : paniers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64 text-gray-400 bg-base-200/50 rounded-2xl border-2 border-dashed border-base-300">
+            <ShoppingCart className="w-16 h-16 mb-4 opacity-50" />
+            <p className="text-xl font-medium">Aucun panier actif pour le moment.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {paniers.map((panier) => (
+              <div 
+                key={panier._id} 
+                className="card bg-base-200 shadow-xl hover:shadow-2xl transition-all duration-300 border border-base-300 flex flex-col h-full"
+              >
+                {/* 👤 En-tête Carte : Info Client */}
+                <div className="card-body p-5 pb-4 bg-base-300/50 rounded-t-xl">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="card-title text-xl capitalize text-base-content">
+                        {panier.utilisateur?.prenom || "Client"} {panier.utilisateur?.nom || "Inconnu"}
+                      </h3>
+                      <a 
+                        href={`mailto:${panier.utilisateur?.email}`}
+                        className="text-sm text-primary hover:underline flex items-center gap-1 mt-1"
+                      >
+                        <Mail size={12} /> {panier.utilisateur?.email}
+                      </a>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <div className="badge badge-primary font-bold">
+                        {getTotalArticles(panier.articles)} articles
+                      </div>
+                      <div className="text-xs font-mono opacity-50">
+                        {getTotalMontant(panier.articles) > 0 ? `${getTotalMontant(panier.articles)} €` : "Prix N/A"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 📦 Corps Carte : Liste Articles */}
+                <div className="flex-1 overflow-y-auto max-h-[400px] scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-transparent p-2">
+                  {panier.articles.length === 0 ? (
+                    <div className="p-8 text-center text-gray-500 text-sm italic">
+                      Panier vide
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      {panier.articles.map((item, index) => (
+                        <div key={index} className="flex gap-3 p-3 bg-base-100 rounded-lg border border-base-content/5 hover:border-primary/30 transition-colors">
+                          {/* Miniature */}
+                          <div className="relative w-24 h-24 rounded-md overflow-hidden bg-base-300 flex-shrink-0">
+                            {(item.image || item.photo?.src) ? (
+                              <img 
+                                src={
+                                  (item.image || item.photo?.src || "").startsWith('http') 
+                                    ? (item.image || item.photo?.src) 
+                                    : `${import.meta.env.VITE_API_URL}${item.image || item.photo?.src}`
+                                } 
+                                alt={item.titre || item.photo?.titre} 
+                                className="object-cover w-full h-full"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display = 'none';
+                                  (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                                }}
+                              />
+                            ) : null}
+                            {/* Fallback icon */}
+                            <div className={`absolute inset-0 flex items-center justify-center bg-base-300 text-gray-400 ${(item.image || item.photo?.src) ? 'hidden' : ''}`}>
+                              <ImageIcon size={24} />
+                            </div>
+                          </div>
+                          
+                          {/* Détails Article */}
+                          <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                            <div>
+                              <h4 className="font-bold text-sm truncate text-base-content" title={item.titre || item.photo?.titre}>
+                                {item.titre || item.photo?.titre || "Article sans titre"}
+                              </h4>
+                              {/* Détails techniques */}
+                              <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-500">
+                                <span className="flex items-center gap-1 bg-base-200 px-1.5 py-0.5 rounded">
+                                  <Ruler size={10} /> {item.format || "Standard"}
+                                </span>
+                                <span className="flex items-center gap-1 bg-base-200 px-1.5 py-0.5 rounded">
+                                  <Layers size={10} /> {item.support || "Papier"}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div className="flex justify-between items-end mt-2">
+                              <span className="badge badge-sm badge-ghost gap-1">
+                                <Package size={10} /> Qté: {item.quantite}
+                              </span>
+                              <span className="font-mono text-sm font-bold text-primary">
+                                {item.prixUnitaire ? `${item.prixUnitaire} €` : "N/A"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* ⚙️ Pied de Carte : Actions */}
+                <div className="p-4 bg-base-300/30 border-t border-base-300 flex justify-between items-center mt-auto rounded-b-xl">
+                  <span className="text-xs text-gray-400 font-mono">
+                    ID: {panier._id.slice(-6)}
+                  </span>
+                  <div className="flex gap-2">
+                    <a
+                      href={`mailto:${panier.utilisateur?.email}`}
+                      className="btn btn-sm btn-info btn-outline gap-2"
+                      title="Envoyer un email"
+                    >
+                      <Mail size={16} />
+                      <span className="hidden sm:inline">Contacter</span>
+                    </a>
+                    <button
+                      onClick={() => handleDelete(panier._id)}
+                      className="btn btn-sm btn-error btn-outline btn-square"
+                      title="Supprimer le panier"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

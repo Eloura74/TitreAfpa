@@ -30,6 +30,24 @@ const panierSchema = new mongoose.Schema({
         type: Number,
         default: 1,
       },
+      format: {
+        type: String,
+        default: "Standard",
+      },
+      support: {
+        type: String,
+        default: "Papier",
+      },
+      prixUnitaire: {
+        type: Number,
+        default: 0,
+      },
+      titre: {
+        type: String,
+      },
+      image: {
+        type: String,
+      },
     },
   ],
 

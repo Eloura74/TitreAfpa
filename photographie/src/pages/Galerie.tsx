@@ -113,6 +113,7 @@ export default function Galerie() {
       const tarif = tarifsDisponibles[0];
       ajouterArticle({
         id: crypto.randomUUID(),
+        photoId: photo._id, // ID MongoDB pour la synchro
         nom: `${photo.titre} (${tarif.format}, ${tarif.support})`,
         prix: tarif.prix,
         quantite: 1,
@@ -177,6 +178,7 @@ export default function Galerie() {
       // Création d'un article panier adapté au type de tarif
       const articlePanier = {
         id: crypto.randomUUID(),
+        photoId: photoSelectionnee._id, // ID MongoDB pour la synchro
         nom: `${photoSelectionnee.titre} (${
           "format" in tarif ? tarif.format : ""
         }, ${"support" in tarif ? tarif.support : ""})`,

@@ -31,7 +31,8 @@ export default function GalerieGraphique() {
 
   const handleAjouterAuPanier = (oeuvre: OeuvreGraphique) => {
     ajouterArticle({
-      id: oeuvre.id,
+      id: crypto.randomUUID(), // ID local unique
+      photoId: oeuvre.id, // ID MongoDB
       nom: `${oeuvre.titre} (Oeuvre Graphique)`,
       prix: oeuvre.prix,
       quantite: 1,

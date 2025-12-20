@@ -10,8 +10,14 @@ const Panier = require("../models/Panier"); // Import du modèle Mongoose "Panie
 // Fonction asynchrone pour récupérer tous les paniers depuis la base de données
 // Elle utilise la méthode find() de Mongoose pour obtenir tous les documents de la collection "paniers"
 exports.getAll = async (req, res) => {
-  const paniers = await Panier.find(); // Recherche de tous les paniers existants
-  res.json(paniers); // Envoi de la réponse au client en format JSON
+  try {
+    const paniers = await Panier.find()
+      .populate("utilisateur", "nom prenom email") // Récupère nom, prénom et email du client
+      .populate("articles.photo", "titre src prix"); // Récupère titre, image et prix de base de la photo
+    res.json(paniers);
+  } catch (err) {
+    res.status(500).json({ erreur: err.message });
+  }
 };
 
 // ***************************
@@ -96,16 +102,27 @@ exports.saveMyCart = async (req, res) => {
     // On cherche si un panier existe déjà pour cet utilisateur
     let panier = await Panier.findOne({ utilisateur: req.user._id });
 
+    // Validation et formatage des articles pour inclure les nouveaux champs
+    const formattedArticles = articles.map((item) => ({
+      photo: item.photo || null, // Peut être null si c'est un upload perso ou si l'ID est manquant
+      quantite: item.quantite,
+      format: item.format || "Standard",
+      support: item.support || "Papier",
+      prixUnitaire: item.prixUnitaire || 0,
+      titre: item.titre || "Article sans titre",
+      image: item.image || "",
+    }));
+
     if (panier) {
       // Mise à jour
-      panier.articles = articles;
+      panier.articles = formattedArticles;
       panier.dateCreation = Date.now(); // On met à jour la date
       await panier.save();
     } else {
       // Création
       panier = await Panier.create({
         utilisateur: req.user._id,
-        articles: articles,
+        articles: formattedArticles,
       });
     }
 

@@ -110,10 +110,15 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
     const token = localStorage.getItem("token");
     if (!email || !token) return;
 
-    // On ne garde que l'ID de la photo et la quantité pour l'envoi
+    // On garde les infos complètes pour l'envoi
     const payload = currentArticles.map((a) => ({
-      photo: a.id,
+      photo: a.photoId || null, // Envoie l'ID MongoDB si dispo, sinon null
       quantite: a.quantite,
+      format: a.format,
+      support: a.support,
+      prixUnitaire: a.prix,
+      titre: a.nom,
+      image: a.image,
     }));
 
     axios
