@@ -32,6 +32,9 @@ const path = require("path");
 // Création de l’application Express
 const app = express();
 
+// Configuration pour Vercel (derrière un proxy)
+app.set('trust proxy', 1);
+
 // ================================
 // CONFIGURATION DE CORS (sécurité frontend/backend)
 // ================================
