@@ -123,7 +123,7 @@ router.post("/login", async (req, res) => {
       adresse: user.adresse,
     });
   } catch (err) {
-    // Gestion des erreurs avec une réponse 400 en cas de problème
+    // Gestion des erreurs avec une réponse 400 en cas de problèmes
     res.status(400).json({ error: err.message });
   }
 });
