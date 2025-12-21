@@ -42,7 +42,8 @@ interface Panier {
 }
 
 // URL d’accès à l’API
-const API_URL = `${import.meta.env.VITE_API_URL}/api/paniers`;
+import { API_URL as BASE_API_URL } from "../config/api";
+const API_URL = `${BASE_API_URL}/api/paniers`;
 
 import { useToast } from "./Toast";
 
@@ -173,7 +174,7 @@ export default function GestionPaniers() {
                                 src={
                                   (item.image || item.photo?.src || "").startsWith('http') 
                                     ? (item.image || item.photo?.src) 
-                                    : `${import.meta.env.VITE_API_URL}${item.image || item.photo?.src}`
+                                    : `${BASE_API_URL}${item.image || item.photo?.src}`
                                 } 
                                 alt={item.titre || item.photo?.titre} 
                                 className="object-cover w-full h-full"

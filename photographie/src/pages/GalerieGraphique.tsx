@@ -9,6 +9,7 @@ import { usePanier } from "../store/panierContext"; // Hook pour le panier
 import Navbar from "../components/layout/navbar"; // Barre de navigation
 import Footer from "../components/layout/Footer"; // Pied de page
 import "../styles/galerie.css"; // Styles spécifiques à la galerie
+import { API_URL } from "../config/api";
 
 // 🎯 Interface TypeScript pour définir la forme d'une œuvre graphique
 interface OeuvreGraphique {
@@ -45,7 +46,7 @@ export default function GalerieGraphique() {
   // 🔄 useEffect : s'exécute au chargement du composant
   useEffect(() => {
     // Appel à l'API pour récupérer les œuvres graphiques
-    fetch(`${import.meta.env.VITE_API_URL}/api/oeuvres-graphique`)
+    fetch(`${API_URL}/api/oeuvres-graphique`)
       .then((res) => {
         // Si la réponse n'est pas OK, on lève une erreur
         if (!res.ok) throw new Error("Erreur réseau ou API");
@@ -58,7 +59,7 @@ export default function GalerieGraphique() {
           titre: oeuvre.titre,
           image:
             oeuvre.image && oeuvre.image.startsWith("/uploads/")
-              ? `${import.meta.env.VITE_API_URL}${oeuvre.image}`
+              ? `${API_URL}${oeuvre.image}`
               : `/images/placeholder.jpg`, // Fallback si l'image est absente
           prix: oeuvre.prix,
           description: oeuvre.description,
@@ -126,7 +127,7 @@ export default function GalerieGraphique() {
                         if (oeuvre.image && oeuvre.image.startsWith("http")) {
                           return oeuvre.image;
                         } else if (oeuvre.image && oeuvre.image.startsWith("/uploads/")) {
-                          return `${import.meta.env.VITE_API_URL}${oeuvre.image}`;
+                          return `${API_URL}${oeuvre.image}`;
                         } else if (oeuvre.image && oeuvre.image.startsWith("/images/")) {
                           return oeuvre.image;
                         } else if (oeuvre.image) {

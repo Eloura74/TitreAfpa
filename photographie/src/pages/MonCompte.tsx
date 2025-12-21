@@ -5,6 +5,7 @@ import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { API_URL } from "../config/api";
 
 interface Paiement {
   _id: string;
@@ -25,8 +26,9 @@ export default function MonCompte() {
   useEffect(() => {
     if (email) {
       const token = localStorage.getItem("token");
+
       axios
-        .get(`${import.meta.env.VITE_API_URL}/api/paiements/me`, {
+        .get(`${API_URL}/api/paiements/me`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {

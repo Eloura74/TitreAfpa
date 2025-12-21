@@ -20,7 +20,8 @@ interface Paiement {
 }
 
 // URL de l’API, configurée via la variable d’environnement
-const API_URL = `${import.meta.env.VITE_API_URL}/api/paiements`;
+import { API_URL as BASE_API_URL } from "../config/api";
+const API_URL = `${BASE_API_URL}/api/paiements`;
 
 // =====================================================================
 // 🎯 Composant principal de gestion des paiements

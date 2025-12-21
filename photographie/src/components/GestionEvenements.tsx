@@ -14,7 +14,8 @@ import axios from "axios";
 import { Evenement } from "../types/evenement";
 
 // URL de base de l’API, récupérée depuis les variables d’environnement Vite
-const API_URL = `${import.meta.env.VITE_API_URL}/api/evenements`;
+import { API_URL as BASE_API_URL } from "../config/api";
+const API_URL = `${BASE_API_URL}/api/evenements`;
 
 // ==========================================
 // 🎯 Composant principal de gestion des événements

@@ -2,6 +2,7 @@
 // 📦 Import des éléments React nécessaires à la création d’un contexte
 // ==========================================================================
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { API_URL } from "../config/api";
 
 /* ==========================================================================
    🧩 Interface `Utilisateur` : structure des données utilisateur dans l'application
@@ -73,7 +74,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const token = localStorage.getItem("token");
     if (token) {
       // On pourrait utiliser axios ici, mais fetch est natif et léger pour ce besoin
-      fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
+      fetch(`${API_URL}/api/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

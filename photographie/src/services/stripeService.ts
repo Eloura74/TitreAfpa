@@ -2,6 +2,7 @@
 //  Service pour communiquer avec l'API Stripe côté backend
 // ==============================
 import { ArticlePanierType } from "../types/panier";
+import { API_URL } from "../config/api";
 
 /**
  * Fonction qui crée une session de paiement Stripe avec les articles du panier.
@@ -19,7 +20,7 @@ export async function createCheckoutSession(articles: ArticlePanierType[]) {
 
   // Envoi d'une requête POST vers notre backend pour créer la session Stripe
   const response = await fetch(
-    `${import.meta.env.VITE_API_URL}/api/stripe/create-checkout-session`, // URL de l'API backend
+    `${API_URL}/api/stripe/create-checkout-session`, // URL de l'API backend
     {
       method: "POST", // Méthode HTTP POST pour envoyer des données
       headers: { "Content-Type": "application/json" }, // Type des données envoyées : JSON

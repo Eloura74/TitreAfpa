@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react"; // Hook React pour gérer l'état local et gérer les URLs temporaires
 import axios from "axios"; // Librairie HTTP pour faire des appels API
 import { useToast } from "../Toast";
+import { API_URL } from "../../config/api";
 
 /**
  * Formulaire d’ajout d’œuvre graphique unique (interface admin)
@@ -56,7 +57,7 @@ export default function GalerieGraphiqueForm() {
     try {
       const res = await axios.post(
         // Envoi de la requête POST vers l’endpoint d’upload
-        `${import.meta.env.VITE_API_URL}/api/upload-cloudinary`,
+        `${API_URL}/api/upload-cloudinary`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" }, // Nécessaire pour l’envoi de fichier
@@ -90,7 +91,7 @@ export default function GalerieGraphiqueForm() {
     // Envoi final de toutes les données du formulaire vers le backend
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/oeuvres-graphique`,
+        `${API_URL}/api/oeuvres-graphique`,
         {
           titre,
           image: imagePath,

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 // Import de la bibliothèque axios pour les appels HTTP
 import axios from "axios";
+import { API_URL } from "../../config/api";
 
 // Définition de l'interface d'une œuvre graphique
 interface OeuvreGraphique {
@@ -46,7 +47,7 @@ export default function GestionGalerieGraphique() {
   async function fetchOeuvres() {
     try {
       const { data } = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/oeuvres-graphique`
+        `${API_URL}/api/oeuvres-graphique`
       );
       setOeuvres(data); // Met à jour l'état avec les données reçues
     } catch (err) {
@@ -61,7 +62,7 @@ export default function GestionGalerieGraphique() {
 
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/oeuvres-graphique/upload`,
+        `${API_URL}/api/oeuvres-graphique/upload`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -117,7 +118,7 @@ export default function GestionGalerieGraphique() {
       if (editId) {
         // --- Cas MODIFICATION ---
         const { data } = await axios.put(
-          `${import.meta.env.VITE_API_URL}/api/oeuvres-graphique/${editId}`,
+          `${API_URL}/api/oeuvres-graphique/${editId}`,
           { ...form, image: imagePath }
         );
 
@@ -129,7 +130,7 @@ export default function GestionGalerieGraphique() {
       } else {
         // --- Cas AJOUT ---
         const { data } = await axios.post(
-          `${import.meta.env.VITE_API_URL}/api/oeuvres-graphique`,
+          `${API_URL}/api/oeuvres-graphique`,
           { ...form, image: imagePath }
         );
 
@@ -168,7 +169,7 @@ export default function GestionGalerieGraphique() {
 
     try {
       await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/oeuvres-graphique/${id}`
+        `${API_URL}/api/oeuvres-graphique/${id}`
       );
 
       // Met à jour la liste locale en retirant l’élément supprimé

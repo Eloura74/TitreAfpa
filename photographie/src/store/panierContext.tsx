@@ -45,6 +45,7 @@ export const usePanier = () => {
 // Ce composant englobe toute l'application (ou une partie) pour fournir l'accès global au panier
 import axios from "axios";
 import { useAuthStore } from "./authStore";
+import { API_URL } from "../config/api";
 
 // ==============================
 //   Provider : PanierProvider
@@ -79,7 +80,7 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
       if (!token) return;
 
       axios
-        .get(`${import.meta.env.VITE_API_URL}/api/paniers/me`, {
+        .get(`${API_URL}/api/paniers/me`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
@@ -123,7 +124,7 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
 
     axios
       .post(
-        `${import.meta.env.VITE_API_URL}/api/paniers/me`,
+        `${API_URL}/api/paniers/me`,
         { articles: payload },
         { headers: { Authorization: `Bearer ${token}` } }
       )

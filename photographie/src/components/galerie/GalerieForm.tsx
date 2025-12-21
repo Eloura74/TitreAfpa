@@ -5,7 +5,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import galerieData from "../../config/galerie.json";
-const API_URL = `${import.meta.env.VITE_API_URL}/api/galerie`; //
+import { API_URL as BASE_API_URL } from "../../config/api";
+const API_URL = `${BASE_API_URL}/api/galerie`; //
 
 // --- TYPE PRINCIPAL DU FORMULAIRE ---
 interface FormType {
@@ -101,7 +102,7 @@ export default function GalerieForm() {
 
         // Récupération des tarifs prédéfinis
         const resTarifs = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/tarifs`
+          `${BASE_API_URL}/api/tarifs`
         ); // OK, déjà corrigé
         const dataTarifs = await resTarifs.json();
         console.log("Tarifs prédéfinis récupérés:", dataTarifs);
@@ -454,7 +455,7 @@ export default function GalerieForm() {
             try {
               // Appel vers la nouvelle route d’upload Cloudinary
               const res = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/upload-cloudinary`,
+                `${BASE_API_URL}/api/upload-cloudinary`,
                 {
                   method: "POST",
                   body: formData,

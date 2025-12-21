@@ -2,6 +2,7 @@
 import React from "react";
 import { ArticlePanierType } from "../../types/panier"; // Type pour définir la structure d’un article du panier
 import { usePanier } from "../../store/panierContext"; // Contexte personnalisé pour accéder aux fonctions liées au panier
+import { API_URL } from "../../config/api";
 
 // Interface des props attendues par le composant
 interface Props {
@@ -23,7 +24,7 @@ const ArticlePanier: React.FC<Props> = ({ article }) => {
               article.image && article.image.startsWith("http")
                 ? article.image
                 : article.image && article.image.startsWith("/uploads/")
-                ? `${import.meta.env.VITE_API_URL}${article.image}`
+                ? `${API_URL}${article.image}`
                 : article.image && article.image.startsWith("/images/")
                 ? article.image
                 : `/images/${article.image}`;

@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"; // Hook de formulaire réactif
 import { zodResolver } from "@hookform/resolvers/zod"; // Liaison Zod <-> RHF
 import { z } from "zod"; // Validation de schéma
 import { useState } from "react"; // Hook local d’édition
+import { API_URL } from "../config/api";
 
 /* -------------------------------------------------------------------------
    🧩 Schéma de validation Zod (formulaire tarif)
@@ -39,7 +40,7 @@ export default function GestionTarifs() {
   const { data: tarifs, isLoading } = useQuery({
     queryKey: ["tarifs"],
     queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tarifs`);
+      const res = await fetch(`${API_URL}/api/tarifs`);
       return res.json();
     },
   });
@@ -51,8 +52,8 @@ export default function GestionTarifs() {
     mutationFn: async (data: TarifForm) => {
       const method = data.id ? "PUT" : "POST";
       const url = data.id
-        ? `${import.meta.env.VITE_API_URL}/api/tarifs/${data.id}`
-        : `${import.meta.env.VITE_API_URL}/api/tarifs`;
+        ? `${API_URL}/api/tarifs/${data.id}`
+        : `${API_URL}/api/tarifs`;
 
       const res = await fetch(url, {
         method,
@@ -77,7 +78,7 @@ export default function GestionTarifs() {
   ------------------------------------------------------------------------- */
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      await fetch(`${import.meta.env.VITE_API_URL}/api/tarifs/${id}`, {
+      await fetch(`${API_URL}/api/tarifs/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,

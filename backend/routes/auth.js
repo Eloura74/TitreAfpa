@@ -96,15 +96,19 @@ router.post("/login", async (req, res) => {
   try {
     // Récupération des identifiants fournis par l'utilisateur
     const { email, motdepasse } = req.body;
+    console.log(`[AUTH] Login request for: ${email}`);
 
     // Recherche de l'utilisateur dans la base de données via son email
     const user = await User.findOne({ email });
+    console.log(`[AUTH] User found: ${!!user}`);
 
     // Vérification si l'utilisateur existe et si le mot de passe est correct via la méthode comparePassword
     if (!user || !(await user.comparePassword(motdepasse))) {
+      console.log(`[AUTH] Login failed for ${email}: Invalid credentials`);
       // Si l'utilisateur n'existe pas ou que le mot de passe est incorrect, renvoi d'une erreur 401 (Unauthorized)
       return res.status(401).json({ error: "Identifiants invalides" });
     }
+    console.log(`[AUTH] Login success for ${email}`);
 
     // Génération d'un token JWT contenant l'ID utilisateur et son rôle
     // Le token est signé avec une clé secrète stockée dans les variables d'environnement (process.env.JWT_SECRET)

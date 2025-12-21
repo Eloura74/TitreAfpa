@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"; // Hooks React : état et effet de 
 import axios from "axios"; // Librairie HTTP pour appels API
 import Navbar from "../components/layout/navbar"; // Barre de navigation
 import Footer from "../components/layout/Footer"; // Pied de page
+import { API_URL } from "../config/api";
 
 // Styles CSS importés
 import "react-calendar/dist/Calendar.css"; // Style de calendrier (non utilisé ici)
@@ -34,7 +35,7 @@ export default function Evenements() {
     const fetchEvenements = async () => {
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/evenements`
+          `${API_URL}/api/evenements`
         );
         const data = res.data;
 

@@ -33,6 +33,7 @@ interface TarifOeuvre {
 
 // Importation du type Tarif
 import { Tarif } from "../types/tarif";
+import { API_URL } from "../config/api";
 
 // ==============================
 //  Définition de l'interface TypeScript pour typer les objets "Photo"
@@ -134,7 +135,7 @@ export default function Galerie() {
   useEffect(() => {
     setLoading(true);
     // 2️⃣ Récupération des photos stockées sur le serveur (MongoDB)
-    fetch(`${import.meta.env.VITE_API_URL}/api/galerie`)
+    fetch(`${API_URL}/api/galerie`)
       .then((res) => res.json()) // Conversion de la réponse en JSON
       .then((data: Photo[]) => {
         // Transformation des données pour corriger le chemin des images issues du serveur
@@ -147,7 +148,7 @@ export default function Galerie() {
               photo.src && photo.src.startsWith("http")
                 ? photo.src
                 : photo.src && photo.src.startsWith("/uploads/")
-                ? `${import.meta.env.VITE_API_URL}${photo.src}`
+                ? `${API_URL}${photo.src}`
                 : photo.src && photo.src.startsWith("/images/")
                 ? photo.src
                 : `/images/${photo.src}`,
