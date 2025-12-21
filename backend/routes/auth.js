@@ -26,7 +26,7 @@ router.post(
   "/register",
   [
     // Validation des champs
-    body("email").isEmail().withMessage("Email invalide").normalizeEmail(),
+    body("email").isEmail().withMessage("Email invalide"), // Suppression de .normalizeEmail() qui modifiait l'email (ex: suppression des points)
     body("motdepasse")
       .isLength({ min: 6 })
       .withMessage("Le mot de passe doit contenir au moins 6 caractères"),
@@ -48,7 +48,12 @@ router.post(
     try {
       // Récupération des données envoyées par le client dans le corps de la requête
       console.log("[AUTH] Register request received for:", req.body.email);
-      const { email, motdepasse, nom, prenom, telephone, adresse } = req.body;
+      let { email, motdepasse, nom, prenom, telephone, adresse } = req.body;
+
+      // Normalisation manuelle pour garantir la cohérence avec le login (minuscules + trim, mais conservation des points)
+      if (email) {
+        email = email.toLowerCase().trim();
+      }
 
       // Définition du rôle par défaut : 'user'
       let role = "user";
