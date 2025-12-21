@@ -86,6 +86,13 @@ exports.captureOrder = async (req, res) => {
 
     console.log("✅ Paiement PayPal enregistré :", nouveauPaiement);
     
+    // Envoi de l'email de confirmation
+    const { sendOrderConfirmation } = require("../services/emailService");
+    if (payer.email_address) {
+      sendOrderConfirmation(payer.email_address, nouveauPaiement)
+        .catch(err => console.error("Erreur envoi email confirmation:", err));
+    }
+
     res.json(result);
   } catch (err) {
     console.error("Erreur capture commande PayPal:", err);

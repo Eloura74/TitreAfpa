@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "build": "cd photographie && npm install && npm run build",
+    "postinstall": "cd backend && npm install"
+  },
   "dependencies": {
     "dotenv": "^16.5.0",
     "framer-motion": "^12.10.5",

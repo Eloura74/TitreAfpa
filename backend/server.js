@@ -258,6 +258,12 @@ console.log(
 // ================================
 // DÉMARRAGE DU SERVEUR BACKEND
 // ================================
-app.listen(PORT, () => {
-  console.log(`🚀 Serveur démarré sur le port ${PORT}`);
-});
+// Si le fichier est exécuté directement (node server.js), on lance le serveur
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Serveur démarré sur le port ${PORT}`);
+  });
+}
+
+// Export de l'application pour Vercel (Serverless)
+module.exports = app;

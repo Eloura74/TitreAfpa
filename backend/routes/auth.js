@@ -72,6 +72,11 @@ router.post(
       // Sauvegarde de l'utilisateur dans la base de données MongoDB
       await user.save();
 
+      // Envoi de l'email de bienvenue (asynchrone, on n'attend pas forcément le résultat pour répondre)
+      // Import dynamique ou require en haut de fichier (je vais ajouter le require en haut)
+      const { sendWelcomeEmail } = require("../services/emailService");
+      sendWelcomeEmail(email, prenom).catch(err => console.error("Erreur envoi email bienvenue:", err));
+
       // Réponse avec un statut 201 (Créé) et un message de succès
       res.status(201).json({ message: "Utilisateur créé" });
     } catch (err) {

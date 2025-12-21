@@ -1,5 +1,6 @@
 import React from "react";
 import { PayPalButtons } from "@paypal/react-paypal-js";
+import { useToast } from "../Toast";
 
 interface PayPalButtonProps {
   articles: any[];
@@ -7,6 +8,8 @@ interface PayPalButtonProps {
 }
 
 const PayPalButton: React.FC<PayPalButtonProps> = ({ articles, total: _total }) => {
+  const { addToast } = useToast();
+
   return (
     <PayPalButtons
       style={{ layout: "vertical", color: "gold", shape: "rect", label: "paypal", height: 45, tagline: false }}
@@ -75,7 +78,7 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({ articles, total: _total }) 
           }
         } catch (error) {
           console.error(error);
-          alert("La transaction a échoué. Veuillez réessayer.");
+          addToast("La transaction a échoué. Veuillez réessayer.", "error");
         }
       }}
     />

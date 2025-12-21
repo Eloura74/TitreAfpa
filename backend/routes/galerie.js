@@ -11,27 +11,11 @@ const Photo = require("../models/Photo.js"); // Modèle Mongoose "Photo"
 const router = express.Router(); // Création d’un routeur Express
 
 // =====================================
-// Configuration de Multer (upload local)
-// =====================================
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    // Définit le dossier où stocker les fichiers uploadés
-    // Ici : dans /uploads à la racine du projet
-    cb(null, path.join(__dirname, "../uploads"));
-  },
-  filename: function (req, file, cb) {
-    // Génère un nom de fichier unique : timestamp + nom original
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
-
-// Crée une instance Multer avec la config précédente
-const upload = multer({ storage });
-
-// =====================================
 // ROUTES
 // =====================================
+
+// NOTE: L'upload local (multer diskStorage) a été désactivé pour la compatibilité Vercel.
+// Veuillez utiliser la route /api/upload-cloudinary pour uploader des images.
 
 // ------------------------------
 // GET /api/galerie
@@ -75,24 +59,9 @@ router.get("/", async (req, res) => {
 // ------------------------------
 // POST /api/galerie/upload
 // ------------------------------
-// Upload d’image via formulaire : accepte "image" ou "file"
-router.post("/upload", (req, res, next) => {
-  // Première tentative : champ "image"
-  upload.single("image")(req, res, function (err) {
-    if (!req.file) {
-      // Si "image" échoue, on tente avec "file"
-      upload.single("file")(req, res, function (err2) {
-        if (!req.file) {
-          // Aucun fichier n’a été reçu
-          return res.status(400).json({ message: "Aucun fichier reçu" });
-        }
-        // Retourne le chemin du fichier uploadé
-        return res.status(200).json({ src: `/uploads/${req.file.filename}` });
-      });
-    } else {
-      // Fichier correctement uploadé via "image"
-      return res.status(200).json({ src: `/uploads/${req.file.filename}` });
-    }
+router.post("/upload", (req, res) => {
+  return res.status(400).json({ 
+    message: "L'upload local est désactivé. Utilisez /api/upload-cloudinary." 
   });
 });
 

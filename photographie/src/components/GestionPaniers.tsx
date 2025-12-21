@@ -44,6 +44,8 @@ interface Panier {
 // URL d’accès à l’API
 const API_URL = `${import.meta.env.VITE_API_URL}/api/paniers`;
 
+import { useToast } from "./Toast";
+
 // =====================================================================
 // 🎯 Composant principal : Gestion des Paniers (Admin)
 // =====================================================================
@@ -51,6 +53,7 @@ export default function GestionPaniers() {
   const [paniers, setPaniers] = useState<Panier[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { addToast } = useToast();
 
   // 🔄 Récupération des paniers
   const fetchPaniers = async () => {
@@ -80,8 +83,9 @@ export default function GestionPaniers() {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setPaniers(paniers.filter((p) => p._id !== id));
+      addToast("Panier supprimé avec succès", "success");
     } catch (e: any) {
-      alert("Erreur lors de la suppression");
+      addToast("Erreur lors de la suppression", "error");
     }
   };
 

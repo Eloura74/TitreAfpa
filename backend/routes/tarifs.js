@@ -18,6 +18,11 @@ const router = express.Router(); // Initialisation du routeur Express
 // Cette fonction est appelée avant chaque modification (POST, PUT, DELETE)
 // Elle sauvegarde tous les tarifs actuels dans un fichier .json horodaté
 const backupTarifs = async () => {
+  // DÉSACTIVÉ POUR VERCEL (Read-only filesystem)
+  console.log("⚠️ Backup local désactivé pour compatibilité Vercel.");
+  return;
+
+  /*
   const tarifs = await Tarif.find(); // Récupère tous les tarifs depuis la base
 
   const backupDir = path.join(__dirname, "../backups"); // Répertoire de sauvegarde
@@ -32,6 +37,7 @@ const backupTarifs = async () => {
     path.join(backupDir, `tarifs-backup-${Date.now()}.json`),
     JSON.stringify(tarifs, null, 2) // Formate le JSON avec indentation pour lisibilité
   );
+  */
 };
 
 // ============================================================

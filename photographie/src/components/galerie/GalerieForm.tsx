@@ -62,6 +62,8 @@ interface Photo {
   tarifs: TarifOeuvre[]; // Liste des formats/supports/prix
 }
 
+import { useToast } from "../../components/Toast";
+
 export default function GalerieForm() {
   // État pour la liste des photos (tableau d'objets Photo)
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -73,6 +75,11 @@ export default function GalerieForm() {
   );
   // État pour les tarifs sélectionnés (IDs)
   const [tarifsSélectionnés, setTarifsSélectionnés] = useState<string[]>([]);
+  
+  // État de chargement
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { addToast } = useToast();
 
   // Note: La gestion des tarifs personnalisés a été simplifiée
   // Nous utilisons maintenant uniquement les tarifs prédéfinis
@@ -102,6 +109,7 @@ export default function GalerieForm() {
         setTarifsPredéfinis(dataTarifs.filter((t: TarifPredefini) => t.actif));
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
+        addToast("Erreur lors du chargement des données", "error");
       }
     };
 
@@ -131,14 +139,18 @@ export default function GalerieForm() {
       !form.description ||
       !form.categorie
     ) {
-      alert("Veuillez remplir tous les champs correctement.");
+      addToast("Veuillez remplir tous les champs correctement.", "warning");
       return;
     }
     console.log(form);
+    
+    setIsSubmitting(true);
+
     try {
       // Vérification que des tarifs sont sélectionnés
       if (tarifsSélectionnés.length === 0) {
-        alert("Veuillez sélectionner au moins un tarif pour cette photo.");
+        addToast("Veuillez sélectionner au moins un tarif pour cette photo.", "warning");
+        setIsSubmitting(false);
         return;
       }
 
@@ -194,7 +206,8 @@ export default function GalerieForm() {
           });
           if (!res.ok) {
             const err = await res.text();
-            alert("Erreur serveur: " + err);
+            addToast("Erreur serveur: " + err, "error");
+            setIsSubmitting(false);
             return;
           }
           const updated = await res.json();
@@ -202,6 +215,7 @@ export default function GalerieForm() {
             photos.map((photo) => (photo._id === editId ? updated : photo))
           );
           setEditId(null); // On sort du mode édition
+          addToast("Photo modifiée avec succès !", "success");
         } else {
           // SOLUTION EN DEUX TEMPS - D'abord créer une photo minimale, puis ajouter les tarifs
           console.log(
@@ -247,7 +261,8 @@ export default function GalerieForm() {
             }
 
             console.error("Détails de l'erreur étape 1:", errorMessage);
-            alert(errorMessage);
+            addToast("Erreur lors de la création : " + errorMessage, "error");
+            setIsSubmitting(false);
             return;
           }
 
@@ -281,6 +296,7 @@ export default function GalerieForm() {
                 console.warn(
                   "Attention: Les tarifs n'ont pas pu être ajoutés, mais la photo a été créée."
                 );
+                addToast("Photo créée, mais erreur lors de l'ajout des tarifs.", "warning");
                 // On continue quand même car la photo existe déjà
               } else {
                 // Mise à jour réussie
@@ -300,25 +316,29 @@ export default function GalerieForm() {
               "Erreur lors de la mise à jour avec les tarifs:",
               updateErr
             );
+            addToast("Erreur lors de l'ajout des tarifs.", "warning");
             // On continue quand même car la photo existe déjà
           }
 
           // Dans tous les cas, on ajoute la photo créée à la liste
           setPhotos((prevPhotos) => [...prevPhotos, photoCreee]);
+          addToast("Photo ajoutée avec succès !", "success");
         }
       } catch (err) {
-        alert("Erreur réseau ou serveur: " + err);
+        addToast("Erreur réseau ou serveur: " + err, "error");
+        setIsSubmitting(false);
         return;
       }
 
       // Réinitialisation complète du formulaire après succès
       setForm(formInitial);
       setTarifsSélectionnés([]);
+      setIsSubmitting(false);
 
-      alert("Photo enregistrée avec succès !");
     } catch (error) {
       console.error("Erreur lors de l'enregistrement :", error);
-      alert("Une erreur est survenue.");
+      addToast("Une erreur inattendue est survenue.", "error");
+      setIsSubmitting(false);
     }
   };
 
@@ -345,8 +365,15 @@ export default function GalerieForm() {
 
   // Suppression d'une photo par son ID
   const handleDelete = async (id: string) => {
-    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-    setPhotos(photos.filter((photo) => photo._id !== id));
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cette photo ?")) return;
+    
+    try {
+      await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      setPhotos(photos.filter((photo) => photo._id !== id));
+      addToast("Photo supprimée.", "info");
+    } catch (e) {
+      addToast("Erreur lors de la suppression.", "error");
+    }
   };
 
   // Génération de la liste des catégories uniques (issues des photos et des données locales)
@@ -468,13 +495,14 @@ export default function GalerieForm() {
               // Sécurisation : vérifie que l'URL Cloudinary existe
               if (data.url && typeof data.url === "string") {
                 setForm((prev) => ({ ...prev, src: data.url }));
+                addToast("Image uploadée avec succès !", "success");
               } else {
                 setForm((prev) => ({ ...prev, src: "" }));
-                alert("L'upload a échoué, pas d'URL Cloudinary reçue.");
+                addToast("L'upload a échoué, pas d'URL Cloudinary reçue.", "error");
               }
             } catch (err) {
               setForm((prev) => ({ ...prev, src: "" }));
-              alert("Erreur lors de l'envoi de l'image.");
+              addToast("Erreur lors de l'envoi de l'image.", "error");
               console.error(err);
             }
           }}
@@ -530,6 +558,7 @@ export default function GalerieForm() {
         <button
           onClick={handleSubmit}
           disabled={
+            isSubmitting ||
             !form.src ||
             !form.titre ||
             !form.alt ||
@@ -537,7 +566,8 @@ export default function GalerieForm() {
             !form.categorie ||
             tarifsSélectionnés.length === 0
           }
-          className={`px-4 py-2 rounded font-bold transition w-full ${
+          className={`px-4 py-2 rounded font-bold transition w-full flex justify-center items-center gap-2 ${
+            isSubmitting ||
             !form.src ||
             !form.titre ||
             !form.alt ||
@@ -548,7 +578,14 @@ export default function GalerieForm() {
               : "bg-yellow-400 text-black hover:bg-yellow-500"
           }`}
         >
-          {editId ? "Modifier" : "Valider"}
+          {isSubmitting ? (
+            <>
+              <span className="loading loading-spinner loading-sm"></span>
+              Traitement en cours...
+            </>
+          ) : (
+            editId ? "Modifier" : "Valider"
+          )}
         </button>
         {tarifsSélectionnés.length === 0 && (
           <div className="text-red-400 text-xs mt-1">

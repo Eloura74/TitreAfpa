@@ -1,6 +1,7 @@
 // --- Importation des hooks et outils nécessaires ---
 import { useState, useRef, useEffect } from "react"; // Hook React pour gérer l'état local et gérer les URLs temporaires
 import axios from "axios"; // Librairie HTTP pour faire des appels API
+import { useToast } from "../Toast";
 
 /**
  * Formulaire d’ajout d’œuvre graphique unique (interface admin)
@@ -17,8 +18,8 @@ export default function GalerieGraphiqueForm() {
   const [description, setDescription] = useState(""); // Description de l’œuvre
 
   // --- États de contrôle ---
-  const [message, setMessage] = useState<string | null>(null); // Message de succès ou d'erreur
   const [loading, setLoading] = useState(false); // Indique si un envoi est en cours
+  const { addToast } = useToast();
 
   /**
    * Gestion du changement de fichier pour générer la preview locale
@@ -63,7 +64,7 @@ export default function GalerieGraphiqueForm() {
       );
       return res.data.url; // Retourne l'URL sécurisée de Cloudinary
     } catch (err) {
-      setMessage("Erreur lors de l’upload de l’image."); // Affiche un message d’erreur
+      addToast("Erreur lors de l’upload de l’image.", "error"); // Affiche un message d’erreur
       return null;
     }
   }
@@ -74,7 +75,6 @@ export default function GalerieGraphiqueForm() {
    */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); // Empêche le rechargement automatique de la page
-    setMessage(null); // Réinitialise les messages
     setLoading(true); // Active l’état de chargement
 
     let imagePath = ""; // Variable temporaire pour stocker le chemin de l’image
@@ -100,7 +100,7 @@ export default function GalerieGraphiqueForm() {
       );
 
       // Réinitialisation complète du formulaire après succès
-      setMessage("Œuvre ajoutée avec succès !");
+      addToast("Œuvre ajoutée avec succès !", "success");
       setTitre("");
       setImage(null);
       setPrix("");
@@ -111,7 +111,7 @@ export default function GalerieGraphiqueForm() {
       }
       setDescription("");
     } catch (err) {
-      setMessage("Erreur lors de l’ajout de l’œuvre."); // Message en cas d’échec
+      addToast("Erreur lors de l’ajout de l’œuvre.", "error"); // Message en cas d’échec
     } finally {
       setLoading(false); // Fin du chargement dans tous les cas
     }
@@ -185,17 +185,17 @@ export default function GalerieGraphiqueForm() {
       <button
         type="submit"
         disabled={loading}
-        className="bg-yellow-400 text-black font-bold px-6 py-2 rounded hover:bg-yellow-300 transition"
+        className="bg-yellow-400 text-black font-bold px-6 py-2 rounded hover:bg-yellow-300 transition flex items-center gap-2 justify-center"
       >
-        {loading ? "Ajout en cours..." : "Ajouter l’œuvre"}
+        {loading ? (
+          <>
+            <span className="loading loading-spinner loading-sm"></span>
+            Ajout en cours...
+          </>
+        ) : (
+          "Ajouter l’œuvre"
+        )}
       </button>
-
-      {/* Affichage du message d’erreur ou succès */}
-      {message && (
-        <div className="text-center text-sm mt-2 text-yellow-400">
-          {message}
-        </div>
-      )}
     </form>
   );
 }
