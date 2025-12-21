@@ -222,7 +222,7 @@ app.get("/", (req, res) => {
 
 // ================================
 // ROUTE SPÉCIALE : AJOUT DIRECT DE PHOTO SANS VALIDATION
-// Permet d’insérer rapidement une image sans passer par la route standard
+// Permet d’insérer rapidement une image sans passer par la route standards
 // Utilisée pour tests ou migration rapide
 // ================================
 const Photo = require("./models/Photo");
