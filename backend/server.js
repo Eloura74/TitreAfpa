@@ -206,8 +206,7 @@ const connectDB = async () => {
     console.log("🟢 MongoDB connecté avec succès !");
   } catch (err) {
     console.error("🔴 Erreur CRITIQUE de connexion MongoDB:", err.message);
-    // On ne crash pas l'app ici pour permettre aux logs de sortir, 
-    // mais les requêtes échoueront.
+    throw err; // On relance l'erreur pour que le handler Vercel la capture
   }
 };
 
