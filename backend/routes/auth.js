@@ -70,7 +70,9 @@ router.post(
       });
 
       // Sauvegarde de l'utilisateur dans la base de données MongoDB
+      console.log(`[AUTH] Saving new user: ${email}`);
       await user.save();
+      console.log(`[AUTH] User saved successfully: ${email}`);
 
       // Envoi de l'email de bienvenue (asynchrone, on n'attend pas forcément le résultat pour répondre)
       // Import dynamique ou require en haut de fichier (je vais ajouter le require en haut)
