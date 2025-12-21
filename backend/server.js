@@ -295,4 +295,5 @@ if (require.main === module) {
 }
 
 // Export de l'application pour Vercel (Serverless)
-module.exports = app;
+// Export de l'application et de la fonction de connexion pour Vercel
+module.exports = { app, connectDB };
