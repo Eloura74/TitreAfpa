@@ -186,7 +186,23 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" })); // Formulaires (
 // ================================
 // CONNEXION À MONGODB (Améliorée pour Vercel)
 // ================================
+// Variable pour mettre en cache la promesse de connexion (Best Practice Serverless)
+let cachedPromise = null;
+
 const connectDB = async () => {
+  // Si déjà connecté, on ne fait rien
+  if (mongoose.connection.readyState === 1) {
+    console.log("🟢 MongoDB déjà connecté (Cache)");
+    return;
+  }
+
+  // Si une connexion est en cours, on l'attend
+  if (cachedPromise) {
+    console.log("🟡 Connexion MongoDB en cours (Attente du cache)...");
+    await cachedPromise;
+    return;
+  }
+
   try {
     const uri = process.env.MONGO_URI;
     if (!uri) {
@@ -197,21 +213,23 @@ const connectDB = async () => {
     const maskedURI = uri.replace(/:([^:@]+)@/, ":****@");
     console.log(`🔌 Tentative de connexion à MongoDB... (${maskedURI})`);
 
-    await mongoose.connect(uri, {
-      // Options recommandées pour la stabilité
-      serverSelectionTimeoutMS: 5000, // Timeout plus court pour échouer vite si pas de connexion
+    // On stocke la promesse pour les appels concurrents
+    cachedPromise = mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
     });
 
+    await cachedPromise;
     console.log("🟢 MongoDB connecté avec succès !");
   } catch (err) {
     console.error("🔴 Erreur CRITIQUE de connexion MongoDB:", err.message);
-    throw err; // On relance l'erreur pour que le handler Vercel la capture
+    cachedPromise = null; // Reset du cache en cas d'erreur
+    throw err;
   }
 };
 
-// Lancer la connexion
-connectDB();
+// Lancer la connexion UNIQUEMENT si on n'est pas en mode test/import
+// connectDB(); <--- SUPPRIMÉ pour éviter le double appel dans Vercel
 
 // ================================
 // ROUTE DE TEST SIMPLE
