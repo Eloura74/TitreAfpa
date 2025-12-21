@@ -47,6 +47,7 @@ router.post(
 
     try {
       // Récupération des données envoyées par le client dans le corps de la requête
+      console.log("[AUTH] Register request received for:", req.body.email);
       const { email, motdepasse, nom, prenom, telephone, adresse } = req.body;
 
       // Définition du rôle par défaut : 'user'

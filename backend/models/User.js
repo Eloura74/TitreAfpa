@@ -38,7 +38,9 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("motdepasse")) return next();
 
   // Hashage du mot de passe avec un "salt" de 10 tours pour renforcer la sécurité
+  console.log("[USER MODEL] Hashing password...");
   this.motdepasse = await bcrypt.hash(this.motdepasse, 10);
+  console.log("[USER MODEL] Password hashed.");
 
   // Passe au middleware suivant ou termine le processus de sauvegarde
   next();
