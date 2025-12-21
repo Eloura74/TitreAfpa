@@ -180,10 +180,36 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" })); // Formulaires (
 // ================================
 // CONNEXION À MONGODB
 // ================================
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("🟢 MongoDB connecté"))
-  .catch((err) => console.error("🔴 Erreur de connexion MongoDB:", err));
+// ================================
+// CONNEXION À MONGODB (Améliorée pour Vercel)
+// ================================
+const connectDB = async () => {
+  try {
+    const uri = process.env.MONGO_URI;
+    if (!uri) {
+      throw new Error("⚠️ La variable MONGO_URI est indéfinie !");
+    }
+
+    // Masquer le mot de passe pour les logs
+    const maskedURI = uri.replace(/:([^:@]+)@/, ":****@");
+    console.log(`🔌 Tentative de connexion à MongoDB... (${maskedURI})`);
+
+    await mongoose.connect(uri, {
+      // Options recommandées pour la stabilité
+      serverSelectionTimeoutMS: 5000, // Timeout plus court pour échouer vite si pas de connexion
+      socketTimeoutMS: 45000,
+    });
+
+    console.log("🟢 MongoDB connecté avec succès !");
+  } catch (err) {
+    console.error("🔴 Erreur CRITIQUE de connexion MongoDB:", err.message);
+    // On ne crash pas l'app ici pour permettre aux logs de sortir, 
+    // mais les requêtes échoueront.
+  }
+};
+
+// Lancer la connexion
+connectDB();
 
 // ================================
 // ROUTE DE TEST SIMPLE
