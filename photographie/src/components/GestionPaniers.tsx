@@ -3,7 +3,7 @@
 // =======================
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Trash2, Mail, ShoppingCart, Image as ImageIcon, Package, CreditCard, Ruler, Layers } from "lucide-react";
+import { Trash2, Mail, ShoppingCart, Image as ImageIcon, Package, Ruler, Layers } from "lucide-react";
 
 // =======================
 // 🧩 Interfaces TypeScript

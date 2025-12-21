@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import galerieData from "../../config/galerie.json";
 const API_URL = `${import.meta.env.VITE_API_URL}/api/galerie`; //
-const uploadUrl = `${import.meta.env.VITE_API_URL}/api/galerie/upload`; //
 
 // --- TYPE PRINCIPAL DU FORMULAIRE ---
 interface FormType {
@@ -342,39 +341,9 @@ export default function GalerieForm() {
     }
   };
 
-  // Préparation du formulaire pour l'édition d'une photo existante
-  const handleEdit = (photo: Photo) => {
-    setEditId(photo._id!);
-    setForm({
-      src: photo.src,
-      alt: photo.alt,
-      titre: photo.titre,
-      description: photo.description,
-      categorie: photo.categorie,
-      tarifs: photo.tarifs || [],
-    });
 
-    // Récupération des IDs des tarifs associés à cette photo
-    if (photo.tarifs && photo.tarifs.length > 0) {
-      const tarifIds = photo.tarifs.map((t) => t.id);
-      setTarifsSélectionnés(tarifIds);
-    } else {
-      setTarifsSélectionnés([]);
-    }
-  };
 
-  // Suppression d'une photo par son ID
-  const handleDelete = async (id: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cette photo ?")) return;
-    
-    try {
-      await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-      setPhotos(photos.filter((photo) => photo._id !== id));
-      addToast("Photo supprimée.", "info");
-    } catch (e) {
-      addToast("Erreur lors de la suppression.", "error");
-    }
-  };
+
 
   // Génération de la liste des catégories uniques (issues des photos et des données locales)
   const allCategories = [

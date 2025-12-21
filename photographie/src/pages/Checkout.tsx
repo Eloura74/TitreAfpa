@@ -7,7 +7,7 @@ import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import { usePanier } from "../store/panierContext";
 import { useUser } from "../context/UserContext";
-import { createCheckoutSession } from "../services/stripeService";
+
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import PayPalButton from "../components/paiement/PayPalButton";
 import { useToast } from "../components/Toast";

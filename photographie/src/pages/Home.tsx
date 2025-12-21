@@ -1,5 +1,5 @@
 // Import des hooks React pour gérer le cycle de vie et la navigation
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Link pour navigation, useNavigate pour redirection
 import { useAuthStore } from "../store/authStore"; // Accès au store Zustand pour gérer le choix utilisateur
 import homeImages from "../config/images.json"; // Import des images statiques depuis un fichier JSON

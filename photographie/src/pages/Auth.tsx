@@ -53,9 +53,7 @@ const Auth: React.FC = () => {
     setError("");
 
     try {
-      const isGraphisme =
-        window.location.pathname.startsWith("/graphisme") ||
-        window.location.search.includes("mode=graphisme");
+
 
       if (isRegister) {
         // 🟢 Mode inscription
@@ -89,7 +87,7 @@ const Auth: React.FC = () => {
             setMessage("Inscription réussie, veuillez vous connecter.");
             setIsRegister(false);
           } else {
-            handleLoginSuccess(loginRes, isGraphisme);
+            handleLoginSuccess(loginRes);
           }
         }
       } else {
@@ -98,7 +96,7 @@ const Auth: React.FC = () => {
         if (res.error) {
           setError(res.error);
         } else {
-          handleLoginSuccess(res, isGraphisme);
+          handleLoginSuccess(res);
         }
       }
     } catch (err) {
@@ -108,7 +106,7 @@ const Auth: React.FC = () => {
     }
   };
 
-  const handleLoginSuccess = (res: any, isGraphisme: boolean) => {
+  const handleLoginSuccess = (res: any) => {
     localStorage.setItem("token", res.token);
 
     setUser({
