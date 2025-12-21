@@ -107,12 +107,19 @@ router.post("/login", async (req, res) => {
 
     // Recherche de l'utilisateur dans la base de données via son email
     const user = await User.findOne({ email });
-    console.log(`[AUTH] User found: ${!!user}`);
+    console.log(`[AUTH] User found result: ${user ? "YES" : "NO"}`);
 
-    // Vérification si l'utilisateur existe et si le mot de passe est correct via la méthode comparePassword
-    if (!user || !(await user.comparePassword(motdepasse))) {
-      console.log(`[AUTH] Login failed for ${email}: Invalid credentials`);
-      // Si l'utilisateur n'existe pas ou que le mot de passe est incorrect, renvoi d'une erreur 401 (Unauthorized)
+    if (!user) {
+      console.log(`[AUTH] Login failed: User '${email}' NOT FOUND in database.`);
+      return res.status(401).json({ error: "Identifiants invalides" });
+    }
+
+    // Vérification du mot de passe
+    const isMatch = await user.comparePassword(motdepasse);
+    console.log(`[AUTH] Password match result for '${email}': ${isMatch}`);
+
+    if (!isMatch) {
+      console.log(`[AUTH] Login failed: Password INCORRECT for '${email}'.`);
       return res.status(401).json({ error: "Identifiants invalides" });
     }
     console.log(`[AUTH] Login success for ${email}`);
