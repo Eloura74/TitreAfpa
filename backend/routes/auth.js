@@ -5,7 +5,7 @@ const express = require("express");
 const router = express.Router();
 
 // Importation de bcrypt pour le hashage et la vérification des mots de passe
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 // Importation de jsonwebtoken pour générer des tokens JWT (authentification sécurisée)
 const jwt = require("jsonwebtoken");

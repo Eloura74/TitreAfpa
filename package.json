@@ -12,7 +12,7 @@
     "react-calendar": "^5.1.0",
     "zustand": "^5.0.5",
     "@paypal/checkout-server-sdk": "^1.0.3",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "cloudinary": "^2.6.1",
     "cors": "^2.8.5",
     "express": "^4.21.2",

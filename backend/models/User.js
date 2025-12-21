@@ -2,7 +2,7 @@
 const mongoose = require("mongoose");
 
 // Importation de bcrypt, une bibliothèque utilisée pour sécuriser les mots de passe en les hashant
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 // Définition du schéma utilisateur (User) avec Mongoose
 const userSchema = new mongoose.Schema({
