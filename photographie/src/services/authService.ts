@@ -1,3 +1,5 @@
+import { API_URL } from "../config/api";
+
 // ==============================
 //  Service pour s'inscrire (register)
 // ==============================
@@ -15,7 +17,7 @@ export async function register(
   }
 ) {
   // Envoi d'une requête POST vers l'API pour créer un nouvel utilisateur
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
+  const res = await fetch(`${API_URL}/api/auth/register`, {
     method: "POST", // Méthode HTTP utilisée : POST pour envoyer des données
     headers: { "Content-Type": "application/json" }, // Type de contenu envoyé : JSON
     body: JSON.stringify({
@@ -42,7 +44,7 @@ export async function login(email: string, motdepasse: string) {
     const timeout = setTimeout(() => controller.abort(), 10000);
 
     // Envoi de la requête POST pour l'authentification
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+    const res = await fetch(`${API_URL}/api/auth/login`, {
       method: "POST", // Méthode HTTP POST
       headers: { "Content-Type": "application/json" }, // Envoi JSON
       body: JSON.stringify({ email, motdepasse }), // Données à envoyer
