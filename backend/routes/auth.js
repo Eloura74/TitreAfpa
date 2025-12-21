@@ -159,5 +159,41 @@ router.get('/me', authenticate, (req, res) => {
   res.json({ user: req.user });
 });
 
+// ==========================
+// Route TEMPORAIRE : Réinitialiser l'admin
+// ==========================
+// Cette route permet de recréer proprement l'utilisateur admin si ses données sont corrompues (ex: mot de passe non hashé)
+router.get("/fix-admin", async (req, res) => {
+  try {
+    const email = "fabien.licata@gmail.com";
+    const password = "admin";
+    
+    // 1. Supprimer l'ancien utilisateur s'il existe
+    await User.deleteOne({ email });
+
+    // 2. Créer le nouvel utilisateur admin
+    const adminUser = new User({
+      email: email,
+      motdepasse: password, // Sera hashé par le middleware pre('save')
+      role: "admin",
+      nom: "Licata",
+      prenom: "Fabien",
+      telephone: "0600000000",
+      adresse: {
+        rue: "Rue de l'Admin",
+        ville: "AdminCity",
+        codePostal: "00000",
+        pays: "France"
+      }
+    });
+
+    await adminUser.save();
+
+    res.json({ message: `Admin user '${email}' has been reset successfully. Password is '${password}'.` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Exportation du routeur pour pouvoir l'utiliser dans l'application principale (app.js ou server.js)
 module.exports = router;
