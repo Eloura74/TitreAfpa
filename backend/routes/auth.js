@@ -95,8 +95,15 @@ router.post(
 router.post("/login", async (req, res) => {
   try {
     // Récupération des identifiants fournis par l'utilisateur
-    const { email, motdepasse } = req.body;
-    console.log(`[AUTH] Login request for: ${email}`);
+    // Récupération des identifiants fournis par l'utilisateur
+    let { email, motdepasse } = req.body;
+    
+    // Normalisation de l'email (minuscules et suppression des espaces) pour correspondre au format d'enregistrement
+    if (email) {
+      email = email.toLowerCase().trim();
+    }
+
+    console.log(`[AUTH] Login request for: '${email}'`);
 
     // Recherche de l'utilisateur dans la base de données via son email
     const user = await User.findOne({ email });
