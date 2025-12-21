@@ -7,9 +7,8 @@ const router = express.Router();
 // Importation du module Stripe pour gérer les paiements
 const Stripe = require("stripe");
 
-// Initialisation de Stripe avec la clé secrète récupérée depuis le fichier .env
-// ⚠️ Utilisation de require('dotenv').config().parsed pour accéder directement aux variables d'environnement
-const stripe = Stripe(require("dotenv").config().parsed.STRIPE_SECRET_KEY);
+// Initialisation de Stripe avec la clé secrète (via process.env pour Vercel)
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ------------------------------
 // Route POST – Création d'une session de paiement Stripe Checkout
