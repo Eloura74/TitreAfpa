@@ -1,176 +1,190 @@
-// Import des hooks React pour gérer le cycle de vie et la navigation
-import { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom"; // Link pour navigation, useNavigate pour redirection
-import { useAuthStore } from "../store/authStore"; // Accès au store Zustand pour gérer le choix utilisateur
-import homeImages from "../config/images.json"; // Import des images statiques depuis un fichier JSON
-import "../styles/home.css"; // Import des styles spécifiques à la page d'accueil
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/authStore";
+import homeImages from "../config/images.json";
+import { motion } from "framer-motion";
 
-/**
- * Composant principal de la page d'accueil immersive
- * Affiche deux zones cliquables permettant de choisir l'univers :
- * - Photographie
- * - Photo-Graphiste
- *
- * Cette page est responsive : split screen sur desktop/tablette,
- * et présentation verticale sur mobile.
- */
+const revealVariants = {
+  hidden: { y: "30%", opacity: 0 },
+  visible: (i: number) => ({
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 1.2,
+      delay: i * 0.15,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  }),
+};
+
 export default function Home() {
-  const navigate = useNavigate(); // Hook pour rediriger l'utilisateur
-  const { setChoix } = useAuthStore(); // Fonction pour mémoriser le choix (photographie ou graphisme)
+  const navigate = useNavigate();
+  const { setChoix } = useAuthStore();
+  const [hoveredSide, setHoveredSide] = useState<"photo" | "graph" | null>(null);
 
-  // useEffect : s'exécute au montage du composant, modifie le titre de l'onglet navigateur
   useEffect(() => {
-    document.title = "Photographe Professionnel | Accueil";
+    document.title = "Fabien Licata | Photographe & Graphiste";
   }, []);
 
-  // Fonction appelée quand l'utilisateur clique sur un univers (photographie ou graphisme)
   const handleChoix = (choix: "photographie" | "photo-graphiste") => {
-    setChoix(choix); // On sauvegarde ce choix dans le store global Zustand
-    
-    // Redirection vers la galerie correspondante au lieu de la page de connexion
-    if (choix === "photographie") {
-      navigate("/galerie");
-    } else {
-      navigate("/galerie-graphique");
-    }
+    setChoix(choix);
+    navigate(choix === "photographie" ? "/galerie" : "/galerie-graphique");
   };
 
   return (
-    <div className="home-page">
-      {/* Conteneur de l'image de fond avec overlay */}
-      <div className="hero-image-container">
-        <img
-          src={homeImages.hero} // Image de fond dynamique importée
-          alt="Photographe professionnel" // Texte alternatif pour accessibilité
-          className="hero-image" // Style CSS
-        />
-      </div>
-
-      {/* Éléments graphiques décoratifs (formes, lignes diagonales) */}
-      <div className="geometric-accent" />
-      <div className="diagonal-line" />
-
-      {/* Split screen visible uniquement sur desktop et tablette (md = breakpoint) */}
-      <div
-        className="hidden md:flex relative w-full h-full items-center justify-center overflow-hidden"
-        style={{ minHeight: "80vh" }} // Hauteur minimale pour remplir une bonne partie de la fenêtre
+    <div className="relative h-screen w-full bg-[#080808] overflow-hidden font-sans text-white">
+      
+      {/* BACKGROUND : Luminosité ajustée */}
+      <motion.div 
+        initial={{ scale: 1.05, opacity: 0 }}
+        animate={{ scale: 1, opacity: 0.55 }} // Augmenté pour moins d'obscurité
+        transition={{ duration: 2.5, ease: "easeOut" }}
+        className="absolute inset-0 z-0 pointer-events-none"
       >
-        {/* Bloc gauche cliquable : choix Photographie */}
-        <button
-          type="button"
-          onClick={() => handleChoix("photographie")} // Appelle la fonction handleChoix avec "photographie"
-          className="flex-1 flex flex-col items-center justify-center z-10 group transition-all duration-500 bg-transparent border-none outline-none cursor-pointer"
-          style={{ position: "relative" }} // Permet d'ajouter des éléments positionnés par la suite
-        >
-          {/* Titre avec effet de dégradé et animation au survol */}
-          <h1
-            className="text-3xl md:text-5xl font-bold mb-2 text-center 
-               bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-600 
-               bg-clip-text text-transparent drop-shadow-lg 
-               transition-all duration-300 ease-in-out 
-               group-hover:brightness-125 pb-6"
+        <img src={homeImages.hero} className="w-full h-full object-cover" alt="Background" />
+        {/* Overlays plus doux pour la clarté */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60" />
+        <div className="absolute inset-0 bg-black/10" /> 
+      </motion.div>
+
+      {/* HEADER : Signature Fabien Licata */}
+      <header className="absolute top-16 left-0 w-full z-40 flex flex-col items-center pointer-events-none px-6">
+        <div className="overflow-hidden">
+          <motion.h2
+            custom={0}
+            variants={revealVariants}
+            initial="hidden"
+            animate="visible"
+            className="text-3xl md:text-5xl font-extralight tracking-[0.6em] uppercase 
+                       bg-gradient-to-b from-white via-yellow-200 to-yellow-500 
+                       bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]"
           >
-            Fabien Photographie
-          </h1>
-          {/* Liste courte des services proposés */}
-          <div className="flex flex-row gap-4 mt-2 text-xs md:text-base text-gray-200 font-light">
-            <span>Événements</span>
-            <span>-</span>
-            <span>Tirage en ligne</span>
-            <span>-</span>
-            <span>Galerie Photo</span>
-          </div>
-        </button>
-
-        {/* Bloc droit cliquable : choix Photo-Graphiste */}
-        <button
-          type="button"
-          onClick={() => handleChoix("photo-graphiste")} // Même principe que le bloc gauche
-          className="flex-1 flex flex-col items-center justify-center z-10 group transition-all duration-500 bg-transparent border-none outline-none cursor-pointer"
-          style={{ position: "relative" }}
-        >
-          <h1
-            className="text-3xl md:text-5xl font-bold mb-2 text-center 
-               bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-600 
-               bg-clip-text text-transparent drop-shadow-lg 
-               transition-all duration-300 ease-in-out 
-               group-hover:brightness-125 pb-6"
+            Fabien Licata
+          </motion.h2>
+        </div>
+        <div className="overflow-hidden mt-3">
+          <motion.p
+            custom={1}
+            variants={revealVariants}
+            initial="hidden"
+            animate="visible"
+            className="text-[10px] md:text-xs tracking-[0.5em] uppercase text-yellow-500/50 font-light"
           >
-            Fabien Photo-Graphiste
-          </h1>
+            Photo-Graphiste / Photographe
+          </motion.p>
+        </div>
+      </header>
 
-          <div className="flex flex-row gap-4 mt-2 text-xs md:text-base text-gray-200 font-light">
-            <span>Événements</span>
-            <span>-</span>
-            <span>Galerie Œuvres Uniques Graphiques</span>
-            <span>-</span>
-            <span>A Propos</span>
-          </div>
-        </button>
-
-        {/* Image de fond visible derrière les boutons (positionnée en absolu) */}
-        <img
-          src={homeImages.hero} // Même image que le background, pour effet de profondeur
-          alt="" // Image décorative, pas besoin de texte alternatif
-          className="absolute inset-0 w-full h-full object-cover z-0 opacity-80 pointer-events-none" // Positionnement, transparence et interaction désactivée
-        />
+      {/* SÉPARATEUR CENTRAL : Réintégré et visible */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none hidden md:block">
+         <motion.div 
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "40vh", opacity: 0.6 }} // Plus visible
+            transition={{ delay: 1, duration: 1.5 }}
+            className="w-[1px] bg-gradient-to-b from-transparent via-yellow-500 to-transparent shadow-[0_0_10px_rgba(234,179,8,0.3)]" 
+         />
       </div>
 
-      {/* Sur mobile : Overlay sombre pour garantir lisibilité */}
-      <div className="md:hidden fixed inset-0 z-0 bg-black/70 pointer-events-none" />
-
-      {/* Sur mobile : Affichage vertical des choix avec des liens cliquables */}
-      <div className="md:hidden flex flex-col h-full w-full z-10 px-4 py-8 gap-8 relative">
-        {/* Lien vers Photographie */}
-        <Link
-          to="/galerie"
-          className="group focus:outline-none focus:ring-2 focus:ring-yellow-400"
+      {/* CONTENU PRINCIPAL */}
+      <div className="relative z-10 flex h-full flex-col md:flex-row">
+        
+        {/* SECTION PHOTOGRAPHIE */}
+        <motion.section
+          onMouseEnter={() => setHoveredSide("photo")}
+          onMouseLeave={() => setHoveredSide(null)}
+          onClick={() => handleChoix("photographie")}
+          className="relative flex flex-1 cursor-pointer flex-col items-center justify-center transition-all duration-700"
         >
-          <div className="w-full bg-black/80 rounded-2xl shadow-lg flex flex-col items-center justify-center py-8 px-4">
-            <h1 className="text-3xl font-bold text-center text-yellow-200 drop-shadow-lg mb-3 break-words">
-              Fabien Photographe
-            </h1>
-            <p className="text-base text-yellow-100 text-center bg-black/40 rounded px-2 py-1 drop-shadow">
-              Événements · Tirage en ligne · Galerie photo
-            </p>
-          </div>
-        </Link>
+          <div className={`transition-all duration-1000 ease-in-out text-center px-4
+            ${hoveredSide === "graph" ? "opacity-25 scale-[0.98] blur-[1px]" : "opacity-100 scale-100 blur-0"}`}>
+            
+            <div className="overflow-hidden mb-2">
+              <motion.span custom={2} variants={revealVariants} initial="hidden" animate="visible"
+                className="block text-[9px] uppercase tracking-[0.8em] text-yellow-500/70 font-medium">
+                Art Visuel
+              </motion.span>
+            </div>
+            
+            <div className="overflow-hidden mb-4">
+              <motion.h1 custom={3} variants={revealVariants} initial="hidden" animate="visible"
+                className="text-4xl lg:text-7xl font-light tracking-[0.25em] uppercase 
+                           bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
+                           drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]">
+                Photographie
+              </motion.h1>
+            </div>
 
-        {/* Lien vers Graphisme */}
-        <Link
-          to="/galerie-graphique"
-          className="group focus:outline-none focus:ring-2 focus:ring-yellow-400"
-        >
-          <div className="w-full bg-black/80 rounded-2xl shadow-lg flex flex-col items-center justify-center py-8 px-4">
-            <h1 className="text-3xl font-bold text-center text-yellow-200 drop-shadow-lg mb-3 break-words">
-              Fabien Graphiste
-            </h1>
-            <p className="text-base text-yellow-100 text-center bg-black/40 rounded px-2 py-1 drop-shadow">
-              Événements · Galerie graphique · A propos
-            </p>
+            <div className="overflow-hidden mb-8">
+              <motion.p custom={4} variants={revealVariants} initial="hidden" animate="visible"
+                className="text-gray-400 text-xs md:text-sm italic font-extralight tracking-widest">
+                "Capturer l'instant, sublimer le réel"
+              </motion.p>
+            </div>
+
+            <motion.div custom={5} variants={revealVariants} initial="hidden" animate="visible"
+              className="flex items-center justify-center gap-4 text-[10px] uppercase tracking-[0.3em] text-yellow-100/40">
+              <span>Événements</span>
+              <span className="w-[1px] h-3 bg-yellow-700/40" />
+              <span>Tirage en ligne</span>
+              <span className="w-[1px] h-3 bg-yellow-700/40" />
+              <span>Galerie</span>
+            </motion.div>
           </div>
-        </Link>
+        </motion.section>
+
+        {/* SECTION GRAPHISME */}
+        <motion.section
+          onMouseEnter={() => setHoveredSide("graph")}
+          onMouseLeave={() => setHoveredSide(null)}
+          onClick={() => handleChoix("photo-graphiste")}
+          className="relative flex flex-1 cursor-pointer flex-col items-center justify-center transition-all duration-700"
+        >
+          <div className={`transition-all duration-1000 ease-in-out text-center px-4
+            ${hoveredSide === "photo" ? "opacity-25 scale-[0.98] blur-[1px]" : "opacity-100 scale-100 blur-0"}`}>
+            
+            <div className="overflow-hidden mb-2">
+              <motion.span custom={2} variants={revealVariants} initial="hidden" animate="visible"
+                className="block text-[9px] uppercase tracking-[0.8em] text-yellow-500/70 font-medium">
+                Design Numérique
+              </motion.span>
+            </div>
+
+            <div className="overflow-hidden mb-4">
+              <motion.h1 custom={3} variants={revealVariants} initial="hidden" animate="visible"
+                className="text-4xl lg:text-7xl font-light tracking-[0.25em] uppercase 
+                           bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
+                           drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]">
+                Graphisme
+              </motion.h1>
+            </div>
+
+            <div className="overflow-hidden mb-8">
+              <motion.p custom={4} variants={revealVariants} initial="hidden" animate="visible"
+                className="text-gray-400 text-xs md:text-sm italic font-extralight tracking-widest">
+                "L'imaginaire au service de votre image"
+              </motion.p>
+            </div>
+
+            <motion.div custom={5} variants={revealVariants} initial="hidden" animate="visible"
+              className="flex items-center justify-center gap-4 text-[10px] uppercase tracking-[0.3em] text-yellow-100/40">
+              <span>Identité</span>
+              <span className="w-[1px] h-3 bg-yellow-700/40" />
+              <span>Galerie Graphique</span>
+              <span className="w-[1px] h-3 bg-yellow-700/40" />
+              <span>À Propos</span>
+            </motion.div>
+          </div>
+        </motion.section>
       </div>
 
-      {/* Éclair vertical décoratif placé au centre sur desktop/tablette */}
-      <img
-        src="/images/eclair2.png"
-        alt="Eclair" // Texte alternatif simple (image décorative)
-        aria-hidden="true" // Indique que l'image n'est pas importante pour les lecteurs d'écran
-        className="absolute left-1/2 top-0 h-full w-auto z-30 pointer-events-none select-none lightning-separator hidden md:block" // Position et style, visible seulement md et plus
-        style={{
-          transform: "translateX(-50%)", // Centre horizontalement l'image
-          filter: `
-      drop-shadow(0 0 10px #ffd700)
-      drop-shadow(0 0 20px #ffcc00)
-      saturate(1.8)
-      contrast(1.2)
-      brightness(1.2)
-    `, // Effets visuels de lumière
-          opacity: 0.65, // Transparence
-          mixBlendMode: "screen", // Mode de fusion pour un effet lumineux
-        }}
-      />
+      {/* FOOTER */}
+      <footer className="absolute bottom-10 w-full px-16 z-30 flex justify-between items-center opacity-30 hover:opacity-100 transition-opacity duration-1000">
+        <p className="text-[9px] uppercase tracking-[0.5em] font-extralight">© 2025 Fabien Licata</p>
+        <div className="flex gap-12 text-[9px] uppercase tracking-[0.5em] font-extralight">
+          <a href="#" className="hover:text-yellow-400 transition-colors">Instagram</a>
+          <a href="#" className="hover:text-yellow-400 transition-colors">Contact</a>
+        </div>
+      </footer>
     </div>
   );
 }
