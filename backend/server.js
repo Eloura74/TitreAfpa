@@ -13,6 +13,7 @@ const mongoose = require("mongoose");
 
 // Chargement des variables d’environnement (.env)
 const dotenv = require("dotenv");
+dotenv.config();
 
 // Import des différentes routes de l’application
 const galerieRoutes = require("./routes/galerie.js");
@@ -145,7 +146,7 @@ app.use(
 // ================================
 // CHARGEMENT DU .env et configuration du port
 // ================================
-dotenv.config();
+
 const PORT = process.env.PORT || 5000;
 
 // ================================
@@ -157,12 +158,23 @@ const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 
 // 1. Helmet : Définit divers en-têtes HTTP sécurisés
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https://res.cloudinary.com"], // Autorise Cloudinary
+        scriptSrc: ["'self'", "'unsafe-inline'"], // Autorise les scripts inline (si besoin)
+      },
+    },
+  })
+);
 
 // 2. Rate Limiting : Limite le nombre de requêtes pour éviter les attaques par force brute
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limite chaque IP à 100 requêtes par fenêtre
+  max: 1000, // Limite chaque IP à 1000 requêtes par fenêtre (augmenté pour dev/admin)
   message: "Trop de requêtes depuis cette IP, veuillez réessayer plus tard.",
 });
 app.use("/api", limiter); // Applique le rate limiting à toutes les routes API
@@ -305,9 +317,13 @@ console.log(
 // DÉMARRAGE DU SERVEUR BACKEND
 // ================================
 // Si le fichier est exécuté directement (node server.js), on lance le serveur
+// Si le fichier est exécuté directement (node server.js), on lance le serveur
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`🚀 Serveur démarré sur le port ${PORT}`);
+  // On attend la connexion à la DB avant de lancer le serveur
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Serveur démarré sur le port ${PORT}`);
+    });
   });
 }
 

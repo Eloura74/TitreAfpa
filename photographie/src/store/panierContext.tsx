@@ -88,14 +88,16 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
           // Si le panier BDD n'est pas vide, on l'utilise (source de vérité)
           if (dbArticles && dbArticles.length > 0) {
             // On mappe pour s'assurer du format (notamment si 'photo' est peuplé)
-            const formatted = dbArticles.map((item: any) => ({
-              id: item.photo._id || item.photo, // Gère le cas populé ou non
-              nom: item.photo.nom || "Photo",
-              prix: item.photo.prix || 0,
-              image: item.photo.image || "",
-              format: item.photo.format || "Standard", // À adapter selon votre modèle
-              quantite: item.quantite,
-            }));
+            const formatted = dbArticles
+              .filter((item: any) => item.photo) // Filtre les items dont la photo a été supprimée
+              .map((item: any) => ({
+                id: item.photo._id || item.photo, // Gère le cas populé ou non
+                nom: item.photo.nom || "Photo",
+                prix: item.photo.prix || 0,
+                image: item.photo.image || "",
+                format: item.photo.format || "Standard", // À adapter selon votre modèle
+                quantite: item.quantite,
+              }));
             setArticles(formatted);
           } else if (articles.length > 0) {
             // Si BDD vide mais local non vide, on envoie le local vers la BDD
@@ -112,15 +114,20 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
     if (!email || !token) return;
 
     // On garde les infos complètes pour l'envoi
-    const payload = currentArticles.map((a) => ({
-      photo: a.photoId || null, // Envoie l'ID MongoDB si dispo, sinon null
-      quantite: a.quantite,
-      format: a.format,
-      support: a.support,
-      prixUnitaire: a.prix,
-      titre: a.nom,
-      image: a.image,
-    }));
+    const payload = currentArticles.map((a) => {
+      // Vérification basique d'un ObjectId MongoDB (24 char hex)
+      const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(a.id);
+      
+      return {
+        photo: isValidObjectId ? a.id : null, // Envoie l'ID seulement s'il est valide
+        quantite: a.quantite,
+        format: a.format,
+        support: a.support,
+        prixUnitaire: a.prix,
+        titre: a.nom,
+        image: a.image,
+      };
+    });
 
     axios
       .post(
@@ -128,7 +135,12 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
         { articles: payload },
         { headers: { Authorization: `Bearer ${token}` } }
       )
-      .catch((err) => console.error("Erreur sauvegarde panier BDD:", err));
+      .catch((err) => {
+        console.error("Erreur sauvegarde panier BDD:", err);
+        if (axios.isAxiosError(err) && err.response) {
+          console.error("Détails erreur 400:", err.response.data);
+        }
+      });
   };
 
   // 3. À chaque changement du panier local, on sauvegarde en BDD si connecté

@@ -58,9 +58,13 @@ export default function GalerieGraphique() {
           id: oeuvre._id || oeuvre.id,
           titre: oeuvre.titre,
           image:
-            oeuvre.image && oeuvre.image.startsWith("/uploads/")
+            oeuvre.image && oeuvre.image.startsWith("http")
+              ? oeuvre.image
+              : oeuvre.image && oeuvre.image.startsWith("/uploads/")
               ? `${API_URL}${oeuvre.image}`
-              : `/images/placeholder.jpg`, // Fallback si l'image est absente
+              : oeuvre.image
+              ? oeuvre.image
+              : `/placeholder.jpg`,
           prix: oeuvre.prix,
           description: oeuvre.description,
         }));
@@ -133,7 +137,7 @@ export default function GalerieGraphique() {
                         } else if (oeuvre.image) {
                           return `/images/${oeuvre.image}`;
                         } else {
-                          return "/images/placeholder.jpg";
+                          return "/placeholder.jpg";
                         }
                       })()
                     }
@@ -141,9 +145,9 @@ export default function GalerieGraphique() {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     onError={(e) => {
                       // Empêche la boucle infinie si le placeholder échoue aussi
-                      if (!e.currentTarget.src.endsWith("/images/placeholder.jpg")) {
+                      if (!e.currentTarget.src.endsWith("/placeholder.jpg")) {
                         e.currentTarget.onerror = null;
-                        e.currentTarget.src = "/images/placeholder.jpg";
+                        e.currentTarget.src = "/placeholder.jpg";
                       }
                     }}
                   />

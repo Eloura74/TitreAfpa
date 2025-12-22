@@ -33,14 +33,24 @@ router.post("/", upload.single("image"), async (req, res) => {
   try {
     // 1. Convertit le fichier en base64 à partir du buffer en RAM
     const fileStr = req.file.buffer.toString("base64");
+    console.log("Upload Cloudinary - Mimetype:", req.file.mimetype);
 
     // 2. Envoie l’image à Cloudinary avec le bon format MIME
+    // On force un nom de fichier explicite pour éviter le bug du "_"
+    const sanitizedFilename = req.file.originalname.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const publicId = `${Date.now()}_${sanitizedFilename}`;
+
     const uploadResponse = await cloudinary.uploader.upload(
-      `data:${req.file.mimetype};base64,${fileStr}`, // Format d’encodage complet
+      `data:${req.file.mimetype};base64,${fileStr}`, 
       {
-        folder: "galerie", // (facultatif) organise les images dans un dossier "galerie"
+        folder: "galerie", 
+        resource_type: "auto",
+        public_id: publicId, // On force l'ID
+        use_filename: true,
+        unique_filename: false
       }
     );
+    console.log("Réponse Cloudinary:", uploadResponse);
 
     // 3. Retourne l’URL sécurisée de l’image hébergée (https)
     res.json({ url: uploadResponse.secure_url });

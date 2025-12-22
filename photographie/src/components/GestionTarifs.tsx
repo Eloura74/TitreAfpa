@@ -365,7 +365,7 @@ export default function GestionTarifs() {
               ) : tarifs?.length ? (
                 tarifs.map((tarif: Tarif) => (
                   <tr
-                    key={tarif.id}
+                    key={tarif._id || tarif.id}
                     className="hover:bg-gray-700/50 transition-colors"
                   >
                     <td className="pl-6">

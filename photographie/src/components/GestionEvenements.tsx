@@ -293,7 +293,7 @@ export default function GestionEvenements() {
           <tbody>
             {evenements.map((event) => (
               <tr
-                key={event.id}
+                key={event._id || event.id}
                 className="bg-[#232336] hover:bg-[#ffe992]/10 transition rounded"
               >
                 <td className="px-2 py-1 text-white">{event.titre}</td>

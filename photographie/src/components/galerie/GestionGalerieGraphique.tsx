@@ -62,13 +62,13 @@ export default function GestionGalerieGraphique() {
 
     try {
       const res = await axios.post(
-        `${API_URL}/api/oeuvres-graphique/upload`,
+        `${API_URL}/api/upload-cloudinary`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-      return res.data.imagePath; // Retour du chemin de l’image depuis le backend
+      return res.data.url; // Retourne l'URL sécurisée de Cloudinary
     } catch {
       setMessage("Erreur lors de l’upload de l’image.");
       return null;
@@ -106,8 +106,12 @@ export default function GestionGalerieGraphique() {
 
     // Si une nouvelle image a été sélectionnée, on l'upload
     if (imageFile) {
+      console.log("Début upload image...");
       const uploaded = await handleUploadImage(imageFile);
+      console.log("Réponse upload:", uploaded);
+      
       if (!uploaded) {
+        console.error("Upload échoué ou URL manquante");
         setLoading(false);
         return;
       }
