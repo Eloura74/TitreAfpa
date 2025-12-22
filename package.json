@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "cd photographie && npm install && npm run build",
+    "build": "cd photographie && npm install --legacy-peer-deps && npm run build",
     "postinstall": "cd backend && npm install"
   },
   "dependencies": {
