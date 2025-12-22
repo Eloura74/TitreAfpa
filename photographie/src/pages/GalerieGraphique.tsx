@@ -1,17 +1,21 @@
-// ================================
-// 🎨 Composant : GalerieGraphique.tsx
-// Affiche une galerie d'œuvres graphiques récupérées via API
-// ================================
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-// 📦 Import des modules React (hooks) et composants
-import { useEffect, useState } from "react";
-import { usePanier } from "../store/panierContext"; // Hook pour le panier
-import Navbar from "../components/layout/navbar"; // Barre de navigation
-import Footer from "../components/layout/Footer"; // Pied de page
-import "../styles/galerie.css"; // Styles spécifiques à la galerie
+// Composants Layout & UI
+import Navbar from "../components/layout/navbar";
+import Footer from "../components/layout/Footer";
+import Skeleton from "../components/Skeleton";
+import { useToast } from "../components/Toast";
+
+// Contextes & Types
+import { usePanier } from "../store/panierContext";
 import { API_URL } from "../config/api";
 
-// 🎯 Interface TypeScript pour définir la forme d'une œuvre graphique
+// Styles
+import "../styles/globals.css";
+import "../styles/galerie.css";
+
+// --- Interface ---
 interface OeuvreGraphique {
   id: string;
   titre: string;
@@ -20,174 +24,181 @@ interface OeuvreGraphique {
   description?: string;
 }
 
-// 📸 Composant principal exporté
+// --- Variantes d'animation ---
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+  }
+};
+
+const cardVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1, 
+    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } 
+  },
+  exit: { scale: 0.98, opacity: 0, transition: { duration: 0.3 } }
+};
+
+const revealVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1, 
+    transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } 
+  }
+};
+
 export default function GalerieGraphique() {
-  // 🧠 États React pour gérer les données et l'affichage
-  const [oeuvres, setOeuvres] = useState<OeuvreGraphique[]>([]); // Liste des œuvres
-  const [loading, setLoading] = useState(true); // État de chargement
-  const [erreur, setErreur] = useState<string | null>(null); // Message d'erreur éventuel
-  const [notification, setNotification] = useState<string | null>(null); // Notification ajout panier
+  const [oeuvres, setOeuvres] = useState<OeuvreGraphique[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  const { ajouterArticle } = usePanier();
+  const { addToast } = useToast();
 
-  const { ajouterArticle } = usePanier(); // Accès au contexte panier
+  // 1. Fetch & Normalisation
+  useEffect(() => {
+    const fetchOeuvres = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_URL}/api/oeuvres-graphique`);
+        if (!res.ok) throw new Error("Erreur réseau");
+        const data = await res.json();
 
+        const sanitized = data.map((oeuvre: any) => ({
+          id: oeuvre._id || oeuvre.id,
+          titre: oeuvre.titre,
+          image: oeuvre.image?.startsWith("http") ? oeuvre.image 
+               : oeuvre.image?.startsWith("/uploads/") ? `${API_URL}${oeuvre.image}`
+               : oeuvre.image?.startsWith("/images/") ? oeuvre.image 
+               : `/images/${oeuvre.image || "/placeholder.jpg"}`,
+          prix: oeuvre.prix,
+          description: oeuvre.description,
+        }));
+
+        setOeuvres(sanitized);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        addToast("Erreur lors du chargement des œuvres graphiques.", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOeuvres();
+  }, [addToast]);
+
+  // 2. Logique Panier (Oeuvre unique)
   const handleAjouterAuPanier = (oeuvre: OeuvreGraphique) => {
     ajouterArticle({
-      id: crypto.randomUUID(), // ID local unique
-      photoId: oeuvre.id, // ID MongoDB
+      id: crypto.randomUUID(),
+      photoId: oeuvre.id,
       nom: `${oeuvre.titre} (Oeuvre Graphique)`,
       prix: oeuvre.prix,
       quantite: 1,
       image: oeuvre.image,
     });
-    setNotification(`${oeuvre.titre} ajouté au panier !`);
-    setTimeout(() => setNotification(null), 3000);
+    addToast(`${oeuvre.titre} ajouté au panier`, "success");
   };
 
-  // 🔄 useEffect : s'exécute au chargement du composant
-  useEffect(() => {
-    // Appel à l'API pour récupérer les œuvres graphiques
-    fetch(`${API_URL}/api/oeuvres-graphique`)
-      .then((res) => {
-        // Si la réponse n'est pas OK, on lève une erreur
-        if (!res.ok) throw new Error("Erreur réseau ou API");
-        return res.json(); // On convertit la réponse en JSON
-      })
-      .then((data: any[]) => {
-        // On reformate les données reçues
-        const oeuvresFormatees = data.map((oeuvre) => ({
-          id: oeuvre._id || oeuvre.id,
-          titre: oeuvre.titre,
-          image:
-            oeuvre.image && oeuvre.image.startsWith("http")
-              ? oeuvre.image
-              : oeuvre.image && oeuvre.image.startsWith("/uploads/")
-              ? `${API_URL}${oeuvre.image}`
-              : oeuvre.image
-              ? oeuvre.image
-              : `/placeholder.jpg`,
-          prix: oeuvre.prix,
-          description: oeuvre.description,
-        }));
-        // On stocke les données dans le state et on arrête le chargement
-        setOeuvres(oeuvresFormatees);
-        setLoading(false);
-      })
-      .catch(() => {
-        // Si erreur, on affiche un message utilisateur
-        setErreur(
-          "Impossible de charger les œuvres graphiques. Vérifiez l’API ou la connexion serveur."
-        );
-        setLoading(false);
-      });
-  }, []); // Le tableau vide signifie que ce code ne s'exécute qu'une fois au début
-
-  // 🖼️ Rendu HTML du composant
   return (
-    <div className="min-h-screen bg-[#0a0a10] text-white">
-      {/* ✅ Barre de navigation en haut */}
+    <div className="min-h-screen bg-[#080808] text-white selection:bg-yellow-500/30 selection:text-white font-sans">
       <Navbar />
 
-      {/* 🧾 En-tête de la galerie */}
-      <div className="galerie-header">
-        <h1 className="galerie-title">Galerie Graphique – Œuvres Uniques</h1>
-        <p className="galerie-description">
-          Découvrez une sélection d’œuvres graphiques uniques, réalisées par
-          Fabien. Chaque création est proposée à un prix individuel et n’existe
-          qu’en un seul exemplaire.
-        </p>
-      </div>
+      {/* Header */}
+      <header className="relative pt-32 pb-16 px-6 overflow-hidden">
+        <motion.div 
+          variants={revealVariants}
+          initial="hidden"
+          animate="visible"
+          className="relative z-10 max-w-5xl mx-auto text-center"
+        >
+          <h1 className="text-3xl md:text-5xl font-extralight tracking-[0.4em] md:tracking-[0.6em] uppercase 
+                         bg-gradient-to-b from-white via-yellow-200 to-yellow-500 
+                         bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] mb-6">
+            Galerie Graphique
+          </h1>
+          <div className="h-[1px] w-24 bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent mx-auto mb-6" />
+          <p className="text-yellow-500/50 text-xs md:text-sm font-light tracking-[0.3em] uppercase">
+            Créations Numériques Uniques
+          </p>
+        </motion.div>
+      </header>
 
-      {/* ⏳ Message de chargement */}
-      {loading && (
-        <div className="text-center text-yellow-300 py-12 text-lg animate-pulse">
-          Chargement des œuvres graphiques…
-        </div>
-      )}
-
-      {/* ❌ Message d'erreur si échec du chargement */}
-      {erreur && !loading && (
-        <div className="text-center text-red-400 py-12 text-lg">{erreur}</div>
-      )}
-
-      {/* 🖼️ Grille des œuvres graphiques si chargement réussi */}
-      {!loading && !erreur && (
-        <div className="galerie-grid">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* On parcourt la liste des œuvres */}
-            {oeuvres.map((oeuvre) => (
-              <div
-                key={oeuvre.id}
-                className="photo-card group relative bg-[#151520] rounded-sm overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-[#d6c48733] flex flex-col items-center"
-              >
-                {/* 🖼️ Image de l'œuvre */}
-                <div className="h-64 overflow-hidden w-full">
-                  {/* Affichage robuste de l'image + fallback local si erreur */}
-                  <img
-                    // Affichage de l'image avec la même logique que la galerie photo
-                    src={
-                      (() => {
-                        // Debug : affiche l'URL image reçue
-                        console.log("Image graphique reçue:", oeuvre.image);
-                        if (oeuvre.image && oeuvre.image.startsWith("http")) {
-                          return oeuvre.image;
-                        } else if (oeuvre.image && oeuvre.image.startsWith("/uploads/")) {
-                          return `${API_URL}${oeuvre.image}`;
-                        } else if (oeuvre.image && oeuvre.image.startsWith("/images/")) {
-                          return oeuvre.image;
-                        } else if (oeuvre.image) {
-                          return `/images/${oeuvre.image}`;
-                        } else {
-                          return "/placeholder.jpg";
-                        }
-                      })()
-                    }
-                    alt={oeuvre.titre || "Œuvre graphique"}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    onError={(e) => {
-                      // Empêche la boucle infinie si le placeholder échoue aussi
-                      if (!e.currentTarget.src.endsWith("/placeholder.jpg")) {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = "/placeholder.jpg";
-                      }
-                    }}
-                  />
+      {/* Grille principale */}
+      <main className="max-w-[1800px] mx-auto px-6 md:px-8 pb-32">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-10"
+        >
+          <AnimatePresence mode="popLayout">
+            {loading ? (
+              Array(10).fill(0).map((_, i) => (
+                <div key={i} className="space-y-3">
+                  <Skeleton height={300} className="rounded-sm" />
+                  <Skeleton height={15} width="60%" />
                 </div>
+              ))
+            ) : (
+              oeuvres.map((oeuvre) => (
+                <motion.div
+                  key={oeuvre.id}
+                  variants={cardVariants}
+                  layout
+                  className="group relative flex flex-col"
+                >
+                  {/* Image Section */}
+                  <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-[#111]">
+                    <motion.img
+                      whileHover={{ scale: 1.03 }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                      src={oeuvre.image}
+                      alt={oeuvre.titre}
+                      className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-700"
+                    />
+                    
+                    {/* Overlay au survol */}
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-700" />
+                  </div>
 
-                {/* 📋 Détails de l'œuvre */}
-                <div className="p-6 w-full flex flex-col items-center">
-                  <h2 className="photo-title mb-2 text-xl font-semibold">
-                    {oeuvre.titre}
-                  </h2>
-                  <p className="text-yellow-400 text-lg font-bold mb-2">
-                    {oeuvre.prix} €
-                  </p>
-                  <p className="text-gray-300 text-center mb-4">
-                    {oeuvre.description}
-                  </p>
+                  {/* Content Section - Minimaliste & Compact */}
+                  <div className="flex flex-col items-center text-center space-y-2">
+                    <h3 className="text-sm md:text-base font-light text-white tracking-[0.15em] uppercase group-hover:text-yellow-200 transition-colors duration-500 line-clamp-1">
+                      {oeuvre.titre}
+                    </h3>
+                    
+                    <div className="w-6 h-[1px] bg-white/10 group-hover:bg-yellow-500/30 transition-colors duration-500" />
 
-                  {/* 🛒 Bouton pour acheter ou en savoir plus */}
-                  {/* 🛒 Bouton pour acheter */}
-                  <button
-                    onClick={() => handleAjouterAuPanier(oeuvre)}
-                    className="bg-yellow-400 text-black px-4 py-2 rounded font-bold hover:bg-yellow-300 transition relative z-10"
-                  >
-                    Ajouter au panier
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+                    {oeuvre.description && (
+                      <p className="text-gray-500 text-[9px] tracking-widest uppercase line-clamp-1">
+                        {oeuvre.description}
+                      </p>
+                    )}
 
-      {/* Notification d'ajout au panier */}
-      {notification && (
-        <div className="notification fixed bottom-8 right-8 bg-[#d6c487] text-black px-6 py-3 rounded-sm shadow-lg z-50">
-          {notification}
-        </div>
-      )}
+                    <div className="pt-1 flex flex-col items-center gap-2 w-full">
+                      <span className="text-yellow-500/80 text-xs font-light tracking-widest">
+                        {oeuvre.prix} €
+                      </span>
+                      
+                      <button
+                        onClick={() => handleAjouterAuPanier(oeuvre)}
+                        className="text-[8px] uppercase tracking-[0.2em] text-white/40 hover:text-white border border-white/10 hover:border-white/30 px-4 py-2 transition-all duration-500 hover:bg-white/5 w-full max-w-[150px]"
+                      >
+                        Ajouter
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </main>
 
-      {/* ✅ Pied de page */}
       <Footer />
     </div>
   );
