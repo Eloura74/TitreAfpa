@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Helmet } from "react-helmet-async";
 
 // Composants Layout & UI
 import Navbar from "../components/layout/navbar";
@@ -160,6 +161,12 @@ export default function Galerie() {
 
   return (
     <div className="min-h-screen bg-[#080808] text-white selection:bg-yellow-500/30 selection:text-white font-sans">
+      <Helmet>
+        <title>Galerie Photo | Fabien Licata</title>
+        <meta name="description" content="Découvrez ma collection de photographies d'art. Paysages, portraits, urbain... Disponibles en tirages limités sur différents supports (Papier, Toile, Alu)." />
+        <meta property="og:title" content="Galerie Photo | Fabien Licata" />
+        <meta property="og:description" content="Découvrez ma collection de photographies d'art. Disponibles en tirages limités." />
+      </Helmet>
       <Navbar />
 
       {/* Header - Style Home.tsx */}
@@ -243,6 +250,8 @@ export default function Galerie() {
                       transition={{ duration: 1, ease: "easeOut" }}
                       src={photo.src}
                       alt={photo.alt}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-700"
                     />
                     

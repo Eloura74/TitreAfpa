@@ -252,29 +252,10 @@ app.get("/", (req, res) => {
 
 // ================================
 // ROUTE SPÉCIALE : AJOUT DIRECT DE PHOTO SANS VALIDATION
-// Permet d’insérer rapidement une image sans passer par la route standards
-// Utilisée pour tests ou migration rapide
+// SUPPRIMÉE POUR SÉCURITÉ EN PRODUCTION
 // ================================
-const Photo = require("./models/Photo");
-
-app.post("/api/photos-direct", async (req, res) => {
-  try {
-    console.log("=== ROUTE DIRECTE PHOTOS ACTIVÉE ===");
-    console.log("Données reçues:", req.body);
-
-    // Création brute sans contrôle de validation (usage limité)
-    const photo = await Photo.create(req.body);
-    console.log("Photo créée avec succès via route directe:", photo);
-
-    return res.status(201).json(photo);
-  } catch (err) {
-    console.error("Erreur route directe photos:", err);
-    return res.status(500).json({
-      message: "Erreur lors de la création de la photo",
-      error: err.message,
-    });
-  }
-});
+// const Photo = require("./models/Photo");
+// app.post("/api/photos-direct", ... ) -> Route supprimée.
 
 // ================================
 // ROUTES MONTÉES (api/xxx)

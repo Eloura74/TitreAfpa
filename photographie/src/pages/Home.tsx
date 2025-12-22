@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import homeImages from "../config/images.json";
 import { motion } from "framer-motion";
+import { Helmet } from "react-helmet-async";
 
 const revealVariants = {
   hidden: { y: "30%", opacity: 0 },
@@ -33,6 +34,13 @@ export default function Home() {
 
   return (
     <div className="relative min-h-[100dvh] w-full bg-[#080808] overflow-y-auto md:overflow-hidden font-sans text-white">
+      <Helmet>
+        <title>Accueil | Fabien Licata</title>
+        <meta name="description" content="Bienvenue sur le portfolio de Fabien Licata. Explorez l'univers de la photographie d'art et du design graphique. Tirages limités et créations sur mesure." />
+        <meta property="og:title" content="Fabien Licata | Photographe & Graphiste" />
+        <meta property="og:description" content="Bienvenue sur le portfolio de Fabien Licata. Explorez l'univers de la photographie d'art et du design graphique." />
+        <meta property="og:image" content={homeImages.hero} />
+      </Helmet>
       
       {/* BACKGROUND : Luminosité ajustée */}
       <motion.div 

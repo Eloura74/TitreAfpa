@@ -2,6 +2,7 @@
 //  Importations des modules et ressources nécessaires pour le routing et les pages
 // ==============================
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // Gestion des routes React
+import { Helmet } from "react-helmet-async"; // Gestion du SEO dynamique
 import Home from "./pages/Home";                           // Page d'accueil
 import Photographie from "./pages/Photographie";           // Univers Photographie
 import Graphisme from "./pages/Graphisme";                 // Univers Graphisme
@@ -32,6 +33,12 @@ function App() {
     <UserProvider>
       <PanierProvider>
         <ToastProvider>
+          {/* Configuration SEO par défaut */}
+          <Helmet defaultTitle="Fabien Licata | Photographe & Graphiste" titleTemplate="%s | Fabien Licata">
+            <meta name="description" content="Portfolio de Fabien Licata, Photographe et Graphiste. Découvrez mes galeries d'art, tirages photos et créations graphiques uniques." />
+            <meta property="og:type" content="website" />
+            <meta property="og:site_name" content="Fabien Licata" />
+          </Helmet>
           {/* Router React pour gérer les différentes URL */}
           <Router>
             {/* Définition des différentes routes accessibles dans l'app */}
