@@ -1,6 +1,7 @@
 // Interface pour les tarifs standards (API)
 export interface Tarif {
   id: string;
+  _id?: string; // MongoDB ID
   nom: string;
   type: "tirage" | "poster" | "toile" | "cadeau" | "textile";
   format: string;
