@@ -141,9 +141,10 @@ export default function GestionEvenements() {
 
       setEvenements(Array.isArray(res.data) ? res.data : []);
       resetForm(); // On vide le formulaire
-    } catch (e: any) {
+    } catch (e) {
+      const err = e as any;
       setError(
-        e?.response?.data?.message || "Erreur lors de l'enregistrement."
+        err?.response?.data?.message || "Erreur lors de l'enregistrement."
       );
     } finally {
       setLoading(false);
@@ -183,8 +184,9 @@ export default function GestionEvenements() {
       // Mise à jour de la liste côté frontend
       setEvenements(evenements.filter((e) => e.id !== id));
       resetForm();
-    } catch (e: any) {
-      setError(e?.response?.data?.message || "Erreur lors de la suppression.");
+    } catch (e) {
+      const err = e as any;
+      setError(err?.response?.data?.message || "Erreur lors de la suppression.");
     } finally {
       setLoading(false);
     }

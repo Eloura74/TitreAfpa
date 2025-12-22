@@ -169,7 +169,7 @@ export default function Galerie() {
       .finally(() => {
         setLoading(false);
       });
-  }, []); // [] signifie que ce code ne s'exécute qu'une seule fois (au montage)
+  }, [addToast]); // [] signifie que ce code ne s'exécute qu'une seule fois (au montage)
 
   // ==============================
   //  Handler : sélection d’un format dans la modale

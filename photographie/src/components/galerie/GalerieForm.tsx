@@ -255,7 +255,7 @@ export default function GalerieForm() {
                 null,
                 2
               )}`;
-            } catch (e) {
+            } catch {
               // Sinon utiliser le texte brut
               errorMessage += `\n\nDétails: ${responseText}`;
             }

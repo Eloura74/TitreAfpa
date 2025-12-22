@@ -14,7 +14,7 @@ interface Paiement {
   source: string;
   transactionId?: string;
   statut: string;
-  articles?: any[]; // Si on veut afficher le détail plus tard
+  articles?: unknown[]; // Si on veut afficher le détail plus tard
 }
 
 export default function MonCompte() {

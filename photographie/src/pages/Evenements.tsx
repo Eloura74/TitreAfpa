@@ -40,9 +40,22 @@ export default function Evenements() {
         const data = res.data;
 
         // Normalisation : transformation des données brutes pour uniformiser les clés
-        const events: Evenement[] = data.map((ev: any) => ({
+        const events: Evenement[] = data.map((ev: {
+          _id?: string;
+          id?: string;
+          titre: string;
+          description?: string;
+          dateDebut: string;
+          dateFin: string;
+          image?: string;
+          lieu?: string;
+          location?: string;
+          place?: string;
+          theme?: string;
+          photos?: string[];
+        }) => ({
           ...ev,
-          id: ev._id || ev.id,
+          id: ev._id || ev.id || "",
           lieu: ev.lieu || ev.location || ev.place || "",
         }));
 

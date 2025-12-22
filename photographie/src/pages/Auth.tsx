@@ -99,14 +99,31 @@ const Auth: React.FC = () => {
           handleLoginSuccess(res);
         }
       }
-    } catch (err) {
+    } catch {
       setError("Erreur serveur, veuillez réessayer plus tard.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLoginSuccess = (res: any) => {
+  interface LoginResponse {
+    token: string;
+    role?: string;
+    isAdmin?: boolean;
+    nom?: string;
+    prenom?: string;
+    telephone?: string;
+    adresse?: {
+      rue: string;
+      ville: string;
+      codePostal: string;
+      pays: string;
+    };
+    email?: string;
+    error?: string;
+  }
+
+  const handleLoginSuccess = (res: LoginResponse) => {
     localStorage.setItem("token", res.token);
 
     setUser({
@@ -118,7 +135,7 @@ const Auth: React.FC = () => {
       adresse: res.adresse,
     });
 
-    setEmailAuth(res.email);
+    setEmailAuth(res.email || null);
     const isAdmin = res.isAdmin !== undefined ? !!res.isAdmin : res.role === "admin";
     setIsAdminAuth(isAdmin);
 

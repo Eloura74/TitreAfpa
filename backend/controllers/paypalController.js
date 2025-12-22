@@ -1,52 +1,111 @@
 const paypal = require("@paypal/checkout-server-sdk");
+const Photo = require("../models/Photo");
+const OeuvreGraphique = require("../models/OeuvreGraphique");
 
 // Configuration de l'environnement PayPal
 // En production, utilisez LiveEnvironment au lieu de SandboxEnvironment
-const environment = new paypal.core.SandboxEnvironment(
-  process.env.PAYPAL_CLIENT_ID,
-  process.env.PAYPAL_CLIENT_SECRET
-);
+let environment;
+if (process.env.NODE_ENV === "production") {
+  environment = new paypal.core.LiveEnvironment(
+    process.env.PAYPAL_CLIENT_ID,
+    process.env.PAYPAL_CLIENT_SECRET
+  );
+} else {
+  environment = new paypal.core.SandboxEnvironment(
+    process.env.PAYPAL_CLIENT_ID,
+    process.env.PAYPAL_CLIENT_SECRET
+  );
+}
 const client = new paypal.core.PayPalHttpClient(environment);
 
 exports.createOrder = async (req, res) => {
   const { articles } = req.body;
 
-  // Calcul du total
-  // Note: Idéalement, le prix devrait être recalculé côté serveur à partir de la DB pour éviter la fraude
-  let total = 0;
-  articles.forEach((article) => {
-    total += article.prix * article.quantite;
-  });
+  try {
+    // Calcul du total côté serveur pour éviter la fraude
+    let total = 0;
+    const verifiedItems = [];
 
-  const request = new paypal.orders.OrdersCreateRequest();
-  request.prefer("return=representation");
-  request.requestBody({
-    intent: "CAPTURE",
-    purchase_units: [
-      {
-        amount: {
+    for (const article of articles) {
+      let prixUnitaire = 0;
+      let nomArticle = article.nom || "Article";
+
+      // 1. Essayer de trouver une Photo
+      // On vérifie si l'ID est un ObjectId valide pour éviter les erreurs de cast
+      if (article.id && article.id.match(/^[0-9a-fA-F]{24}$/)) {
+        const photo = await Photo.findById(article.id);
+        
+        if (photo) {
+          nomArticle = photo.titre || article.nom;
+          // Chercher le tarif correspondant au format/support
+          if (photo.tarifs && photo.tarifs.length > 0) {
+            const tarif = photo.tarifs.find(
+              (t) => t.format === article.format && t.support === article.support
+            );
+            if (tarif) {
+              prixUnitaire = tarif.prix;
+            } else {
+              // Fallback si format non trouvé (ne devrait pas arriver si synchro)
+              // On peut logger une erreur ou utiliser le prix par défaut
+              console.warn(`Tarif non trouvé pour photo ${article.id} format ${article.format}`);
+              prixUnitaire = photo.prix || 0; 
+            }
+          } else {
+            prixUnitaire = photo.prix || 0;
+          }
+        } else {
+          // 2. Essayer de trouver une OeuvreGraphique
+          const oeuvre = await OeuvreGraphique.findById(article.id);
+          if (oeuvre) {
+            nomArticle = oeuvre.titre || article.nom;
+            prixUnitaire = oeuvre.prix;
+          } else {
+            console.warn(`Article non trouvé en base: ${article.id}`);
+            // Si l'article n'est pas trouvé en base, on ne peut pas valider le prix.
+            // Option: rejeter la commande ou (risqué) utiliser le prix client.
+            // Ici on rejette pour sécurité.
+            throw new Error(`Article non trouvé ou indisponible: ${article.nom}`);
+          }
+        }
+      } else {
+         // ID invalide ou manquant
+         console.warn(`ID article invalide: ${article.id}`);
+         throw new Error(`Article invalide: ${article.nom}`);
+      }
+
+      total += prixUnitaire * article.quantite;
+      
+      verifiedItems.push({
+        name: nomArticle,
+        unit_amount: {
           currency_code: "EUR",
-          value: total.toFixed(2),
-          breakdown: {
-            item_total: {
-              currency_code: "EUR",
-              value: total.toFixed(2),
+          value: prixUnitaire.toFixed(2),
+        },
+        quantity: article.quantite.toString(),
+      });
+    }
+
+    const request = new paypal.orders.OrdersCreateRequest();
+    request.prefer("return=representation");
+    request.requestBody({
+      intent: "CAPTURE",
+      purchase_units: [
+        {
+          amount: {
+            currency_code: "EUR",
+            value: total.toFixed(2),
+            breakdown: {
+              item_total: {
+                currency_code: "EUR",
+                value: total.toFixed(2),
+              },
             },
           },
+          items: verifiedItems,
         },
-        items: articles.map((article) => ({
-          name: article.nom,
-          unit_amount: {
-            currency_code: "EUR",
-            value: article.prix.toFixed(2),
-          },
-          quantity: article.quantite.toString(),
-        })),
-      },
-    ],
-  });
+      ],
+    });
 
-  try {
     const order = await client.execute(request);
     res.json({ id: order.result.id });
   } catch (err) {

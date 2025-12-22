@@ -1,6 +1,7 @@
 // TypeScript : Définition du type Evenement pour la page des événements
 export interface Evenement {
   id: string; // Normalisé depuis _id MongoDB
+  _id?: string; // ID MongoDB original (optionnel)
   titre: string;
   description?: string;
   dateDebut: string; // Date de début (obligatoire)

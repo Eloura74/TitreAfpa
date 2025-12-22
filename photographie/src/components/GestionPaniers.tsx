@@ -64,8 +64,9 @@ export default function GestionPaniers() {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setPaniers(Array.isArray(res.data) ? res.data : []);
-    } catch (e: any) {
-      setError(e?.response?.data?.message || "Erreur lors du chargement des paniers.");
+    } catch (e) {
+      const err = e as any;
+      setError(err?.response?.data?.message || "Erreur lors du chargement des paniers.");
     } finally {
       setLoading(false);
     }
@@ -85,7 +86,7 @@ export default function GestionPaniers() {
       });
       setPaniers(paniers.filter((p) => p._id !== id));
       addToast("Panier supprimé avec succès", "success");
-    } catch (e: any) {
+    } catch {
       addToast("Erreur lors de la suppression", "error");
     }
   };

@@ -1,6 +1,6 @@
 // === Importations de base React et React Router ===
 import { useState } from "react"; // Pour gérer l'ouverture/fermeture du menu
-import { Link, useLocation } from "react-router-dom"; // Pour naviguer entre les pages sans recharger
+import { Link, useLocation, useNavigate } from "react-router-dom"; // Pour naviguer entre les pages sans recharger
 import { useAuthStore, useAuthSync } from "../../store/authStore"; // Store Zustand pour gérer l'authentification
 import "../../styles/navbar.css"; // Fichier CSS spécifique à la Navbar
 
@@ -15,14 +15,16 @@ export default function Navbar() {
   const univers = localStorage.getItem("univers") || (location.pathname.startsWith("/graphisme") ? "graphisme" : "photographie");
   const isGraphisme = univers === "graphisme";
 
+  const navigate = useNavigate();
+
   // Fonction pour changer d'univers dynamiquement
   const handleUniversChange = (nouvelUnivers: "photographie" | "graphisme") => {
     localStorage.setItem("univers", nouvelUnivers);
     // Redirige vers la page d'accueil de l'univers choisi sans déconnexion
     if (nouvelUnivers === "graphisme") {
-      window.location.href = "/graphisme";
+      navigate("/graphisme");
     } else {
-      window.location.href = "/photographie";
+      navigate("/photographie");
     }
   };
 

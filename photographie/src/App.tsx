@@ -47,7 +47,7 @@ function App() {
               <Route path="/about" element={<About />} />
 
               {/* Route pour la galerie photo */}
-              <Route path="/Galerie" element={<Galerie />} />
+              <Route path="/galerie" element={<Galerie />} />
 
               {/* Route pour la page des événements */}
               <Route path="/evenements" element={<Evenements />} />

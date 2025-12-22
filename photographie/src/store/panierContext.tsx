@@ -88,8 +88,11 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
           // Si le panier BDD n'est pas vide, on l'utilise (source de vérité)
           if (dbArticles && dbArticles.length > 0) {
             // On mappe pour s'assurer du format (notamment si 'photo' est peuplé)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const formatted = dbArticles
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               .filter((item: any) => item.photo) // Filtre les items dont la photo a été supprimée
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               .map((item: any) => ({
                 id: item.photo._id || item.photo, // Gère le cas populé ou non
                 nom: item.photo.nom || "Photo",
@@ -106,6 +109,7 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
         })
         .catch((err) => console.error("Erreur chargement panier BDD:", err));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [email]);
 
   // 2. Fonction pour sauvegarder en BDD
@@ -149,6 +153,7 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
       // Debounce ou sauvegarde directe ? Directe pour l'instant (attention au trafic)
       saveToDb(articles);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [articles, email]);
 
   // ==============================

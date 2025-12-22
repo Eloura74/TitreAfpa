@@ -64,7 +64,7 @@ export default function GalerieGraphiqueForm() {
         }
       );
       return res.data.url; // Retourne l'URL sécurisée de Cloudinary
-    } catch (err) {
+    } catch {
       addToast("Erreur lors de l’upload de l’image.", "error"); // Affiche un message d’erreur
       return null;
     }
@@ -111,7 +111,7 @@ export default function GalerieGraphiqueForm() {
         imagePreviewUrl.current = null;
       }
       setDescription("");
-    } catch (err) {
+    } catch {
       addToast("Erreur lors de l’ajout de l’œuvre.", "error"); // Message en cas d’échec
     } finally {
       setLoading(false); // Fin du chargement dans tous les cas

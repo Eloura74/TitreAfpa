@@ -50,7 +50,7 @@ export default function GestionGalerieGraphique() {
         `${API_URL}/api/oeuvres-graphique`
       );
       setOeuvres(data); // Met à jour l'état avec les données reçues
-    } catch (err) {
+    } catch {
       setMessage("Erreur lors du chargement des œuvres.");
     }
   }

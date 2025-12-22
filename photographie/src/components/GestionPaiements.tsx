@@ -109,9 +109,10 @@ export default function GestionPaiements() {
       // 🔄 Rafraîchissement de la liste
       fetchPaiements();
       resetForm();
-    } catch (e: any) {
+    } catch (e) {
+      const err = e as any;
       setError(
-        e?.response?.data?.message ||
+        err?.response?.data?.message ||
           "Erreur lors de l'enregistrement du paiement."
       );
     } finally {
@@ -147,9 +148,10 @@ export default function GestionPaiements() {
       // Mise à jour de la liste localement
       setPaiements(paiements.filter((p) => p._id !== id));
       resetForm();
-    } catch (e: any) {
+    } catch (e) {
+      const err = e as any;
       setError(
-        e?.response?.data?.message ||
+        err?.response?.data?.message ||
           "Erreur lors de la suppression du paiement."
       );
     } finally {

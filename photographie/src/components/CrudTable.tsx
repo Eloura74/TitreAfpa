@@ -14,7 +14,7 @@ import React from "react";
 interface Colonne<T> {
   key: keyof T; // Clé du champ dans l’objet (ex : "nom", "email", etc.)
   label: string; // Texte affiché dans l'en-tête de colonne
-  render?: (valeur: any, item: T) => React.ReactNode; // Fonction pour personnaliser l'affichage de cette cellule
+  render?: (valeur: T[keyof T], item: T) => React.ReactNode; // Fonction pour personnaliser l'affichage de cette cellule
 }
 
 // Définition des props attendues par le composant

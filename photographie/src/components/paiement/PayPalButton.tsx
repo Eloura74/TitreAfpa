@@ -3,7 +3,14 @@ import { PayPalButtons } from "@paypal/react-paypal-js";
 import { useToast } from "../Toast";
 
 interface PayPalButtonProps {
-  articles: any[];
+  articles: Array<{
+    id: string;
+    nom: string;
+    prix: number;
+    quantite: number;
+    format?: string;
+    support?: string;
+  }>;
   total: number;
 }
 
@@ -13,7 +20,7 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({ articles, total: _total }) 
   return (
     <PayPalButtons
       style={{ layout: "vertical", color: "gold", shape: "rect", label: "paypal", height: 45, tagline: false }}
-      createOrder={async (_data, _actions) => {
+      createOrder={async () => {
         try {
           const response = await fetch("/api/paypal/create-order", {
             method: "POST",
