@@ -1,357 +1,290 @@
-// ==============================
-//  Importations des modules et ressources
-// ==============================
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-// React et ses hooks pour gérer l'état (useState) et le cycle de vie du composant (useEffect)
-import { useState, useEffect } from "react";
-
-// Importation des composants de layout
+// Composants Layout & UI
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
+import Skeleton from "../components/Skeleton";
+import { useToast } from "../components/Toast";
+import { SelectionFormatModal } from "../components/galerie/SelectionFormatModal";
 
-// Importation des fichiers de styles globaux et spécifiques à la galerie
+// Contextes & Types
+import { usePanier } from "../store/panierContext";
+import { API_URL } from "../config/api";
+import { Tarif, TarifOeuvre } from "../types/tarif";
+
+// Styles
 import "../styles/globals.css";
 import "../styles/galerie.css";
 
-// Importation du contexte personnalisé pour gérer le panier (state global)
-import { usePanier } from "../store/panierContext";
-
-// Importation de la modale de sélection de format
-import { SelectionFormatModal } from "../components/galerie/SelectionFormatModal";
-
-// Importation des nouveaux composants UX
-import Skeleton from "../components/Skeleton";
-import { useToast } from "../components/Toast";
-
-// Interface pour un tarif (format/support/prix) associé à une photo
-interface TarifOeuvre {
-  id: string;
-  format: string;
-  support: string;
-  prix: number;
-}
-
-// Importation du type Tarif
-import { Tarif } from "../types/tarif";
-import { API_URL } from "../config/api";
-
-// ==============================
-//  Définition de l'interface TypeScript pour typer les objets "Photo"
-// ==============================
+// --- Interfaces ---
 interface Photo {
-  id?: number; // ID local optionnel (pour les données statiques)
-  _id?: string; // ID MongoDB optionnel (pour les données issues de la base)
-  src: string; // Chemin ou URL de l'image
-  alt: string; // Texte alternatif pour l'accessibilité
-  titre: string; // Titre de la photo
-  description: string; // Description détaillée
-  prix: number; // Prix en euros
-  categorie: string; // Catégorie de la photo
-  type: string; // Type de la photo
-  tarifs?: TarifOeuvre[]; // Formats/supports/prix personnalisés
+  id?: number;
+  _id?: string;
+  src: string;
+  alt: string;
+  titre: string;
+  description: string;
+  prix: number;
+  categorie: string;
+  type: string;
+  tarifs?: TarifOeuvre[];
 }
 
-// ==============================
-//  Composant principal : Galerie
-// ==============================
-export default function Galerie() {
-  // Gestion des états avec useState :
-  const [photos, setPhotos] = useState<Photo[]>([]); // Stocke toutes les photos (locales + MongoDB)
-  const [loading, setLoading] = useState(true); // État de chargement
-  const [categorieActive, setCategorieActive] = useState<string>("Toutes"); // Catégorie actuellement sélectionnée
-  const [photoSelectionnee, setPhotoSelectionnee] = useState<Photo | null>(
-    null
-  );
-  const [modalVisible, setModalVisible] = useState(false);
-  // Stocke les tarifs à afficher dans la modale
-  const [tarifsPourModale, setTarifsPourModale] = useState<
-    (TarifOeuvre | Tarif)[]
-  >([]);
+// --- Variantes d'animation ---
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.12, delayChildren: 0.2 }
+  }
+};
 
-  // Récupération de la fonction "ajouterArticle" via le contexte panier
+const cardVariants = {
+  hidden: { y: 30, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1, 
+    transition: { duration: 0.6, ease: [0.25, 1, 0.5, 1] } 
+  },
+  exit: { scale: 0.95, opacity: 0, transition: { duration: 0.3 } }
+};
+
+export default function Galerie() {
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [categorieActive, setCategorieActive] = useState<string>("Toutes");
+  const [photoSelectionnee, setPhotoSelectionnee] = useState<Photo | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [tarifsPourModale, setTarifsPourModale] = useState<(TarifOeuvre | Tarif)[]>([]);
+
   const { ajouterArticle } = usePanier();
   const { addToast } = useToast();
 
-  /**
-   * Filtre les tarifs applicables à une photo selon la logique métier
-   * Retourne les tarifs dynamiques de la photo (formats/supports/prix)
-   * SOLUTION RADICALE : Crée un tarif par défaut si aucun n'est disponible
-   */
-  function getTarifsPourPhoto(photo: Photo) {
-    // Si la photo a des tarifs valides, on les utilise
-    if (Array.isArray(photo.tarifs) && photo.tarifs.length > 0) {
-      return photo.tarifs;
-    }
+  // 1. Fetch & Normalisation
+  useEffect(() => {
+    const fetchPhotos = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_URL}/api/galerie`);
+        const data: Photo[] = await res.json();
 
-    // Sinon, on crée un tarif par défaut basé sur le prix de la photo
-    const tarifParDefaut = [
-      {
-        id: `default-${photo._id || photo.id || crypto.randomUUID()}`,
-        format: "Standard",
-        support: "Papier photo",
-        prix: photo.prix || 0,
-      },
-    ];
+        const sanitized = data.map((p) => ({
+          ...p,
+          src: p.src?.startsWith("http") ? p.src 
+               : p.src?.startsWith("/uploads/") ? `${API_URL}${p.src}`
+               : p.src?.startsWith("/images/") ? p.src 
+               : `/images/${p.src}`,
+          tarifs: Array.isArray(p.tarifs) ? p.tarifs : [],
+        }));
 
-    // On modifie la photo pour lui ajouter ce tarif (pour les prochains appels)
-    photo.tarifs = tarifParDefaut;
-    return tarifParDefaut;
-  }
+        setPhotos(sanitized);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        addToast("Erreur lors du chargement de la galerie.", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPhotos();
+  }, [addToast]);
 
-  /**
-   * Handler amélioré pour l'ajout au panier depuis la galerie
-   * - Crée toujours au moins un tarif par défaut
-   * - Ouvre la modale de sélection si plusieurs formats
-   * - Ajoute direct si un seul format
-   */
-  function handleAjouterAuPanier(photo: Photo) {
-    // SOLUTION RADICALE : On force la création d'au moins un tarif
-    const tarifsDisponibles = getTarifsPourPhoto(photo);
+  // 2. Logique de Panier
+  const handleAjouterAuPanier = useCallback((photo: Photo) => {
+    const tarifsDisponibles = photo.tarifs && photo.tarifs.length > 0 
+      ? photo.tarifs 
+      : [{
+          id: `def-${photo._id || crypto.randomUUID()}`,
+          format: "Standard",
+          support: "Papier photo",
+          prix: photo.prix || 0,
+        }];
 
-    // On est sûr d'avoir au moins un tarif maintenant
     if (tarifsDisponibles.length === 1) {
-      // Si un seul tarif, ajout direct au panier
-      const tarif = tarifsDisponibles[0];
+      const t = tarifsDisponibles[0];
       ajouterArticle({
         id: crypto.randomUUID(),
-        photoId: photo._id, // ID MongoDB pour la synchro
-        nom: `${photo.titre} (${tarif.format}, ${tarif.support})`,
-        prix: tarif.prix,
+        photoId: photo._id,
+        nom: `${photo.titre} (${t.format})`,
+        prix: t.prix,
         quantite: 1,
         image: photo.src,
+        format: t.format,
+        support: t.support,
       });
-      addToast(`${photo.titre} ajouté au panier !`, "success");
+      addToast(`${photo.titre} ajouté au panier`, "success");
     } else {
-      // Si plusieurs tarifs, ouvre la modale de sélection
       setTarifsPourModale(tarifsDisponibles);
       setPhotoSelectionnee(photo);
       setModalVisible(true);
     }
-  }
+  }, [ajouterArticle, addToast]);
 
-  // ==============================
-  //  useEffect : Chargement des données au montage du composant
-  // ==============================
-  useEffect(() => {
-    setLoading(true);
-    // 2️⃣ Récupération des photos stockées sur le serveur (MongoDB)
-    fetch(`${API_URL}/api/galerie`)
-      .then((res) => res.json()) // Conversion de la réponse en JSON
-      .then((data: Photo[]) => {
-        // Transformation des données pour corriger le chemin des images issues du serveur
-        const photosServeur = data.map((photo) => {
-          // Création d'un nouvel objet avec tous les champs, y compris tarifs
-          return {
-            ...photo,
-            // Correction robuste : Cloudinary, local absolu ou nom de fichier
-            src:
-              photo.src && photo.src.startsWith("http")
-                ? photo.src
-                : photo.src && photo.src.startsWith("/uploads/")
-                ? `${API_URL}${photo.src}`
-                : photo.src && photo.src.startsWith("/images/")
-                ? photo.src
-                : `/images/${photo.src}`,
-            // Assurons-nous que tarifs est bien préservé
-            tarifs: Array.isArray(photo.tarifs) ? photo.tarifs : [],
-          };
-        });
-
-        // 3️⃣ Mise à jour de l'état avec uniquement les données du serveur
-        setPhotos(photosServeur);
-      })
-      .catch((err) => {
-        // En cas d'erreur (ex : serveur hors ligne)
-        console.error("Erreur chargement MongoDB:", err);
-        addToast("Impossible de charger la galerie.", "error");
-        setPhotos([]); // On n'affiche rien ou un message d'erreur
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [addToast]); // [] signifie que ce code ne s'exécute qu'une seule fois (au montage)
-
-  // ==============================
-  //  Handler : sélection d’un format dans la modale
-  // ==============================
+  // 3. Gestion de la sélection de format via la modale
   const handleSelectFormat = (tarif: TarifOeuvre | Tarif) => {
-    if (photoSelectionnee) {
-      // Création d'un article panier adapté au type de tarif
-      const articlePanier = {
-        id: crypto.randomUUID(),
-        photoId: photoSelectionnee._id, // ID MongoDB pour la synchro
-        nom: `${photoSelectionnee.titre} (${
-          "format" in tarif ? tarif.format : ""
-        }, ${"support" in tarif ? tarif.support : ""})`,
-        prix: tarif.prix,
-        quantite: 1,
-        image: photoSelectionnee.src,
-      };
+    if (!photoSelectionnee) return;
 
-      // Ajout au panier et notification
-      ajouterArticle(articlePanier);
-      addToast(`${photoSelectionnee.titre} ajouté au panier !`, "success");
+    ajouterArticle({
+      id: crypto.randomUUID(),
+      photoId: photoSelectionnee._id,
+      nom: `${photoSelectionnee.titre} (${tarif.format})`,
+      prix: tarif.prix,
+      quantite: 1,
+      image: photoSelectionnee.src,
+      format: tarif.format,
+      support: tarif.support,
+    });
 
-      // Fermeture de la modale
-      setPhotoSelectionnee(null);
-      setModalVisible(false);
-    }
+    addToast(`${photoSelectionnee.titre} (${tarif.format}) ajouté au panier`, "success");
+    setModalVisible(false);
+    setPhotoSelectionnee(null);
   };
 
-  // ==============================
-  //  Génération dynamique des catégories à partir des photos chargées
-  // ==============================
-  const categories = [
-    "Toutes", // Option par défaut pour afficher toutes les photos
-    ...Array.from(new Set(photos.map((photo) => photo.categorie))), // Extraction unique des catégories existantes
-  ];
+  // 4. Mémorisation
+  const categories = useMemo(() => 
+    ["Toutes", ...Array.from(new Set(photos.map(p => p.categorie)))], 
+  [photos]);
 
-  // ==============================
-  //  Filtrage des photos selon la catégorie sélectionnée
-  // ==============================
-  const photosFiltered =
-    categorieActive === "Toutes"
-      ? photos // Si "Toutes" est sélectionné, on affiche toutes les photos
-      : photos.filter((photo) => photo.categorie === categorieActive); // Sinon, filtre par catégorie
+  const filtered = useMemo(() => 
+    categorieActive === "Toutes" ? photos : photos.filter(p => p.categorie === categorieActive),
+  [photos, categorieActive]);
 
-  // ==============================
-  //  Affichage de la galerie
-  // ==============================
   return (
-    <div className="min-h-screen bg-[#0a0a10] text-white">
+    <div className="min-h-screen bg-[#0a0a0f] text-white selection:bg-[#d6c487] selection:text-black">
       <Navbar />
 
-      <div className="galerie-header">
-        <h1 className="galerie-title">Notre Galerie Photo</h1>
-        <p className="galerie-description">
-          Découvrez notre collection de photographies artistiques disponibles à
-          l'achat.
-        </p>
-      </div>
+      {/* Header avec profondeur et éclat doré */}
+      <header className="relative py-24 px-6 overflow-hidden border-b border-white/5">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(214,196,135,0.15),transparent_70%)]" />
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative z-10 max-w-5xl mx-auto text-center"
+        >
+          <h1 className="text-4xl md:text-8xl font-black mb-4 tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white via-[#d6c487] to-[#8a7a4a]">
+            Galerie d'Art
+          </h1>
+          <div className="h-1 w-24 bg-[#d6c487] mx-auto mb-6 rounded-full shadow-[0_0_15px_#d6c487]" />
+          <p className="text-[#d6c487] text-lg md:text-xl font-light tracking-[0.2em] uppercase italic">
+            L'excellence photographique pour votre intérieur
+          </p>
+        </motion.div>
+      </header>
 
-      {/* Filtres */}
-      <div className="category-filters">
-        <div className="flex flex-wrap justify-center gap-4">
+      {/* Navigation des filtres dorée */}
+      <nav className="sticky top-24 z-40 px-4 py-8">
+        <div className="max-w-fit mx-auto bg-[#1a1a25]/60 backdrop-blur-xl p-2 rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-wrap justify-center items-center gap-2">
           {loading ? (
-            // Skeleton pour les filtres
-            Array(4).fill(0).map((_, i) => (
-              <Skeleton key={i} width={100} height={40} className="rounded-sm" />
-            ))
+            <Skeleton width={200} height={40} className="rounded-xl" />
           ) : (
-            categories.map((categorie) => (
+            categories.map((cat) => (
               <button
-                key={categorie}
-                onClick={() => setCategorieActive(categorie)}
-                className={`filter-button px-4 py-2 rounded-sm transition-all duration-300 ${
-                  categorieActive === categorie
-                    ? "active bg-gradient-to-r from-[#d6c487] to-[#ffe992] text-black font-semibold"
-                    : "bg-[#1a1a20] text-gray-300 hover:bg-[#252530]"
+                key={cat}
+                onClick={() => setCategorieActive(cat)}
+                className={`relative px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-500 ${
+                  categorieActive === cat ? "text-black" : "text-gray-400 hover:text-[#d6c487]"
                 }`}
               >
-                {categorie}
+                {categorieActive === cat && (
+                  <motion.div 
+                    layoutId="activeGlow" 
+                    className="absolute inset-0 bg-gradient-to-r from-[#d6c487] to-[#ffe992] rounded-xl shadow-[0_0_20px_rgba(214,196,135,0.4)]"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{cat}</span>
               </button>
             ))
           )}
         </div>
-      </div>
+      </nav>
 
-      {/* Galerie */}
-      <div className="galerie-grid">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {loading ? (
-            // Skeleton pour les cartes photos
-            Array(6).fill(0).map((_, i) => (
-              <div key={i} className="bg-[#151520] rounded-sm overflow-hidden">
-                <Skeleton height={256} className="w-full" />
-                <div className="p-6 space-y-4">
-                  <Skeleton width="70%" height={24} />
-                  <Skeleton width="100%" height={16} />
-                  <div className="flex justify-between items-center pt-2">
-                    <Skeleton width={60} height={28} />
-                    <Skeleton width={140} height={40} />
-                  </div>
+      {/* Grille principale */}
+      <main className="max-w-[1400px] mx-auto px-8 pb-32">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"
+        >
+          <AnimatePresence mode="popLayout">
+            {loading ? (
+              Array(6).fill(0).map((_, i) => (
+                <div key={i} className="space-y-4">
+                  <Skeleton height={400} className="rounded-3xl" />
+                  <Skeleton height={30} width="60%" />
                 </div>
-              </div>
-            ))
-          ) : (
-            photosFiltered.map((photo) => (
-              <div
-                key={photo._id || photo.id}
-                className="photo-card group relative bg-[#151520] rounded-sm overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-[#d6c48733]"
-              >
-                <div className="h-64 overflow-hidden">
-                  {/* Affichage intelligent + fallback placeholder si image absente ou cassée */}
-                  <img
-                    src={
-                      photo.src &&
-                      (photo.src.startsWith("http") ||
-                        photo.src.startsWith("/images/"))
-                        ? photo.src
-                        : photo.src
-                        ? `/images/${photo.src}`
-                        : "/placeholder.jpg"
-                    }
-                    alt={photo.alt || "Image non disponible"}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    // Astuce : vérifie la valeur de photo.src dans la console si tu as un carré vide
-                    onError={(e) => {
-                      e.currentTarget.onerror = null; // Empêche la boucle infinie
-                      e.currentTarget.src = "/placeholder.jpg";
-                    }}
-                  />
-                </div>
-                <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-xs px-3 py-1 rounded-sm">
-                  {Array.isArray(photo.tarifs) && photo.tarifs.length > 0 ? (
-                    <ul className="mt-2">
-                      {photo.tarifs.map((tarif) => (
-                        <li
-                          key={
-                            tarif.id ||
-                            `${tarif.format}-${tarif.support}-${tarif.prix}`
-                          }
-                          className="text-yellow-300 text-sm"
-                        >
-                          <span className="font-bold">{tarif.format}</span> —{" "}
-                          {tarif.support} : {tarif.prix}€
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div className="text-gray-400 text-xs mt-2">
-                      Aucun format disponible pour cette photo.
+              ))
+            ) : (
+              filtered.map((photo) => (
+                <motion.div
+                  key={photo._id || photo.id}
+                  variants={cardVariants}
+                  layout
+                  className="group relative bg-[#12121a] rounded-[2rem] overflow-hidden border border-white/5 hover:border-[#d6c487]/40 transition-all duration-500 shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_60px_rgba(214,196,135,0.15)]"
+                >
+                  {/* Image Section */}
+                  <div className="relative h-[450px] overflow-hidden">
+                    <motion.img
+                      whileHover={{ scale: 1.08 }}
+                      transition={{ duration: 1.2, ease: "circOut" }}
+                      src={photo.src}
+                      alt={photo.alt}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent opacity-80" />
+                    
+                    {/* Badge Catégorie Doré */}
+                    <div className="absolute top-6 left-6">
+                      <span className="bg-[#d6c487] text-black text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">
+                        {photo.categorie}
+                      </span>
                     </div>
-                  )}
-                </div>
-                <div className="p-6">
-                  <h3 className="photo-title mb-2">{photo.titre}</h3>
-                  <p className="photo-description text-gray-400 mb-4 h-12">
-                    {photo.description}
-                  </p>
-                  <div className="flex justify-between items-center mt-4">
-                    <span className="photo-price text-[#ffe992] text-xl">
-                      {photo.prix}€
-                    </span>
+                  </div>
+
+                  {/* Content Section */}
+                  <div className="absolute bottom-0 inset-x-0 p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                    <div className="flex justify-between items-end mb-4">
+                      <div>
+                        <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-[#ffe992] transition-colors">
+                          {photo.titre}
+                        </h3>
+                        <p className="text-gray-400 text-sm line-clamp-1 italic">
+                          {photo.description}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="block text-[#ffe992] text-2xl font-black drop-shadow-md">
+                          {photo.prix}€
+                        </span>
+                      </div>
+                    </div>
+
                     <button
                       onClick={() => handleAjouterAuPanier(photo)}
-                      className="cart-button bg-transparent z-50 border border-[#d6c487] text-[#ffe992] px-4 py-2 rounded-sm transition-all duration-300 hover:bg-[#d6c487] hover:text-black"
+                      className="w-full mt-4 bg-white/5 hover:bg-gradient-to-r hover:from-[#d6c487] hover:to-[#ffe992] hover:text-black py-4 rounded-2xl border border-white/10 hover:border-transparent transition-all duration-500 font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 group/btn shadow-xl"
                     >
-                      Ajouter au panier
+                      Ajouter à la collection
+                      <div className="w-6 h-px bg-current group-hover/btn:w-10 transition-all duration-500" />
                     </button>
                   </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </main>
 
-      {modalVisible && photoSelectionnee && (
-        <SelectionFormatModal
-          tarifs={tarifsPourModale}
-          onSelect={handleSelectFormat}
-          onClose={() => setModalVisible(false)}
-        />
-      )}
+      {/* Modal - Animée */}
+      <AnimatePresence>
+        {modalVisible && photoSelectionnee && (
+          <SelectionFormatModal
+            tarifs={tarifsPourModale}
+            onSelect={handleSelectFormat}
+            onClose={() => setModalVisible(false)}
+          />
+        )}
+      </AnimatePresence>
 
       <Footer />
     </div>
