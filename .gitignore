@@ -4,5 +4,5 @@
 /backend/.env
 /photographie/.env
 /photographie/public/test.txt
-/photographie/public/images
+# /photographie/public/images
 *.zip
