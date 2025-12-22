@@ -91,15 +91,15 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const formatted = dbArticles
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              .filter((item: any) => item.photo) // Filtre les items dont la photo a été supprimée
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              .filter((item: any) => item && item.photo) // Filtre robuste
               .map((item: any) => ({
-                id: item.photo._id || item.photo, // Gère le cas populé ou non
-                nom: item.photo.nom || "Photo",
-                prix: item.photo.prix || 0,
-                image: item.photo.image || "",
-                format: item.photo.format || "Standard", // À adapter selon votre modèle
-                quantite: item.quantite,
+                id: item.photo?._id || item.photo, // Utilisation de l'optional chaining
+                nom: item.photo?.nom || item.photo?.titre || "Photo", // Fallback sur titre si nom absent
+                prix: item.photo?.prix || 0,
+                image: item.photo?.image || item.photo?.src || "", // Fallback sur src
+                format: item.format || "Standard", // Correction: format est sur l'item, pas la photo
+                quantite: item.quantite || 1,
+                photoId: item.photo?._id || item.photo,
               }));
             setArticles(formatted);
           } else if (articles.length > 0) {
