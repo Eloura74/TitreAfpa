@@ -133,14 +133,14 @@ export default function GalerieGraphique() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-10"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
         >
           <AnimatePresence mode="popLayout">
             {loading ? (
-              Array(10).fill(0).map((_, i) => (
-                <div key={i} className="space-y-3">
-                  <Skeleton height={300} className="rounded-sm" />
-                  <Skeleton height={15} width="60%" />
+              Array(6).fill(0).map((_, i) => (
+                <div key={i} className="space-y-4">
+                  <Skeleton height={500} className="rounded-sm" />
+                  <Skeleton height={20} width="60%" />
                 </div>
               ))
             ) : (
@@ -151,46 +151,53 @@ export default function GalerieGraphique() {
                   layout
                   className="group relative flex flex-col"
                 >
-                  {/* Image Section */}
-                  <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-[#111]">
+                  {/* Image Section avec Overlay */}
+                  <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-[#111] rounded-2xl shadow-lg border border-white/10 group-hover:shadow-2xl group-hover:border-white/20 transition-all duration-500">
                     <motion.img
-                      whileHover={{ scale: 1.03 }}
-                      transition={{ duration: 1, ease: "easeOut" }}
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
                       src={oeuvre.image}
                       alt={oeuvre.titre}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-700"
                     />
                     
-                    {/* Overlay au survol */}
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-700" />
-                  </div>
-
-                  {/* Content Section - Minimaliste & Compact */}
-                  <div className="flex flex-col items-center text-center space-y-2">
-                    <h3 className="text-sm md:text-base font-light text-white tracking-[0.15em] uppercase group-hover:text-yellow-200 transition-colors duration-500 line-clamp-1">
-                      {oeuvre.titre}
-                    </h3>
-                    
-                    <div className="w-6 h-[1px] bg-white/10 group-hover:bg-yellow-500/30 transition-colors duration-500" />
-
-                    {oeuvre.description && (
-                      <p className="text-gray-500 text-[9px] tracking-widest uppercase line-clamp-1">
-                        {oeuvre.description}
-                      </p>
-                    )}
-
-                    <div className="pt-1 flex flex-col items-center gap-2 w-full">
-                      <span className="text-yellow-500/80 text-xs font-light tracking-widest">
-                        {oeuvre.prix} €
-                      </span>
-                      
+                    {/* Overlay au survol avec Bouton */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center backdrop-blur-[2px]">
                       <button
-                        onClick={() => handleAjouterAuPanier(oeuvre)}
-                        className="text-[8px] uppercase tracking-[0.2em] text-white/40 hover:text-white border border-white/10 hover:border-white/30 px-4 py-2 transition-all duration-500 hover:bg-white/5 w-full max-w-[150px]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAjouterAuPanier(oeuvre);
+                        }}
+                        className="transform translate-y-4 group-hover:translate-y-0 transition-all duration-500
+                                   bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 
+                                   text-white text-[10px] uppercase tracking-[0.25em] px-8 py-4 
+                                   hover:scale-105 active:scale-95"
                       >
                         Ajouter
                       </button>
                     </div>
+                  </div>
+
+                  {/* Content Section - Épuré */}
+                  <div className="flex flex-col items-center text-center space-y-2">
+                    <div className="flex flex-col items-center gap-1">
+                      <h3 className="text-base md:text-lg font-light text-white tracking-[0.2em] uppercase group-hover:text-yellow-200 transition-colors duration-500">
+                        {oeuvre.titre}
+                      </h3>
+                      {oeuvre.description && (
+                        <span className="text-gray-500 text-[10px] tracking-widest uppercase line-clamp-1">
+                          {oeuvre.description}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="w-6 h-[1px] bg-white/5 group-hover:bg-yellow-500/20 transition-colors duration-500 my-2" />
+
+                    <span className="text-yellow-500/80 text-xs font-light tracking-widest">
+                      {oeuvre.prix} €
+                    </span>
                   </div>
                 </motion.div>
               ))

@@ -225,7 +225,7 @@ export default function Galerie() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
         >
           <AnimatePresence mode="popLayout">
             {loading ? (
@@ -243,11 +243,11 @@ export default function Galerie() {
                   layout
                   className="group relative flex flex-col"
                 >
-                  {/* Image Section */}
-                  <div className="relative overflow-hidden aspect-[3/4] mb-6 bg-[#111]">
+                  {/* Image Section avec Overlay */}
+                  <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-[#111] rounded-2xl shadow-lg border border-white/10 group-hover:shadow-2xl group-hover:border-white/20 transition-all duration-500">
                     <motion.img
-                      whileHover={{ scale: 1.03 }}
-                      transition={{ duration: 1, ease: "easeOut" }}
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
                       src={photo.src}
                       alt={photo.alt}
                       loading="lazy"
@@ -255,34 +255,39 @@ export default function Galerie() {
                       className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-700"
                     />
                     
-                    {/* Overlay au survol */}
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-700" />
-                  </div>
-
-                  {/* Content Section - Minimaliste */}
-                  <div className="flex flex-col items-center text-center space-y-3">
-                    <h3 className="text-lg md:text-xl font-light text-white tracking-[0.2em] uppercase group-hover:text-yellow-200 transition-colors duration-500">
-                      {photo.titre}
-                    </h3>
-                    
-                    <div className="w-8 h-[1px] bg-white/10 group-hover:bg-yellow-500/30 transition-colors duration-500" />
-
-                    <p className="text-gray-500 text-[10px] tracking-widest uppercase line-clamp-1">
-                      {photo.categorie}
-                    </p>
-
-                    <div className="pt-2 flex flex-col items-center gap-3 w-full">
-                      <span className="text-yellow-500/80 text-sm font-light tracking-widest">
-                        {photo.prix} €
-                      </span>
-                      
+                    {/* Overlay au survol avec Bouton */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center backdrop-blur-[2px]">
                       <button
-                        onClick={() => handleAjouterAuPanier(photo)}
-                        className="text-[9px] uppercase tracking-[0.25em] text-white/40 hover:text-white border border-white/10 hover:border-white/30 px-6 py-3 transition-all duration-500 hover:bg-white/5 w-full max-w-[200px]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAjouterAuPanier(photo);
+                        }}
+                        className="transform translate-y-4 group-hover:translate-y-0 transition-all duration-500
+                                   bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 
+                                   text-white text-[10px] uppercase tracking-[0.25em] px-8 py-4 
+                                   hover:scale-105 active:scale-95"
                       >
                         Ajouter
                       </button>
                     </div>
+                  </div>
+
+                  {/* Content Section - Épuré */}
+                  <div className="flex flex-col items-center text-center space-y-2">
+                    <div className="flex flex-col items-center gap-1">
+                      <h3 className="text-base md:text-lg font-light text-white tracking-[0.2em] uppercase group-hover:text-yellow-200 transition-colors duration-500">
+                        {photo.titre}
+                      </h3>
+                      <span className="text-yellow-500/60 text-[10px] tracking-widest uppercase">
+                        {photo.categorie}
+                      </span>
+                    </div>
+
+                    <div className="w-6 h-[1px] bg-white/5 group-hover:bg-yellow-500/20 transition-colors duration-500 my-2" />
+
+                    <span className="text-white/80 text-xs font-light tracking-widest">
+                      {photo.prix} €
+                    </span>
                   </div>
                 </motion.div>
               ))

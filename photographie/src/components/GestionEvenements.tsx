@@ -122,14 +122,18 @@ export default function GestionEvenements() {
     setError(null);
 
     try {
+      // On crée une copie de l'objet form pour le nettoyer avant envoi
+      // On retire l'id et _id car ils ne doivent pas être envoyés dans le body pour une modification (Mongoose n'aime pas qu'on essaie de modifier l'id)
+      const { id, _id, ...dataToSend } = form as any;
+
       if (editId) {
         // Mode édition : on met à jour un événement existant
-        await axios.put(`${API_URL}/${editId}`, form, {
+        await axios.put(`${API_URL}/${editId}`, dataToSend, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
       } else {
         // Mode ajout : on ajoute un nouvel événement
-        await axios.post(API_URL, form, {
+        await axios.post(API_URL, dataToSend, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
       }
@@ -158,8 +162,8 @@ export default function GestionEvenements() {
     setForm({
       ...evt,
       id: evt.id || "",
-      dateDebut: evt.dateDebut || "",
-      dateFin: evt.dateFin || "",
+      dateDebut: evt.dateDebut ? evt.dateDebut.split('T')[0] : "", // Format date pour input type="date"
+      dateFin: evt.dateFin ? evt.dateFin.split('T')[0] : "",
       image: evt.image || "",
       lieu: evt.lieu || "",
       description: evt.description || "",
@@ -247,61 +251,70 @@ export default function GestionEvenements() {
           className="bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white"
           required
         />
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={form.description}
-          onChange={handleChange}
-          className="bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white resize-none"
-          required
-        />
-        {/* Boutons Ajouter/Modifier + Annuler */}
-        <div className="flex gap-2 mt-2">
-          <button
-            type="submit"
-            className="bg-[#ffe992] text-black font-semibold px-6 py-2 rounded hover:bg-[#d6c487] transition"
-            disabled={loading}
-          >
-            {editId ? "Modifier" : "Ajouter"}
-          </button>
-          {editId && (
+          <input
+            name="lieu"
+            placeholder="Lieu (ex: Paris, Lyon...)"
+            value={form.lieu}
+            onChange={handleChange}
+            className="bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white"
+          />
+          <textarea
+            name="description"
+            placeholder="Description"
+            value={form.description}
+            onChange={handleChange}
+            className="bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white resize-none"
+            required
+          />
+          {/* Boutons Ajouter/Modifier + Annuler */}
+          <div className="flex gap-2 mt-2">
             <button
-              type="button"
-              className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition"
-              onClick={resetForm}
+              type="submit"
+              className="bg-[#ffe992] text-black font-semibold px-6 py-2 rounded hover:bg-[#d6c487] transition"
+              disabled={loading}
             >
-              Annuler
+              {editId ? "Modifier" : "Ajouter"}
             </button>
-          )}
-        </div>
-      </form>
-
-      {/* Affichage de la liste des événements */}
-      {loading ? (
-        <div className="text-center text-gray-400">Chargement...</div>
-      ) : evenements.length === 0 ? (
-        <div className="text-center text-gray-500">Aucun événement trouvé.</div>
-      ) : (
-        <table className="w-full text-left border-separate border-spacing-y-2">
-          <thead>
-            <tr className="text-[#ffe992] text-lg">
-              <th className="px-2">Titre</th>
-              <th className="px-2">Début</th>
-              <th className="px-2">Fin</th>
-              <th className="px-2">Description</th>
-              <th className="px-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {evenements.map((event) => (
-              <tr
-                key={event._id || event.id}
-                className="bg-[#232336] hover:bg-[#ffe992]/10 transition rounded"
+            {editId && (
+              <button
+                type="button"
+                className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition"
+                onClick={resetForm}
               >
-                <td className="px-2 py-1 text-white">{event.titre}</td>
-                <td className="px-2 py-1 text-white">{event.dateDebut}</td>
-                <td className="px-2 py-1 text-white">{event.dateFin}</td>
-                <td className="px-2 py-1 text-white">{event.description}</td>
+                Annuler
+              </button>
+            )}
+          </div>
+        </form>
+  
+        {/* Affichage de la liste des événements */}
+        {loading ? (
+          <div className="text-center text-gray-400">Chargement...</div>
+        ) : evenements.length === 0 ? (
+          <div className="text-center text-gray-500">Aucun événement trouvé.</div>
+        ) : (
+          <table className="w-full text-left border-separate border-spacing-y-2">
+            <thead>
+              <tr className="text-[#ffe992] text-lg">
+                <th className="px-2">Titre</th>
+                <th className="px-2">Lieu</th>
+                <th className="px-2">Début</th>
+                <th className="px-2">Fin</th>
+                <th className="px-2">Description</th>
+                <th className="px-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {evenements.map((event) => (
+                <tr
+                  key={event.id || event._id || Math.random()}
+                  className="bg-[#232336] hover:bg-[#ffe992]/10 transition rounded"
+                >
+                  <td className="px-2 py-1 text-white">{event.titre}</td>
+                  <td className="px-2 py-1 text-white">{event.lieu || "-"}</td>
+                  <td className="px-2 py-1 text-white">{event.dateDebut}</td>
+                  <td className="px-2 py-1 text-white">{event.dateFin}</td>
+                  <td className="px-2 py-1 text-white">{event.description}</td>
                 <td className="px-2 py-1">
                   <button
                     className="bg-yellow-300 text-black rounded px-2 py-1 mr-2 hover:bg-yellow-200 transition"
