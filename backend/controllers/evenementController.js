@@ -7,9 +7,51 @@ const Evenement = require("../models/Evenement");
 // avec les paramètres req et res
 exports.getAll = async (req, res) => {
   // rechercher (trouver) tous les documents de la collection MongoDB associée.
-  const evenements = await Evenement.find();
+  // On filtre pour ne récupérer que les événements publics
+  const evenements = await Evenement.find({ visibilite: "public" });
   // envoyer la réponse au client sous forme de JSON
   res.json(evenements);
+};
+
+// ***************************
+// Obtenir les événements du client connecté
+// ***************************
+exports.getMyEvents = async (req, res) => {
+  try {
+    // Récupérer l'ID de l'utilisateur depuis le token (req.user.id)
+    const userId = req.user.id;
+    
+    // Trouver les événements où le champ "client" correspond à l'ID de l'utilisateur
+    const events = await Evenement.find({ client: userId }).populate("photos");
+    
+    res.json(events);
+  } catch (err) {
+    res.status(500).json({ erreur: "Erreur lors de la récupération des événements." });
+  }
+};
+
+// ***************************
+// Obtenir un événement par ID
+// ***************************
+exports.getOne = async (req, res) => {
+  try {
+    const evenement = await Evenement.findById(req.params.id).populate("photos");
+    if (!evenement) return res.status(404).json({ erreur: "Événement non trouvé" });
+
+    // Si l'événement est public, on le renvoie
+    if (evenement.visibilite === "public") {
+      return res.json(evenement);
+    }
+
+    // Si privé, vérification des droits (admin ou client propriétaire)
+    if (req.user.role === "admin" || (evenement.client && evenement.client.toString() === req.user.id)) {
+      return res.json(evenement);
+    }
+
+    return res.status(403).json({ erreur: "Accès refusé à cet événement privé." });
+  } catch (err) {
+    res.status(500).json({ erreur: err.message });
+  }
 };
 
 // ***************************

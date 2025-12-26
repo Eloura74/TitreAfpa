@@ -19,7 +19,21 @@ const isAdmin = require("../middleware/isAdmin"); // Middleware pour vérifier q
 // GET /api/evenements/
 // **************************************
 // Route publique : permet à n’importe qui de voir la liste des événements
+// Route publique : permet à n’importe qui de voir la liste des événements
 router.get("/", ctrl.getAll);
+
+// **************************************
+// GET /api/evenements/me
+// **************************************
+// Route protégée : permet à un client connecté de voir ses propres événements
+// Route protégée : permet à un client connecté de voir ses propres événements
+router.get("/me", auth, ctrl.getMyEvents);
+
+// **************************************
+// GET /api/evenements/:id
+// **************************************
+// Route protégée (vérification droits dans le contrôleur)
+router.get("/:id", auth, ctrl.getOne);
 
 // **************************************
 // POST /api/evenements/

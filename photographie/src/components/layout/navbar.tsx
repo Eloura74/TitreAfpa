@@ -5,7 +5,12 @@ import { useAuthStore, useAuthSync } from "../../store/authStore"; // Store Zust
 import "../../styles/navbar.css"; // Fichier CSS spécifique à la Navbar
 
 // === Composant principal de la barre de navigation ===
-export default function Navbar() {
+// === Composant principal de la barre de navigation ===
+interface NavbarProps {
+  variant?: "default" | "client";
+}
+
+export default function Navbar({ variant = "default" }: NavbarProps) {
   useAuthSync(); // Synchronisation automatique entre Zustand et le localStorage à chaque rendu
 
   const location = useLocation(); // Donne accès à l'URL actuelle
@@ -33,6 +38,8 @@ export default function Navbar() {
   // Récupération des infos de connexion via Zustand
   const { email, isAdmin, logout } = useAuthStore();
 
+  const isClientMode = variant === "client";
+
   return (
     <nav className="navbar-container">
       <div className="navbar-content">
@@ -50,51 +57,60 @@ export default function Navbar() {
           ☰
         </button>
 
-        {/* === Sélecteur d'univers (photographie/graphisme) === */}
-        <div className="flex items-center gap-3 mr-4">
-          <select
-            className="bg-[#232336] border border-[#ffe992]/30 rounded px-2 py-1 text-white"
-            value={univers}
-            onChange={e => handleUniversChange(e.target.value as "photographie" | "graphisme")}
-            aria-label="Changer d'univers"
-          >
-            <option value="photographie">Photographie</option>
-            <option value="graphisme">Graphisme</option>
-          </select>
-        </div>
+        {/* === Sélecteur d'univers (photographie/graphisme) - Masqué en mode client === */}
+        {!isClientMode && (
+          <div className="flex items-center gap-3 mr-4">
+            <select
+              className="bg-[#232336] border border-[#ffe992]/30 rounded px-2 py-1 text-white"
+              value={univers}
+              onChange={e => handleUniversChange(e.target.value as "photographie" | "graphisme")}
+              aria-label="Changer d'univers"
+            >
+              <option value="photographie">Photographie</option>
+              <option value="graphisme">Graphisme</option>
+            </select>
+          </div>
+        )}
+
         {/* === Menu de navigation (visible ou non selon isMenuOpen) === */}
         <ul className={`navbar-menu ${isMenuOpen ? "open" : ""}`}>
-          {/* Lien vers l'accueil */}
-          <li className="nav-item">
-            <Link to="/" className="nav-link">
-              Accueil
-            </Link>
-          </li>
+          
+          {!isClientMode && (
+            <>
+              {/* Lien vers l'accueil */}
+              <li className="nav-item">
+                <Link to="/" className="nav-link">
+                  Accueil
+                </Link>
+              </li>
 
-          {/* Lien conditionnel : Galerie ou Galerie Graphique selon l'univers courant */}
-          <li className="nav-item">
-            {isGraphisme ? (
-              <Link to="/galerie-graphique" className="nav-link">
-                Galerie graphique
-              </Link>
-            ) : (
-              <Link to="/galerie" className="nav-link">
-                Galerie
-              </Link>
-            )}
-          </li>
+              {/* Lien conditionnel : Galerie ou Galerie Graphique selon l'univers courant */}
+              <li className="nav-item">
+                {isGraphisme ? (
+                  <Link to="/galerie-graphique" className="nav-link">
+                    Galerie graphique
+                  </Link>
+                ) : (
+                  <Link to="/galerie" className="nav-link">
+                    Galerie
+                  </Link>
+                )}
+              </li>
 
-          {/* Liens vers autres pages communes */}
-          <li className="nav-item">
-            <Link to="/evenements" className="nav-link">
-              Événements
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/about" className="nav-link">
-              A Propos
-            </Link>
-          </li>
+              {/* Liens vers autres pages communes */}
+              <li className="nav-item">
+                <Link to="/evenements" className="nav-link">
+                  Événements
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link to="/about" className="nav-link">
+                  A Propos
+                </Link>
+              </li>
+            </>
+          )}
+
           <li className="nav-item">
             <Link to="/panier" className="nav-link">
               Panier

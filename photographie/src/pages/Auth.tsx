@@ -130,11 +130,8 @@ const Auth: React.FC = () => {
       navigate("/admin/gestion-galerie");
     } else {
       setTimeout(() => {
-        if (choix === "photo-graphiste") {
-          navigate("/graphisme");
-        } else {
-          navigate("/photographie");
-        }
+        // Redirection vers l'espace client "L'Écrin Privé"
+        navigate("/mon-compte");
       }, 800);
     }
   };

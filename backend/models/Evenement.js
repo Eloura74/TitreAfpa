@@ -40,6 +40,16 @@ const evenementSchema = new mongoose.Schema({
   // Champ "photos" : tableau d'identifiants d'objets (références à des documents de la collection "Photo")
   // Cela permet de lier un événement à plusieurs photos enregistrées dans la base.
   photos: [{ type: mongoose.Schema.Types.ObjectId, ref: "Photo" }],
+
+  // Champ "client" : référence à l'utilisateur (client) associé à cet événement
+  client: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+
+  // Champ "visibilite" : définit si l'événement est public ou privé
+  visibilite: {
+    type: String,
+    enum: ["public", "prive"],
+    default: "public",
+  },
 });
 
 // ****************************************

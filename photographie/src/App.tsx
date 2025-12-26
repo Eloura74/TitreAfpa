@@ -19,7 +19,8 @@ import GestionGalerie from "./pages/GestionGalerie";       // Page admin gestion
 import RouteAdminOnly from "./components/RouteAdminOnly"; // Composant route protégée pour admin uniquement
 import TirageEnLigne from "./pages/TirageEnLigne";         // Page Tirage en ligne
 import GestionTarifs from "./components/GestionTarifs";     // Composant admin gestion tarifs
-import MonCompte from "./pages/MonCompte";                   // Page Espace Client
+import MonCompte from "./pages/MonCompte";
+import ClientEvenement from "./pages/ClientEvenement";                   // Page Espace Client
 import Checkout from "./pages/Checkout";                     // Page de paiement
 import { ToastProvider } from "./components/Toast";          // Provider pour les notifications Toast
 
@@ -97,6 +98,7 @@ function App() {
 
               {/* Route pour l'espace client */}
               <Route path="/mon-compte" element={<MonCompte />} />
+              <Route path="/client/evenement/:id" element={<ClientEvenement />} />
 
               {/* Route pour le paiement */}
               <Route path="/checkout" element={<Checkout />} />
