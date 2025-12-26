@@ -8,12 +8,72 @@ import { Evenement } from "../types/evenement";
 import { Tarif } from "../types/tarif";
 import { API_URL as BASE_API_URL } from "../config/api";
 
-const API_URL = `${BASE_API_URL}/api/evenements`;
+const API_URL = `${BASE_API_URL}/api/acces-prive`;
 
 // ==========================================
 // 🎯 Composant Gestion Accès Privé
 // ==========================================
 export default function GestionAccesPrive() {
+  // === UTILITAIRE DE COMPRESSION ===
+  const compressImage = async (file: File): Promise<File> => {
+    // Si l'image fait moins de 2MB, on la garde telle quelle
+    if (file.size < 2 * 1024 * 1024) return file;
+
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(file); // Fallback
+          return;
+        }
+
+        // On limite la résolution max (ex: 4096px) pour éviter les images géantes
+        const MAX_DIM = 4096;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compression JPEG à 80%
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+              console.log(`Compression: ${file.size} -> ${newFile.size}`);
+              resolve(newFile);
+            } else {
+              resolve(file);
+            }
+          },
+          "image/jpeg",
+          0.8
+        );
+      };
+      img.onerror = (err) => {
+        console.error("Erreur compression", err);
+        resolve(file);
+      };
+    });
+  };
+
   // === ÉTATS ===
   const [evenements, setEvenements] = useState<Evenement[]>([]);
   
@@ -47,6 +107,10 @@ export default function GestionAccesPrive() {
     adresse: { rue: "", ville: "", codePostal: "", pays: "France" }
   });
 
+  // Gestion de l'édition d'une photo spécifique
+  const [editingPhoto, setEditingPhoto] = useState<any | null>(null);
+  const [filesToUpload, setFilesToUpload] = useState<File[]>([]);
+
   const [imagePreview, setImagePreview] = useState<string>("");
   const [editId, setEditId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -69,8 +133,7 @@ export default function GestionAccesPrive() {
       })
       .then((r) => {
         if (Array.isArray(r.data)) {
-          // Filtrer uniquement les événements privés
-          setEvenements(r.data.filter((e: Evenement) => e.visibilite === "prive"));
+          setEvenements(r.data);
         } else {
           setEvenements([]);
         }
@@ -123,6 +186,7 @@ export default function GestionAccesPrive() {
     setError(null);
     setSuccess(null);
     setShowClientForm(false);
+    setFilesToUpload([]);
   };
 
   // ================================
@@ -206,13 +270,15 @@ export default function GestionAccesPrive() {
       }).filter(Boolean);
 
       for (const file of files) {
-        const formData = new FormData();
-        formData.append("image", file);
-        
-        const resUpload = await axios.post(`${BASE_API_URL}/api/upload-cloudinary`, formData);
-        const imageUrl = resUpload.data.url;
+        try {
+          const compressedFile = await compressImage(file);
+          const formData = new FormData();
+          formData.append("image", compressedFile);
+          
+          const resUpload = await axios.post(`${BASE_API_URL}/api/upload-cloudinary`, formData);
+          const imageUrl = resUpload.data.url;
 
-        if (!imageUrl) throw new Error("Erreur upload image");
+          if (!imageUrl) throw new Error("Erreur upload image");
 
         const resPhoto = await axios.post(`${BASE_API_URL}/api/galerie`, {
           src: imageUrl,
@@ -227,6 +293,9 @@ export default function GestionAccesPrive() {
 
         if (resPhoto.data && resPhoto.data._id) {
           uploadedPhotoIds.push(resPhoto.data._id);
+        }
+        } catch (err) {
+          console.error(`Erreur upload fichier ${file.name}`, err);
         }
       }
 
@@ -250,6 +319,9 @@ export default function GestionAccesPrive() {
   // ================================
   // ✅ Submit
   // ================================
+  // ================================
+  // ✅ Submit (Création + Upload)
+  // ================================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -258,19 +330,76 @@ export default function GestionAccesPrive() {
 
     try {
       const { id, _id, photos, ...dataToSend } = form as any;
-      // Force visibilité privée
-      dataToSend.visibilite = "prive";
+      let targetId = editId;
 
+      // 1. Création ou Modification de l'accès
       if (editId) {
         await axios.put(`${API_URL}/${editId}`, dataToSend, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setSuccess("Accès privé modifié avec succès.");
       } else {
-        await axios.post(API_URL, dataToSend, {
+        const res = await axios.post(API_URL, dataToSend, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
+        targetId = res.data._id || res.data.id;
         setSuccess("Accès privé créé avec succès.");
+      }
+
+      // 2. Upload des photos si présentes
+      console.log("Files to upload:", filesToUpload.length);
+      console.log("Target ID:", targetId);
+
+      if (filesToUpload.length > 0 && targetId) {
+        setSuccess(prev => `${prev} Upload de ${filesToUpload.length} photos en cours...`);
+        
+        const uploadedPhotoIds: string[] = [];
+        const tarifsToApply = selectedTariffs.map(id => {
+            const t = tarifs.find(tarif => tarif.id === id || tarif._id === id);
+            return t ? {
+              id: t.id || t._id,
+              format: t.format,
+              support: t.support,
+              prix: t.prix
+            } : null;
+          }).filter(Boolean);
+
+        for (const file of filesToUpload) {
+            try {
+              const compressedFile = await compressImage(file);
+              const formData = new FormData();
+              formData.append("image", compressedFile);
+              
+              const resUpload = await axios.post(`${BASE_API_URL}/api/upload-cloudinary`, formData);
+              const imageUrl = resUpload.data.url;
+
+              if (imageUrl) {
+                  const resPhoto = await axios.post(`${BASE_API_URL}/api/galerie`, {
+                    src: imageUrl,
+                    titre: file.name,
+                    categorie: "EvenementPrive",
+                    tarifs: tarifsToApply,
+                    alt: `Photo privée ${form.titre}`,
+                    description: `Photo privée pour ${form.titre}`
+                  }, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                  });
+
+                  if (resPhoto.data && resPhoto.data._id) {
+                    uploadedPhotoIds.push(resPhoto.data._id);
+                  }
+              }
+            } catch (err) {
+              console.error(`Erreur upload fichier ${file.name}`, err);
+            }
+        }
+
+        if (uploadedPhotoIds.length > 0) {
+            await axios.post(`${API_URL}/${targetId}/photos`, { photoIds: uploadedPhotoIds }, {
+              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+            setSuccess(prev => `${prev} ${uploadedPhotoIds.length} photos ajoutées !`);
+        }
       }
 
       loadEvenements();
@@ -440,34 +569,13 @@ export default function GestionAccesPrive() {
               )}
             </div>
 
-            <div className="flex gap-2 mt-4">
-              <button
-                type="submit"
-                className="flex-1 bg-[#ffe992] text-black font-semibold px-6 py-2 rounded hover:bg-[#d6c487] transition"
-                disabled={loading}
-              >
-                {editId ? "Enregistrer les modifications" : "Créer l'accès privé"}
-              </button>
-              {editId && (
-                <button
-                  type="button"
-                  className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition"
-                  onClick={resetForm}
-                >
-                  Annuler
-                </button>
-              )}
-            </div>
-          </form>
-
-          {/* GESTION DES PHOTOS */}
-          {editId && (
-            <div className="mt-8 pt-6 border-t border-white/10">
-              <h3 className="text-lg font-semibold text-white mb-4">Photos de la galerie privée</h3>
+            <div className="bg-[#232336] p-4 rounded border border-white/10 mt-4">
+              <h4 className="text-sm font-bold text-[#ffe992] mb-2">Ajouter des photos (Optionnel)</h4>
+              <p className="text-xs text-gray-400 mb-2">Vous pouvez sélectionner plusieurs photos ou un dossier complet dès maintenant.</p>
               
-              <div className="mb-6 bg-[#232336] p-4 rounded border border-white/10">
-                <h4 className="text-sm font-bold text-[#ffe992] mb-2">1. Tarifs applicables</h4>
-                <div className="max-h-40 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="mb-2">
+                <p className="text-xs text-gray-400 mb-1">Tarifs par défaut pour ces photos :</p>
+                <div className="max-h-24 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
                   {tarifs.map(t => (
                     <label key={t.id || t._id} className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer hover:bg-white/5 p-1 rounded">
                       <input 
@@ -484,11 +592,75 @@ export default function GestionAccesPrive() {
                     </label>
                   ))}
                 </div>
-                {tarifs.length === 0 && <p className="text-xs text-gray-500">Aucun tarif disponible.</p>}
               </div>
 
-              <div className="space-y-4">
-                <h4 className="text-sm font-bold text-[#ffe992]">2. Ajouter des photos</h4>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files) {
+                    setFilesToUpload(Array.from(e.target.files));
+                  }
+                }}
+                className="w-full bg-[#181824] border border-[#ffe992]/30 rounded px-4 py-2 text-white text-sm"
+              />
+              {filesToUpload.length > 0 && (
+                <p className="text-xs text-green-400 mt-1">{filesToUpload.length} fichier(s) sélectionné(s)</p>
+              )}
+            </div>
+
+            <div className="flex gap-2 mt-4">
+              <button
+                type="submit"
+                className="flex-1 bg-[#ffe992] text-black font-semibold px-6 py-2 rounded hover:bg-[#d6c487] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading}
+              >
+                {loading ? "Traitement en cours..." : (editId ? "Enregistrer les modifications" : "Créer l'accès privé")}
+              </button>
+              {editId && (
+                <button
+                  type="button"
+                  className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition"
+                  onClick={resetForm}
+                >
+                  Annuler
+                </button>
+              )}
+            </div>
+          </form>
+
+          {/* GESTION DES PHOTOS */}
+          {/* GESTION DES PHOTOS */}
+          {editId && (
+            <div className="mt-8 pt-6 border-t border-white/10">
+              <h3 className="text-lg font-semibold text-white mb-4">Photos de la galerie privée</h3>
+              
+              {/* UPLOAD */}
+              <div className="mb-6 bg-[#232336] p-4 rounded border border-white/10">
+                <h4 className="text-sm font-bold text-[#ffe992] mb-2">Ajouter des photos</h4>
+                
+                <div className="mb-4">
+                  <p className="text-xs text-gray-400 mb-2">Tarifs par défaut pour les nouvelles photos :</p>
+                  <div className="max-h-24 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+                    {tarifs.map(t => (
+                      <label key={t.id || t._id} className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer hover:bg-white/5 p-1 rounded">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedTariffs.includes(t.id || t._id || "")}
+                          onChange={(e) => {
+                            const id = t.id || t._id || "";
+                            if (e.target.checked) setSelectedTariffs([...selectedTariffs, id]);
+                            else setSelectedTariffs(selectedTariffs.filter(tid => tid !== id));
+                          }}
+                          className="rounded border-gray-600 bg-black/50"
+                        />
+                        <span>{t.nom} ({t.format} - {t.prix}€)</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
                 <input
                   type="file"
                   multiple
@@ -496,13 +668,56 @@ export default function GestionAccesPrive() {
                   onChange={handlePhotosUpload}
                   className="w-full bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white text-sm"
                 />
-                <p className="text-xs text-gray-400">Sélectionnez plusieurs photos. Les tarifs cochés seront appliqués.</p>
+              </div>
+
+              {/* LISTE DES PHOTOS */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-bold text-[#ffe992]">Photos existantes ({form.photos?.length || 0})</h4>
                 
                 {form.photos && form.photos.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-2 mt-4 max-h-60 overflow-y-auto p-2 bg-black/20 rounded">
-                    <p className="col-span-3 text-center text-gray-500 text-sm py-4">
-                      {form.photos.length} photos dans cette galerie.
-                    </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {form.photos.map((photo: any) => (
+                      <div key={photo._id || photo.id} className="bg-[#232336] p-2 rounded border border-white/10 group relative">
+                        <img 
+                          src={photo.src} 
+                          alt={photo.alt} 
+                          className="w-full h-32 object-cover rounded mb-2"
+                        />
+                        <p className="text-xs text-white font-bold truncate">{photo.titre}</p>
+                        <p className="text-[10px] text-gray-400 truncate mb-2">{photo.description || "Aucune description"}</p>
+                        
+                        <div className="flex gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setEditingPhoto(photo)}
+                            className="flex-1 bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white text-xs py-1 rounded transition"
+                          >
+                            Modifier
+                          </button>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (!window.confirm("Supprimer cette photo ?")) return;
+                              try {
+                                await axios.delete(`${BASE_API_URL}/api/galerie/${photo._id || photo.id}`, {
+                                  headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                                });
+                                // Mettre à jour l'état local
+                                const updatedPhotos = form.photos.filter((p: any) => (p._id || p.id) !== (photo._id || photo.id));
+                                setForm(prev => ({ ...prev, photos: updatedPhotos }));
+                                setSuccess("Photo supprimée.");
+                              } catch (err) {
+                                console.error(err);
+                                setError("Erreur suppression photo.");
+                              }
+                            }}
+                            className="bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-2 rounded transition"
+                          >
+                            X
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <p className="text-gray-500 italic text-sm">Aucune photo pour le moment.</p>
@@ -555,6 +770,98 @@ export default function GestionAccesPrive() {
           )}
         </div>
       </div>
+      {/* MODAL ÉDITION PHOTO */}
+      {editingPhoto && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#181824] p-6 rounded-lg max-w-2xl w-full border border-[#ffe992]/20 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-[#ffe992] mb-4">Modifier la photo</h3>
+            
+            <div className="flex gap-4 mb-4">
+              <img src={editingPhoto.src} alt="Preview" className="w-32 h-32 object-cover rounded border border-white/10" />
+              <div className="flex-1 space-y-3">
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Titre</label>
+                  <input
+                    value={editingPhoto.titre || ""}
+                    onChange={(e) => setEditingPhoto({ ...editingPhoto, titre: e.target.value })}
+                    className="w-full bg-[#232336] border border-white/10 rounded px-3 py-1 text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Description</label>
+                  <textarea
+                    value={editingPhoto.description || ""}
+                    onChange={(e) => setEditingPhoto({ ...editingPhoto, description: e.target.value })}
+                    className="w-full bg-[#232336] border border-white/10 rounded px-3 py-1 text-white text-sm h-20 resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h4 className="text-sm font-bold text-white mb-2">Tarifs disponibles pour cette photo</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto bg-[#232336] p-3 rounded border border-white/10">
+                {tarifs.map(t => {
+                  const isSelected = editingPhoto.tarifs?.some((pt: any) => (pt.id === t.id || pt._id === t._id || pt.id === t._id));
+                  return (
+                    <label key={t.id || t._id} className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer hover:bg-white/5 p-1 rounded">
+                      <input 
+                        type="checkbox" 
+                        checked={isSelected}
+                        onChange={(e) => {
+                          let newTarifs = editingPhoto.tarifs || [];
+                          if (e.target.checked) {
+                            // Ajouter le tarif complet
+                            newTarifs = [...newTarifs, t];
+                          } else {
+                            // Retirer le tarif
+                            newTarifs = newTarifs.filter((pt: any) => (pt.id !== t.id && pt._id !== t._id && pt.id !== t._id));
+                          }
+                          setEditingPhoto({ ...editingPhoto, tarifs: newTarifs });
+                        }}
+                        className="rounded border-gray-600 bg-black/50"
+                      />
+                      <span>{t.nom} ({t.format} - {t.prix}€)</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setEditingPhoto(null)}
+                className="px-4 py-2 rounded text-gray-400 hover:text-white hover:bg-white/10 transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await axios.put(`${BASE_API_URL}/api/galerie/${editingPhoto._id || editingPhoto.id}`, editingPhoto, {
+                      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                    });
+                    
+                    // Mise à jour locale
+                    const updatedPhotos = form.photos.map((p: any) => 
+                      (p._id === editingPhoto._id || p.id === editingPhoto.id) ? editingPhoto : p
+                    );
+                    setForm(prev => ({ ...prev, photos: updatedPhotos }));
+                    setEditingPhoto(null);
+                    setSuccess("Photo mise à jour avec succès !");
+                  } catch (err) {
+                    console.error(err);
+                    setError("Erreur lors de la mise à jour de la photo.");
+                  }
+                }}
+                className="px-4 py-2 rounded bg-[#ffe992] text-black font-bold hover:bg-[#d6c487] transition"
+              >
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

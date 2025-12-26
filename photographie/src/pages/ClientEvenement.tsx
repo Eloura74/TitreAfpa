@@ -8,10 +8,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Check, X } from "lucide-react";
 
 // Types
+interface Tarif {
+  _id?: string;
+  id?: string;
+  format: string;
+  support: string;
+  prix: number;
+}
+
 interface Photo {
   _id: string;
   url: string;
   titre?: string;
+  tarifs?: Tarif[];
 }
 
 interface Evenement {
@@ -36,18 +45,19 @@ export default function ClientEvenement() {
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
   const [showConfig, setShowConfig] = useState(false);
   
-  // Configuration par défaut pour la commande
-  const [globalConfig, setGlobalConfig] = useState<PhotoConfig>({
-    format: "10x15",
-    support: "Papier Brillant",
-    quantite: 1
-  });
+  // Configuration de la commande
+  const [config, setConfig] = useState<{
+    [photoId: string]: {
+      tarifId: string;
+      quantite: number;
+    }
+  }>({});
 
   useEffect(() => {
     const fetchEvenement = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get(`${API_URL}/api/evenements/${id}`, {
+        const res = await axios.get(`${API_URL}/api/acces-prive/${id}`, {
              headers: { Authorization: `Bearer ${token}` }
         });
         setEvenement(res.data);
@@ -61,18 +71,48 @@ export default function ClientEvenement() {
   }, [id]);
 
   const toggleSelection = (photoId: string) => {
-    setSelectedPhotos(prev => 
-      prev.includes(photoId) 
+    setSelectedPhotos(prev => {
+      const newSelection = prev.includes(photoId) 
         ? prev.filter(id => id !== photoId)
-        : [...prev, photoId]
-    );
+        : [...prev, photoId];
+      
+      // Initialiser la config par défaut si nouvelle sélection
+      if (!prev.includes(photoId) && evenement) {
+        const photo = evenement.photos.find(p => p._id === photoId);
+        if (photo && photo.tarifs && photo.tarifs.length > 0) {
+          setConfig(curr => ({
+            ...curr,
+            [photoId]: { tarifId: photo.tarifs![0]._id || photo.tarifs![0].id, quantite: 1 }
+          }));
+        }
+      }
+      return newSelection;
+    });
   };
 
   const handleAddToQuote = () => {
-    // Ici, on enverrait la demande de devis ou on ajouterait au panier
-    // Pour l'instant, on simule une action
-    console.log("Commande:", { photos: selectedPhotos, config: globalConfig });
-    alert("Votre sélection a été ajoutée à votre demande de devis !");
+    // Construction du panier
+    const items = selectedPhotos.map(photoId => {
+      const photo = evenement?.photos.find(p => p._id === photoId);
+      const conf = config[photoId];
+      const tarif = photo?.tarifs?.find(t => (t._id === conf?.tarifId || t.id === conf?.tarifId));
+      
+      if (!photo || !tarif) return null;
+
+      return {
+        photoId: photo._id,
+        photoUrl: photo.url,
+        tarifId: tarif._id || tarif.id,
+        format: tarif.format,
+        support: tarif.support,
+        prix: tarif.prix,
+        quantite: conf?.quantite || 1
+      };
+    }).filter(Boolean);
+
+    console.log("Ajout au panier:", items);
+    // TODO: Appel API pour ajouter au panier
+    alert("Vos photos ont été ajoutées au panier !");
     setShowConfig(false);
     setSelectedPhotos([]);
   };
@@ -104,7 +144,7 @@ export default function ClientEvenement() {
               className={`relative aspect-[2/3] group cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-300 ${selectedPhotos.includes(photo._id) ? 'border-yellow-500' : 'border-transparent'}`}
               onClick={() => toggleSelection(photo._id)}
             >
-              <img src={photo.url} alt={photo.titre} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <img src={photo.src} alt={photo.titre} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
               
               {/* Overlay Selection */}
               <div className={`absolute inset-0 bg-black/40 transition-opacity duration-300 flex items-center justify-center ${selectedPhotos.includes(photo._id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
@@ -112,6 +152,15 @@ export default function ClientEvenement() {
                   <Check size={20} />
                 </div>
               </div>
+              
+              {/* Prix à partir de */}
+              {photo.tarifs && photo.tarifs.length > 0 && (
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                  <p className="text-xs text-center text-gray-300">
+                    À partir de <span className="text-white font-bold">{Math.min(...photo.tarifs.map(t => t.prix))}€</span>
+                  </p>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -161,89 +210,94 @@ export default function ClientEvenement() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-[#1a1a24] w-full max-w-lg rounded-2xl border border-white/10 overflow-hidden shadow-2xl"
+              className="bg-[#1a1a24] w-full max-w-4xl rounded-2xl border border-white/10 overflow-hidden shadow-2xl max-h-[90vh] flex flex-col"
             >
-              <div className="p-6 border-b border-white/5 flex justify-between items-center">
+              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-[#12121a]">
                 <h3 className="text-xl font-serif italic text-[#ffe992]">Configuration de la commande</h3>
                 <button onClick={() => setShowConfig(false)} className="text-gray-400 hover:text-white">
                   <X size={24} />
                 </button>
               </div>
               
-              <div className="p-6 space-y-6">
-                <div className="bg-white/5 rounded-lg p-4 flex items-center gap-4">
-                  <div className="bg-yellow-500 text-black font-bold w-10 h-10 rounded-full flex items-center justify-center text-lg">
-                    {selectedPhotos.length}
-                  </div>
-                  <div>
-                    <p className="font-medium text-white">Photos sélectionnées</p>
-                    <p className="text-sm text-gray-400">Ces options s'appliqueront à toute la sélection</p>
-                  </div>
-                </div>
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                {selectedPhotos.map(photoId => {
+                  const photo = evenement?.photos.find(p => p._id === photoId);
+                  if (!photo) return null;
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Format d'impression</label>
-                    <select 
-                      value={globalConfig.format}
-                      onChange={(e) => setGlobalConfig({...globalConfig, format: e.target.value})}
-                      className="w-full bg-[#0a0a10] border border-white/10 rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none transition"
-                    >
-                      <option value="10x15">10x15 cm (Standard)</option>
-                      <option value="13x18">13x18 cm</option>
-                      <option value="20x30">20x30 cm (A4)</option>
-                      <option value="30x45">30x45 cm (A3)</option>
-                      <option value="Numérique HD">Fichier Numérique HD</option>
-                    </select>
-                  </div>
+                  return (
+                    <div key={photoId} className="flex gap-4 bg-white/5 p-4 rounded-lg border border-white/5">
+                      <img src={photo.src} alt={photo.titre} className="w-24 h-36 object-cover rounded bg-black" />
+                      
+                      <div className="flex-1 space-y-4">
+                        <h4 className="font-bold text-white">{photo.titre}</h4>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs text-gray-400 mb-1">Format & Support</label>
+                            <select 
+                              value={config[photoId]?.tarifId || ""}
+                              onChange={(e) => setConfig(prev => ({
+                                ...prev,
+                                [photoId]: { ...prev[photoId], tarifId: e.target.value }
+                              }))}
+                              className="w-full bg-[#0a0a10] border border-white/10 rounded px-3 py-2 text-white text-sm focus:border-yellow-500 focus:outline-none"
+                            >
+                              {photo.tarifs?.map((t: any) => (
+                                <option key={t._id || t.id} value={t._id || t.id}>
+                                  {t.format} - {t.support} ({t.prix}€)
+                                </option>
+                              ))}
+                            </select>
+                          </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Support / Finition</label>
-                    <select 
-                      value={globalConfig.support}
-                      onChange={(e) => setGlobalConfig({...globalConfig, support: e.target.value})}
-                      className="w-full bg-[#0a0a10] border border-white/10 rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none transition"
-                    >
-                      <option value="Papier Brillant">Papier Brillant</option>
-                      <option value="Papier Mat">Papier Mat</option>
-                      <option value="Papier Fine Art">Papier Fine Art (+5€)</option>
-                      <option value="Aucun (Numérique)">Aucun (Numérique)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Quantité par photo</label>
-                    <div className="flex items-center gap-4">
-                      <button 
-                        onClick={() => setGlobalConfig(prev => ({...prev, quantite: Math.max(1, prev.quantite - 1)}))}
-                        className="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-xl font-bold"
-                      >
-                        -
-                      </button>
-                      <span className="text-xl font-mono w-8 text-center">{globalConfig.quantite}</span>
-                      <button 
-                        onClick={() => setGlobalConfig(prev => ({...prev, quantite: prev.quantite + 1}))}
-                        className="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-xl font-bold"
-                      >
-                        +
-                      </button>
+                          <div>
+                            <label className="block text-xs text-gray-400 mb-1">Quantité</label>
+                            <div className="flex items-center gap-2">
+                              <button 
+                                onClick={() => setConfig(prev => ({
+                                  ...prev,
+                                  [photoId]: { ...prev[photoId], quantite: Math.max(1, (prev[photoId]?.quantite || 1) - 1) }
+                                }))}
+                                className="w-8 h-8 rounded bg-white/5 hover:bg-white/10 flex items-center justify-center font-bold"
+                              >
+                                -
+                              </button>
+                              <span className="w-8 text-center font-mono">{config[photoId]?.quantite || 1}</span>
+                              <button 
+                                onClick={() => setConfig(prev => ({
+                                  ...prev,
+                                  [photoId]: { ...prev[photoId], quantite: (prev[photoId]?.quantite || 1) + 1 }
+                                }))}
+                                className="w-8 h-8 rounded bg-white/5 hover:bg-white/10 flex items-center justify-center font-bold"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  );
+                })}
               </div>
 
-              <div className="p-6 border-t border-white/5 bg-black/20 flex justify-end gap-3">
-                <button 
-                  onClick={() => setShowConfig(false)}
-                  className="px-6 py-2 text-gray-400 hover:text-white transition"
-                >
-                  Annuler
-                </button>
+              <div className="p-6 border-t border-white/5 bg-[#12121a] flex justify-between items-center">
+                <div className="text-right flex-1 mr-6">
+                  <p className="text-gray-400 text-sm">Total estimé</p>
+                  <p className="text-2xl font-bold text-[#ffe992]">
+                    {selectedPhotos.reduce((acc, id) => {
+                      const photo = evenement?.photos.find(p => p._id === id);
+                      const conf = config[id];
+                      const tarif = photo?.tarifs?.find(t => (t._id === conf?.tarifId || t.id === conf?.tarifId));
+                      return acc + (tarif?.prix || 0) * (conf?.quantite || 1);
+                    }, 0).toFixed(2)} €
+                  </p>
+                </div>
                 <button 
                   onClick={handleAddToQuote}
-                  className="px-8 py-2 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg font-bold uppercase tracking-wide transition shadow-lg shadow-yellow-500/20"
+                  className="px-8 py-3 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg font-bold uppercase tracking-wide transition shadow-lg shadow-yellow-500/20"
                 >
-                  Valider la demande
+                  Ajouter au panier
                 </button>
               </div>
             </motion.div>

@@ -21,6 +21,7 @@ import RouteAdminOnly from "./components/RouteAdminOnly"; // Composant route pro
 import TirageEnLigne from "./pages/TirageEnLigne";         // Page Tirage en ligne
 import GestionTarifs from "./components/GestionTarifs";     // Composant admin gestion tarifs
 import MonCompte from "./pages/MonCompte";                   // Page Espace Client
+import ClientEvenement from "./pages/ClientEvenement";       // Page Événement Client (Photos)
 import Checkout from "./pages/Checkout";                     // Page de paiement
 import { ToastProvider } from "./components/Toast";          // Provider pour les notifications Toast
 
@@ -107,6 +108,9 @@ function App() {
 
               {/* Route pour le paiement */}
               <Route path="/checkout" element={<Checkout />} />
+
+              {/* Route pour l'événement client spécifique */}
+              <Route path="/client/evenement/:id" element={<ClientEvenement />} />
             </Routes>
           </Router>
         </ToastProvider>

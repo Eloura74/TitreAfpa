@@ -47,7 +47,7 @@ export default function MonCompte() {
 
       // Chargement parallèle des événements et de l'historique
       Promise.all([
-        axios.get(`${API_URL}/api/evenements/me`, { headers }).catch(err => {
+        axios.get(`${API_URL}/api/acces-prive`, { headers }).catch(err => {
           console.error("Erreur chargement événements:", err);
           return { data: [] };
         }),
