@@ -31,11 +31,7 @@ interface Evenement {
   photos: Photo[];
 }
 
-interface PhotoConfig {
-  format: string;
-  support: string;
-  quantite: number;
-}
+
 
 export default function ClientEvenement() {
   const { id } = useParams();
@@ -82,7 +78,7 @@ export default function ClientEvenement() {
         if (photo && photo.tarifs && photo.tarifs.length > 0) {
           setConfig(curr => ({
             ...curr,
-            [photoId]: { tarifId: photo.tarifs![0]._id || photo.tarifs![0].id, quantite: 1 }
+            [photoId]: { tarifId: (photo.tarifs![0]._id || photo.tarifs![0].id) as string, quantite: 1 }
           }));
         }
       }
@@ -144,7 +140,7 @@ export default function ClientEvenement() {
               className={`relative aspect-[2/3] group cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-300 ${selectedPhotos.includes(photo._id) ? 'border-yellow-500' : 'border-transparent'}`}
               onClick={() => toggleSelection(photo._id)}
             >
-              <img src={photo.src} alt={photo.titre} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <img src={photo.url} alt={photo.titre} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
               
               {/* Overlay Selection */}
               <div className={`absolute inset-0 bg-black/40 transition-opacity duration-300 flex items-center justify-center ${selectedPhotos.includes(photo._id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
@@ -226,7 +222,7 @@ export default function ClientEvenement() {
 
                   return (
                     <div key={photoId} className="flex gap-4 bg-white/5 p-4 rounded-lg border border-white/5">
-                      <img src={photo.src} alt={photo.titre} className="w-24 h-36 object-cover rounded bg-black" />
+                      <img src={photo.url} alt={photo.titre} className="w-24 h-36 object-cover rounded bg-black" />
                       
                       <div className="flex-1 space-y-4">
                         <h4 className="font-bold text-white">{photo.titre}</h4>

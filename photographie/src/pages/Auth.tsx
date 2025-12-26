@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 const Auth: React.FC = () => {
   const { setUser } = useUser();
   const navigate = useNavigate();
-  const { setEmail: setEmailAuth, setIsAdmin: setIsAdminAuth, choix } = useAuthStore();
+  const { setEmail: setEmailAuth, setIsAdmin: setIsAdminAuth } = useAuthStore();
 
   // ------------------------------------------------------------------------
   // 💡 ÉTATS LOCAUX

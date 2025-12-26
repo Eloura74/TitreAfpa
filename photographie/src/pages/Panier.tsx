@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, ArrowRight, ShoppingBag, CreditCard } from "lucide-react";
+import { Trash2, ShoppingBag, CreditCard } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
@@ -109,7 +109,6 @@ const Panier: React.FC = () => {
                         </h3>
                         <div className="text-sm text-gray-400 space-y-1">
                           {article.format && <p>Format : {article.format}</p>}
-                          {article.finition && <p>Finition : {article.finition}</p>}
                           <p>Quantité : {article.quantite}</p>
                         </div>
                       </div>

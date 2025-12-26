@@ -21,7 +21,7 @@ export const compressImage = async (file: File): Promise<File> => {
   // Si l'image fait moins de 2MB, on la garde telle quelle
   if (file.size < 2 * 1024 * 1024) return file;
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const img = new Image();
     img.src = URL.createObjectURL(file);
     img.onload = () => {
