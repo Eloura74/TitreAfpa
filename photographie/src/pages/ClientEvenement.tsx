@@ -18,7 +18,7 @@ interface Tarif {
 
 interface Photo {
   _id: string;
-  url: string;
+  src: string;
   titre?: string;
   tarifs?: Tarif[];
 }
@@ -97,7 +97,7 @@ export default function ClientEvenement() {
 
       return {
         photoId: photo._id,
-        photoUrl: photo.url,
+        photoUrl: photo.src,
         tarifId: tarif._id || tarif.id,
         format: tarif.format,
         support: tarif.support,
@@ -140,7 +140,7 @@ export default function ClientEvenement() {
               className={`relative aspect-[2/3] group cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-300 ${selectedPhotos.includes(photo._id) ? 'border-yellow-500' : 'border-transparent'}`}
               onClick={() => toggleSelection(photo._id)}
             >
-              <img src={photo.url} alt={photo.titre} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <img src={photo.src} alt={photo.titre} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
               
               {/* Overlay Selection */}
               <div className={`absolute inset-0 bg-black/40 transition-opacity duration-300 flex items-center justify-center ${selectedPhotos.includes(photo._id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
@@ -222,7 +222,7 @@ export default function ClientEvenement() {
 
                   return (
                     <div key={photoId} className="flex gap-4 bg-white/5 p-4 rounded-lg border border-white/5">
-                      <img src={photo.url} alt={photo.titre} className="w-24 h-36 object-cover rounded bg-black" />
+                      <img src={photo.src} alt={photo.titre} className="w-24 h-36 object-cover rounded bg-black" />
                       
                       <div className="flex-1 space-y-4">
                         <h4 className="font-bold text-white">{photo.titre}</h4>
