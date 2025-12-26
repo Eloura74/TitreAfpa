@@ -1,31 +1,84 @@
 // Contrôleur pour la gestion des événements
 const Evenement = require("../models/Evenement");
+const User = require("../models/User"); // Import du modèle User pour la recherche par email
+
 // ***************************
 // Obtenir tous les événements
 // ***************************
-// fonction asynchrone pour récupérer tous les événements de la base de données
-// avec les paramètres req et res
 exports.getAll = async (req, res) => {
-  // rechercher (trouver) tous les documents de la collection MongoDB associée.
-  const evenements = await Evenement.find();
-  // envoyer la réponse au client sous forme de JSON
-  res.json(evenements);
+  try {
+    // Si l'utilisateur est admin, il voit tout, sinon seulement les publics
+    const filter = {};
+    if (!req.user || req.user.role !== "admin") {
+      filter.visibilite = "public";
+    }
+    const evenements = await Evenement.find(filter).populate("photos");
+    res.json(evenements);
+  } catch (err) {
+    res.status(500).json({ erreur: err.message });
+  }
+};
+
+// ***************************
+// Obtenir un événement par ID
+// ***************************
+exports.getOne = async (req, res) => {
+  try {
+    const evenement = await Evenement.findById(req.params.id).populate("photos");
+    if (!evenement) return res.status(404).json({ erreur: "Événement non trouvé" });
+
+    // Si public, accès autorisé
+    if (evenement.visibilite === "public") {
+      return res.json(evenement);
+    }
+
+    // Si privé, vérification des droits
+    // Admin ou le client assigné
+    if (req.user && (req.user.role === "admin" || (evenement.client && evenement.client.toString() === req.user.id))) {
+      return res.json(evenement);
+    }
+
+    return res.status(403).json({ erreur: "Accès refusé à cet événement privé." });
+  } catch (err) {
+    res.status(500).json({ erreur: err.message });
+  }
+};
+
+// ***************************
+// Obtenir mes événements (Client)
+// ***************************
+exports.getMyEvents = async (req, res) => {
+  try {
+    const evenements = await Evenement.find({ client: req.user.id }).populate("photos");
+    res.json(evenements);
+  } catch (err) {
+    res.status(500).json({ erreur: err.message });
+  }
 };
 
 // ***************************
 // Ajouter un événement
 // ***************************
-// fonction asynchrone pour ajouter un événement à la base de données
 exports.create = async (req, res) => {
   try {
-    // Créer un nouveau document Evenement avec les données fournies dans le corps de la requête
-    const nouvelEvenement = new Evenement(req.body);
-    // Enregistrer le nouveau document dans la base de données
+    const data = { ...req.body };
+
+    // Si un email client est fourni, on cherche l'utilisateur correspondant
+    if (data.clientEmail) {
+      const clientUser = await User.findOne({ email: data.clientEmail });
+      if (clientUser) {
+        data.client = clientUser._id;
+      } else {
+        return res.status(400).json({ erreur: `Client avec l'email ${data.clientEmail} introuvable.` });
+      }
+      delete data.clientEmail;
+    }
+
+    const nouvelEvenement = new Evenement(data);
     await nouvelEvenement.save();
-    // Envoyer la réponse au client sous forme de JSON
     res.status(201).json(nouvelEvenement);
   } catch (err) {
-    // Envoyer la réponse au client sous forme de JSON
+    console.error("Erreur création événement:", err);
     res.status(400).json({ erreur: err.message });
   }
 };
@@ -33,15 +86,23 @@ exports.create = async (req, res) => {
 // ***************************
 // Modifier un événement
 // ***************************
-// fonction asynchrone pour modifier un événement dans la base de données
 exports.update = async (req, res) => {
-  // Rechercher (trouver) un document spécifique dans la collection MongoDB associée.
   try {
+    const data = { ...req.body };
+
+    // Si un email client est fourni, on cherche l'utilisateur correspondant
+    if (data.clientEmail) {
+      const clientUser = await User.findOne({ email: data.clientEmail });
+      if (clientUser) {
+        data.client = clientUser._id;
+      }
+      delete data.clientEmail;
+    }
+
     const evenementModifie = await Evenement.findByIdAndUpdate(
-      // methode findByIdAndUpdate pour modifier un document spécifique
-      req.params.id, // id de l'événement à modifier
-      req.body, // données à modifier
-      { new: true } // retourner le document modifié
+      req.params.id,
+      data,
+      { new: true }
     );
     res.json(evenementModifie);
   } catch (err) {
@@ -50,12 +111,38 @@ exports.update = async (req, res) => {
 };
 
 // ***************************
+// Ajouter des photos à un événement
+// ***************************
+exports.addPhotos = async (req, res) => {
+  try {
+    const { photoIds } = req.body; // Tableau d'IDs de photos
+    if (!photoIds || !Array.isArray(photoIds)) {
+      return res.status(400).json({ erreur: "Liste d'IDs de photos invalide." });
+    }
+
+    const evenement = await Evenement.findById(req.params.id);
+    if (!evenement) return res.status(404).json({ erreur: "Événement non trouvé" });
+
+    // Ajout des photos sans doublons
+    photoIds.forEach(id => {
+      if (!evenement.photos.includes(id)) {
+        evenement.photos.push(id);
+      }
+    });
+
+    await evenement.save();
+    res.json(evenement);
+  } catch (err) {
+    res.status(500).json({ erreur: err.message });
+  }
+};
+
+// ***************************
 // Supprimer un événement
 // ***************************
-// fonction asynchrone pour supprimer un événement dans la base de données
 exports.remove = async (req, res) => {
   try {
-    await Evenement.findByIdAndDelete(req.params.id); // methode findByIdAndDelete pour supprimer un document spécifique
+    await Evenement.findByIdAndDelete(req.params.id);
     res.json({ message: "Événement supprimé" });
   } catch (err) {
     res.status(400).json({ erreur: err.message });

@@ -7,6 +7,7 @@ import GestionEvenements from "./GestionEvenements"; // Gestion CRUD des événe
 import GestionPaiements from "./GestionPaiements"; // Gestion CRUD des paiements
 import GestionPaniers from "./GestionPaniers"; // Gestion CRUD des paniers
 import GestionTarifs from "./GestionTarifs"; // Gestion CRUD des tarifs
+import GestionAccesPrive from "./GestionAccesPrive"; // Gestion Accès Privé (Client)
 
 // 📌 Hook de React pour gérer l'état local (ici : l'onglet actif)
 import { useState } from "react";
@@ -25,6 +26,7 @@ const onglets = [
   { nom: "Paiements", composant: <GestionPaiements /> },
   { nom: "Paniers", composant: <GestionPaniers /> },
   { nom: "Tarifs", composant: <GestionTarifs /> },
+  { nom: "Accès Privé", composant: <GestionAccesPrive /> },
 ];
 
 /* ==========================================================================

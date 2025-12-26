@@ -8,7 +8,12 @@ const router = express.Router();
 const Stripe = require("stripe");
 
 // Initialisation de Stripe avec la clé secrète (via process.env pour Vercel)
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+let stripe;
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+} else {
+  console.warn("⚠️ STRIPE_SECRET_KEY manquant. Les paiements Stripe ne fonctionneront pas.");
+}
 
 // ------------------------------
 // Route POST – Création d'une session de paiement Stripe Checkout

@@ -21,7 +21,7 @@ const revealVariants = {
 export default function Home() {
   const navigate = useNavigate();
   const { setChoix } = useAuthStore();
-  const [hoveredSide, setHoveredSide] = useState<"photo" | "graph" | null>(null);
+  const [hoveredSide, setHoveredSide] = useState<"photo" | "graph" | "ecrin" | null>(null);
 
   useEffect(() => {
     document.title = "Fabien Licata | Photographe & Graphiste";
@@ -83,28 +83,48 @@ export default function Home() {
         </div>
       </header>
 
-      {/* SÉPARATEUR CENTRAL : Réintégré et visible */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none hidden md:block">
+      {/* SÉPARATEUR VERTICAL (Entre Photo et Graphisme) */}
+      <div className="absolute left-1/2 top-0 bottom-[40vh] -translate-x-1/2 z-20 pointer-events-none hidden md:block">
          <motion.div 
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "40vh", opacity: 0.6 }} // Plus visible
-            transition={{ delay: 1, duration: 1.5 }}
-            className="w-[1px] bg-gradient-to-b from-transparent via-yellow-500 to-transparent shadow-[0_0_10px_rgba(234,179,8,0.3)]" 
+            animate={{ height: "100%", opacity: 0.4 }}
+            transition={{ delay: 0.5, duration: 1.5, ease: "easeInOut" }}
+            className="w-[1px] h-full bg-gradient-to-b from-transparent via-yellow-500/50 to-yellow-500/80" 
          />
       </div>
 
+      {/* SÉPARATEUR HORIZONTAL (Au dessus de l'Écrin Privé) */}
+      <div className="absolute left-0 right-0 top-[60vh] z-20 pointer-events-none hidden md:block">
+         <motion.div 
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={{ scaleX: 1, opacity: 0.4 }}
+            transition={{ delay: 0.5, duration: 1.5, ease: "easeInOut" }}
+            className="w-full h-[1px] bg-gradient-to-r from-transparent via-yellow-500/80 to-transparent" 
+         />
+      </div>
+
+      {/* POINT D'INTERSECTION (Diamant central) */}
+      <div className="absolute left-1/2 top-[60vh] -translate-x-1/2 -translate-y-1/2 z-30 hidden md:block">
+        <motion.div 
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 1.2, duration: 0.8, ease: "backOut" }}
+          className="w-1.5 h-1.5 bg-yellow-500 rotate-45 shadow-[0_0_15px_rgba(234,179,8,1)]"
+        />
+      </div>
+
       {/* CONTENU PRINCIPAL */}
-      <div className="relative z-10 flex flex-col md:flex-row min-h-[100dvh]">
+      <div className="relative z-10 flex flex-col md:flex-row md:flex-wrap h-[100dvh]">
         
-        {/* SECTION PHOTOGRAPHIE */}
+        {/* SECTION PHOTOGRAPHIE (Haut Gauche) */}
         <motion.section
           onMouseEnter={() => setHoveredSide("photo")}
           onMouseLeave={() => setHoveredSide(null)}
           onClick={() => handleChoix("photographie")}
-          className="relative flex flex-1 cursor-pointer flex-col items-center justify-center transition-all duration-700 py-20 md:py-0 border-b border-white/5 md:border-none"
+          className="relative flex flex-1 cursor-pointer flex-col items-center justify-center transition-all duration-700 py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
         >
           <div className={`transition-all duration-1000 ease-in-out text-center px-4
-            ${hoveredSide === "graph" ? "md:opacity-25 md:scale-[0.98] md:blur-[1px]" : "opacity-100 scale-100 blur-0"}`}>
+            ${hoveredSide === "graph" || hoveredSide === "ecrin" ? "md:opacity-25 md:scale-[0.98] md:blur-[1px]" : "opacity-100 scale-100 blur-0"}`}>
             
             <div className="overflow-hidden mb-2">
               <motion.span custom={2} variants={revealVariants} initial="hidden" animate="visible"
@@ -140,15 +160,15 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* SECTION GRAPHISME */}
+        {/* SECTION GRAPHISME (Haut Droite) */}
         <motion.section
           onMouseEnter={() => setHoveredSide("graph")}
           onMouseLeave={() => setHoveredSide(null)}
           onClick={() => handleChoix("photo-graphiste")}
-          className="relative flex flex-1 cursor-pointer flex-col items-center justify-center transition-all duration-700 py-20 md:py-0"
+          className="relative flex flex-1 cursor-pointer flex-col items-center justify-center transition-all duration-700 py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
         >
           <div className={`transition-all duration-1000 ease-in-out text-center px-4
-            ${hoveredSide === "photo" ? "md:opacity-25 md:scale-[0.98] md:blur-[1px]" : "opacity-100 scale-100 blur-0"}`}>
+            ${hoveredSide === "photo" || hoveredSide === "ecrin" ? "md:opacity-25 md:scale-[0.98] md:blur-[1px]" : "opacity-100 scale-100 blur-0"}`}>
             
             <div className="overflow-hidden mb-2">
               <motion.span custom={2} variants={revealVariants} initial="hidden" animate="visible"
@@ -180,6 +200,53 @@ export default function Home() {
               <span>Galerie Graphique</span>
               <span className="hidden md:block w-[1px] h-3 bg-yellow-700/40" />
               <span>À Propos</span>
+            </motion.div>
+          </div>
+        </motion.section>
+
+        {/* SECTION L'ÉCRIN PRIVÉ (Bas Centre) */}
+        <motion.section
+          onMouseEnter={() => setHoveredSide("ecrin")}
+          onMouseLeave={() => setHoveredSide(null)}
+          className="relative flex w-full md:w-full cursor-default flex-col items-center justify-start md:justify-center transition-all duration-700 py-10 md:py-0 md:h-[40vh]"
+        >
+           <div className={`transition-all duration-1000 ease-in-out text-center px-4
+            ${hoveredSide === "photo" || hoveredSide === "graph" ? "md:opacity-25 md:scale-[0.98] md:blur-[1px]" : "opacity-100 scale-100 blur-0"}`}>
+            
+            <div className="overflow-hidden mb-2">
+              <motion.span custom={6} variants={revealVariants} initial="hidden" animate="visible"
+                className="block text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium">
+                Espace Client
+              </motion.span>
+            </div>
+
+            <div className="overflow-hidden mb-4">
+              <motion.h1 custom={7} variants={revealVariants} initial="hidden" animate="visible"
+                className="text-2xl md:text-3xl lg:text-5xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
+                           bg-gradient-to-b from-white via-gray-200 to-gray-500 bg-clip-text text-transparent
+                           drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]">
+                L'Écrin Privé
+              </motion.h1>
+            </div>
+
+            <div className="overflow-hidden mb-6">
+              <motion.p custom={8} variants={revealVariants} initial="hidden" animate="visible"
+                className="text-gray-400 text-[10px] md:text-xs italic font-extralight tracking-widest max-w-md mx-auto">
+                "Accédez à vos reportages privés et sélectionnez vos souvenirs d'exception"
+              </motion.p>
+            </div>
+
+            <motion.div custom={9} variants={revealVariants} initial="hidden" animate="visible">
+              <button 
+                onClick={() => navigate("/connexion")}
+                className="group relative px-8 py-3 overflow-hidden rounded-sm transition-all duration-500"
+              >
+                <div className="absolute inset-0 border border-yellow-500/30 group-hover:border-yellow-500/80 transition-colors duration-500" />
+                <div className="absolute inset-0 bg-yellow-500/0 group-hover:bg-yellow-500/10 transition-colors duration-500" />
+                <span className="relative text-yellow-500 text-[10px] md:text-xs uppercase tracking-[0.2em] group-hover:tracking-[0.3em] transition-all duration-500">
+                  Se connecter
+                </span>
+              </button>
             </motion.div>
           </div>
         </motion.section>

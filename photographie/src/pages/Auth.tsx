@@ -144,12 +144,9 @@ const Auth: React.FC = () => {
     if (res.role === "admin") {
       navigate("/admin/gestion-galerie");
     } else {
+      // Redirection vers l'espace client privé
       setTimeout(() => {
-        if (choix === "photo-graphiste") {
-          navigate("/graphisme");
-        } else {
-          navigate("/photographie");
-        }
+        navigate("/mon-compte");
       }, 800);
     }
   };

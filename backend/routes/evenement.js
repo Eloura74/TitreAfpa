@@ -22,6 +22,18 @@ const isAdmin = require("../middleware/isAdmin"); // Middleware pour vérifier q
 router.get("/", ctrl.getAll);
 
 // **************************************
+// GET /api/evenements/me
+// **************************************
+// Route protégée : permet à un client connecté de voir ses propres événements
+router.get("/me", auth, ctrl.getMyEvents);
+
+// **************************************
+// GET /api/evenements/:id
+// **************************************
+// Route protégée (vérification droits dans le contrôleur)
+router.get("/:id", auth, ctrl.getOne);
+
+// **************************************
 // POST /api/evenements/
 // **************************************
 // Route protégée : seuls les administrateurs peuvent ajouter un événement
@@ -29,6 +41,12 @@ router.get("/", ctrl.getAll);
 // - auth : vérifie que l'utilisateur est connecté
 // - isAdmin : vérifie que l'utilisateur a le rôle administrateur
 router.post("/", auth, isAdmin, ctrl.create);
+
+// **************************************
+// POST /api/evenements/:id/photos
+// **************************************
+// Route protégée : permet à un admin d'ajouter des photos à un événement
+router.post("/:id/photos", auth, isAdmin, ctrl.addPhotos);
 
 // **************************************
 // PUT /api/evenements/:id

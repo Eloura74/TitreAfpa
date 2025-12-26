@@ -189,8 +189,8 @@ app.use(xss());
 // MIDDLEWARES POUR LECTURE DES CORPS JSON / FORMULAIRES
 // ================================
 // Ces middlewares permettent d’analyser les corps de requêtes POST/PUT
-app.use(express.json({ limit: "10mb" })); // JSON (application/json)
-app.use(express.urlencoded({ extended: true, limit: "10mb" })); // Formulaires (x-www-form-urlencoded)
+app.use(express.json({ limit: "50mb" })); // JSON (application/json)
+app.use(express.urlencoded({ extended: true, limit: "50mb" })); // Formulaires (x-www-form-urlencoded)
 
 // ================================
 // CONNEXION À MONGODB

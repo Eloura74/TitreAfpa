@@ -5,7 +5,7 @@ import { useAuthStore, useAuthSync } from "../../store/authStore"; // Store Zust
 import "../../styles/navbar.css"; // Fichier CSS spécifique à la Navbar
 
 // === Composant principal de la barre de navigation ===
-export default function Navbar() {
+export default function Navbar({ variant }: { variant?: "client" }) {
   useAuthSync(); // Synchronisation automatique entre Zustand et le localStorage à chaque rendu
 
   const location = useLocation(); // Donne accès à l'URL actuelle
@@ -34,6 +34,37 @@ export default function Navbar() {
 
   // Récupération des infos de connexion via Zustand
   const { email, isAdmin, logout } = useAuthStore();
+
+  // Si variant="client", on affiche une navbar simplifiée
+  if (variant === "client") {
+    return (
+      <nav className="navbar-container">
+        <div className="navbar-content justify-between">
+          <Link to="/" className="navbar-brand">
+            Photographe Pro
+          </Link>
+          
+          <div className="flex items-center gap-4">
+            {email && (
+              <div className="hidden md:flex items-center gap-2">
+                <span className="text-sm text-gray-400">{email}</span>
+                <button
+                  onClick={logout}
+                  className="text-xs px-2 py-1 bg-red-600/20 text-red-500 rounded hover:bg-red-600 hover:text-white transition"
+                >
+                  Déconnexion
+                </button>
+              </div>
+            )}
+            <Link to="/panier" className="nav-link">
+              Panier
+            </Link>
+          </div>
+        </div>
+        <div className="navbar-accent"></div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="navbar-container">
@@ -116,7 +147,6 @@ export default function Navbar() {
           {email && (
             <li className="nav-item">
               <div className="flex items-center gap-2">
-                {/* Affiche l'email de l'utilisateur connecté */}
                 {/* Affiche l'email de l'utilisateur connecté avec lien vers Mon Compte */}
                 <Link to="/mon-compte" className="nav-link font-semibold text-yellow-400 hover:text-yellow-300 transition">
                   {email}

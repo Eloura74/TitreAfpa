@@ -10,5 +10,8 @@ export interface Evenement {
   image?: string;    // URL de l'image de couverture (optionnelle)
   photos?: string[];
   theme?: string;    // Thème optionnel
+  visibilite?: "public" | "prive";
+  client?: string;   // ID du client (User)
+  clientEmail?: string; // Pour le formulaire seulement
 }
 
