@@ -49,6 +49,7 @@ export async function login(email: string, motdepasse: string) {
       headers: { "Content-Type": "application/json" }, // Envoi JSON
       body: JSON.stringify({ email, motdepasse }), // Données à envoyer
       signal: controller.signal, // Permet d'annuler la requête en cas de timeout
+      credentials: "include", // Important : permet de recevoir et stocker le cookie HttpOnly
     });
 
     // Nettoyage du timeout si la réponse arrive avant 10 secondes
@@ -79,5 +80,20 @@ export async function login(email: string, motdepasse: string) {
     }
     // Toute autre erreur réseau ou serveur
     return { error: "Erreur réseau ou serveur" };
+  }
+}
+// ==============================
+//  Service pour se déconnecter (logout)
+// ==============================
+export async function logout() {
+  try {
+    await fetch(`${API_URL}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include", // Important : permet d'envoyer le cookie pour suppression
+    });
+    return true;
+  } catch (e) {
+    console.error("Erreur lors de la déconnexion", e);
+    return false;
   }
 }

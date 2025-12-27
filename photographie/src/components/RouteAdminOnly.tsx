@@ -25,8 +25,17 @@ interface Props {
 ========================================================================== */
 export default function RouteAdminOnly({ children }: Props) {
   // 📥 Récupération de l'état utilisateur depuis le contexte global
-  const { user } = useUser(); // `user` contient des infos comme : isAuthenticated, isAdmin, email, etc.
+  const { user, isLoading } = useUser(); // `user` contient des infos comme : isAuthenticated, isAdmin, email, etc.
   console.log(user);
+
+  // ⏳ Si la session est en cours de chargement, on affiche un loader ou rien
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a10]">
+        <span className="loading loading-spinner loading-lg text-yellow-500"></span>
+      </div>
+    );
+  }
 
   /* -------------------------------------------------------------------------
      🚫 Vérification des autorisations :

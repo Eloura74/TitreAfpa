@@ -12,16 +12,23 @@ const User = require("../models/User"); // Import du modèle Mongoose "User" (ut
 // Ce middleware est utilisé pour protéger les routes.
 // Il vérifie la présence et la validité du token JWT envoyé par le client.
 const authenticate = async (req, res, next) => {
-  // Récupère le header "Authorization" de la requête
-  const authHeader = req.headers.authorization;
-
-  // Si le header est absent ou mal formé, on renvoie une erreur 401 (non autorisé)
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Token manquant ou invalide" });
+  // Récupère le token : soit via le header Authorization, soit via le cookie
+  let token;
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+    token = req.headers.authorization.split(" ")[1];
+    console.log("[AUTH] Token found in Authorization header");
+  } else if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
+    console.log("[AUTH] Token found in cookies");
+  } else {
+    console.log("[AUTH] No token found in headers or cookies");
+    console.log("[AUTH] Cookies received:", req.cookies);
   }
 
-  // Récupère le token réel en enlevant "Bearer "
-  const token = authHeader.split(" ")[1];
+  // Si aucun token n'est trouvé
+  if (!token) {
+    return res.status(401).json({ message: "Token manquant ou invalide" });
+  }
 
   try {
     // Vérifie le token JWT avec la clé secrète (définie dans .env via process.env.JWT_SECRET)
@@ -31,8 +38,10 @@ const authenticate = async (req, res, next) => {
     const user = await User.findById(decoded.id);
 
     // Si aucun utilisateur n'est trouvé, renvoyer une erreur
-    if (!user)
+    if (!user) {
+      console.log("[AUTH] User not found for token");
       return res.status(401).json({ message: "Utilisateur non trouvé" });
+    }
 
     // Si l'utilisateur est valide, on l’attache à la requête pour les traitements suivants
     req.user = user;
@@ -40,6 +49,7 @@ const authenticate = async (req, res, next) => {
     // On continue vers le prochain middleware ou la route
     next();
   } catch (err) {
+    console.log("[AUTH] Token verification failed:", err.message);
     // Si le token est invalide ou expiré, renvoyer une erreur 401
     return res.status(401).json({ message: "Token invalide" });
   }

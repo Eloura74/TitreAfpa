@@ -40,18 +40,18 @@ export default function MonCompte() {
 
   useEffect(() => {
     if (email) {
-      const token = localStorage.getItem("token");
-      const headers = { Authorization: `Bearer ${token}` };
+      // const token = localStorage.getItem("token"); // Plus nécessaire
+      // const headers = { Authorization: `Bearer ${token}` };
 
       setLoading(true);
 
       // Chargement parallèle des événements et de l'historique
       Promise.all([
-        axios.get(`${API_URL}/api/acces-prive`, { headers }).catch(err => {
+        axios.get(`${API_URL}/api/acces-prive`, { withCredentials: true }).catch(err => {
           console.error("Erreur chargement événements:", err);
           return { data: [] };
         }),
-        axios.get(`${API_URL}/api/paiements/me`, { headers }).catch(err => {
+        axios.get(`${API_URL}/api/paiements/me`, { withCredentials: true }).catch(err => {
           console.error("Erreur chargement historique:", err);
           return { data: [] };
         })

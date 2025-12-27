@@ -50,7 +50,7 @@ export default function GestionPaiements() {
     setLoading(true);
     axios
       .get(API_URL, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        withCredentials: true,
       })
       .then((r) => {
         setPaiements(Array.isArray(r.data) ? r.data : []);
@@ -97,12 +97,12 @@ export default function GestionPaiements() {
       if (editId) {
         // 🔁 Modification d’un paiement existant
         await axios.put(`${API_URL}/${editId}`, form, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          withCredentials: true,
         });
       } else {
         // ➕ Création d’un nouveau paiement
         await axios.post(API_URL, form, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          withCredentials: true,
         });
       }
 
@@ -142,7 +142,7 @@ export default function GestionPaiements() {
 
     try {
       await axios.delete(`${API_URL}/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        withCredentials: true,
       });
 
       // Mise à jour de la liste localement

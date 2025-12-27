@@ -125,17 +125,26 @@ router.post("/login", async (req, res) => {
     console.log(`[AUTH] Login success for ${email}`);
 
     // Génération d'un token JWT contenant l'ID utilisateur et son rôle
-    // Le token est signé avec une clé secrète stockée dans les variables d'environnement (process.env.JWT_SECRET)
-    // Le token expire après 2 heures
     const token = jwt.sign(
-      { id: user._id, role: user.role }, // Payload du token
-      process.env.JWT_SECRET, // Clé secrète pour signer le token
-      { expiresIn: "2h" } // Durée de validité du token
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "2h" }
     );
 
-    // Envoi du token ainsi que des informations de l'utilisateur (email et rôle) au client
+    // Configuration du cookie
+    const cookieOptions = {
+      httpOnly: true, // Empêche l'accès via JS (protection XSS)
+      secure: process.env.NODE_ENV === "production", // HTTPS uniquement en prod
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax", // Protection CSRF
+      maxAge: 2 * 60 * 60 * 1000, // 2 heures en millisecondes
+    };
+
+    // Envoi du cookie
+    res.cookie("token", token, cookieOptions);
+
+    // Réponse JSON (sans le token dans le body)
     res.json({
-      token,
+      message: "Connexion réussie",
       email: user.email,
       role: user.role,
       nom: user.nom,
@@ -152,6 +161,18 @@ router.post("/login", async (req, res) => {
 // Route de test protégée
 router.get('/me', authenticate, (req, res) => {
   res.json({ user: req.user });
+});
+
+// ==========================
+// Route POST : Déconnexion
+// ==========================
+router.post("/logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+  });
+  res.json({ message: "Déconnexion réussie" });
 });
 
 // Exportation du routeur pour pouvoir l'utiliser dans l'application principale (app.js ou server.js)

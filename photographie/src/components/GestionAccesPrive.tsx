@@ -77,7 +77,7 @@ export default function GestionAccesPrive() {
     setLoading(true);
     axios
       .get(API_URL, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        withCredentials: true,
       })
       .then((r) => {
         if (Array.isArray(r.data)) {
@@ -239,7 +239,7 @@ export default function GestionAccesPrive() {
           alt: `Photo privée ${form.titre}`,
           description: `Photo privée pour ${form.titre}`
         }, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          withCredentials: true,
         });
 
         if (resPhoto.data && resPhoto.data._id) {
@@ -252,7 +252,7 @@ export default function GestionAccesPrive() {
 
       if (uploadedPhotoIds.length > 0) {
         await axios.post(`${API_URL}/${editId}/photos`, { photoIds: uploadedPhotoIds }, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          withCredentials: true,
         });
         
         loadEvenements();
@@ -283,12 +283,12 @@ export default function GestionAccesPrive() {
       // 1. Création ou Modification de l'accès
       if (editId) {
         await axios.put(`${API_URL}/${editId}`, dataToSend, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          withCredentials: true,
         });
         setSuccess("Accès privé modifié avec succès.");
       } else {
         const res = await axios.post(API_URL, dataToSend, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          withCredentials: true,
         });
         targetId = res.data._id || res.data.id;
         setSuccess("Accès privé créé avec succès.");
@@ -330,7 +330,7 @@ export default function GestionAccesPrive() {
                     alt: `Photo privée ${form.titre}`,
                     description: `Photo privée pour ${form.titre}`
                   }, {
-                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                    withCredentials: true,
                   });
 
                   if (resPhoto.data && resPhoto.data._id) {
@@ -344,7 +344,7 @@ export default function GestionAccesPrive() {
 
         if (uploadedPhotoIds.length > 0) {
             await axios.post(`${API_URL}/${targetId}/photos`, { photoIds: uploadedPhotoIds }, {
-              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+              withCredentials: true,
             });
             setSuccess(prev => `${prev} ${uploadedPhotoIds.length} photos ajoutées !`);
         }
@@ -390,7 +390,7 @@ export default function GestionAccesPrive() {
     setError(null);
     try {
       await axios.delete(`${API_URL}/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        withCredentials: true,
       });
 
       setEvenements(evenements.filter((e) => e.id !== id));
@@ -410,7 +410,7 @@ export default function GestionAccesPrive() {
   const handleDeletePhoto = async (photoId: string) => {
     try {
       await axios.delete(`${BASE_API_URL}/api/galerie/${photoId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        withCredentials: true,
       });
       // Mettre à jour l'état local
       const updatedPhotos = form.photos?.filter((p: any) => (p._id || p.id) !== photoId);
@@ -515,7 +515,7 @@ export default function GestionAccesPrive() {
                         // Logique de sauvegarde de la photo modifiée
                         try {
                             await axios.put(`${BASE_API_URL}/api/galerie/${editingPhoto._id || editingPhoto.id}`, editingPhoto, {
-                                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+                                withCredentials: true
                             });
                             // Mise à jour locale
                             const updatedPhotos = form.photos?.map((p: any) => 

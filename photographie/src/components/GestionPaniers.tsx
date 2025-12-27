@@ -61,7 +61,7 @@ export default function GestionPaniers() {
     setLoading(true);
     try {
       const res = await axios.get(API_URL, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        withCredentials: true,
       });
       setPaniers(Array.isArray(res.data) ? res.data : []);
     } catch (e) {
@@ -82,7 +82,7 @@ export default function GestionPaniers() {
 
     try {
       await axios.delete(`${API_URL}/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        withCredentials: true,
       });
       setPaniers(paniers.filter((p) => p._id !== id));
       addToast("Panier supprimé avec succès", "success");

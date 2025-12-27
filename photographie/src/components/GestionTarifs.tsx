@@ -59,8 +59,8 @@ export default function GestionTarifs() {
         method,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
+        credentials: "include", // Cookie HttpOnly
         body: JSON.stringify(data),
       });
 
@@ -80,9 +80,7 @@ export default function GestionTarifs() {
     mutationFn: async (id: string) => {
       await fetch(`${API_URL}/api/tarifs/${id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        credentials: "include", // Cookie HttpOnly
       });
     },
     onSuccess: () => {

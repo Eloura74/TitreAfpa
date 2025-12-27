@@ -76,12 +76,12 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
   // 1. Au chargement ou changement d'utilisateur : on récupère le panier en BDD
   useEffect(() => {
     if (email) {
-      const token = localStorage.getItem("token");
-      if (!token) return;
+      // const token = localStorage.getItem("token"); // Plus nécessaire avec HttpOnly
+      // if (!token) return;
 
       axios
         .get(`${API_URL}/api/paniers/me`, {
-          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true, // Utilisation du cookie HttpOnly
         })
         .then((res) => {
           const dbArticles = res.data.articles;
@@ -114,8 +114,8 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
 
   // 2. Fonction pour sauvegarder en BDD
   const saveToDb = (currentArticles: ArticlePanierType[]) => {
-    const token = localStorage.getItem("token");
-    if (!email || !token) return;
+    // const token = localStorage.getItem("token");
+    if (!email) return;
 
     // On garde les infos complètes pour l'envoi
     const payload = currentArticles.map((a) => {
@@ -137,7 +137,7 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
       .post(
         `${API_URL}/api/paniers/me`,
         { articles: payload },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true } // Utilisation du cookie HttpOnly
       )
       .catch((err) => {
         console.error("Erreur sauvegarde panier BDD:", err);

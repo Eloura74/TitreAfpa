@@ -82,7 +82,7 @@ export default function GestionEvenements() {
     setLoading(true);
     axios
       .get(API_URL, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        withCredentials: true,
       })
       .then((r) => {
         if (Array.isArray(r.data))
@@ -224,7 +224,7 @@ export default function GestionEvenements() {
           alt: `Photo événement ${form.titre}`,
           description: `Photo de l'événement ${form.titre}`
         }, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          withCredentials: true,
         });
 
         if (resPhoto.data && resPhoto.data._id) {
@@ -235,7 +235,7 @@ export default function GestionEvenements() {
       // 3. Lier les photos à l'événement
       if (uploadedPhotoIds.length > 0) {
         await axios.post(`${API_URL}/${editId}/photos`, { photoIds: uploadedPhotoIds }, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          withCredentials: true,
         });
         
         loadEvenements();
@@ -264,12 +264,12 @@ export default function GestionEvenements() {
 
       if (editId) {
         await axios.put(`${API_URL}/${editId}`, dataToSend, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          withCredentials: true,
         });
         setSuccess("Événement modifié avec succès.");
       } else {
         await axios.post(API_URL, dataToSend, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          withCredentials: true,
         });
         setSuccess("Événement créé avec succès.");
       }
@@ -317,7 +317,7 @@ export default function GestionEvenements() {
     setError(null);
     try {
       await axios.delete(`${API_URL}/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        withCredentials: true,
       });
 
       setEvenements(evenements.filter((e) => e.id !== id));

@@ -52,9 +52,8 @@ export default function ClientEvenement() {
   useEffect(() => {
     const fetchEvenement = async () => {
       try {
-        const token = localStorage.getItem("token");
         const res = await axios.get(`${API_URL}/api/acces-prive/${id}`, {
-             headers: { Authorization: `Bearer ${token}` }
+             withCredentials: true
         });
         setEvenement(res.data);
       } catch (error) {

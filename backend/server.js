@@ -15,6 +15,9 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config();
 
+// Middleware pour gérer les cookies
+const cookieParser = require("cookie-parser");
+
 // Import des différentes routes de l’application
 const galerieRoutes = require("./routes/galerie.js");
 const oeuvresGraphiqueRoutes = require("./routes/oeuvresGraphique.js"); // Routes pour les œuvres graphiques uniques
@@ -187,11 +190,12 @@ app.use(mongoSanitize());
 app.use(xss());
 
 // ================================
-// MIDDLEWARES POUR LECTURE DES CORPS JSON / FORMULAIRES
+// MIDDLEWARES POUR LECTURE DES CORPS JSON / FORMULAIRES / COOKIES
 // ================================
-// Ces middlewares permettent d’analyser les corps de requêtes POST/PUT
+// Ces middlewares permettent d’analyser les corps de requêtes POST/PUT et les cookies
 app.use(express.json({ limit: "50mb" })); // JSON (application/json)
 app.use(express.urlencoded({ extended: true, limit: "50mb" })); // Formulaires (x-www-form-urlencoded)
+app.use(cookieParser()); // Analyse des cookies
 
 // ================================
 // CONNEXION À MONGODB

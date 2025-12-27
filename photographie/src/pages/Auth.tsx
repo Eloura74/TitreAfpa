@@ -107,7 +107,7 @@ const Auth: React.FC = () => {
   };
 
   interface LoginResponse {
-    token: string;
+    token?: string; // Token is now optional (HttpOnly cookie)
     role?: string;
     isAdmin?: boolean;
     nom?: string;
@@ -124,10 +124,10 @@ const Auth: React.FC = () => {
   }
 
   const handleLoginSuccess = (res: LoginResponse) => {
-    localStorage.setItem("token", res.token);
+    // localStorage.setItem("token", res.token); // Suppression : Token géré par cookie HttpOnly
 
     setUser({
-      isAuthenticated: !!res.token,
+      isAuthenticated: true, // Si on est ici, c'est que le login a réussi
       isAdmin: res.role === "admin",
       nom: res.nom || "",
       prenom: res.prenom,

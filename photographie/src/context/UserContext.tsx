@@ -17,6 +17,7 @@ import { Utilisateur } from "../types/utilisateur";
 interface UserContextType {
   user: Utilisateur; // ✅ Données utilisateur actuelles
   setUser: React.Dispatch<React.SetStateAction<Utilisateur>>; // 🔁 Fonction permettant de modifier l'utilisateur
+  isLoading: boolean; // ⏳ État de chargement de la session
 }
 
 /* ==========================================================================
@@ -56,21 +57,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
     adresse: undefined,
   });
 
+  // État de chargement pour éviter les redirections prématurées
+  const [isLoading, setIsLoading] = useState(true);
+
   // 🔄 Restauration de la session au chargement
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      // On pourrait utiliser axios ici, mais fetch est natif et léger pour ce besoin
-      fetch(`${API_URL}/api/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+    // Vérification de la session via le cookie HttpOnly
+    fetch(`${API_URL}/api/auth/me`, {
+      credentials: "include", // Envoie le cookie automatiquement
+    })
         .then((res) => {
           if (res.ok) return res.json();
+          console.error("[UserContext] /api/auth/me failed:", res.status, res.statusText);
           throw new Error("Token invalide");
         })
         .then((data) => {
+          console.log("[UserContext] Session restored for:", data.user.email);
           // data.user contient les infos de l'utilisateur
           setUser({
             isAuthenticated: true,
@@ -82,9 +84,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
             adresse: data.user.adresse,
           });
         })
-        .catch(() => {
-          // Si erreur (token expiré par exemple), on nettoie
-          localStorage.removeItem("token");
+        .catch((err) => {
+          console.error("[UserContext] Session check error:", err);
+          // Si erreur (session expirée), on nettoie l'état
           setUser({
             isAuthenticated: false,
             isAdmin: false,
@@ -93,13 +95,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
             telephone: "",
             adresse: undefined,
           });
+        })
+        .finally(() => {
+          setIsLoading(false);
         });
-    }
   }, []);
 
   return (
     // Fourniture des données utilisateur et du setter à tous les composants enfants
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, isLoading }}>
       {children}
     </UserContext.Provider>
   );
