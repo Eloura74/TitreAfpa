@@ -79,7 +79,9 @@ export default function Galerie() {
         const res = await fetch(`${API_URL}/api/galerie`);
         const data: Photo[] = await res.json();
 
-        const sanitized = data.map((p) => ({
+        const sanitized = data
+          .filter(p => p.categorie !== "EvenementPrive") // Double sécurité côté front
+          .map((p) => ({
           ...p,
           src: p.src?.startsWith("http") ? p.src 
                : p.src?.startsWith("/uploads/") ? `${API_URL}${p.src}`

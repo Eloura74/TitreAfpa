@@ -23,8 +23,8 @@ const router = express.Router(); // Création d’un routeur Express
 // Récupère toutes les photos enregistrées en base
 router.get("/", async (req, res) => {
   try {
-    // Récupération brute depuis MongoDB
-    const photos = await Photo.find();
+    // Récupération brute depuis MongoDB (Exclusion des photos privées via Regex insensible à la casse)
+    const photos = await Photo.find({ categorie: { $not: /EvenementPrive/i } });
 
     // Convertit les documents Mongoose en objets JavaScript simples
     const photosObj = photos.map((p) => p.toObject());
