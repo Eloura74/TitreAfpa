@@ -448,25 +448,54 @@ export default function GalerieForm() {
             const file = e.target.files?.[0];
             if (!file) return;
 
-            const formData = new FormData();
-            formData.append("image", file);
-
             try {
-              // Appel vers la nouvelle route d’upload Cloudinary
-              const res = await fetch(`${BASE_API_URL}/api/upload-cloudinary`, {
-                method: "POST",
-                body: formData,
-                credentials: "include", // Important : envoie le cookie de session
-              });
-              const data = await res.json();
-              // Sécurisation : vérifie que l'URL Cloudinary existe
-              if (data.url && typeof data.url === "string") {
-                setForm((prev) => ({ ...prev, src: data.url }));
+              // 1. Demander une signature au backend
+              const signRes = await fetch(
+                `${BASE_API_URL}/api/upload-cloudinary/sign`,
+                {
+                  method: "GET",
+                  credentials: "include", // Important pour l'auth
+                }
+              );
+
+              if (!signRes.ok) {
+                throw new Error(
+                  "Erreur lors de la récupération de la signature"
+                );
+              }
+
+              const signData = await signRes.json();
+              const { signature, timestamp, cloud_name, api_key, folder } =
+                signData;
+
+              // 2. Préparer l'upload direct vers Cloudinary
+              const formData = new FormData();
+              formData.append("file", file);
+              formData.append("signature", signature);
+              formData.append("timestamp", timestamp.toString());
+              formData.append("api_key", api_key);
+              formData.append("folder", folder);
+
+              // 3. Envoyer directement à Cloudinary
+              const uploadRes = await fetch(
+                `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
+                {
+                  method: "POST",
+                  body: formData,
+                }
+              );
+
+              const uploadData = await uploadRes.json();
+
+              if (uploadData.secure_url) {
+                setForm((prev) => ({ ...prev, src: uploadData.secure_url }));
                 addToast("Image uploadée avec succès !", "success");
               } else {
+                console.error("Erreur Cloudinary:", uploadData);
                 setForm((prev) => ({ ...prev, src: "" }));
                 addToast(
-                  "L'upload a échoué, pas d'URL Cloudinary reçue.",
+                  "L'upload a échoué : " +
+                    (uploadData.error?.message || "Erreur inconnue"),
                   "error"
                 );
               }

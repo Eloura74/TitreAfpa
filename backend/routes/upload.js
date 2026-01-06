@@ -5,7 +5,6 @@
 const express = require("express");
 const router = express.Router(); // Initialisation du routeur Express
 
-const multer = require("multer"); // Multer est utilisé pour gérer l’envoi de fichiers via formulaire
 const cloudinary = require("cloudinary").v2; // Cloudinary gère l’hébergement et le traitement des images
 
 // -------------------------------------------------------------
@@ -22,48 +21,43 @@ cloudinary.config({
 // CONFIGURATION DE MULTER POUR GÉRER L’UPLOAD EN MÉMOIRE
 // -------------------------------------------------------------
 // Le fichier est temporairement gardé en mémoire (pas stocké sur le disque)
-const storage = multer.memoryStorage();
-const upload = multer({ storage }); // Middleware pour une image unique dans le champ "image"
-
 // -------------------------------------------------------------
-// POST /api/upload-cloudinary
+// GET /api/upload-cloudinary/sign
 // -------------------------------------------------------------
-// Cette route reçoit un fichier image depuis un formulaire ou un appel frontend
-// AJOUT : Protection par authentification (admin ou user connecté)
+// Génère une signature pour permettre au frontend d'uploader directement vers Cloudinary
+// Cela permet de contourner la limite de taille de Vercel (4.5MB)
 const { authenticate } = require("../middleware/auth");
 
-router.post("/", authenticate, upload.single("image"), async (req, res) => {
-  console.log("[UPLOAD] Request received");
+router.get("/sign", authenticate, (req, res) => {
   try {
-    // 1. Convertit le fichier en base64 à partir du buffer en RAM
-    const fileStr = req.file.buffer.toString("base64");
-    console.log("Upload Cloudinary - Mimetype:", req.file.mimetype);
+    const timestamp = Math.round(new Date().getTime() / 1000);
+    const folder = "galerie";
 
-    // 2. Envoie l’image à Cloudinary avec le bon format MIME
-    // On force un nom de fichier explicite pour éviter le bug du "_"
-    const sanitizedFilename = req.file.originalname
-      .replace(/[^a-z0-9]/gi, "_")
-      .toLowerCase();
-    const publicId = `${Date.now()}_${sanitizedFilename}`;
+    // Paramètres à signer (doivent correspondre exactement à ceux envoyés par le front)
+    const paramsToSign = {
+      folder: folder,
+      timestamp: timestamp,
+      // upload_preset: "ml_default", // Si tu utilises un preset, sinon on signe les params
+    };
 
-    const uploadResponse = await cloudinary.uploader.upload(
-      `data:${req.file.mimetype};base64,${fileStr}`,
-      {
-        folder: "galerie",
-        resource_type: "auto",
-        public_id: publicId, // On force l'ID
-        use_filename: true,
-        unique_filename: false,
-      }
+    // Génération de la signature
+    const signature = cloudinary.utils.api_sign_request(
+      paramsToSign,
+      process.env.CLOUDINARY_API_SECRET
     );
-    console.log("Réponse Cloudinary:", uploadResponse);
 
-    // 3. Retourne l’URL sécurisée de l’image hébergée (https)
-    res.json({ url: uploadResponse.secure_url });
+    res.json({
+      signature,
+      timestamp,
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      folder,
+    });
   } catch (err) {
-    // Gestion des erreurs : problème avec l’upload ou les identifiants API
-    console.error(err);
-    res.status(500).json({ message: "Erreur upload Cloudinary" });
+    console.error("Erreur signature Cloudinary:", err);
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la génération de la signature" });
   }
 });
 
