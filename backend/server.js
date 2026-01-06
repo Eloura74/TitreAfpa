@@ -73,6 +73,9 @@ const allowedOrigins = [
 function checkOrigin(origin, callback) {
   // Autorise prod et local
   if (!origin) return callback(null, true); // <--- AJOUT : accepte les accès directs sans Origin (navigateurs)
+
+  console.log(`[CORS] Checking origin: ${origin}`);
+
   if (allowedOrigins.includes(origin)) return callback(null, true);
 
   // Autorise tous les sous-domaines previews Vercel (https obligatoire)
@@ -84,6 +87,7 @@ function checkOrigin(origin, callback) {
     return callback(null, true);
   }
 
+  console.error(`[CORS] Blocked origin: ${origin}`);
   // Sinon, refuse
   return callback(new Error("Not allowed by CORS"));
 }
@@ -308,6 +312,31 @@ console.log("✅ Route /api/services montée");
 console.log(
   "✅ GET /api/tarifs fonctionne et la grille tarifaire dynamique est accessible côté front"
 );
+
+// ================================
+// GESTION GLOBALE DES ERREURS
+// ================================
+app.use((err, req, res, next) => {
+  console.error("🔥 Erreur globale:", err);
+
+  if (err.message === "Not allowed by CORS") {
+    return res.status(403).json({
+      error: "CORS Error",
+      message: "Origin not allowed",
+      origin: req.headers.origin,
+    });
+  }
+
+  if (err.code === "LIMIT_FILE_SIZE") {
+    return res.status(413).json({ error: "Fichier trop volumineux" });
+  }
+
+  res.status(err.status || 500).json({
+    error: "Internal Server Error",
+    message: err.message,
+    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+  });
+});
 
 // ================================
 // DÉMARRAGE DU SERVEUR BACKEND

@@ -33,6 +33,7 @@ const upload = multer({ storage }); // Middleware pour une image unique dans le 
 const { authenticate } = require("../middleware/auth");
 
 router.post("/", authenticate, upload.single("image"), async (req, res) => {
+  console.log("[UPLOAD] Request received");
   try {
     // 1. Convertit le fichier en base64 à partir du buffer en RAM
     const fileStr = req.file.buffer.toString("base64");
