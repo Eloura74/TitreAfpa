@@ -3,27 +3,29 @@
 // ==============================
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // Gestion des routes React
 import { Helmet } from "react-helmet-async"; // Gestion du SEO dynamique
-import Home from "./pages/Home";                           // Page d'accueil
-import Photographie from "./pages/Photographie";           // Univers Photographie
-import Graphisme from "./pages/Graphisme";                 // Univers Graphisme
-import About from "./pages/About";                         // Page À propos
-import Galerie from "./pages/Galerie";                     // Galerie photo classique
-import GalerieGraphique from "./pages/GalerieGraphique";  // Galerie d'œuvres graphiques uniques
-import Evenements from "./pages/Evenements";               // Page Événements
+import Home from "./pages/Home"; // Page d'accueil
+import Photographie from "./pages/Photographie"; // Univers Photographie
+import Graphisme from "./pages/Graphisme"; // Univers Graphisme
+import About from "./pages/About"; // Page À propos
+import Galerie from "./pages/Galerie"; // Galerie photo classique
+import GalerieGraphique from "./pages/GalerieGraphique"; // Galerie d'œuvres graphiques uniques
+import Evenements from "./pages/Evenements"; // Page Événements
+import Services from "./pages/Services"; // Page Prestations (Services)
+import ServiceDetail from "./pages/ServiceDetail"; // Page Détail Prestation
 import GalerieForm from "./components/galerie/GalerieForm"; // Formulaire de gestion de galerie
 // import CalendarTest from "../test/calendarTest";        // Route de test, commentée
-import Panier from "./pages/Panier";                       // Page Panier
-import Auth from "./pages/Auth";                           // Page Authentification (connexion / inscription)
-import { PanierProvider } from "./store/panierContext";   // Provider pour gérer le panier globalement
-import { UserProvider } from "./context/UserContext";     // Provider pour gérer le contexte utilisateur
-import GestionGalerie from "./pages/GestionGalerie";       // Page admin gestion galerie
+import Panier from "./pages/Panier"; // Page Panier
+import Auth from "./pages/Auth"; // Page Authentification (connexion / inscription)
+import { PanierProvider } from "./store/panierContext"; // Provider pour gérer le panier globalement
+import { UserProvider } from "./context/UserContext"; // Provider pour gérer le contexte utilisateur
+import GestionGalerie from "./pages/GestionGalerie"; // Page admin gestion galerie
 import RouteAdminOnly from "./components/RouteAdminOnly"; // Composant route protégée pour admin uniquement
-import TirageEnLigne from "./pages/TirageEnLigne";         // Page Tirage en ligne
-import GestionTarifs from "./components/GestionTarifs";     // Composant admin gestion tarifs
-import MonCompte from "./pages/MonCompte";                   // Page Espace Client
-import ClientEvenement from "./pages/ClientEvenement";       // Page Événement Client (Photos)
-import Checkout from "./pages/Checkout";                     // Page de paiement
-import { ToastProvider } from "./components/Toast";          // Provider pour les notifications Toast
+import TirageEnLigne from "./pages/TirageEnLigne"; // Page Tirage en ligne
+import GestionTarifs from "./components/GestionTarifs"; // Composant admin gestion tarifs
+import MonCompte from "./pages/MonCompte"; // Page Espace Client
+import ClientEvenement from "./pages/ClientEvenement"; // Page Événement Client (Photos)
+import Checkout from "./pages/Checkout"; // Page de paiement
+import { ToastProvider } from "./components/Toast"; // Provider pour les notifications Toast
 
 // ==============================
 //  Composant principal App : configuration des routes
@@ -35,8 +37,14 @@ function App() {
       <PanierProvider>
         <ToastProvider>
           {/* Configuration SEO par défaut */}
-          <Helmet defaultTitle="Fabien Licata | Photographe & Graphiste" titleTemplate="%s | Fabien Licata">
-            <meta name="description" content="Portfolio de Fabien Licata, Photographe et Graphiste. Découvrez mes galeries d'art, tirages photos et créations graphiques uniques." />
+          <Helmet
+            defaultTitle="Fabien Licata | Photographe & Graphiste"
+            titleTemplate="%s | Fabien Licata"
+          >
+            <meta
+              name="description"
+              content="Portfolio de Fabien Licata, Photographe et Graphiste. Découvrez mes galeries d'art, tirages photos et créations graphiques uniques."
+            />
             <meta property="og:type" content="website" />
             <meta property="og:site_name" content="Fabien Licata" />
           </Helmet>
@@ -59,6 +67,10 @@ function App() {
 
               {/* Route pour la page des événements */}
               <Route path="/evenements" element={<Evenements />} />
+
+              {/* Route pour la page des prestations (services) */}
+              <Route path="/services" element={<Services />} />
+              <Route path="/services/:id" element={<ServiceDetail />} />
 
               {/* Route pour le formulaire de gestion de galerie */}
               <Route path="/galerie-form" element={<GalerieForm />} />
@@ -110,7 +122,10 @@ function App() {
               <Route path="/checkout" element={<Checkout />} />
 
               {/* Route pour l'événement client spécifique */}
-              <Route path="/client/evenement/:id" element={<ClientEvenement />} />
+              <Route
+                path="/client/evenement/:id"
+                element={<ClientEvenement />}
+              />
             </Routes>
           </Router>
         </ToastProvider>

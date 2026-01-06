@@ -30,6 +30,7 @@ const tarifsRoutes = require("./routes/tarifs"); // Routes CRUD pour la grille t
 const uploadCloudinaryRoutes = require("./routes/upload"); // Routes d’upload vers Cloudinary
 const paypalRoutes = require("./routes/paypal"); // Routes pour PayPal
 const accesPriveRoutes = require("./routes/accesPrive"); // Routes pour les accès privés (Nouvelle collection)
+const servicesRoutes = require("./routes/services"); // Routes pour les services (Prestations)
 
 // Module pour gérer les chemins de fichiers
 const path = require("path");
@@ -38,7 +39,7 @@ const path = require("path");
 const app = express();
 
 // Configuration pour Vercel (derrière un proxy)
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 
 // ================================
 // CONFIGURATION DE CORS (sécurité frontend/backend)
@@ -300,6 +301,10 @@ console.log("✅ Route /api/paypal montée");
 // Accès Privé (Nouvelle Collection)
 app.use("/api/acces-prive", accesPriveRoutes);
 console.log("✅ Route /api/acces-prive montée");
+
+// Services (Prestations)
+app.use("/api/services", servicesRoutes);
+console.log("✅ Route /api/services montée");
 console.log(
   "✅ GET /api/tarifs fonctionne et la grille tarifaire dynamique est accessible côté front"
 );

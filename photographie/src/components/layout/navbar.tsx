@@ -12,7 +12,9 @@ export default function Navbar({ variant }: { variant?: "client" }) {
 
   // Détecte si on se trouve dans l'univers "graphisme"
   // On détecte l'univers courant depuis le localStorage (persistant entre les pages)
-  const univers = localStorage.getItem("univers") || (location.pathname.startsWith("/graphisme") ? "graphisme" : "photographie");
+  const univers =
+    localStorage.getItem("univers") ||
+    (location.pathname.startsWith("/graphisme") ? "graphisme" : "photographie");
   const isGraphisme = univers === "graphisme";
 
   const navigate = useNavigate();
@@ -28,7 +30,6 @@ export default function Navbar({ variant }: { variant?: "client" }) {
     }
   };
 
-
   // État local pour contrôler l'ouverture du menu sur mobile
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -43,7 +44,7 @@ export default function Navbar({ variant }: { variant?: "client" }) {
           <Link to="/" className="navbar-brand">
             Photographe Pro
           </Link>
-          
+
           <div className="flex items-center gap-4">
             {email && (
               <div className="hidden md:flex items-center gap-2">
@@ -88,7 +89,11 @@ export default function Navbar({ variant }: { variant?: "client" }) {
           <select
             className="bg-[#232336] border border-[#ffe992]/30 rounded px-2 py-1 text-white"
             value={univers}
-            onChange={e => handleUniversChange(e.target.value as "photographie" | "graphisme")}
+            onChange={(e) =>
+              handleUniversChange(
+                e.target.value as "photographie" | "graphisme"
+              )
+            }
             aria-label="Changer d'univers"
           >
             <option value="photographie">Photographie</option>
@@ -115,6 +120,13 @@ export default function Navbar({ variant }: { variant?: "client" }) {
                 Galerie
               </Link>
             )}
+          </li>
+
+          {/* Lien vers la page Services */}
+          <li className="nav-item">
+            <Link to="/services" className="nav-link">
+              Services
+            </Link>
           </li>
 
           {/* Liens vers autres pages communes */}
@@ -148,7 +160,10 @@ export default function Navbar({ variant }: { variant?: "client" }) {
             <li className="nav-item">
               <div className="flex items-center gap-2">
                 {/* Affiche l'email de l'utilisateur connecté avec lien vers Mon Compte */}
-                <Link to="/mon-compte" className="nav-link font-semibold text-yellow-400 hover:text-yellow-300 transition">
+                <Link
+                  to="/mon-compte"
+                  className="nav-link font-semibold text-yellow-400 hover:text-yellow-300 transition"
+                >
                   {email}
                 </Link>
                 {/* Bouton pour se déconnecter */}
