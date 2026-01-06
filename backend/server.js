@@ -110,12 +110,11 @@ app.use(
 // ================================
 // 2. CORS GLOBAL POUR LES ROUTES API UNIQUEMENT
 // ================================
-// DEBUG: Permissive CORS to diagnose 403 Forbidden
 app.use(
   "/api",
   cors({
-    origin: true, // Allow all origins reflected
-    credentials: true,
+    origin: checkOrigin,
+    credentials: true, // Cookies/token autorisés pour les routes API
   })
 );
 
