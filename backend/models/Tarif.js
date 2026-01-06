@@ -20,7 +20,6 @@ const TarifSchema = new mongoose.Schema(
     // Exemple : tirage papier, poster grand format, toile tendue, etc.
     type: {
       type: String,
-      enum: ["tirage", "poster", "toile", "cadeau", "textile"], // Valeurs autorisées
       required: true,
     },
 

@@ -14,7 +14,7 @@ import { API_URL } from "../config/api";
 ------------------------------------------------------------------------- */
 const tarifSchema = z.object({
   nom: z.string().min(2),
-  type: z.enum(["tirage", "poster", "toile", "cadeau", "textile"]),
+  type: z.string().min(2), // Autorise tout type de chaîne (min 2 chars)
   format: z.string().min(2),
   prix: z.number().positive(),
   support: z.string().min(2),
@@ -100,7 +100,7 @@ export default function GestionTarifs() {
     resolver: zodResolver(tarifSchema),
     defaultValues: {
       nom: "",
-      type: "tirage",
+      type: "",
       format: "",
       prix: 0,
       support: "",
@@ -205,16 +205,28 @@ export default function GestionTarifs() {
                 <label className="label">
                   <span className="label-text text-gray-300">Type</span>
                 </label>
-                <select
+                <input
                   {...register("type")}
-                  className="select select-bordered w-full bg-gray-900"
-                >
-                  <option value="tirage">Tirage Papier</option>
-                  <option value="poster">Poster</option>
-                  <option value="toile">Toile</option>
-                  <option value="cadeau">Objet Cadeau</option>
-                  <option value="textile">Textile</option>
-                </select>
+                  list="types-list"
+                  placeholder="Ex: Tirage Papier, Album..."
+                  className={`input input-bordered w-full bg-gray-900 ${
+                    errors.type ? "input-error" : ""
+                  }`}
+                />
+                <datalist id="types-list">
+                  <option value="Tirage Papier" />
+                  <option value="Poster" />
+                  <option value="Toile" />
+                  <option value="Objet Cadeau" />
+                  <option value="Textile" />
+                  <option value="Album" />
+                  <option value="Fichier Numérique" />
+                </datalist>
+                {errors.type && (
+                  <span className="text-error text-xs mt-1">
+                    {errors.type.message}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -413,7 +425,7 @@ export default function GestionTarifs() {
                                 "Êtes-vous sûr de vouloir supprimer ce tarif ?"
                               )
                             ) {
-                              deleteMutation.mutate(tarif.id);
+                              deleteMutation.mutate(tarif._id || tarif.id);
                             }
                           }}
                           title="Supprimer"
