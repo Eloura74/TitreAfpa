@@ -5,12 +5,13 @@ try {
     try {
       // On s'assure que la DB est connectée avant de traiter la requête
       await connectDB();
+      console.log("[API] Handling request via Vercel handler");
       return app(req, res);
     } catch (dbError) {
       console.error("Failed to connect to MongoDB in Vercel handler:", dbError);
       res.status(500).json({
         error: "Database connection failed",
-        details: dbError.message
+        details: dbError.message,
       });
     }
   };
@@ -21,7 +22,7 @@ try {
       error: "Failed to load backend",
       details: error.message,
       stack: error.stack,
-      env: process.env
+      env: process.env,
     });
   };
 }
