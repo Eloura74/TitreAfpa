@@ -78,7 +78,9 @@ router.post(
       // Envoi de l'email de bienvenue (asynchrone, on n'attend pas forcément le résultat pour répondre)
       // Import dynamique ou require en haut de fichier (je vais ajouter le require en haut)
       const { sendWelcomeEmail } = require("../services/emailService");
-      sendWelcomeEmail(email, prenom).catch(err => console.error("Erreur envoi email bienvenue:", err));
+      sendWelcomeEmail(email, prenom).catch((err) =>
+        console.error("Erreur envoi email bienvenue:", err)
+      );
 
       // Réponse avec un statut 201 (Créé) et un message de succès
       res.status(201).json({ message: "Utilisateur créé" });
@@ -97,7 +99,7 @@ router.post("/login", async (req, res) => {
     // Récupération des identifiants fournis par l'utilisateur
     // Récupération des identifiants fournis par l'utilisateur
     let { email, motdepasse } = req.body;
-    
+
     // Normalisation de l'email (minuscules et suppression des espaces) pour correspondre au format d'enregistrement
     if (email) {
       email = email.toLowerCase().trim();
@@ -110,7 +112,9 @@ router.post("/login", async (req, res) => {
     console.log(`[AUTH] User found result: ${user ? "YES" : "NO"}`);
 
     if (!user) {
-      console.log(`[AUTH] Login failed: User '${email}' NOT FOUND in database.`);
+      console.log(
+        `[AUTH] Login failed: User '${email}' NOT FOUND in database.`
+      );
       return res.status(401).json({ error: "Identifiants invalides" });
     }
 
@@ -135,7 +139,7 @@ router.post("/login", async (req, res) => {
     const cookieOptions = {
       httpOnly: true, // Empêche l'accès via JS (protection XSS)
       secure: process.env.NODE_ENV === "production", // HTTPS uniquement en prod
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax", // Protection CSRF
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // 'none' pour Vercel (cross-site), 'lax' en local
       maxAge: 2 * 60 * 60 * 1000, // 2 heures en millisecondes
     };
 
@@ -159,7 +163,7 @@ router.post("/login", async (req, res) => {
 });
 
 // Route de test protégée
-router.get('/me', authenticate, (req, res) => {
+router.get("/me", authenticate, (req, res) => {
   res.json({ user: req.user });
 });
 
@@ -170,7 +174,7 @@ router.post("/logout", (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   });
   res.json({ message: "Déconnexion réussie" });
 });

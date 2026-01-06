@@ -75,7 +75,7 @@ export default function GalerieForm() {
   );
   // État pour les tarifs sélectionnés (IDs)
   const [tarifsSélectionnés, setTarifsSélectionnés] = useState<string[]>([]);
-  
+
   // État de chargement
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -101,9 +101,7 @@ export default function GalerieForm() {
         setPhotos(dataPhotos);
 
         // Récupération des tarifs prédéfinis
-        const resTarifs = await fetch(
-          `${BASE_API_URL}/api/tarifs`
-        ); // OK, déjà corrigé
+        const resTarifs = await fetch(`${BASE_API_URL}/api/tarifs`); // OK, déjà corrigé
         const dataTarifs = await resTarifs.json();
         console.log("Tarifs prédéfinis récupérés:", dataTarifs);
         setTarifsPredéfinis(dataTarifs.filter((t: TarifPredefini) => t.actif));
@@ -143,13 +141,16 @@ export default function GalerieForm() {
       return;
     }
     console.log(form);
-    
+
     setIsSubmitting(true);
 
     try {
       // Vérification que des tarifs sont sélectionnés
       if (tarifsSélectionnés.length === 0) {
-        addToast("Veuillez sélectionner au moins un tarif pour cette photo.", "warning");
+        addToast(
+          "Veuillez sélectionner au moins un tarif pour cette photo.",
+          "warning"
+        );
         setIsSubmitting(false);
         return;
       }
@@ -296,7 +297,10 @@ export default function GalerieForm() {
                 console.warn(
                   "Attention: Les tarifs n'ont pas pu être ajoutés, mais la photo a été créée."
                 );
-                addToast("Photo créée, mais erreur lors de l'ajout des tarifs.", "warning");
+                addToast(
+                  "Photo créée, mais erreur lors de l'ajout des tarifs.",
+                  "warning"
+                );
                 // On continue quand même car la photo existe déjà
               } else {
                 // Mise à jour réussie
@@ -334,17 +338,12 @@ export default function GalerieForm() {
       setForm(formInitial);
       setTarifsSélectionnés([]);
       setIsSubmitting(false);
-
     } catch (error) {
       console.error("Erreur lors de l'enregistrement :", error);
       addToast("Une erreur inattendue est survenue.", "error");
       setIsSubmitting(false);
     }
   };
-
-
-
-
 
   // Génération de la liste des catégories uniques (issues des photos et des données locales)
   const allCategories = [
@@ -454,13 +453,11 @@ export default function GalerieForm() {
 
             try {
               // Appel vers la nouvelle route d’upload Cloudinary
-              const res = await fetch(
-                `${BASE_API_URL}/api/upload-cloudinary`,
-                {
-                  method: "POST",
-                  body: formData,
-                }
-              );
+              const res = await fetch(`${BASE_API_URL}/api/upload-cloudinary`, {
+                method: "POST",
+                body: formData,
+                credentials: "include", // Important : envoie le cookie de session
+              });
               const data = await res.json();
               // Sécurisation : vérifie que l'URL Cloudinary existe
               if (data.url && typeof data.url === "string") {
@@ -468,7 +465,10 @@ export default function GalerieForm() {
                 addToast("Image uploadée avec succès !", "success");
               } else {
                 setForm((prev) => ({ ...prev, src: "" }));
-                addToast("L'upload a échoué, pas d'URL Cloudinary reçue.", "error");
+                addToast(
+                  "L'upload a échoué, pas d'URL Cloudinary reçue.",
+                  "error"
+                );
               }
             } catch (err) {
               setForm((prev) => ({ ...prev, src: "" }));
@@ -553,8 +553,10 @@ export default function GalerieForm() {
               <span className="loading loading-spinner loading-sm"></span>
               Traitement en cours...
             </>
+          ) : editId ? (
+            "Modifier"
           ) : (
-            editId ? "Modifier" : "Valider"
+            "Valider"
           )}
         </button>
         {tarifsSélectionnés.length === 0 && (

@@ -29,7 +29,10 @@ const upload = multer({ storage }); // Middleware pour une image unique dans le 
 // POST /api/upload-cloudinary
 // -------------------------------------------------------------
 // Cette route reçoit un fichier image depuis un formulaire ou un appel frontend
-router.post("/", upload.single("image"), async (req, res) => {
+// AJOUT : Protection par authentification (admin ou user connecté)
+const { authenticate } = require("../middleware/auth");
+
+router.post("/", authenticate, upload.single("image"), async (req, res) => {
   try {
     // 1. Convertit le fichier en base64 à partir du buffer en RAM
     const fileStr = req.file.buffer.toString("base64");
@@ -37,17 +40,19 @@ router.post("/", upload.single("image"), async (req, res) => {
 
     // 2. Envoie l’image à Cloudinary avec le bon format MIME
     // On force un nom de fichier explicite pour éviter le bug du "_"
-    const sanitizedFilename = req.file.originalname.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const sanitizedFilename = req.file.originalname
+      .replace(/[^a-z0-9]/gi, "_")
+      .toLowerCase();
     const publicId = `${Date.now()}_${sanitizedFilename}`;
 
     const uploadResponse = await cloudinary.uploader.upload(
-      `data:${req.file.mimetype};base64,${fileStr}`, 
+      `data:${req.file.mimetype};base64,${fileStr}`,
       {
-        folder: "galerie", 
+        folder: "galerie",
         resource_type: "auto",
         public_id: publicId, // On force l'ID
         use_filename: true,
-        unique_filename: false
+        unique_filename: false,
       }
     );
     console.log("Réponse Cloudinary:", uploadResponse);
