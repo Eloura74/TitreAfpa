@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    {
+      "source": "/api/upload-cloudinary",
+      "destination": "/api/upload-cloudinary.js"
+    },
     { "source": "/((?!api/|.*\\..*).*)", "destination": "/index.html" }
   ]
 }
