@@ -81,7 +81,7 @@ export default function Graphisme() {
         <motion.div variants={itemVariants} className="text-center mb-12">
           <h1 className="hero-title mb-6 text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight break-words">
             <span className="hero-title-gradient bg-clip-text text-transparent bg-gradient-to-r from-[#d6c487] via-[#ffe992] to-[#c9b36f]">
-              Fabien <br className="block sm:hidden" /> Graphiste
+              Le Photo-Graphisme
             </span>
           </h1>
 

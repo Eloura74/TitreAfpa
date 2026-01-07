@@ -5,6 +5,7 @@ import homeImages from "../config/images.json";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import GoldDust from "../components/GoldDust";
+import ContactFooter from "./ContactFooter";
 
 const revealVariants = {
   hidden: { y: "30%", opacity: 0 },
@@ -123,7 +124,7 @@ export default function Home() {
             variants={revealVariants}
             initial="hidden"
             animate="visible"
-            className="text-2xl md:text-5xl font-extralight tracking-[0.4em] md:tracking-[0.6em] uppercase 
+            className="text-2xl md:text-4xl font-extralight tracking-[0.4em] md:tracking-[0.6em] uppercase 
                        bg-gradient-to-b from-white via-yellow-200 to-yellow-500 
                        bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(255,255,255,0.15)] text-center"
           >
@@ -136,9 +137,9 @@ export default function Home() {
             variants={revealVariants}
             initial="hidden"
             animate="visible"
-            className="text-[9px] md:text-xs tracking-[0.3em] md:tracking-[0.5em] uppercase text-yellow-500/50 font-light text-center"
+            className="text-[9px] md:text-xs tracking-[0.3em] md:tracking-[0.5em] uppercase text-yellow-500/50 font-light text-center lg:ml-13"
           >
-            Photo-Graphiste / Photographe
+            Photographe / Photo-Graphiste
           </motion.p>
         </div>
       </header>
@@ -197,7 +198,7 @@ export default function Home() {
           onClick={() => handleChoix("photographie")}
           animate={{ x: textParallaxX, y: textParallaxY }}
           transition={{ type: "spring", stiffness: 40, damping: 15 }}
-          className="relative flex flex-1 cursor-pointer flex-col items-center justify-center transition-all duration-700 py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
+          className="relative flex flex-1 cursor-pointer flex-col items-center justify-center md:justify-start md:pt-[20vh] transition-all duration-700 py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
         >
           <div
             className={`transition-all duration-1000 ease-in-out text-center px-4
@@ -225,7 +226,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="text-3xl md:text-4xl lg:text-7xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
+                className="text-3xl md:text-2xl lg:text-6xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
                            bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
                            drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
               >
@@ -254,13 +255,8 @@ export default function Home() {
             >
               <span>Événements</span>
               <span className="hidden md:block w-[1px] h-3 bg-yellow-700/40" />
-              <span>Tirage en ligne</span>
-              <span className="hidden md:block w-[1px] h-3 bg-yellow-700/40" />
               <span>Galerie</span>
-
-              {/* retour à la ligne forcé */}
               <div className="w-full" />
-
               <span>Services (Mariages, Studio, Shootings, …)</span>
             </motion.div>
           </div>
@@ -273,7 +269,7 @@ export default function Home() {
           onClick={() => handleChoix("photo-graphiste")}
           animate={{ x: textParallaxX, y: textParallaxY }}
           transition={{ type: "spring", stiffness: 40, damping: 15 }}
-          className="relative flex flex-1 cursor-pointer flex-col items-center justify-center transition-all duration-700 py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
+          className="relative flex flex-1 cursor-pointer flex-col items-center justify-center md:justify-start md:pt-[20vh] transition-all duration-700 py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
         >
           <div
             className={`transition-all duration-1000 ease-in-out text-center px-4
@@ -301,11 +297,11 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="text-3xl md:text-4xl lg:text-7xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
+                className="text-3xl md:text-4xl lg:text-6xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
                            bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
                            drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
               >
-                Graphisme
+                PHOTO-GRAPHISME
               </motion.h1>
             </div>
 
@@ -371,7 +367,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="text-3xl md:text-4xl lg:text-7xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
+                className="text-3xl md:text-4xl lg:text-6xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
                            bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
                            drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
               >
@@ -400,11 +396,14 @@ export default function Home() {
             >
               <button
                 onClick={() => navigate("/connexion")}
-                className="group relative px-8 py-3 overflow-hidden rounded-sm transition-all duration-500"
+                className="group relative px-8 py-3 overflow-hidden rounded-xl transition-all duration-500"
               >
                 <div className="absolute inset-0 border border-yellow-500/30 group-hover:border-yellow-500/80 transition-colors duration-500" />
                 <div className="absolute inset-0 bg-yellow-500/0 group-hover:bg-yellow-500/10 transition-colors duration-500" />
-                <span className="relative text-yellow-500 text-[10px] md:text-xs uppercase tracking-[0.2em] group-hover:tracking-[0.3em] transition-all duration-500">
+                <span
+                  className="relative text-[10px] md:text-xs uppercase tracking-[0.2em] group-hover:tracking-[0.3em] transition-all duration-500
+                bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent"
+                >
                   Se connecter
                 </span>
               </button>
@@ -414,19 +413,41 @@ export default function Home() {
       </div>
 
       {/* FOOTER */}
-      <footer className="absolute bottom-4 md:bottom-10 w-full px-6 md:px-16 z-30 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 opacity-50 md:opacity-30 hover:opacity-100 transition-opacity duration-1000 pointer-events-none md:pointer-events-auto">
+
+      <ContactFooter />
+      {/* <footer className="absolute bottom-4 md:bottom-10 w-full px-6 md:px-16 z-30 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 opacity-50 md:opacity-50 hover:opacity-100 transition-opacity duration-1000 pointer-events-none md:pointer-events-auto">
         <p className="text-[8px] md:text-[9px] uppercase tracking-[0.3em] md:tracking-[0.5em] font-extralight">
-          © 2025 Fabien Licata
+          © 2026 Fabien Licata
         </p>
-        <div className="flex gap-8 md:gap-12 text-[8px] md:text-[9px] uppercase tracking-[0.3em] md:tracking-[0.5em] font-extralight pointer-events-auto">
-          <a href="#" className="hover:text-yellow-400 transition-colors">
+        <div className="flex gap-8 md:gap-12 text-[10px] md:text-[12px] uppercase tracking-[0.3em] md:tracking-[0.5em] font-extralight pointer-events-auto ">
+          <a
+            href="https://www.instagram.com/fabienlicata?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+            target="_blank"
+            className="hover:text-yellow-400 transition-colors border-b border-transparent hover:border-yellow-400"
+          >
             Instagram
           </a>
-          <a href="#" className="hover:text-yellow-400 transition-colors">
+          <span className="border-b border-transparent hover:border-yellow-400">
+            |
+          </span>
+          <a
+            href="https://www.facebook.com/FabienLicata"
+            target="_blank"
+            className="hover:text-yellow-400 transition-colors border-b border-transparent hover:border-yellow-400"
+          >
+            Facebook
+          </a>
+          <span className="border-b border-transparent hover:border-yellow-400">
+            |
+          </span>
+          <a
+            href="#"
+            className="hover:text-yellow-400 transition-colors border-b border-transparent hover:border-yellow-400"
+          >
             Contact
           </a>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 }
