@@ -11,7 +11,9 @@ import {
   X,
   ShoppingBag,
   Image as ImageIcon,
+  ArrowRight,
 } from "lucide-react";
+import { usePanier } from "../store/panierContext";
 
 // Types
 interface Tarif {
@@ -40,6 +42,7 @@ interface Evenement {
 export default function ClientEvenement() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { ajouterArticle } = usePanier();
   const [evenement, setEvenement] = useState<Evenement | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
@@ -93,34 +96,40 @@ export default function ClientEvenement() {
   };
 
   const handleAddToQuote = () => {
-    // Construction du panier
-    const items = selectedPhotos
-      .map((photoId) => {
-        const photo = evenement?.photos.find((p) => p._id === photoId);
-        const conf = config[photoId];
-        const tarif = photo?.tarifs?.find(
-          (t) => t._id === conf?.tarifId || t.id === conf?.tarifId
-        );
+    let addedCount = 0;
+    selectedPhotos.forEach((photoId) => {
+      const photo = evenement?.photos.find((p) => p._id === photoId);
+      const conf = config[photoId];
+      // Default to first tariff if not configured
+      const defaultTarif = photo?.tarifs?.[0];
+      const targetTarifId =
+        conf?.tarifId || defaultTarif?._id || defaultTarif?.id;
 
-        if (!photo || !tarif) return null;
+      const tarif = photo?.tarifs?.find(
+        (t) => t._id === targetTarifId || t.id === targetTarifId
+      );
 
-        return {
-          photoId: photo._id,
-          photoUrl: photo.src,
-          tarifId: tarif._id || tarif.id,
-          format: tarif.format,
-          support: tarif.support,
-          prix: tarif.prix,
-          quantite: conf?.quantite || 1,
-        };
-      })
-      .filter(Boolean);
+      if (!photo || !tarif) return;
 
-    console.log("Ajout au panier:", items);
-    // TODO: Appel API pour ajouter au panier
-    alert("Vos photos ont été ajoutées au panier !");
-    setShowConfig(false);
-    setSelectedPhotos([]);
+      ajouterArticle({
+        id: `${photo._id}-${tarif._id || tarif.id}`,
+        nom: photo.titre || "Photo",
+        prix: tarif.prix,
+        quantite: conf?.quantite || 1,
+        image: photo.src,
+        photoId: photo._id,
+        format: tarif.format,
+        support: tarif.support,
+      });
+      addedCount++;
+    });
+
+    if (addedCount > 0) {
+      // alert("Vos photos ont été ajoutées au panier !");
+      setShowConfig(false);
+      setSelectedPhotos([]);
+      navigate("/panier");
+    }
   };
 
   if (loading)
@@ -169,11 +178,11 @@ export default function ClientEvenement() {
             </span>
           </h1>
 
-          {/* <div className="flex items-center gap-4 text-sm text-gray-400 font-light tracking-wide uppercase">
+          <div className="flex items-center gap-4 text-sm text-gray-400 font-light tracking-wide uppercase">
             <span>{new Date(evenement.dateDebut).toLocaleDateString()}</span>
             <span className="w-1 h-1 bg-[#ffe992] rounded-full" />
             <span>{evenement.photos.length} photos</span>
-          </div> */}
+          </div>
         </div>
 
         {/* Grid Photos */}
@@ -354,9 +363,9 @@ export default function ClientEvenement() {
                                 }
                                 className="w-full bg-[#1a1a24] border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-[#ffe992] focus:outline-none appearance-none cursor-pointer hover:bg-[#22222e] transition-colors"
                               >
-                                {photo.tarifs?.map((t: any) => (
+                                {photo.tarifs?.map((t: any, index: number) => (
                                   <option
-                                    key={t._id || t.id}
+                                    key={t._id || t.id || index}
                                     value={t._id || t.id}
                                   >
                                     {t.format} — {t.support}
