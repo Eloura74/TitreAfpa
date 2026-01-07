@@ -214,7 +214,7 @@ export default function Galerie() {
           animate="visible"
           className="relative z-10 max-w-5xl mx-auto text-center"
         >
-          <h1 className="hero-title !mb-0 !ml-0 text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
+          <h1 className="hero-title !mb-0 !ml-0 text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight break-words hyphens-auto">
             <span className="hero-title-gradient bg-clip-text text-transparent bg-gradient-to-r from-[#d6c487] via-[#ffe992] to-[#c9b36f]">
               Galerie d'Art
             </span>

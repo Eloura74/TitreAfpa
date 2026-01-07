@@ -189,7 +189,7 @@ export default function Home() {
       </div>
 
       {/* CONTENU PRINCIPAL */}
-      <div className="relative z-10 flex flex-col md:flex-row md:flex-wrap h-[100dvh]">
+      <div className="relative z-10 flex flex-col md:flex-row md:flex-wrap min-h-[100dvh] md:h-[100dvh] pt-32 pb-24 md:pt-0 md:pb-0">
         {/* SECTION PHOTOGRAPHIE (Haut Gauche) */}
         <motion.section
           onMouseEnter={() => setHoveredSide("photo")}
