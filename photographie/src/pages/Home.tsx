@@ -2,10 +2,13 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import homeImages from "../config/images.json";
+// import { photoImages, graphismeImages } from "../config/carouselImages"; // REMOVED: Using dynamic data
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import GoldDust from "../components/GoldDust";
 import ContactFooter from "./ContactFooter";
+import CoverflowCarousel from "../components/CoverflowCarousel";
+import { API_URL } from "../config/api";
 
 const revealVariants = {
   hidden: { y: "30%", opacity: 0 },
@@ -26,18 +29,82 @@ export default function Home() {
   const [hoveredSide, setHoveredSide] = useState<
     "photo" | "graph" | "ecrin" | null
   >(null);
+  const [isPC, setIsPC] = useState(false);
 
-  // --- PARALLAX SETUP ---
+  // États pour les images dynamiques
+  const [dynamicPhotoImages, setDynamicPhotoImages] = useState<string[]>([]);
+  const [dynamicGraphismeImages, setDynamicGraphismeImages] = useState<
+    string[]
+  >([]);
+
+  // --- CONFIGURATION PARALLAXE ---
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const windowSize = useRef({ w: 0, h: 0 });
 
   useEffect(() => {
     windowSize.current = { w: window.innerWidth, h: window.innerHeight };
+
     const handleResize = () => {
       windowSize.current = { w: window.innerWidth, h: window.innerHeight };
+      // Vérifier si l'appareil est un PC (a le survol et un grand écran)
+      const hasHover = window.matchMedia(
+        "(hover: hover) and (pointer: fine)"
+      ).matches;
+      const isLargeScreen = window.innerWidth >= 1024;
+      setIsPC(hasHover && isLargeScreen);
     };
+
+    // Vérification initiale
+    handleResize();
+
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // --- RÉCUPÉRATION DES IMAGES DYNAMIQUES ---
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        // 1. Photographie
+        const resPhoto = await fetch(`${API_URL}/api/galerie`);
+        if (resPhoto.ok) {
+          const dataPhoto = await resPhoto.json();
+          const images = dataPhoto
+            .filter((p: any) => p.categorie !== "EvenementPrive")
+            .map((p: any) => {
+              // Logique de sanitization identique à Galerie.tsx
+              if (p.src?.startsWith("http")) return p.src;
+              if (p.src?.startsWith("/uploads/")) return `${API_URL}${p.src}`;
+              if (p.src?.startsWith("/images/")) return p.src;
+              return `/images/${p.src}`;
+            });
+          setDynamicPhotoImages(images);
+        }
+
+        // 2. Graphisme
+        const resGraph = await fetch(`${API_URL}/api/oeuvres-graphique`);
+        if (resGraph.ok) {
+          const dataGraph = await resGraph.json();
+          const images = dataGraph.map((oeuvre: any) => {
+            // Logique de sanitization identique à GalerieGraphique.tsx
+            if (oeuvre.image?.startsWith("http")) return oeuvre.image;
+            if (oeuvre.image?.startsWith("/uploads/"))
+              return `${API_URL}${oeuvre.image}`;
+            if (oeuvre.image?.startsWith("/images/")) return oeuvre.image;
+            return `/images/${oeuvre.image || "/placeholder.jpg"}`;
+          });
+          setDynamicGraphismeImages(images);
+        }
+      } catch (error) {
+        console.error(
+          "Erreur lors du chargement des images pour le carrousel:",
+          error
+        );
+        // Fallback optionnel si besoin, ou laisser vide
+      }
+    };
+
+    fetchImages();
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -52,8 +119,8 @@ export default function Home() {
   // Valeurs de parallaxe (inversées pour la profondeur)
   const parallaxX = mousePosition.x * -15; // Déplacement max 15px
   const parallaxY = mousePosition.y * -15;
-  const textParallaxX = mousePosition.x * -25; // Texte bouge plus vite (devant)
-  const textParallaxY = mousePosition.y * -25;
+  // const textParallaxX = mousePosition.x * -25; // REMOVED: Parallax on text sections caused issues
+  // const textParallaxY = mousePosition.y * -25; // REMOVED
 
   useEffect(() => {
     document.title = "Fabien Licata | Photographe & Graphiste";
@@ -89,7 +156,7 @@ export default function Home() {
       {/* PARTICULES D'OR */}
       <GoldDust />
 
-      {/* BACKGROUND : Luminosité ajustée + PARALLAXE */}
+      {/* ARRIÈRE-PLAN : Luminosité ajustée + PARALLAXE */}
       <motion.div
         initial={{ scale: 1.05, opacity: 0 }}
         animate={{
@@ -116,7 +183,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/10" />
       </motion.div>
 
-      {/* HEADER : Signature Fabien Licata */}
+      {/* EN-TÊTE : Signature Fabien Licata */}
       <header className="absolute top-8 md:top-16 left-0 w-full z-40 flex flex-col items-center pointer-events-none px-6">
         <div className="overflow-hidden">
           <motion.h2
@@ -196,12 +263,21 @@ export default function Home() {
           onMouseEnter={() => setHoveredSide("photo")}
           onMouseLeave={() => setHoveredSide(null)}
           onClick={() => handleChoix("photographie")}
-          animate={{ x: textParallaxX, y: textParallaxY }}
-          transition={{ type: "spring", stiffness: 40, damping: 15 }}
-          className="relative flex flex-1 cursor-pointer flex-col items-center justify-center md:justify-start md:pt-[20vh] transition-all duration-700 py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
+          // animate={{ x: textParallaxX, y: textParallaxY }} // REMOVED
+          // transition={{ type: "spring", stiffness: 40, damping: 15 }} // REMOVED
+          className="relative flex flex-1 cursor-pointer flex-col items-center justify-center md:justify-start md:pt-[20vh] py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
         >
+          {/* CARROUSEL PHOTOGRAPHIE */}
+          <CoverflowCarousel
+            images={dynamicPhotoImages}
+            isVisible={
+              isPC && hoveredSide === "photo" && dynamicPhotoImages.length > 0
+            }
+            className="top-[63%]"
+          />
+
           <div
-            className={`transition-all duration-1000 ease-in-out text-center px-4
+            className={`relative z-20 pointer-events-none transition-all duration-1000 ease-in-out text-center px-4
             ${
               hoveredSide === "graph" || hoveredSide === "ecrin"
                 ? "md:opacity-25 md:scale-[0.98] md:blur-[1px]"
@@ -214,7 +290,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="block text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium"
+                className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium"
               >
                 Art Visuel
               </motion.span>
@@ -226,7 +302,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="text-3xl md:text-2xl lg:text-6xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
+                className="pointer-events-auto text-3xl md:text-2xl lg:text-6xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
                            bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
                            drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
               >
@@ -240,7 +316,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="text-gray-400 text-[10px] md:text-sm italic font-extralight tracking-widest"
+                className="pointer-events-auto text-gray-400 text-[10px] md:text-sm italic font-extralight tracking-widest"
               >
                 "Capturer l'instant, sublimer le réel"
               </motion.p>
@@ -251,12 +327,12 @@ export default function Home() {
               variants={revealVariants}
               initial="hidden"
               animate="visible"
-              className="flex flex-wrap items-center justify-center gap-3 md:gap-4 text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-yellow-100/40"
+              className="pointer-events-auto flex flex-wrap items-center justify-center gap-3 md:gap-4 text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-yellow-100/40"
             >
               <span>Événements</span>
               <span className="hidden md:block w-[1px] h-3 bg-yellow-700/40" />
               <span>Galerie</span>
-              <div className="w-full" />
+              <span className="hidden md:block w-[1px] h-3 bg-yellow-700/40" />
               <span>Services (Mariages, Studio, Shootings, …)</span>
             </motion.div>
           </div>
@@ -267,12 +343,23 @@ export default function Home() {
           onMouseEnter={() => setHoveredSide("graph")}
           onMouseLeave={() => setHoveredSide(null)}
           onClick={() => handleChoix("photo-graphiste")}
-          animate={{ x: textParallaxX, y: textParallaxY }}
-          transition={{ type: "spring", stiffness: 40, damping: 15 }}
-          className="relative flex flex-1 cursor-pointer flex-col items-center justify-center md:justify-start md:pt-[20vh] transition-all duration-700 py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
+          // animate={{ x: textParallaxX, y: textParallaxY }} // REMOVED
+          // transition={{ type: "spring", stiffness: 40, damping: 15 }} // REMOVED
+          className="relative flex flex-1 cursor-pointer flex-col items-center justify-center md:justify-start md:pt-[20vh] py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
         >
+          {/* CARROUSEL GRAPHISME */}
+          <CoverflowCarousel
+            images={dynamicGraphismeImages}
+            isVisible={
+              isPC &&
+              hoveredSide === "graph" &&
+              dynamicGraphismeImages.length > 0
+            }
+            className="top-[63%]"
+          />
+
           <div
-            className={`transition-all duration-1000 ease-in-out text-center px-4
+            className={`relative z-20 pointer-events-none transition-all duration-1000 ease-in-out text-center px-4
             ${
               hoveredSide === "photo" || hoveredSide === "ecrin"
                 ? "md:opacity-25 md:scale-[0.98] md:blur-[1px]"
@@ -285,7 +372,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="block text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium"
+                className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium"
               >
                 Design Numérique
               </motion.span>
@@ -297,7 +384,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="text-3xl md:text-4xl lg:text-6xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
+                className="pointer-events-auto text-3xl md:text-4xl lg:text-6xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
                            bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
                            drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
               >
@@ -311,7 +398,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="text-gray-400 text-[10px] md:text-sm italic font-extralight tracking-widest"
+                className="pointer-events-auto text-gray-400 text-[10px] md:text-sm italic font-extralight tracking-widest"
               >
                 "L'imaginaire au service de votre image"
               </motion.p>
@@ -322,7 +409,7 @@ export default function Home() {
               variants={revealVariants}
               initial="hidden"
               animate="visible"
-              className="flex flex-wrap items-center justify-center gap-3 md:gap-4 text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-yellow-100/40"
+              className="pointer-events-auto flex flex-wrap items-center justify-center gap-3 md:gap-4 text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-yellow-100/40"
             >
               <span>Identité</span>
               <span className="hidden md:block w-[1px] h-3 bg-yellow-700/40" />
@@ -337,8 +424,8 @@ export default function Home() {
         <motion.section
           onMouseEnter={() => setHoveredSide("ecrin")}
           onMouseLeave={() => setHoveredSide(null)}
-          animate={{ x: textParallaxX * 0.5, y: textParallaxY * 0.5 }} // Moins de mouvement pour le bas
-          transition={{ type: "spring", stiffness: 40, damping: 15 }}
+          // animate={{ x: textParallaxX * 0.5, y: textParallaxY * 0.5 }} // REMOVED
+          // transition={{ type: "spring", stiffness: 40, damping: 15 }} // REMOVED
           className="relative flex w-full md:w-full cursor-default flex-col items-center justify-start md:justify-center transition-all duration-700 py-10 md:py-0 md:h-[40vh]"
         >
           <div
@@ -355,7 +442,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="block text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium"
+                className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium"
               >
                 Espace Client
               </motion.span>
@@ -367,7 +454,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="text-3xl md:text-4xl lg:text-6xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
+                className="pointer-events-auto text-3xl md:text-4xl lg:text-6xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
                            bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
                            drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
               >
@@ -381,7 +468,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="text-gray-400 text-[10px] md:text-xs italic font-extralight tracking-widest max-w-md mx-auto"
+                className="pointer-events-auto text-gray-400 text-[10px] md:text-xs italic font-extralight tracking-widest max-w-md mx-auto"
               >
                 "Accédez à vos reportages privés et sélectionnez vos souvenirs
                 d'exception"
@@ -393,6 +480,7 @@ export default function Home() {
               variants={revealVariants}
               initial="hidden"
               animate="visible"
+              className="pointer-events-auto"
             >
               <button
                 onClick={() => navigate("/connexion")}
@@ -415,39 +503,6 @@ export default function Home() {
       {/* FOOTER */}
 
       <ContactFooter />
-      {/* <footer className="absolute bottom-4 md:bottom-10 w-full px-6 md:px-16 z-30 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 opacity-50 md:opacity-50 hover:opacity-100 transition-opacity duration-1000 pointer-events-none md:pointer-events-auto">
-        <p className="text-[8px] md:text-[9px] uppercase tracking-[0.3em] md:tracking-[0.5em] font-extralight">
-          © 2026 Fabien Licata
-        </p>
-        <div className="flex gap-8 md:gap-12 text-[10px] md:text-[12px] uppercase tracking-[0.3em] md:tracking-[0.5em] font-extralight pointer-events-auto ">
-          <a
-            href="https://www.instagram.com/fabienlicata?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
-            target="_blank"
-            className="hover:text-yellow-400 transition-colors border-b border-transparent hover:border-yellow-400"
-          >
-            Instagram
-          </a>
-          <span className="border-b border-transparent hover:border-yellow-400">
-            |
-          </span>
-          <a
-            href="https://www.facebook.com/FabienLicata"
-            target="_blank"
-            className="hover:text-yellow-400 transition-colors border-b border-transparent hover:border-yellow-400"
-          >
-            Facebook
-          </a>
-          <span className="border-b border-transparent hover:border-yellow-400">
-            |
-          </span>
-          <a
-            href="#"
-            className="hover:text-yellow-400 transition-colors border-b border-transparent hover:border-yellow-400"
-          >
-            Contact
-          </a>
-        </div>
-      </footer> */}
     </div>
   );
 }
