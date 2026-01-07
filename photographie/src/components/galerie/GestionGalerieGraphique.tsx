@@ -39,15 +39,54 @@ export default function GestionGalerieGraphique() {
   }
 
   async function handleUploadImage(file: File): Promise<string | null> {
-    const formData = new FormData();
-    formData.append("image", file);
-
     try {
-      const res = await axios.post(`/api/upload-cloudinary`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      // 1. Récupérer la signature depuis le backend
+      console.log(
+        "Fetching signature from:",
+        `${API_URL}/api/upload-cloudinary/sign`
+      );
+      const signRes = await fetch(`${API_URL}/api/upload-cloudinary/sign`, {
+        method: "GET",
+        credentials: "include",
       });
-      return res.data.url;
-    } catch {
+
+      if (!signRes.ok) {
+        console.error(
+          "Signature fetch failed:",
+          signRes.status,
+          signRes.statusText
+        );
+        throw new Error("Erreur lors de la récupération de la signature");
+      }
+
+      const signData = await signRes.json();
+      const { signature, timestamp, cloud_name, api_key, folder } = signData;
+
+      // 2. Préparer le formulaire pour Cloudinary
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("signature", signature);
+      formData.append("timestamp", timestamp.toString());
+      formData.append("api_key", api_key);
+      formData.append("folder", folder);
+
+      // 3. Envoyer directement à Cloudinary
+      const uploadRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!uploadRes.ok) {
+        throw new Error("Erreur lors de l'upload Cloudinary");
+      }
+
+      const uploadData = await uploadRes.json();
+      return uploadData.secure_url;
+    } catch (error) {
+      console.error("Erreur upload:", error);
       setMessage("Erreur lors de l’upload de l’image.");
       return null;
     }
