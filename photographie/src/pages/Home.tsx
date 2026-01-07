@@ -195,6 +195,8 @@ export default function Home() {
               <span>Tirage en ligne</span>
               <span className="hidden md:block w-[1px] h-3 bg-yellow-700/40" />
               <span>Galerie</span>
+              {/* retour a la ligne */}
+              <br />
               <span className="hidden md:block w-[1px] h-3 bg-yellow-700/40" />
               <span>Services (Mariages, Studio, Shootings, ...)</span>
             </motion.div>
