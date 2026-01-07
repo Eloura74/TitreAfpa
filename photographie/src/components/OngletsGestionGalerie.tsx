@@ -1,25 +1,14 @@
-// ==========================================================================
-// 📦 Importation des composants de gestion à intégrer dans les différents onglets
-// ==========================================================================
-import GalerieForm from "./galerie/GalerieForm"; // Formulaire de gestion des images (ajout / modif)
-import GestionGalerieGraphique from "./galerie/GestionGalerieGraphique"; // Visualisation graphique (vignettes, tags, etc.)
-import GestionEvenements from "./GestionEvenements"; // Gestion CRUD des événements
-import GestionPaiements from "./GestionPaiements"; // Gestion CRUD des paiements
-import GestionPaniers from "./GestionPaniers"; // Gestion CRUD des paniers
-import GestionTarifs from "./GestionTarifs"; // Gestion CRUD des tarifs
-import GestionAccesPrive from "./GestionAccesPrive"; // Gestion Accès Privé (Client)
-import GestionServices from "./GestionServices"; // Gestion des Services (Prestations)
-
-// 📌 Hook de React pour gérer l'état local (ici : l'onglet actif)
+import GalerieForm from "./galerie/GalerieForm";
+import GestionGalerieGraphique from "./galerie/GestionGalerieGraphique";
+import GestionEvenements from "./GestionEvenements";
+import GestionPaiements from "./GestionPaiements";
+import GestionPaniers from "./GestionPaniers";
+import GestionTarifs from "./GestionTarifs";
+import GestionAccesPrive from "./GestionAccesPrive";
+import GestionServices from "./GestionServices";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-/* ==========================================================================
-   🧭 Définition de la liste des onglets (chaque onglet a un nom + un composant à afficher)
-   --------------------------------------------------------------------------
-   - Le tableau `onglets` contient des objets avec :
-     → `nom` : le libellé affiché sur le bouton
-     → `composant` : le composant React correspondant à afficher
-========================================================================== */
 const onglets = [
   { nom: "Galerie", composant: <GalerieForm /> },
   { nom: "Galerie Graphique", composant: <GestionGalerieGraphique /> },
@@ -31,48 +20,48 @@ const onglets = [
   { nom: "Services", composant: <GestionServices /> },
 ];
 
-/* ==========================================================================
-   🧩 Composant principal : gestion dynamique d’onglets avec rendu conditionnel
-========================================================================== */
 export default function OngletsGestionGalerie() {
-  // État `actif` : index du tableau `onglets` indiquant quel onglet est actuellement actif
-  const [actif, setActif] = useState(0); // Par défaut : 0 = "Galerie"
+  const [actif, setActif] = useState(0);
 
   return (
     <div>
-      {/* ===============================================================
-          🔘 Barre horizontale d’onglets (boutons de navigation)
-          - Chaque bouton change l’onglet actif en mettant à jour `actif`
-          - L'onglet actif est visuellement souligné
-      =============================================================== */}
-      <div className="flex border-b mb-4">
+      {/* Navigation des onglets */}
+      <div className="flex flex-wrap gap-2 mb-8 justify-center">
         {onglets.map((onglet, i) => (
           <button
-            key={onglet.nom} // Clé unique basée sur le nom (obligatoire pour le rendu de liste)
-            onClick={() => setActif(i)} // Lors du clic : on change l’onglet actif
+            key={onglet.nom}
+            onClick={() => setActif(i)}
             className={`
-              px-4 py-2 -mb-px border-b-2 transition-all duration-150
+              relative px-6 py-3 rounded-full text-sm font-medium transition-all duration-300
               ${
                 actif === i
-                  ? "border-blue-600 text-blue-600 font-bold" // Style mis en évidence pour l’onglet actif
-                  : "border-transparent text-gray-500" // Style atténué pour les onglets inactifs
+                  ? "text-black shadow-[0_0_20px_rgba(255,233,146,0.4)]"
+                  : "text-gray-400 hover:text-white hover:bg-white/5"
               }
             `}
           >
-            {/* 🏷️ Nom de l’onglet (ex. Galerie, Événements, Paiements...) */}
-            {onglet.nom}
+            {actif === i && (
+              <motion.div
+                layoutId="activeTab"
+                className="absolute inset-0 bg-[#ffe992] rounded-full"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <span className="relative z-10">{onglet.nom}</span>
           </button>
         ))}
       </div>
 
-      {/* ===============================================================
-          🧱 Zone de contenu : affiche dynamiquement le composant
-          correspondant à l’onglet actuellement sélectionné
-      =============================================================== */}
-      <div className="bg-none rounded shadow p-4">
-        {/* ⚙️ Affichage conditionnel basé sur l’index actif */}
+      {/* Zone de contenu */}
+      <motion.div
+        key={actif}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="bg-[#12121a]/50 backdrop-blur-xl rounded-2xl border border-white/5 p-6 md:p-8 shadow-2xl min-h-[500px]"
+      >
         {onglets[actif].composant}
-      </div>
+      </motion.div>
     </div>
   );
 }

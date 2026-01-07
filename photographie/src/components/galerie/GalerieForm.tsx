@@ -1,12 +1,18 @@
 // Importations des modules nécessaires
-// useEffect et useState : hooks React pour la gestion du cycle de vie et de l'état
-// useNavigate : hook React Router pour la navigation programmatique
-// galerieData : données locales de la galerie (JSON)
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import galerieData from "../../config/galerie.json";
 import { API_URL as BASE_API_URL } from "../../config/api";
-const API_URL = `${BASE_API_URL}/api/galerie`; //
+import { useToast } from "../../components/Toast";
+import {
+  ArrowLeft,
+  Upload,
+  Check,
+  AlertCircle,
+  Image as ImageIcon,
+} from "lucide-react";
+
+const API_URL = `${BASE_API_URL}/api/galerie`;
 
 // --- TYPE PRINCIPAL DU FORMULAIRE ---
 interface FormType {
@@ -16,7 +22,6 @@ interface FormType {
   description: string;
   categorie: string;
   tarifs: TarifOeuvre[];
-  // Le prix n'est plus demandé car il est déterminé par le format choisi
 }
 
 // --- TYPE POUR UN TARIF (FORMAT/SUPPORT/PRIX) ---
@@ -47,63 +52,41 @@ const formInitial: FormType = {
   description: "",
   categorie: "",
   tarifs: [],
-  // Le prix n'est plus demandé car il est déterminé par le format choisi
 };
 
 // Interface pour les photos (structure des objets photo)
 interface Photo {
-  _id?: string; // ID optionnel (défini par MongoDB)
-  src: string; // URL ou chemin de l'image
-  alt: string; // Texte alternatif pour l'accessibilité
-  titre: string; // Titre de la photo
-  description: string; // Description détaillée
-  prix: number; // Prix par défaut (optionnel, pour compat)
-  categorie: string; // Catégorie de la photo
-  tarifs: TarifOeuvre[]; // Liste des formats/supports/prix
+  _id?: string;
+  src: string;
+  alt: string;
+  titre: string;
+  description: string;
+  prix: number;
+  categorie: string;
+  tarifs: TarifOeuvre[];
 }
 
-import { useToast } from "../../components/Toast";
-
 export default function GalerieForm() {
-  // État pour la liste des photos (tableau d'objets Photo)
   const [photos, setPhotos] = useState<Photo[]>([]);
-  // État pour le formulaire (photo en cours de création ou d'édition)
-  const [form, setForm] = useState<FormType>(formInitial); // Initialisation des tarifs
-  // État pour la liste des tarifs prédéfinis disponibles
+  const [form, setForm] = useState<FormType>(formInitial);
   const [tarifsPredéfinis, setTarifsPredéfinis] = useState<TarifPredefini[]>(
     []
   );
-  // État pour les tarifs sélectionnés (IDs)
   const [tarifsSélectionnés, setTarifsSélectionnés] = useState<string[]>([]);
-
-  // État de chargement
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const { addToast } = useToast();
-
-  // Note: La gestion des tarifs personnalisés a été simplifiée
-  // Nous utilisons maintenant uniquement les tarifs prédéfinis
-
-  // État pour savoir si on édite une photo (sinon null)
   const [editId, setEditId] = useState<string | null>(null);
-  // URL de l'API backend pour la galerie
-  // const API_URL = "http://localhost:5001/api/galerie";
-  // Hook pour rediriger l'utilisateur après une action
   const navigate = useNavigate();
 
-  // Chargement des photos et des tarifs prédéfinis au montage du composant
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Récupération des photos
-        const resPhotos = await fetch(API_URL); // OK, déjà corrigé
+        const resPhotos = await fetch(API_URL);
         const dataPhotos = await resPhotos.json();
         setPhotos(dataPhotos);
 
-        // Récupération des tarifs prédéfinis
-        const resTarifs = await fetch(`${BASE_API_URL}/api/tarifs`); // OK, déjà corrigé
+        const resTarifs = await fetch(`${BASE_API_URL}/api/tarifs`);
         const dataTarifs = await resTarifs.json();
-        console.log("Tarifs prédéfinis récupérés:", dataTarifs);
         setTarifsPredéfinis(dataTarifs.filter((t: TarifPredefini) => t.actif));
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
@@ -114,22 +97,17 @@ export default function GalerieForm() {
     fetchData();
   }, []);
 
-  // Gestion des changements dans le formulaire (tous les champs)
-  // Gestion des changements dans le formulaire (tous les champs sauf tarifs)
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setForm({
       ...form,
-      [name]: name === "prix" ? parseFloat(value || "0") : value, // Conversion en nombre pour le prix
+      [name]: name === "prix" ? parseFloat(value || "0") : value,
     });
   };
 
-  // Soumission du formulaire : ajout ou modification d'une photo
   const handleSubmit = async () => {
-    // Vérification des champs obligatoires
-    // Correction : on accepte désormais toute URL Cloudinary ou chemin d'image valide
     if (
       !form.src ||
       !form.titre ||
@@ -140,12 +118,10 @@ export default function GalerieForm() {
       addToast("Veuillez remplir tous les champs correctement.", "warning");
       return;
     }
-    console.log(form);
 
     setIsSubmitting(true);
 
     try {
-      // Vérification que des tarifs sont sélectionnés
       if (tarifsSélectionnés.length === 0) {
         addToast(
           "Veuillez sélectionner au moins un tarif pour cette photo.",
@@ -155,35 +131,24 @@ export default function GalerieForm() {
         return;
       }
 
-      // Préparation des tarifs sélectionnés pour l'envoi
-      console.log("Tarifs sélectionnés (IDs):", tarifsSélectionnés);
-      console.log("Tarifs prédéfinis disponibles:", tarifsPredéfinis);
-
       const tarifsÀEnvoyer = tarifsSélectionnés
         .map((id) => {
           const tarifTrouvé = tarifsPredéfinis.find(
             (t) => t._id === id || t.id === id
           );
-          console.log(`Recherche du tarif avec ID ${id}:`, tarifTrouvé);
 
           if (tarifTrouvé) {
-            const tarifFormaté = {
+            return {
               id: tarifTrouvé._id || tarifTrouvé.id,
               format: tarifTrouvé.format,
               support: tarifTrouvé.support,
               prix: tarifTrouvé.prix,
             };
-            console.log("Tarif formaté pour l'envoi:", tarifFormaté);
-            return tarifFormaté;
           }
           return null;
         })
         .filter((t) => t !== null) as TarifOeuvre[];
 
-      console.log("Tarifs finaux à envoyer:", tarifsÀEnvoyer);
-
-      // Mise à jour du formulaire avec les tarifs sélectionnés
-      // Création d'un objet simple et plat pour l'envoi
       const formAvecTarifs = {
         src: form.src,
         alt: form.alt,
@@ -193,13 +158,8 @@ export default function GalerieForm() {
         tarifs: tarifsÀEnvoyer,
       };
 
-      // Log du formulaire pour debug
-      console.log("Formulaire envoyé:", formAvecTarifs);
-      console.log("JSON à envoyer:", JSON.stringify(formAvecTarifs));
-
       try {
         if (editId) {
-          // Si editId existe, on modifie une photo existante (PUT)
           const res = await fetch(`${API_URL}/${editId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -215,41 +175,28 @@ export default function GalerieForm() {
           setPhotos(
             photos.map((photo) => (photo._id === editId ? updated : photo))
           );
-          setEditId(null); // On sort du mode édition
+          setEditId(null);
           addToast("Photo modifiée avec succès !", "success");
         } else {
-          // SOLUTION EN DEUX TEMPS - D'abord créer une photo minimale, puis ajouter les tarifs
-          console.log(
-            "Création en deux temps - Étape 1: photo minimale sans tarifs",
-            formAvecTarifs
-          );
-
-          // Étape 1: Création d'une photo SANS les tarifs (qui posent problème)
           const photoMinimale = {
             src: formAvecTarifs.src,
             alt: formAvecTarifs.alt,
             titre: formAvecTarifs.titre,
             description: formAvecTarifs.description,
             categorie: formAvecTarifs.categorie,
-            // tarifs volontairement omis ici
           };
 
-          // Envoi de la requête minimale
           const res = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(photoMinimale),
           });
 
-          // Récupération du texte de la réponse pour analyse
           const responseText = await res.text();
-          console.log("Réponse brute du serveur étape 1:", responseText);
 
-          // Si la réponse n'est pas OK pour l'étape 1
           if (!res.ok) {
             let errorMessage = `Erreur étape 1 - ${res.status}: ${res.statusText}`;
             try {
-              // Essayer de parser comme JSON si possible
               const errorJson = JSON.parse(responseText);
               errorMessage += `\n\nDétails: ${JSON.stringify(
                 errorJson,
@@ -257,30 +204,17 @@ export default function GalerieForm() {
                 2
               )}`;
             } catch {
-              // Sinon utiliser le texte brut
               errorMessage += `\n\nDétails: ${responseText}`;
             }
-
-            console.error("Détails de l'erreur étape 1:", errorMessage);
             addToast("Erreur lors de la création : " + errorMessage, "error");
             setIsSubmitting(false);
             return;
           }
 
-          // Étape 1 réussie : Photo créée sans tarifs
           let photoCreee = JSON.parse(responseText);
-          console.log("Photo créée avec succès (sans tarifs):", photoCreee);
 
           try {
-            // ÉTAPE 2: Mise à jour de la photo avec les tarifs
-            console.log(
-              "Création en deux temps - Étape 2: ajout des tarifs",
-              formAvecTarifs.tarifs
-            );
-
-            // Si la photo a bien été créée et a un ID
             if (photoCreee && photoCreee._id) {
-              // Requête PUT pour mettre à jour la photo avec les tarifs
               const updateRes = await fetch(`${API_URL}/${photoCreee._id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -288,43 +222,24 @@ export default function GalerieForm() {
               });
 
               const updateResponseText = await updateRes.text();
-              console.log(
-                "Réponse brute du serveur étape 2:",
-                updateResponseText
-              );
 
               if (!updateRes.ok) {
-                console.warn(
-                  "Attention: Les tarifs n'ont pas pu être ajoutés, mais la photo a été créée."
-                );
                 addToast(
                   "Photo créée, mais erreur lors de l'ajout des tarifs.",
                   "warning"
                 );
-                // On continue quand même car la photo existe déjà
               } else {
-                // Mise à jour réussie
                 try {
                   photoCreee = JSON.parse(updateResponseText);
-                  console.log(
-                    "Photo mise à jour avec succès (avec tarifs):",
-                    photoCreee
-                  );
                 } catch (e) {
                   console.error("Erreur de parsing de la réponse étape 2:", e);
                 }
               }
             }
           } catch (updateErr) {
-            console.warn(
-              "Erreur lors de la mise à jour avec les tarifs:",
-              updateErr
-            );
             addToast("Erreur lors de l'ajout des tarifs.", "warning");
-            // On continue quand même car la photo existe déjà
           }
 
-          // Dans tous les cas, on ajoute la photo créée à la liste
           setPhotos((prevPhotos) => [...prevPhotos, photoCreee]);
           addToast("Photo ajoutée avec succès !", "success");
         }
@@ -334,7 +249,6 @@ export default function GalerieForm() {
         return;
       }
 
-      // Réinitialisation complète du formulaire après succès
       setForm(formInitial);
       setTarifsSélectionnés([]);
       setIsSubmitting(false);
@@ -345,215 +259,285 @@ export default function GalerieForm() {
     }
   };
 
-  // Génération de la liste des catégories uniques (issues des photos et des données locales)
   const allCategories = [
     ...new Set([
       ...photos.map((p) => p.categorie),
-      ...galerieData.map((p) => p.categorie), // Typage minimal, pas Photo
+      ...galerieData.map((p) => p.categorie),
     ]),
   ].sort((a, b) => a.localeCompare(b));
 
-  // Rendu du formulaire et de la liste des photos
   return (
-    <div className="p-8 max-w-4xl mx-auto text-white bg-[#1a1a20] rounded-md shadow-md">
+    <div className="p-8 max-w-4xl mx-auto text-white bg-[#12121a]/50 backdrop-blur-md rounded-2xl border border-white/5 shadow-xl">
       {/* En-tête du formulaire */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-[#ffe992]">
-          Gestion de la Galerie
-        </h2>
+      <div className="flex justify-between items-center mb-8 pb-6 border-b border-white/5">
+        <div>
+          <h2 className="text-2xl font-serif italic text-[#ffe992] mb-1">
+            Gestion de la Galerie
+          </h2>
+          <p className="text-xs text-gray-400 uppercase tracking-wider">
+            Ajouter ou modifier une œuvre
+          </p>
+        </div>
         <button
           onClick={() => navigate("/galerie")}
-          className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition-colors text-sm font-medium border border-white/5"
         >
-          ⬅ Retour à la galerie
+          <ArrowLeft size={16} /> Retour à la galerie
         </button>
       </div>
 
-      {/* Sélection des tarifs prédéfinis */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="font-semibold">
-            Tarifs applicables à cette photo
-          </span>
-          <a
-            href="/admin/tarifs"
-            target="_blank"
-            className="text-blue-400 hover:text-blue-300 text-sm"
-          >
-            Gérer les tarifs
-          </a>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Colonne Gauche : Upload et Infos */}
+        <div className="space-y-6">
+          {/* Upload */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-[#ffe992] uppercase tracking-wider">
+              Image de l'œuvre
+            </label>
+            <div className="relative group">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  try {
+                    const signRes = await fetch(
+                      `${BASE_API_URL}/api/upload-cloudinary/sign`,
+                      { method: "GET", credentials: "include" }
+                    );
+
+                    if (!signRes.ok) throw new Error("Erreur signature");
+
+                    const signData = await signRes.json();
+                    const {
+                      signature,
+                      timestamp,
+                      cloud_name,
+                      api_key,
+                      folder,
+                    } = signData;
+
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("signature", signature);
+                    formData.append("timestamp", timestamp.toString());
+                    formData.append("api_key", api_key);
+                    formData.append("folder", folder);
+
+                    const uploadRes = await fetch(
+                      `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
+                      { method: "POST", body: formData }
+                    );
+
+                    const uploadData = await uploadRes.json();
+
+                    if (uploadData.secure_url) {
+                      setForm((prev) => ({
+                        ...prev,
+                        src: uploadData.secure_url,
+                      }));
+                      addToast("Image uploadée avec succès !", "success");
+                    } else {
+                      addToast("L'upload a échoué", "error");
+                    }
+                  } catch (err) {
+                    addToast("Erreur lors de l'envoi de l'image.", "error");
+                  }
+                }}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              />
+              <div
+                className={`w-full h-64 rounded-xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center gap-3 ${
+                  form.src
+                    ? "border-[#ffe992]/50 bg-black/40"
+                    : "border-white/10 bg-white/5 hover:border-[#ffe992]/30 hover:bg-white/10"
+                }`}
+              >
+                {form.src ? (
+                  <img
+                    src={form.src}
+                    alt="Aperçu"
+                    className="w-full h-full object-contain rounded-lg p-2"
+                  />
+                ) : (
+                  <>
+                    <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-[#ffe992] transition-colors">
+                      <Upload size={24} />
+                    </div>
+                    <p className="text-sm text-gray-400 group-hover:text-white transition-colors">
+                      Cliquez ou glissez une image ici
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Champs Texte */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-[#ffe992] uppercase tracking-wider">
+                Titre
+              </label>
+              <input
+                name="titre"
+                placeholder="Ex: L'Aube Dorée"
+                value={form.titre}
+                onChange={handleChange}
+                className="w-full bg-[#0a0a10] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:border-[#ffe992] focus:outline-none focus:ring-1 focus:ring-[#ffe992]/50 transition-all"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-[#ffe992] uppercase tracking-wider">
+                  Catégorie
+                </label>
+                <input
+                  list="categories"
+                  name="categorie"
+                  placeholder="Ex: Paysage"
+                  value={form.categorie}
+                  onChange={handleChange}
+                  className="w-full bg-[#0a0a10] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:border-[#ffe992] focus:outline-none focus:ring-1 focus:ring-[#ffe992]/50 transition-all"
+                />
+                <datalist id="categories">
+                  {allCategories.map((cat, index) => (
+                    <option key={index} value={cat} />
+                  ))}
+                </datalist>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-[#ffe992] uppercase tracking-wider">
+                  Alt Text
+                </label>
+                <input
+                  name="alt"
+                  placeholder="Description courte pour SEO"
+                  value={form.alt}
+                  onChange={handleChange}
+                  className="w-full bg-[#0a0a10] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:border-[#ffe992] focus:outline-none focus:ring-1 focus:ring-[#ffe992]/50 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-[#ffe992] uppercase tracking-wider">
+                Description
+              </label>
+              <textarea
+                name="description"
+                rows={4}
+                placeholder="Description détaillée de l'œuvre..."
+                value={form.description}
+                onChange={handleChange}
+                className="w-full bg-[#0a0a10] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:border-[#ffe992] focus:outline-none focus:ring-1 focus:ring-[#ffe992]/50 transition-all resize-none"
+              />
+            </div>
+          </div>
         </div>
 
-        {tarifsPredéfinis.length === 0 ? (
-          <div className="text-yellow-200 text-sm mb-2">
-            Aucun tarif disponible. Veuillez en créer dans la section "Gestion
-            des tarifs".
+        {/* Colonne Droite : Tarifs */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-[#ffe992] uppercase tracking-wider">
+              Tarifs Applicables
+            </label>
+            <a
+              href="/admin/tarifs"
+              target="_blank"
+              className="text-xs text-gray-400 hover:text-white underline decoration-gray-600 hover:decoration-white transition-all"
+            >
+              Gérer les tarifs
+            </a>
           </div>
-        ) : (
-          <>
-            {tarifsSélectionnés.length === 0 && (
-              <div className="text-yellow-200 text-sm mb-2">
-                Sélectionnez au moins un tarif pour cette photo.
+
+          <div className="bg-[#0a0a10] rounded-xl border border-white/10 overflow-hidden h-[600px] overflow-y-auto custom-scrollbar">
+            {tarifsPredéfinis.length === 0 ? (
+              <div className="p-8 text-center text-gray-500 flex flex-col items-center gap-3">
+                <AlertCircle size={32} />
+                <p>Aucun tarif disponible.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-white/5">
+                {tarifsPredéfinis.map((tarif) => {
+                  const isSelected = tarifsSélectionnés.includes(
+                    tarif._id || tarif.id
+                  );
+                  return (
+                    <div
+                      key={tarif._id || tarif.id}
+                      onClick={() => {
+                        if (isSelected) {
+                          setTarifsSélectionnés(
+                            tarifsSélectionnés.filter(
+                              (id) => id !== (tarif._id || tarif.id)
+                            )
+                          );
+                        } else {
+                          setTarifsSélectionnés([
+                            ...tarifsSélectionnés,
+                            tarif._id || tarif.id,
+                          ]);
+                        }
+                      }}
+                      className={`p-4 cursor-pointer transition-all duration-200 flex items-start gap-4 group ${
+                        isSelected
+                          ? "bg-[#ffe992]/10 hover:bg-[#ffe992]/20"
+                          : "hover:bg-white/5"
+                      }`}
+                    >
+                      <div
+                        className={`mt-1 w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                          isSelected
+                            ? "bg-[#ffe992] border-[#ffe992] text-black"
+                            : "border-gray-600 group-hover:border-gray-400 bg-transparent"
+                        }`}
+                      >
+                        {isSelected && <Check size={14} strokeWidth={3} />}
+                      </div>
+
+                      <div className="flex-1">
+                        <div
+                          className={`font-medium mb-1 transition-colors ${
+                            isSelected ? "text-[#ffe992]" : "text-white"
+                          }`}
+                        >
+                          {tarif.nom}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                          <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5">
+                            {tarif.format}
+                          </span>
+                          <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5">
+                            {tarif.support}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <span
+                          className={`text-lg font-bold ${
+                            isSelected ? "text-[#ffe992]" : "text-white"
+                          }`}
+                        >
+                          {tarif.prix}€
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto p-2 border border-gray-700 rounded">
-              {tarifsPredéfinis.map((tarif) => (
-                <div
-                  key={tarif._id || tarif.id}
-                  className="flex items-center gap-2 p-2 hover:bg-gray-800 rounded"
-                >
-                  <input
-                    type="checkbox"
-                    id={`tarif-${tarif._id || tarif.id}`}
-                    checked={tarifsSélectionnés.includes(tarif._id || tarif.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setTarifsSélectionnés([
-                          ...tarifsSélectionnés,
-                          tarif._id || tarif.id,
-                        ]);
-                      } else {
-                        setTarifsSélectionnés(
-                          tarifsSélectionnés.filter(
-                            (id) => id !== (tarif._id || tarif.id)
-                          )
-                        );
-                      }
-                    }}
-                    className="h-4 w-4"
-                  />
-                  <label
-                    htmlFor={`tarif-${tarif._id || tarif.id}`}
-                    className="flex-1 cursor-pointer"
-                  >
-                    <div className="font-medium">{tarif.nom}</div>
-                    <div className="text-sm text-gray-400">
-                      {tarif.format} - {tarif.support} -{" "}
-                      <span className="text-yellow-300">{tarif.prix}€</span>
-                    </div>
-                  </label>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+          </div>
+        </div>
       </div>
 
-      {/* Formulaire */}
-      <div className="grid grid-cols-1 gap-4 mb-6">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-
-            try {
-              // 1. Demander une signature au backend
-              const signRes = await fetch(
-                `${BASE_API_URL}/api/upload-cloudinary/sign`,
-                {
-                  method: "GET",
-                  credentials: "include", // Important pour l'auth
-                }
-              );
-
-              if (!signRes.ok) {
-                throw new Error(
-                  "Erreur lors de la récupération de la signature"
-                );
-              }
-
-              const signData = await signRes.json();
-              const { signature, timestamp, cloud_name, api_key, folder } =
-                signData;
-
-              // 2. Préparer l'upload direct vers Cloudinary
-              const formData = new FormData();
-              formData.append("file", file);
-              formData.append("signature", signature);
-              formData.append("timestamp", timestamp.toString());
-              formData.append("api_key", api_key);
-              formData.append("folder", folder);
-
-              // 3. Envoyer directement à Cloudinary
-              const uploadRes = await fetch(
-                `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
-                {
-                  method: "POST",
-                  body: formData,
-                }
-              );
-
-              const uploadData = await uploadRes.json();
-
-              if (uploadData.secure_url) {
-                setForm((prev) => ({ ...prev, src: uploadData.secure_url }));
-                addToast("Image uploadée avec succès !", "success");
-              } else {
-                console.error("Erreur Cloudinary:", uploadData);
-                setForm((prev) => ({ ...prev, src: "" }));
-                addToast(
-                  "L'upload a échoué : " +
-                    (uploadData.error?.message || "Erreur inconnue"),
-                  "error"
-                );
-              }
-            } catch (err) {
-              setForm((prev) => ({ ...prev, src: "" }));
-              addToast("Erreur lors de l'envoi de l'image.", "error");
-              console.error(err);
-            }
-          }}
-          className="input"
-        />
-
-        {/* Prévisualisation unique de l'image après upload */}
-        {form.src && (
-          <img
-            src={form.src}
-            alt="Aperçu"
-            className="w-64 h-auto mt-2 rounded border border-gray-600"
-          />
-        )}
-
-        <input
-          name="alt"
-          placeholder="Texte alternatif"
-          value={form.alt}
-          onChange={handleChange}
-          className="input"
-        />
-        <input
-          name="titre"
-          placeholder="Titre"
-          value={form.titre}
-          onChange={handleChange}
-          className="input"
-        />
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={form.description}
-          onChange={handleChange}
-          className="input"
-        />
-        <input
-          list="categories"
-          name="categorie"
-          placeholder="Catégorie"
-          value={form.categorie}
-          onChange={handleChange}
-          className="input"
-        />
-
-        <datalist id="categories">
-          {allCategories.map((cat, index) => (
-            <option key={index} value={cat} />
-          ))}
-        </datalist>
-
-        {/* Bloc de validation détaillé et bouton Valider  */}
+      {/* Bouton de validation */}
+      <div className="mt-8 pt-6 border-t border-white/5">
         <button
           onClick={handleSubmit}
           disabled={
@@ -565,7 +549,7 @@ export default function GalerieForm() {
             !form.categorie ||
             tarifsSélectionnés.length === 0
           }
-          className={`px-4 py-2 rounded font-bold transition w-full flex justify-center items-center gap-2 ${
+          className={`w-full py-4 rounded-xl font-bold uppercase tracking-widest transition-all duration-300 shadow-lg ${
             isSubmitting ||
             !form.src ||
             !form.titre ||
@@ -573,51 +557,30 @@ export default function GalerieForm() {
             !form.description ||
             !form.categorie ||
             tarifsSélectionnés.length === 0
-              ? "bg-gray-600 cursor-not-allowed"
-              : "bg-yellow-400 text-black hover:bg-yellow-500"
+              ? "bg-gray-800 text-gray-500 cursor-not-allowed shadow-none"
+              : "bg-[#ffe992] text-black hover:bg-white hover:shadow-[#ffe992]/20 transform hover:-translate-y-1"
           }`}
         >
           {isSubmitting ? (
-            <>
+            <div className="flex items-center justify-center gap-3">
               <span className="loading loading-spinner loading-sm"></span>
               Traitement en cours...
-            </>
+            </div>
           ) : editId ? (
-            "Modifier"
+            "Enregistrer les modifications"
           ) : (
-            "Valider"
+            "Ajouter à la galerie"
           )}
         </button>
-        {tarifsSélectionnés.length === 0 && (
-          <div className="text-red-400 text-xs mt-1">
-            Sélectionne au moins un tarif pour valider la photo.
-          </div>
-        )}
-        {!form.src && (
-          <div className="text-red-400 text-xs mt-1">
-            Ajoute une image (upload obligatoire).
-          </div>
-        )}
-        {!form.titre && (
-          <div className="text-red-400 text-xs mt-1">Le titre est requis.</div>
-        )}
-        {!form.alt && (
-          <div className="text-red-400 text-xs mt-1">
-            Le texte alternatif est requis.
-          </div>
-        )}
-        {!form.description && (
-          <div className="text-red-400 text-xs mt-1">
-            La description est requise.
-          </div>
-        )}
-        {!form.categorie && (
-          <div className="text-red-400 text-xs mt-1">
-            La catégorie est requise.
-          </div>
-        )}
 
-        {/* Liste avec miniatures */}
+        {/* Messages d'erreur contextuels */}
+        <div className="mt-4 flex flex-wrap gap-4 justify-center text-xs text-red-400/80 font-mono">
+          {!form.src && <span>* Image requise</span>}
+          {!form.titre && <span>* Titre requis</span>}
+          {tarifsSélectionnés.length === 0 && (
+            <span>* Au moins un tarif requis</span>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -6,6 +6,8 @@ import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import { API_URL as BASE_API_URL } from "../config/api";
 import { Link } from "react-router-dom";
+import { ArrowRight, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 
 const API_URL = `${BASE_API_URL}/api/services`;
 
@@ -26,88 +28,111 @@ export default function Services() {
 
   if (loading) {
     return (
-      <div className="text-center text-white py-20">
-        Chargement des prestations...
+      <div className="min-h-screen bg-[#0a0a10] flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-[#ffe992]"></span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#121212] text-white font-sans">
+    <div className="min-h-screen bg-[#0a0a10] text-white font-sans selection:bg-[#ffe992]/30">
       <Navbar />
-      <div className="max-w-7xl mx-auto py-20 px-6">
-        <h1 className="text-4xl font-bold text-center mb-4 text-[#ffe992]">
-          Nos Prestations
-        </h1>
-        <p className="text-center text-gray-400 mb-16 max-w-2xl mx-auto">
-          Découvrez nos services sur mesure pour capturer vos moments les plus
-          précieux. Mariages, shootings, événements... nous sommes à votre
-          écoute.
-        </p>
+
+      {/* Geometric Accents */}
+      <div className="geometric-accent fixed top-0 left-0 w-full h-full pointer-events-none z-0 opacity-30" />
+
+      <main className="max-w-7xl mx-auto py-20 px-6 pt-32 relative z-10">
+        {/* Header Cinematic */}
+        <div className="text-center mb-16">
+          <h1 className="text-5xl md:text-7xl font-bold mb-4 tracking-tight font-['Cinzel']">
+            <span className="hero-title-gradient bg-clip-text text-transparent bg-gradient-to-r from-[#d6c487] via-[#ffe992] to-[#c9b36f]">
+              Nos Prestations
+            </span>
+          </h1>
+          <div className="h-1 w-24 bg-gradient-to-r from-transparent via-[#ffe992] to-transparent mx-auto mb-6 opacity-50" />
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto font-light leading-relaxed">
+            Découvrez nos services sur mesure pour capturer vos moments les plus
+            précieux. Mariages, shootings, événements... nous sublimons chaque
+            instant.
+          </p>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service) => (
-            <div
+          {services.map((service, index) => (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
               key={service._id || service.id}
-              className="bg-[#1e1e2d] rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-[#ffe992]/10 transition duration-300 group flex flex-col relative"
+              className="group relative bg-[#12121a]/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/5 hover:border-[#ffe992]/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.1)] flex flex-col"
             >
               {/* Badge Catégorie */}
-              <div className="absolute top-4 right-4 z-10">
-                <span className="bg-black/60 backdrop-blur-md text-[#ffe992] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-[#ffe992]/20">
+              <div className="absolute top-4 right-4 z-20">
+                <span className="bg-black/60 backdrop-blur-md text-[#ffe992] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-widest border border-[#ffe992]/20 shadow-lg">
                   {service.categorie}
                 </span>
               </div>
 
-              {/* Image principale (première image ou placeholder) */}
-              <div className="h-64 overflow-hidden relative">
+              {/* Image principale */}
+              <div className="h-72 overflow-hidden relative">
                 <img
                   src={service.images[0] || "/placeholder-service.jpg"}
                   alt={service.titre}
-                  className="w-full h-full object-cover transition duration-500 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#1e1e2d] to-transparent opacity-60"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a10] via-transparent to-transparent opacity-80"></div>
               </div>
 
-              <div className="p-6 flex-1 flex flex-col">
-                <h3 className="text-xl font-bold mb-2 text-[#ffe992]">
+              <div className="p-8 flex-1 flex flex-col -mt-12 relative z-10">
+                <h3 className="text-2xl font-serif italic text-white mb-3 group-hover:text-[#ffe992] transition-colors">
                   {service.titre}
                 </h3>
-                <p className="text-gray-400 text-sm mb-4 flex-1 whitespace-pre-line line-clamp-4">
+                <p className="text-gray-400 text-sm mb-6 flex-1 line-clamp-3 font-light leading-relaxed">
                   {service.description}
                 </p>
 
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10 gap-2">
-                  <span className="text-lg font-bold text-white">
-                    {service.prix > 0
-                      ? `À partir de ${service.prix}€`
-                      : "Sur devis"}
-                  </span>
-                  <div className="flex gap-2">
+                <div className="flex items-center justify-between pt-6 border-t border-white/5 mt-auto">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-gray-500 uppercase tracking-wider">
+                      À partir de
+                    </span>
+                    <span className="text-xl font-bold text-[#ffe992]">
+                      {service.prix > 0 ? `${service.prix}€` : "Sur devis"}
+                    </span>
+                  </div>
+
+                  <div className="flex gap-3">
                     <Link
                       to={`/services/${service._id || service.id}`}
-                      className="bg-white/10 text-white px-3 py-2 rounded font-semibold hover:bg-white/20 transition text-sm"
+                      className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors border border-white/5"
+                      title="Voir détails"
                     >
-                      Voir détails
+                      <ArrowRight
+                        size={18}
+                        className="-rotate-45 group-hover:rotate-0 transition-transform duration-300"
+                      />
                     </Link>
                     <button
                       onClick={() => setSelectedService(service)}
-                      className="bg-[#ffe992] text-black px-3 py-2 rounded font-semibold hover:bg-[#d6c487] transition text-sm"
+                      className="px-5 py-2 bg-[#ffe992] text-black rounded-full font-bold text-xs uppercase tracking-wider hover:bg-white transition-colors shadow-[0_0_15px_rgba(255,233,146,0.2)]"
                     >
-                      Contacter
+                      Réserver
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {services.length === 0 && (
-          <div className="text-center text-gray-500 py-10">
-            Aucune prestation disponible pour le moment.
+          <div className="text-center text-gray-500 py-20 bg-white/5 rounded-2xl border border-white/5 mt-10">
+            <Sparkles className="mx-auto mb-4 text-gray-600" size={32} />
+            <p>Aucune prestation disponible pour le moment.</p>
           </div>
         )}
-      </div>
+      </main>
 
       {selectedService && (
         <ContactModal

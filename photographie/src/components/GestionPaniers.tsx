@@ -1,13 +1,20 @@
-// =======================
-// 📦 Import des modules
-// =======================
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Trash2, Mail, ShoppingCart, Image as ImageIcon, Package, Ruler, Layers } from "lucide-react";
+import {
+  Trash2,
+  Mail,
+  ShoppingCart,
+  Image as ImageIcon,
+  Package,
+  Ruler,
+  Layers,
+  Check,
+  X,
+} from "lucide-react";
+import { API_URL as BASE_API_URL } from "../config/api";
+import { useToast } from "./Toast";
 
-// =======================
-// 🧩 Interfaces TypeScript
-// =======================
+const API_URL = `${BASE_API_URL}/api/paniers`;
 
 interface User {
   _id: string;
@@ -41,32 +48,22 @@ interface Panier {
   dateCreation?: string;
 }
 
-// URL d’accès à l’API
-import { API_URL as BASE_API_URL } from "../config/api";
-const API_URL = `${BASE_API_URL}/api/paniers`;
-
-import { useToast } from "./Toast";
-
-// =====================================================================
-// 🎯 Composant principal : Gestion des Paniers (Admin)
-// =====================================================================
 export default function GestionPaniers() {
   const [paniers, setPaniers] = useState<Panier[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { addToast } = useToast();
 
-  // 🔄 Récupération des paniers
   const fetchPaniers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(API_URL, {
-        withCredentials: true,
-      });
+      const res = await axios.get(API_URL, { withCredentials: true });
       setPaniers(Array.isArray(res.data) ? res.data : []);
     } catch (e) {
       const err = e as any;
-      setError(err?.response?.data?.message || "Erreur lors du chargement des paniers.");
+      setError(
+        err?.response?.data?.message || "Erreur lors du chargement des paniers."
+      );
     } finally {
       setLoading(false);
     }
@@ -76,14 +73,12 @@ export default function GestionPaniers() {
     fetchPaniers();
   }, []);
 
-  // ❌ Suppression d’un panier
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce panier ?")) return;
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce panier ?"))
+      return;
 
     try {
-      await axios.delete(`${API_URL}/${id}`, {
-        withCredentials: true,
-      });
+      await axios.delete(`${API_URL}/${id}`, { withCredentials: true });
       setPaniers(paniers.filter((p) => p._id !== id));
       addToast("Panier supprimé avec succès", "success");
     } catch {
@@ -91,166 +86,185 @@ export default function GestionPaniers() {
     }
   };
 
-  // 🧮 Calcul du total d'articles
   const getTotalArticles = (articles: Article[]) => {
     return articles.reduce((acc, item) => acc + item.quantite, 0);
   };
 
-  // 🧮 Calcul du montant total estimé
   const getTotalMontant = (articles: Article[]) => {
-    return articles.reduce((acc, item) => acc + (item.prixUnitaire || 0) * item.quantite, 0);
+    return articles.reduce(
+      (acc, item) => acc + (item.prixUnitaire || 0) * item.quantite,
+      0
+    );
   };
 
   return (
-    <div className="p-6 min-h-screen bg-base-100">
-      <div className="max-w-7xl mx-auto">
-        {/* En-tête */}
-        <div className="flex items-center gap-3 mb-8 pb-4 border-b border-base-300">
-          <div className="p-3 bg-primary/10 rounded-xl">
-            <ShoppingCart className="w-8 h-8 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold">Gestion des Paniers</h2>
-            <p className="text-gray-500">Suivi des commandes en cours et paniers abandonnés</p>
-          </div>
+    <div className="bg-[#12121a]/50 backdrop-blur-md rounded-2xl border border-white/5 shadow-xl p-8 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/5">
+        <div>
+          <h2 className="text-2xl font-serif italic text-[#ffe992] mb-1">
+            Gestion des Paniers
+          </h2>
+          <p className="text-xs text-gray-400 uppercase tracking-wider">
+            Suivi des commandes en cours
+          </p>
         </div>
+        <div className="text-right">
+          <span className="text-xs text-gray-500 uppercase tracking-wider block mb-1">
+            Total paniers
+          </span>
+          <span className="text-xl font-bold text-white">{paniers.length}</span>
+        </div>
+      </div>
 
-        {error && <div className="alert alert-error mb-6 shadow-lg">{error}</div>}
+      {error && (
+        <div className="bg-red-500/10 text-red-400 p-4 rounded-lg mb-6 border border-red-500/20 flex items-center gap-3">
+          <X size={20} /> {error}
+        </div>
+      )}
 
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <span className="loading loading-spinner loading-lg text-primary"></span>
-          </div>
-        ) : paniers.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-gray-400 bg-base-200/50 rounded-2xl border-2 border-dashed border-base-300">
-            <ShoppingCart className="w-16 h-16 mb-4 opacity-50" />
-            <p className="text-xl font-medium">Aucun panier actif pour le moment.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {paniers.map((panier) => (
-              <div 
-                key={panier._id} 
-                className="card bg-base-200 shadow-xl hover:shadow-2xl transition-all duration-300 border border-base-300 flex flex-col h-full"
-              >
-                {/* 👤 En-tête Carte : Info Client */}
-                <div className="card-body p-5 pb-4 bg-base-300/50 rounded-t-xl">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="card-title text-xl capitalize text-base-content">
-                        {panier.utilisateur?.prenom || "Client"} {panier.utilisateur?.nom || "Inconnu"}
-                      </h3>
-                      <a 
-                        href={`mailto:${panier.utilisateur?.email}`}
-                        className="text-sm text-primary hover:underline flex items-center gap-1 mt-1"
-                      >
-                        <Mail size={12} /> {panier.utilisateur?.email}
-                      </a>
-                    </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <div className="badge badge-primary font-bold">
-                        {getTotalArticles(panier.articles)} articles
-                      </div>
-                      <div className="text-xs font-mono opacity-50">
-                        {getTotalMontant(panier.articles) > 0 ? `${getTotalMontant(panier.articles)} €` : "Prix N/A"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 📦 Corps Carte : Liste Articles */}
-                <div className="flex-1 overflow-y-auto max-h-[400px] scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-transparent p-2">
-                  {panier.articles.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500 text-sm italic">
-                      Panier vide
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-2">
-                      {panier.articles.map((item, index) => (
-                        <div key={index} className="flex gap-3 p-3 bg-base-100 rounded-lg border border-base-content/5 hover:border-primary/30 transition-colors">
-                          {/* Miniature */}
-                          <div className="relative w-24 h-24 rounded-md overflow-hidden bg-base-300 flex-shrink-0">
-                            {(item.image || item.photo?.src) ? (
-                              <img 
-                                src={
-                                  (item.image || item.photo?.src || "").startsWith('http') 
-                                    ? (item.image || item.photo?.src) 
-                                    : `${BASE_API_URL}${item.image || item.photo?.src}`
-                                } 
-                                alt={item.titre || item.photo?.titre} 
-                                className="object-cover w-full h-full"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = 'none';
-                                  (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                                }}
-                              />
-                            ) : null}
-                            {/* Fallback icon */}
-                            <div className={`absolute inset-0 flex items-center justify-center bg-base-300 text-gray-400 ${(item.image || item.photo?.src) ? 'hidden' : ''}`}>
-                              <ImageIcon size={24} />
-                            </div>
-                          </div>
-                          
-                          {/* Détails Article */}
-                          <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                            <div>
-                              <h4 className="font-bold text-sm truncate text-base-content" title={item.titre || item.photo?.titre}>
-                                {item.titre || item.photo?.titre || "Article sans titre"}
-                              </h4>
-                              {/* Détails techniques */}
-                              <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-500">
-                                <span className="flex items-center gap-1 bg-base-200 px-1.5 py-0.5 rounded">
-                                  <Ruler size={10} /> {item.format || "Standard"}
-                                </span>
-                                <span className="flex items-center gap-1 bg-base-200 px-1.5 py-0.5 rounded">
-                                  <Layers size={10} /> {item.support || "Papier"}
-                                </span>
-                              </div>
-                            </div>
-                            
-                            <div className="flex justify-between items-end mt-2">
-                              <span className="badge badge-sm badge-ghost gap-1">
-                                <Package size={10} /> Qté: {item.quantite}
-                              </span>
-                              <span className="font-mono text-sm font-bold text-primary">
-                                {item.prixUnitaire ? `${item.prixUnitaire} €` : "N/A"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* ⚙️ Pied de Carte : Actions */}
-                <div className="p-4 bg-base-300/30 border-t border-base-300 flex justify-between items-center mt-auto rounded-b-xl">
-                  <span className="text-xs text-gray-400 font-mono">
-                    ID: {panier._id.slice(-6)}
-                  </span>
-                  <div className="flex gap-2">
+      {loading ? (
+        <div className="flex items-center justify-center h-64 text-gray-500 gap-2">
+          <span className="loading loading-spinner loading-lg"></span>{" "}
+          Chargement...
+        </div>
+      ) : paniers.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-64 text-gray-500 gap-2">
+          <ShoppingCart size={32} className="opacity-20" />
+          <p>Aucun panier actif pour le moment.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {paniers.map((panier) => (
+            <div
+              key={panier._id}
+              className="bg-[#0a0a10] rounded-xl border border-white/10 overflow-hidden flex flex-col h-full hover:border-[#ffe992]/30 transition-all group"
+            >
+              {/* En-tête Carte */}
+              <div className="p-5 bg-white/5 border-b border-white/5">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-bold text-white text-lg capitalize group-hover:text-[#ffe992] transition-colors">
+                      {panier.utilisateur?.prenom || "Client"}{" "}
+                      {panier.utilisateur?.nom || "Inconnu"}
+                    </h3>
                     <a
                       href={`mailto:${panier.utilisateur?.email}`}
-                      className="btn btn-sm btn-info btn-outline gap-2"
-                      title="Envoyer un email"
+                      className="text-xs text-gray-400 hover:text-white flex items-center gap-1 mt-1 transition-colors"
                     >
-                      <Mail size={16} />
-                      <span className="hidden sm:inline">Contacter</span>
+                      <Mail size={12} /> {panier.utilisateur?.email}
                     </a>
-                    <button
-                      onClick={() => handleDelete(panier._id)}
-                      className="btn btn-sm btn-error btn-outline btn-square"
-                      title="Supprimer le panier"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[#ffe992] font-bold text-lg">
+                      {getTotalMontant(panier.articles) > 0
+                        ? `${getTotalMontant(panier.articles)} €`
+                        : "N/A"}
+                    </div>
+                    <div className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">
+                      {getTotalArticles(panier.articles)} articles
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+
+              {/* Liste Articles */}
+              <div className="flex-1 overflow-y-auto max-h-[300px] custom-scrollbar p-3 space-y-2">
+                {panier.articles.length === 0 ? (
+                  <div className="p-8 text-center text-gray-500 text-xs italic">
+                    Panier vide
+                  </div>
+                ) : (
+                  panier.articles.map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex gap-3 p-2 bg-[#1a1a20] rounded-lg border border-white/5 hover:border-white/10 transition-colors"
+                    >
+                      {/* Miniature */}
+                      <div className="w-16 h-16 rounded bg-black/40 overflow-hidden border border-white/5 flex-shrink-0">
+                        {item.image || item.photo?.src ? (
+                          <img
+                            src={
+                              (item.image || item.photo?.src || "").startsWith(
+                                "http"
+                              )
+                                ? item.image || item.photo?.src
+                                : `${BASE_API_URL}${
+                                    item.image || item.photo?.src
+                                  }`
+                            }
+                            alt={item.titre || item.photo?.titre}
+                            className="object-cover w-full h-full"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-600">
+                            <ImageIcon size={20} />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Détails */}
+                      <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                        <div>
+                          <h4
+                            className="font-bold text-white text-xs truncate"
+                            title={item.titre || item.photo?.titre}
+                          >
+                            {item.titre ||
+                              item.photo?.titre ||
+                              "Article sans titre"}
+                          </h4>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            <span className="text-[10px] bg-white/5 text-gray-400 px-1.5 py-0.5 rounded border border-white/5">
+                              {item.format || "Standard"}
+                            </span>
+                            <span className="text-[10px] bg-white/5 text-gray-400 px-1.5 py-0.5 rounded border border-white/5">
+                              {item.support || "Papier"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-end mt-1">
+                          <span className="text-[10px] text-gray-500 font-mono">
+                            Qté: {item.quantite}
+                          </span>
+                          <span className="text-xs font-bold text-[#ffe992]">
+                            {item.prixUnitaire
+                              ? `${item.prixUnitaire} €`
+                              : "N/A"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="p-4 bg-white/5 border-t border-white/5 flex justify-between items-center mt-auto">
+                <span className="text-[10px] text-gray-500 font-mono">
+                  ID: {panier._id.slice(-6)}
+                </span>
+                <div className="flex gap-2">
+                  <a
+                    href={`mailto:${panier.utilisateur?.email}`}
+                    className="p-2 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg transition-colors border border-blue-500/20"
+                    title="Contacter"
+                  >
+                    <Mail size={14} />
+                  </a>
+                  <button
+                    onClick={() => handleDelete(panier._id)}
+                    className="p-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-colors border border-red-500/20"
+                    title="Supprimer"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
