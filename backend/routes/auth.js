@@ -42,6 +42,7 @@ router.post(
     // Vérification des erreurs de validation
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log("[AUTH] Register validation errors:", errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
 
@@ -86,6 +87,7 @@ router.post(
       res.status(201).json({ message: "Utilisateur créé" });
     } catch (err) {
       // En cas d'erreur (ex: email déjà utilisé), renvoi d'une réponse avec un statut 400 (Bad Request) et le message d'erreur
+      console.error("[AUTH] Register error:", err);
       res.status(400).json({ error: err.message });
     }
   }

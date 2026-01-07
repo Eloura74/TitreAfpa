@@ -62,6 +62,48 @@ router.get("/sign", authenticate, (req, res) => {
 });
 
 // -------------------------------------------------------------
+// CONFIGURATION DE MULTER
+// -------------------------------------------------------------
+const multer = require("multer");
+const storage = multer.memoryStorage(); // Stockage en mémoire pour traitement rapide
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // Limite à 10MB
+});
+
+// -------------------------------------------------------------
+// POST /api/upload-cloudinary
+// -------------------------------------------------------------
+// Upload d'une image vers Cloudinary (via le serveur)
+router.post("/", authenticate, upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "Aucun fichier fourni." });
+    }
+
+    // Conversion du buffer en base64 pour l'envoi à Cloudinary
+    const b64 = Buffer.from(req.file.buffer).toString("base64");
+    let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+
+    const result = await cloudinary.uploader.upload(dataURI, {
+      folder: "galerie", // Dossier de destination sur Cloudinary
+      resource_type: "auto",
+    });
+
+    res.json({
+      url: result.secure_url,
+      public_id: result.public_id,
+    });
+  } catch (err) {
+    console.error("Erreur upload Cloudinary:", err);
+    res.status(500).json({
+      error: "Erreur lors de l'upload vers Cloudinary",
+      details: err.message,
+    });
+  }
+});
+
+// -------------------------------------------------------------
 // EXPORT DU ROUTEUR
 // -------------------------------------------------------------
 // Ce fichier est monté dans app.js via : app.use('/api/upload-cloudinary', ...)

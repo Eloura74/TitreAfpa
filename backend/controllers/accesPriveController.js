@@ -9,7 +9,9 @@ exports.getAll = async (req, res) => {
     if (req.user.role !== "admin") {
       filter.client = req.user.id;
     }
-    const items = await AccesPrive.find(filter).populate("photos").populate("client", "email nom prenom");
+    const items = await AccesPrive.find(filter)
+      .populate("photos")
+      .populate("client", "email nom prenom");
     res.json(items);
   } catch (err) {
     res.status(500).json({ erreur: err.message });
@@ -19,11 +21,17 @@ exports.getAll = async (req, res) => {
 // GET ONE
 exports.getOne = async (req, res) => {
   try {
-    const item = await AccesPrive.findById(req.params.id).populate("photos").populate("client");
-    if (!item) return res.status(404).json({ erreur: "Accès privé non trouvé" });
+    const item = await AccesPrive.findById(req.params.id)
+      .populate("photos")
+      .populate("client");
+    if (!item)
+      return res.status(404).json({ erreur: "Accès privé non trouvé" });
 
     // Vérification droits : Admin ou le client propriétaire
-    if (req.user.role !== "admin" && item.client._id.toString() !== req.user.id) {
+    if (
+      req.user.role !== "admin" &&
+      item.client._id.toString() !== req.user.id
+    ) {
       return res.status(403).json({ erreur: "Accès non autorisé." });
     }
 
@@ -40,12 +48,22 @@ exports.create = async (req, res) => {
 
     // Validation du client
     if (!data.clientEmail) {
-      return res.status(400).json({ erreur: "L'email du client est obligatoire." });
+      console.log("[AccesPrive] Erreur: Email client manquant");
+      return res
+        .status(400)
+        .json({ erreur: "L'email du client est obligatoire." });
     }
 
     const clientUser = await User.findOne({ email: data.clientEmail });
     if (!clientUser) {
-      return res.status(400).json({ erreur: `Client avec l'email ${data.clientEmail} introuvable.` });
+      console.log(
+        `[AccesPrive] Erreur: Client ${data.clientEmail} introuvable`
+      );
+      return res
+        .status(400)
+        .json({
+          erreur: `Client avec l'email ${data.clientEmail} introuvable.`,
+        });
     }
 
     data.client = clientUser._id;
@@ -64,7 +82,7 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const data = { ...req.body };
-    
+
     if (data.clientEmail) {
       const clientUser = await User.findOne({ email: data.clientEmail });
       if (clientUser) {
@@ -73,7 +91,11 @@ exports.update = async (req, res) => {
       delete data.clientEmail;
     }
 
-    const updatedItem = await AccesPrive.findByIdAndUpdate(req.params.id, data, { new: true });
+    const updatedItem = await AccesPrive.findByIdAndUpdate(
+      req.params.id,
+      data,
+      { new: true }
+    );
     res.json(updatedItem);
   } catch (err) {
     res.status(400).json({ erreur: err.message });
@@ -104,7 +126,8 @@ exports.addPhotos = async (req, res) => {
       { new: true }
     ).populate("photos");
 
-    if (!updatedItem) return res.status(404).json({ erreur: "Accès privé non trouvé" });
+    if (!updatedItem)
+      return res.status(404).json({ erreur: "Accès privé non trouvé" });
 
     res.json(updatedItem);
   } catch (err) {

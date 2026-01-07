@@ -267,6 +267,12 @@ export default function GestionAccesPrive() {
 
     try {
       const { id, _id, photos, ...dataToSend } = form as any;
+
+      // Nettoyage de l'email
+      if (dataToSend.clientEmail) {
+        dataToSend.clientEmail = dataToSend.clientEmail.trim();
+      }
+
       let targetId = editId;
 
       if (editId) {
