@@ -47,21 +47,26 @@ export default function MonCompte() {
 
       // Chargement parallèle des événements et de l'historique
       Promise.all([
-        axios.get(`${API_URL}/api/acces-prive`, { withCredentials: true }).catch(err => {
-          console.error("Erreur chargement événements:", err);
-          return { data: [] };
-        }),
-        axios.get(`${API_URL}/api/paiements/me`, { withCredentials: true }).catch(err => {
-          console.error("Erreur chargement historique:", err);
-          return { data: [] };
+        axios
+          .get(`${API_URL}/api/acces-prive`, { withCredentials: true })
+          .catch((err) => {
+            console.error("Erreur chargement événements:", err);
+            return { data: [] };
+          }),
+        axios
+          .get(`${API_URL}/api/paiements/me`, { withCredentials: true })
+          .catch((err) => {
+            console.error("Erreur chargement historique:", err);
+            return { data: [] };
+          }),
+      ])
+        .then(([resEvents, resPaiements]) => {
+          setEvenements(resEvents.data);
+          setPaiements(resPaiements.data);
         })
-      ]).then(([resEvents, resPaiements]) => {
-        setEvenements(resEvents.data);
-        setPaiements(resPaiements.data);
-      }).finally(() => {
-        setLoading(false);
-      });
-
+        .finally(() => {
+          setLoading(false);
+        });
     } else {
       setLoading(false);
     }
@@ -78,7 +83,10 @@ export default function MonCompte() {
           <p className="mb-6 text-gray-400">
             Vous devez être connecté pour accéder à votre espace.
           </p>
-          <Link to="/connexion" className="px-6 py-2 bg-yellow-500 text-black rounded-full font-bold hover:bg-yellow-400 transition">
+          <Link
+            to="/connexion"
+            className="px-6 py-2 bg-yellow-500 text-black rounded-full font-bold hover:bg-yellow-400 transition"
+          >
             Se connecter
           </Link>
         </div>
@@ -89,26 +97,35 @@ export default function MonCompte() {
 
   return (
     <div className="min-h-screen bg-[#0a0a10] text-white flex flex-col">
-      <Navbar variant="client" />
-      
+      <Navbar />
+
       <main className="flex-1 container mx-auto px-4 py-12 md:py-20 max-w-6xl">
         {/* En-tête de l'espace client */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 border-b border-white/10 pb-8 gap-6">
           <div>
-            <h1 className="text-4xl md:text-5xl font-serif italic text-[#ffe992] mb-2">L'Écrin Privé</h1>
+            <h1 className="text-4xl md:text-5xl font-serif italic text-[#ffe992] mb-2">
+              L'Écrin Privé
+            </h1>
             <p className="text-gray-400 text-sm md:text-base tracking-wide">
-              Bienvenue, <span className="text-white font-medium">{user.prenom} {user.nom}</span>
+              Bienvenue,{" "}
+              <span className="text-white font-medium">
+                {user.prenom} {user.nom}
+              </span>
             </p>
           </div>
           <div className="flex flex-col items-end gap-2">
-             <span className="text-xs uppercase tracking-widest text-gray-500">Compte connecté</span>
-             <span className="text-sm font-mono text-yellow-500/80">{email}</span>
-             <button
-                onClick={logout}
-                className="text-xs text-red-500 hover:text-red-400 underline mt-1"
-              >
-                Se déconnecter
-              </button>
+            <span className="text-xs uppercase tracking-widest text-gray-500">
+              Compte connecté
+            </span>
+            <span className="text-sm font-mono text-yellow-500/80">
+              {email}
+            </span>
+            <button
+              onClick={logout}
+              className="text-xs text-red-500 hover:text-red-400 underline mt-1"
+            >
+              Se déconnecter
+            </button>
           </div>
         </div>
 
@@ -116,7 +133,9 @@ export default function MonCompte() {
           {/* Section Vos Événements */}
           <section>
             <div className="flex items-center gap-4 mb-8">
-              <h2 className="text-2xl font-light uppercase tracking-[0.2em] text-white">Vos Événements</h2>
+              <h2 className="text-2xl font-light uppercase tracking-[0.2em] text-white">
+                Vos Événements
+              </h2>
               <div className="h-[1px] flex-1 bg-gradient-to-r from-yellow-500/50 to-transparent" />
             </div>
 
@@ -127,7 +146,8 @@ export default function MonCompte() {
             ) : evenements.length === 0 ? (
               <div className="bg-white/5 rounded-2xl p-8 text-center border border-white/10">
                 <p className="text-gray-400 text-lg font-light">
-                  Aucun événement privé n'est associé à votre compte pour le moment.
+                  Aucun événement privé n'est associé à votre compte pour le
+                  moment.
                 </p>
               </div>
             ) : (
@@ -142,9 +162,9 @@ export default function MonCompte() {
                     {/* Image de couverture */}
                     <div className="relative aspect-[4/3] overflow-hidden bg-black">
                       {event.image ? (
-                        <img 
-                          src={event.image} 
-                          alt={event.titre} 
+                        <img
+                          src={event.image}
+                          alt={event.titre}
                           className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
                         />
                       ) : (
@@ -153,7 +173,7 @@ export default function MonCompte() {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                      
+
                       <div className="absolute bottom-4 left-4 right-4">
                         <h3 className="text-xl font-bold text-white mb-1 group-hover:text-yellow-200 transition-colors">
                           {event.titre}
@@ -177,17 +197,25 @@ export default function MonCompte() {
                           {event.photos?.length || 0} photos
                         </span>
                       </div>
-                      
+
                       <p className="text-sm text-gray-400 line-clamp-2 mb-6 font-light">
-                        {event.description || "Accédez à votre galerie privée pour sélectionner vos photos."}
+                        {event.description ||
+                          "Accédez à votre galerie privée pour sélectionner vos photos."}
                       </p>
 
-                      <button 
-                        onClick={() => navigate(`/client/evenement/${event._id}`)}
+                      <button
+                        onClick={() =>
+                          navigate(`/client/evenement/${event._id}`)
+                        }
                         className="w-full py-3 bg-white/5 hover:bg-yellow-500 hover:text-black border border-white/10 hover:border-yellow-500 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 group/btn"
                       >
-                        <span className="text-sm uppercase tracking-wider font-medium">Accéder à la galerie</span>
-                        <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                        <span className="text-sm uppercase tracking-wider font-medium">
+                          Accéder à la galerie
+                        </span>
+                        <ArrowRight
+                          size={16}
+                          className="group-hover/btn:translate-x-1 transition-transform"
+                        />
                       </button>
                     </div>
                   </motion.div>
@@ -199,10 +227,12 @@ export default function MonCompte() {
           {/* Section Historique des commandes */}
           <section>
             <div className="flex items-center gap-4 mb-8">
-              <h2 className="text-2xl font-light uppercase tracking-[0.2em] text-white">Mes Commandes</h2>
+              <h2 className="text-2xl font-light uppercase tracking-[0.2em] text-white">
+                Mes Commandes
+              </h2>
               <div className="h-[1px] flex-1 bg-gradient-to-r from-yellow-500/50 to-transparent" />
             </div>
-            
+
             <div className="bg-[#12121a] rounded-xl border border-white/5 overflow-hidden">
               {loading ? (
                 <div className="p-8 text-center">
@@ -212,7 +242,10 @@ export default function MonCompte() {
                 <div className="p-8 text-center text-gray-500">
                   Vous n'avez pas encore passé de commande.
                   <br />
-                  <Link to="/galerie" className="text-[#ffe992] hover:underline mt-2 inline-block">
+                  <Link
+                    to="/galerie"
+                    className="text-[#ffe992] hover:underline mt-2 inline-block"
+                  >
                     Découvrir la galerie
                   </Link>
                 </div>
@@ -230,7 +263,10 @@ export default function MonCompte() {
                     </thead>
                     <tbody className="divide-y divide-white/5">
                       {paiements.map((p) => (
-                        <tr key={p._id} className="hover:bg-white/5 transition-colors">
+                        <tr
+                          key={p._id}
+                          className="hover:bg-white/5 transition-colors"
+                        >
                           <td className="py-4 px-6 font-mono text-sm text-gray-300">
                             {new Date(p.date).toLocaleDateString()}
                           </td>
@@ -241,9 +277,13 @@ export default function MonCompte() {
                             {p.montant.toFixed(2)} €
                           </td>
                           <td className="py-4 px-6">
-                            <span className={`px-2 py-1 rounded text-xs font-medium uppercase ${
-                              p.statut === "payé" ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"
-                            }`}>
+                            <span
+                              className={`px-2 py-1 rounded text-xs font-medium uppercase ${
+                                p.statut === "payé"
+                                  ? "bg-green-500/20 text-green-400"
+                                  : "bg-yellow-500/20 text-yellow-400"
+                              }`}
+                            >
                               {p.statut}
                             </span>
                           </td>

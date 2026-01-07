@@ -2,6 +2,8 @@
 import { useState } from "react"; // Pour gérer l'ouverture/fermeture du menu
 import { Link, useLocation, useNavigate } from "react-router-dom"; // Pour naviguer entre les pages sans recharger
 import { useAuthStore, useAuthSync } from "../../store/authStore"; // Store Zustand pour gérer l'authentification
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, Check, Camera, Palette } from "lucide-react";
 import "../../styles/navbar.css"; // Fichier CSS spécifique à la Navbar
 
 // === Composant principal de la barre de navigation ===
@@ -32,6 +34,7 @@ export default function Navbar({ variant }: { variant?: "client" }) {
 
   // État local pour contrôler l'ouverture du menu sur mobile
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Récupération des infos de connexion via Zustand
   const { email, isAdmin, logout } = useAuthStore();
@@ -85,20 +88,84 @@ export default function Navbar({ variant }: { variant?: "client" }) {
         </button>
 
         {/* === Sélecteur d'univers (photographie/graphisme) === */}
-        <div className="flex items-center gap-3 mr-4">
-          <select
-            className="bg-[#232336] border border-[#ffe992]/30 rounded px-2 py-1 text-white"
-            value={univers}
-            onChange={(e) =>
+        <div className="relative mr-4 hidden md:block">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-all duration-300 hover:border-[#ffe992]/30"
+          >
+            {univers === "photographie" ? (
+              <Camera size={16} className="text-[#ffe992]" />
+            ) : (
+              <Palette size={16} className="text-[#ffe992]" />
+            )}
+            <span className="capitalize tracking-wide">
+              {univers === "photographie" ? "Photographie" : "Graphisme"}
+            </span>
+            <ChevronDown
+              size={14}
+              className={`text-white/50 transition-transform duration-300 ${
+                isDropdownOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          <AnimatePresence>
+            {isDropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className="absolute top-full right-0 mt-2 w-48 bg-[#0a0a10]/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] z-50"
+              >
+                <div className="p-1">
+                  {[
+                    { id: "photographie", label: "Photographie", icon: Camera },
+                    { id: "graphisme", label: "Graphisme", icon: Palette },
+                  ].map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => {
+                        handleUniversChange(
+                          option.id as "photographie" | "graphisme"
+                        );
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2.5 text-sm flex items-center justify-between rounded-lg transition-all duration-200 ${
+                        univers === option.id
+                          ? "bg-white/10 text-[#ffe992]"
+                          : "text-gray-400 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <option.icon size={16} />
+                        <span className="font-medium">{option.label}</span>
+                      </div>
+                      {univers === option.id && <Check size={14} />}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Version Mobile du sélecteur (visible uniquement sur mobile) */}
+        <div className="md:hidden mr-4">
+          <button
+            onClick={() =>
               handleUniversChange(
-                e.target.value as "photographie" | "graphisme"
+                univers === "photographie" ? "graphisme" : "photographie"
               )
             }
-            aria-label="Changer d'univers"
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-[#ffe992]"
           >
-            <option value="photographie">Photographie</option>
-            <option value="graphisme">Graphisme</option>
-          </select>
+            {univers === "photographie" ? (
+              <Camera size={20} />
+            ) : (
+              <Palette size={20} />
+            )}
+          </button>
         </div>
         {/* === Menu de navigation (visible ou non selon isMenuOpen) === */}
         <ul className={`navbar-menu ${isMenuOpen ? "open" : ""}`}>
