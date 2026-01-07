@@ -134,9 +134,19 @@ export default function GestionAccesPrive() {
         adresse: { rue: "", ville: "", codePostal: "", pays: "France" },
       });
     } catch (err: any) {
-      setError(
-        err.response?.data?.error || "Erreur lors de la création du client."
-      );
+      console.error("Erreur création client:", err);
+      const resData = err.response?.data;
+      let errorMsg = "Erreur lors de la création du client.";
+
+      if (resData?.errors && Array.isArray(resData.errors)) {
+        // Cas des erreurs de validation (express-validator)
+        errorMsg = resData.errors.map((e: any) => e.msg).join(", ");
+      } else if (resData?.error) {
+        // Cas d'une erreur unique (ex: email existant)
+        errorMsg = resData.error;
+      }
+
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -158,8 +168,7 @@ export default function GestionAccesPrive() {
 
         const resUpload = await axios.post(
           `${BASE_API_URL}/api/upload-cloudinary`,
-          formData,
-          { withCredentials: true }
+          formData
         );
         const imageUrl = resUpload.data.url;
 
@@ -268,12 +277,6 @@ export default function GestionAccesPrive() {
 
     try {
       const { id, _id, photos, ...dataToSend } = form as any;
-
-      // Nettoyage de l'email
-      if (dataToSend.clientEmail) {
-        dataToSend.clientEmail = dataToSend.clientEmail.trim();
-      }
-
       let targetId = editId;
 
       if (editId) {
@@ -320,8 +323,7 @@ export default function GestionAccesPrive() {
 
             const resUpload = await axios.post(
               `${BASE_API_URL}/api/upload-cloudinary`,
-              formData,
-              { withCredentials: true }
+              formData
             );
             const imageUrl = resUpload.data.url;
 

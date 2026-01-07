@@ -48,7 +48,6 @@ exports.create = async (req, res) => {
 
     // Validation du client
     if (!data.clientEmail) {
-      console.log("[AccesPrive] Erreur: Email client manquant");
       return res
         .status(400)
         .json({ erreur: "L'email du client est obligatoire." });
@@ -56,9 +55,6 @@ exports.create = async (req, res) => {
 
     const clientUser = await User.findOne({ email: data.clientEmail });
     if (!clientUser) {
-      console.log(
-        `[AccesPrive] Erreur: Client ${data.clientEmail} introuvable`
-      );
       return res
         .status(400)
         .json({

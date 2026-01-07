@@ -32,17 +32,16 @@ router.post(
       .withMessage("Le mot de passe doit contenir au moins 6 caractères"),
     body("nom").trim().escape(),
     body("prenom").trim().escape(),
-    body("telephone").optional({ checkFalsy: true }).trim().escape(),
-    body("adresse.rue").optional({ checkFalsy: true }).trim().escape(),
-    body("adresse.ville").optional({ checkFalsy: true }).trim().escape(),
-    body("adresse.codePostal").optional({ checkFalsy: true }).trim().escape(),
-    body("adresse.pays").optional({ checkFalsy: true }).trim().escape(),
+    body("telephone").trim().escape(),
+    body("adresse.rue").trim().escape(),
+    body("adresse.ville").trim().escape(),
+    body("adresse.codePostal").trim().escape(),
+    body("adresse.pays").trim().escape(),
   ],
   async (req, res) => {
     // Vérification des erreurs de validation
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      console.log("[AUTH] Register validation errors:", errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
 
@@ -87,7 +86,6 @@ router.post(
       res.status(201).json({ message: "Utilisateur créé" });
     } catch (err) {
       // En cas d'erreur (ex: email déjà utilisé), renvoi d'une réponse avec un statut 400 (Bad Request) et le message d'erreur
-      console.error("[AUTH] Register error:", err);
       res.status(400).json({ error: err.message });
     }
   }
