@@ -158,7 +158,8 @@ export default function GestionAccesPrive() {
 
         const resUpload = await axios.post(
           `${BASE_API_URL}/api/upload-cloudinary`,
-          formData
+          formData,
+          { withCredentials: true }
         );
         const imageUrl = resUpload.data.url;
 
@@ -319,7 +320,8 @@ export default function GestionAccesPrive() {
 
             const resUpload = await axios.post(
               `${BASE_API_URL}/api/upload-cloudinary`,
-              formData
+              formData,
+              { withCredentials: true }
             );
             const imageUrl = resUpload.data.url;
 

@@ -32,11 +32,11 @@ router.post(
       .withMessage("Le mot de passe doit contenir au moins 6 caractères"),
     body("nom").trim().escape(),
     body("prenom").trim().escape(),
-    body("telephone").trim().escape(),
-    body("adresse.rue").trim().escape(),
-    body("adresse.ville").trim().escape(),
-    body("adresse.codePostal").trim().escape(),
-    body("adresse.pays").trim().escape(),
+    body("telephone").optional({ checkFalsy: true }).trim().escape(),
+    body("adresse.rue").optional({ checkFalsy: true }).trim().escape(),
+    body("adresse.ville").optional({ checkFalsy: true }).trim().escape(),
+    body("adresse.codePostal").optional({ checkFalsy: true }).trim().escape(),
+    body("adresse.pays").optional({ checkFalsy: true }).trim().escape(),
   ],
   async (req, res) => {
     // Vérification des erreurs de validation
