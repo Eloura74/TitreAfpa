@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import homeImages from "../config/images.json";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
+import GoldDust from "../components/GoldDust";
 
 const revealVariants = {
   hidden: { y: "30%", opacity: 0 },
@@ -25,6 +26,34 @@ export default function Home() {
     "photo" | "graph" | "ecrin" | null
   >(null);
 
+  // --- PARALLAX SETUP ---
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const windowSize = useRef({ w: 0, h: 0 });
+
+  useEffect(() => {
+    windowSize.current = { w: window.innerWidth, h: window.innerHeight };
+    const handleResize = () => {
+      windowSize.current = { w: window.innerWidth, h: window.innerHeight };
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const { clientX, clientY } = e;
+    const { w, h } = windowSize.current;
+    // Normaliser entre -1 et 1
+    const x = (clientX / w) * 2 - 1;
+    const y = (clientY / h) * 2 - 1;
+    setMousePosition({ x, y });
+  };
+
+  // Valeurs de parallaxe (inversées pour la profondeur)
+  const parallaxX = mousePosition.x * -15; // Déplacement max 15px
+  const parallaxY = mousePosition.y * -15;
+  const textParallaxX = mousePosition.x * -25; // Texte bouge plus vite (devant)
+  const textParallaxY = mousePosition.y * -25;
+
   useEffect(() => {
     document.title = "Fabien Licata | Photographe & Graphiste";
   }, []);
@@ -35,7 +64,10 @@ export default function Home() {
   };
 
   return (
-    <div className="relative min-h-[100dvh] w-full bg-[#080808] overflow-y-auto md:overflow-hidden font-sans text-white">
+    <div
+      className="relative min-h-[100dvh] w-full bg-[#080808] overflow-y-auto md:overflow-hidden font-sans text-white"
+      onMouseMove={handleMouseMove}
+    >
       <Helmet>
         <title>Accueil | Fabien Licata</title>
         <meta
@@ -53,11 +85,24 @@ export default function Home() {
         <meta property="og:image" content={homeImages.hero} />
       </Helmet>
 
-      {/* BACKGROUND : Luminosité ajustée */}
+      {/* PARTICULES D'OR */}
+      <GoldDust />
+
+      {/* BACKGROUND : Luminosité ajustée + PARALLAXE */}
       <motion.div
         initial={{ scale: 1.05, opacity: 0 }}
-        animate={{ scale: 1, opacity: 0.55 }} // Augmenté pour moins d'obscurité
-        transition={{ duration: 2.5, ease: "easeOut" }}
+        animate={{
+          scale: 1,
+          opacity: 0.55,
+          x: parallaxX,
+          y: parallaxY,
+        }}
+        transition={{
+          scale: { duration: 2.5, ease: "easeOut" },
+          opacity: { duration: 2.5, ease: "easeOut" },
+          x: { type: "spring", stiffness: 50, damping: 20 }, // Mouvement fluide
+          y: { type: "spring", stiffness: 50, damping: 20 },
+        }}
         className="fixed inset-0 z-0 pointer-events-none"
       >
         <img
@@ -123,15 +168,15 @@ export default function Home() {
         {/* Onde d'animation */}
         <motion.div
           initial={{ scale: 1, opacity: 0 }}
-          animate={{ scale: [1, 4], opacity: [0.6, 0] }}
+          animate={{ scale: [1, 20], opacity: [0.5, 0] }}
           transition={{
             delay: 2.0,
-            duration: 2,
+            duration: 3,
             ease: "easeOut",
             repeat: Infinity,
-            repeatDelay: 1,
+            repeatDelay: 0.5,
           }}
-          className="absolute inset-0 bg-yellow-500/50 rotate-45 rounded-sm"
+          className="absolute inset-0 bg-yellow-500/30 rotate-45 rounded-sm"
         />
 
         {/* Point central */}
@@ -150,6 +195,8 @@ export default function Home() {
           onMouseEnter={() => setHoveredSide("photo")}
           onMouseLeave={() => setHoveredSide(null)}
           onClick={() => handleChoix("photographie")}
+          animate={{ x: textParallaxX, y: textParallaxY }}
+          transition={{ type: "spring", stiffness: 40, damping: 15 }}
           className="relative flex flex-1 cursor-pointer flex-col items-center justify-center transition-all duration-700 py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
         >
           <div
@@ -224,6 +271,8 @@ export default function Home() {
           onMouseEnter={() => setHoveredSide("graph")}
           onMouseLeave={() => setHoveredSide(null)}
           onClick={() => handleChoix("photo-graphiste")}
+          animate={{ x: textParallaxX, y: textParallaxY }}
+          transition={{ type: "spring", stiffness: 40, damping: 15 }}
           className="relative flex flex-1 cursor-pointer flex-col items-center justify-center transition-all duration-700 py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
         >
           <div
@@ -292,6 +341,8 @@ export default function Home() {
         <motion.section
           onMouseEnter={() => setHoveredSide("ecrin")}
           onMouseLeave={() => setHoveredSide(null)}
+          animate={{ x: textParallaxX * 0.5, y: textParallaxY * 0.5 }} // Moins de mouvement pour le bas
+          transition={{ type: "spring", stiffness: 40, damping: 15 }}
           className="relative flex w-full md:w-full cursor-default flex-col items-center justify-start md:justify-center transition-all duration-700 py-10 md:py-0 md:h-[40vh]"
         >
           <div
@@ -320,9 +371,9 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="text-2xl md:text-3xl lg:text-5xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
-                           bg-gradient-to-b from-white via-gray-200 to-gray-500 bg-clip-text text-transparent
-                           drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]"
+                className="text-3xl md:text-4xl lg:text-7xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
+                           bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
+                           drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
               >
                 L'Écrin Privé
               </motion.h1>
