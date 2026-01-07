@@ -152,6 +152,34 @@ export default function GestionAccesPrive() {
     }
   };
 
+  // Fonction helper pour l'upload direct vers Cloudinary
+  const uploadToCloudinary = async (file: File) => {
+    // 1. Récupérer la signature depuis le backend
+    const signRes = await axios.get(
+      `${BASE_API_URL}/api/upload-cloudinary/sign`,
+      {
+        withCredentials: true,
+      }
+    );
+    const { signature, timestamp, cloud_name, api_key, folder } = signRes.data;
+
+    // 2. Préparer le formulaire pour Cloudinary
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("api_key", api_key);
+    formData.append("timestamp", timestamp.toString());
+    formData.append("signature", signature);
+    formData.append("folder", folder);
+
+    // 3. Envoyer directement à Cloudinary
+    const cloudinaryRes = await axios.post(
+      `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
+      formData
+    );
+
+    return cloudinaryRes.data.secure_url;
+  };
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
@@ -163,14 +191,7 @@ export default function GestionAccesPrive() {
 
       setLoading(true);
       try {
-        const formData = new FormData();
-        formData.append("image", file);
-
-        const resUpload = await axios.post(
-          `${BASE_API_URL}/api/upload-cloudinary`,
-          formData
-        );
-        const imageUrl = resUpload.data.url;
+        const imageUrl = await uploadToCloudinary(file);
 
         if (imageUrl) {
           setForm((prev) => ({ ...prev, image: imageUrl }));
@@ -215,14 +236,8 @@ export default function GestionAccesPrive() {
       for (const file of files) {
         try {
           const compressedFile = await compressImage(file);
-          const formData = new FormData();
-          formData.append("image", compressedFile);
-
-          const resUpload = await axios.post(
-            `${BASE_API_URL}/api/upload-cloudinary`,
-            formData
-          );
-          const imageUrl = resUpload.data.url;
+          // Upload direct vers Cloudinary
+          const imageUrl = await uploadToCloudinary(compressedFile);
 
           if (!imageUrl) throw new Error("Erreur upload image");
 
@@ -318,14 +333,8 @@ export default function GestionAccesPrive() {
         for (const file of filesToUpload) {
           try {
             const compressedFile = await compressImage(file);
-            const formData = new FormData();
-            formData.append("image", compressedFile);
-
-            const resUpload = await axios.post(
-              `${BASE_API_URL}/api/upload-cloudinary`,
-              formData
-            );
-            const imageUrl = resUpload.data.url;
+            // Upload direct vers Cloudinary
+            const imageUrl = await uploadToCloudinary(compressedFile);
 
             if (imageUrl) {
               const resPhoto = await axios.post(
