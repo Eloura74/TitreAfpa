@@ -35,7 +35,7 @@ export default function ClientCreationForm({
       <label className="text-sm font-bold text-[#ffe992] mb-2 block">
         Client associé
       </label>
-      
+
       {/* Bouton pour basculer l'affichage du formulaire */}
       <div className="flex gap-2 mb-2">
         <button
@@ -53,7 +53,7 @@ export default function ClientCreationForm({
           <h4 className="text-blue-400 font-bold mb-3 text-sm">
             Créer un compte client
           </h4>
-          
+
           {/* Nom et Prénom */}
           <div className="grid grid-cols-2 gap-2 mb-2">
             <input
@@ -89,6 +89,9 @@ export default function ClientCreationForm({
               onChange={handleClientChange}
               className="bg-[#181824] border border-white/10 rounded px-2 py-1 text-white text-sm focus:border-blue-500 outline-none transition-colors"
             />
+            <span className="text-[10px] text-gray-400 col-span-2 text-right px-1">
+              * 6 caractères minimum
+            </span>
           </div>
 
           {/* Bouton de validation */}

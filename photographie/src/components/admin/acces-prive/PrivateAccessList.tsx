@@ -1,4 +1,3 @@
-
 import { Evenement } from "../../../types/evenement";
 
 // ==========================================
@@ -55,7 +54,13 @@ export default function PrivateAccessList({
               >
                 {/* En-tête Card */}
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className={`font-bold ${isSelected ? "text-[#ffe992]" : "text-gray-200 group-hover:text-[#ffe992]"}`}>
+                  <h4
+                    className={`font-bold ${
+                      isSelected
+                        ? "text-[#ffe992]"
+                        : "text-gray-200 group-hover:text-[#ffe992]"
+                    }`}
+                  >
                     {event.titre}
                   </h4>
                   <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/20">
@@ -66,16 +71,24 @@ export default function PrivateAccessList({
                 {/* Infos Client */}
                 <p className="text-sm text-gray-400 mb-1 flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
-                  {event.clientEmail || "Aucun client assigné"}
+                  {typeof event.client === "object" && event.client?.email
+                    ? event.client.email
+                    : event.clientEmail || "Aucun client assigné"}
                 </p>
-                
+
                 {/* Date */}
                 <p className="text-xs text-gray-500 mb-3 ml-3.5">
                   {new Date(event.dateDebut).toLocaleDateString()}
                 </p>
 
                 {/* Actions */}
-                <div className={`flex justify-end gap-2 mt-3 transition-opacity duration-200 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+                <div
+                  className={`flex justify-end gap-2 mt-3 transition-opacity duration-200 ${
+                    isSelected
+                      ? "opacity-100"
+                      : "opacity-0 group-hover:opacity-100"
+                  }`}
+                >
                   <button
                     className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-black text-xs px-3 py-1.5 rounded transition-colors font-medium"
                     onClick={() => onEdit(event)}
@@ -86,7 +99,8 @@ export default function PrivateAccessList({
                     className="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white text-xs px-3 py-1.5 rounded transition-colors font-medium"
                     onClick={(e) => {
                       e.stopPropagation(); // Évite de déclencher le onEdit si on clique sur supprimer
-                      if (event.id) onDelete(event.id);
+                      const idToDelete = event.id || event._id;
+                      if (idToDelete) onDelete(idToDelete);
                     }}
                   >
                     Supprimer

@@ -5,13 +5,14 @@ export interface Evenement {
   titre: string;
   description?: string;
   dateDebut: string; // Date de début (obligatoire)
-  dateFin: string;   // Date de fin (obligatoire)
+  dateFin: string; // Date de fin (obligatoire)
   lieu?: string;
-  image?: string;    // URL de l'image de couverture (optionnelle)
+  image?: string; // URL de l'image de couverture (optionnelle)
   photos?: string[];
-  theme?: string;    // Thème optionnel
+  theme?: string; // Thème optionnel
   visibilite?: "public" | "prive";
-  client?: string;   // ID du client (User)
+  client?:
+    | string
+    | { _id: string; email: string; nom?: string; prenom?: string }; // ID du client (User) ou objet peuplé
   clientEmail?: string; // Pour le formulaire seulement
 }
-

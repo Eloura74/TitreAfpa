@@ -408,7 +408,7 @@ export default function GestionAccesPrive() {
     setError(null);
     try {
       await axios.delete(`${API_URL}/${id}`, { withCredentials: true });
-      setEvenements(evenements.filter((e) => e.id !== id));
+      setEvenements(evenements.filter((e) => (e.id || e._id) !== id));
       resetForm();
       setSuccess("Accès privé supprimé.");
     } catch (e) {
