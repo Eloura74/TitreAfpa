@@ -57,7 +57,7 @@ export default function GalerieGraphiqueForm() {
     try {
       const res = await axios.post(
         // Envoi de la requête POST vers l’endpoint d’upload
-        `${API_URL}/api/upload-cloudinary`,
+        `/api/upload-cloudinary`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" }, // Nécessaire pour l’envoi de fichier
@@ -90,15 +90,12 @@ export default function GalerieGraphiqueForm() {
     }
     // Envoi final de toutes les données du formulaire vers le backend
     try {
-      await axios.post(
-        `${API_URL}/api/oeuvres-graphique`,
-        {
-          titre,
-          image: imagePath,
-          prix: Number(prix), // Conversion en nombre
-          description,
-        }
-      );
+      await axios.post(`${API_URL}/api/oeuvres-graphique`, {
+        titre,
+        image: imagePath,
+        prix: Number(prix), // Conversion en nombre
+        description,
+      });
 
       // Réinitialisation complète du formulaire après succès
       addToast("Œuvre ajoutée avec succès !", "success");
@@ -200,5 +197,3 @@ export default function GalerieGraphiqueForm() {
     </form>
   );
 }
-
-

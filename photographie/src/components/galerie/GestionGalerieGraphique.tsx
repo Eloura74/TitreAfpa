@@ -43,11 +43,9 @@ export default function GestionGalerieGraphique() {
     formData.append("image", file);
 
     try {
-      const res = await axios.post(
-        `${API_URL}/api/upload-cloudinary`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      const res = await axios.post(`/api/upload-cloudinary`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       return res.data.url;
     } catch {
       setMessage("Erreur lors de l’upload de l’image.");
