@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import { API_URL } from "../config/api";
-import { Edit, Trash2, Plus, Check, X, Tag } from "lucide-react";
+import { Edit, Trash2, Plus, Tag } from "lucide-react";
 
 const tarifSchema = z.object({
   nom: z.string().min(2),

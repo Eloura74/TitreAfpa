@@ -5,11 +5,9 @@ import {
   Edit,
   Trash2,
   Plus,
-  DollarSign,
   Calendar,
   User,
   CreditCard,
-  Check,
   X,
 } from "lucide-react";
 

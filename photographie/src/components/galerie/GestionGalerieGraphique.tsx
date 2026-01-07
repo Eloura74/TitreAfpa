@@ -1,15 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "../../config/api";
-import {
-  Upload,
-  Edit,
-  Trash2,
-  Plus,
-  Image as ImageIcon,
-  Check,
-  X,
-} from "lucide-react";
+import { Edit, Trash2, Plus, Image as ImageIcon } from "lucide-react";
 
 interface OeuvreGraphique {
   _id?: string;

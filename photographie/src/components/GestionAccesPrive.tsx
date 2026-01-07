@@ -6,7 +6,7 @@ import { API_URL as BASE_API_URL } from "../config/api";
 import PrivateAccessForm from "./admin/acces-prive/PrivateAccessForm";
 import PrivateAccessList from "./admin/acces-prive/PrivateAccessList";
 import { compressImage } from "./admin/acces-prive/PhotoUploader";
-import { Lock, Check, X, Edit, Trash2 } from "lucide-react";
+import { Check, X, Edit } from "lucide-react";
 
 const API_URL = `${BASE_API_URL}/api/acces-prive`;
 

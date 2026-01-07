@@ -120,11 +120,26 @@ export default function Home() {
 
       {/* POINT D'INTERSECTION (Diamant central) */}
       <div className="absolute left-1/2 top-[60vh] -translate-x-1/2 -translate-y-1/2 z-30 hidden md:block">
+        {/* Onde d'animation */}
+        <motion.div
+          initial={{ scale: 1, opacity: 0 }}
+          animate={{ scale: [1, 4], opacity: [0.6, 0] }}
+          transition={{
+            delay: 2.0,
+            duration: 2,
+            ease: "easeOut",
+            repeat: Infinity,
+            repeatDelay: 1,
+          }}
+          className="absolute inset-0 bg-yellow-500/50 rotate-45 rounded-sm"
+        />
+
+        {/* Point central */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 1.2, duration: 0.8, ease: "backOut" }}
-          className="w-1.5 h-1.5 bg-yellow-500 rotate-45 shadow-[0_0_15px_rgba(234,179,8,1)]"
+          className="relative w-1.5 h-1.5 bg-yellow-500 rotate-45 shadow-[0_0_15px_rgba(234,179,8,1)] z-10"
         />
       </div>
 

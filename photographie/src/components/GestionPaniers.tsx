@@ -5,10 +5,6 @@ import {
   Mail,
   ShoppingCart,
   Image as ImageIcon,
-  Package,
-  Ruler,
-  Layers,
-  Check,
   X,
 } from "lucide-react";
 import { API_URL as BASE_API_URL } from "../config/api";

@@ -7,7 +7,7 @@ import GestionTarifs from "./GestionTarifs";
 import GestionAccesPrive from "./GestionAccesPrive";
 import GestionServices from "./GestionServices";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 const onglets = [
   { nom: "Galerie", composant: <GalerieForm /> },

@@ -4,13 +4,7 @@ import { useNavigate } from "react-router-dom";
 import galerieData from "../../config/galerie.json";
 import { API_URL as BASE_API_URL } from "../../config/api";
 import { useToast } from "../../components/Toast";
-import {
-  ArrowLeft,
-  Upload,
-  Check,
-  AlertCircle,
-  Image as ImageIcon,
-} from "lucide-react";
+import { ArrowLeft, Upload, Check, AlertCircle } from "lucide-react";
 
 const API_URL = `${BASE_API_URL}/api/galerie`;
 
