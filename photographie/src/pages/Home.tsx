@@ -193,7 +193,7 @@ export default function Home() {
             animate="visible"
             className="text-2xl md:text-4xl font-extralight tracking-[0.4em] md:tracking-[0.6em] uppercase 
                        bg-gradient-to-b from-white via-yellow-200 to-yellow-500 
-                       bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(255,255,255,0.15)] text-center"
+                       bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(255,255,255,0.15)] text-center font-syncopate"
           >
             Fabien Licata
           </motion.h2>
@@ -204,7 +204,7 @@ export default function Home() {
             variants={revealVariants}
             initial="hidden"
             animate="visible"
-            className="text-[9px] md:text-xs tracking-[0.3em] md:tracking-[0.5em] uppercase text-yellow-500/50 font-light text-center lg:ml-13"
+            className="text-[9px] md:text-xs tracking-[0.3em] md:tracking-[0.5em] uppercase text-yellow-500/50 font-light text-center lg:ml-13 font-syncopate"
           >
             Photographe / Photo-Graphiste
           </motion.p>
@@ -263,8 +263,6 @@ export default function Home() {
           onMouseEnter={() => setHoveredSide("photo")}
           onMouseLeave={() => setHoveredSide(null)}
           onClick={() => handleChoix("photographie")}
-          // animate={{ x: textParallaxX, y: textParallaxY }} // REMOVED
-          // transition={{ type: "spring", stiffness: 40, damping: 15 }} // REMOVED
           className="relative flex flex-1 cursor-pointer flex-col items-center justify-center md:justify-start md:pt-[20vh] py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
         >
           {/* CARROUSEL PHOTOGRAPHIE */}
@@ -290,7 +288,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium"
+                className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium font-syncopate"
               >
                 Art Visuel
               </motion.span>
@@ -302,9 +300,9 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="pointer-events-auto text-3xl md:text-2xl lg:text-6xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
+                className="pointer-events-auto text-3xl md:text-2xl lg:text-6xl font-normal tracking-[0.2em] uppercase 
                            bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
-                           drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
+                           drop-shadow-[0_0_8px_rgba(234,179,8,0.1)] font-playfair"
               >
                 Photographie
               </motion.h1>
@@ -316,7 +314,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="pointer-events-auto text-gray-400 text-[10px] md:text-sm italic font-extralight tracking-widest"
+                className="pointer-events-auto text-gray-400 text-[10px] md:text-sm italic font-extralight tracking-widest font-playfair"
               >
                 "Capturer l'instant, sublimer le réel"
               </motion.p>
@@ -327,7 +325,7 @@ export default function Home() {
               variants={revealVariants}
               initial="hidden"
               animate="visible"
-              className="pointer-events-auto flex flex-wrap items-center justify-center gap-3 md:gap-4 text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-yellow-100/40"
+              className="pointer-events-auto flex flex-wrap items-center justify-center gap-3 md:gap-4 text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-yellow-100/40 font-syncopate"
             >
               <span>Événements</span>
               <span className="hidden md:block w-[1px] h-3 bg-yellow-700/40" />
@@ -343,8 +341,6 @@ export default function Home() {
           onMouseEnter={() => setHoveredSide("graph")}
           onMouseLeave={() => setHoveredSide(null)}
           onClick={() => handleChoix("photo-graphiste")}
-          // animate={{ x: textParallaxX, y: textParallaxY }} // REMOVED
-          // transition={{ type: "spring", stiffness: 40, damping: 15 }} // REMOVED
           className="relative flex flex-1 cursor-pointer flex-col items-center justify-center md:justify-start md:pt-[20vh] py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
         >
           {/* CARROUSEL GRAPHISME */}
@@ -372,7 +368,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium"
+                className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium font-syncopate"
               >
                 Design Numérique
               </motion.span>
@@ -384,9 +380,9 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="pointer-events-auto text-3xl md:text-4xl lg:text-6xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
+                className="pointer-events-auto text-3xl md:text-4xl lg:text-6xl font-normal tracking-[0.2em] uppercase 
                            bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
-                           drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
+                           drop-shadow-[0_0_8px_rgba(234,179,8,0.1)] font-playfair"
               >
                 PHOTO-GRAPHISME
               </motion.h1>
@@ -398,7 +394,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="pointer-events-auto text-gray-400 text-[10px] md:text-sm italic font-extralight tracking-widest"
+                className="pointer-events-auto text-gray-400 text-[10px] md:text-sm italic font-extralight tracking-widest font-playfair"
               >
                 "L'imaginaire au service de votre image"
               </motion.p>
@@ -409,7 +405,7 @@ export default function Home() {
               variants={revealVariants}
               initial="hidden"
               animate="visible"
-              className="pointer-events-auto flex flex-wrap items-center justify-center gap-3 md:gap-4 text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-yellow-100/40"
+              className="pointer-events-auto flex flex-wrap items-center justify-center gap-3 md:gap-4 text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-yellow-100/40 font-syncopate"
             >
               <span>Identité</span>
               <span className="hidden md:block w-[1px] h-3 bg-yellow-700/40" />
@@ -424,8 +420,6 @@ export default function Home() {
         <motion.section
           onMouseEnter={() => setHoveredSide("ecrin")}
           onMouseLeave={() => setHoveredSide(null)}
-          // animate={{ x: textParallaxX * 0.5, y: textParallaxY * 0.5 }} // REMOVED
-          // transition={{ type: "spring", stiffness: 40, damping: 15 }} // REMOVED
           className="relative flex w-full md:w-full cursor-default flex-col items-center justify-start md:justify-center transition-all duration-700 py-10 md:py-0 md:h-[40vh]"
         >
           <div
@@ -442,7 +436,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium"
+                className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium font-syncopate"
               >
                 Espace Client
               </motion.span>
@@ -454,9 +448,9 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="pointer-events-auto text-3xl md:text-4xl lg:text-6xl font-light tracking-[0.2em] md:tracking-[0.25em] uppercase 
+                className="pointer-events-auto text-3xl md:text-4xl lg:text-6xl font-normal tracking-[0.2em] uppercase 
                            bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
-                           drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
+                           drop-shadow-[0_0_8px_rgba(234,179,8,0.1)] font-playfair"
               >
                 L'Écrin Privé
               </motion.h1>
@@ -468,7 +462,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="pointer-events-auto text-gray-400 text-[10px] md:text-xs italic font-extralight tracking-widest max-w-md mx-auto"
+                className="pointer-events-auto text-gray-400 text-[10px] md:text-xs italic font-extralight tracking-widest max-w-md mx-auto font-playfair"
               >
                 "Accédez à vos reportages privés et sélectionnez vos souvenirs
                 d'exception"
@@ -490,7 +484,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-yellow-500/0 group-hover:bg-yellow-500/10 transition-colors duration-500" />
                 <span
                   className="relative text-[10px] md:text-xs uppercase tracking-[0.2em] group-hover:tracking-[0.3em] transition-all duration-500
-                bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent"
+                bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent font-syncopate"
                 >
                   Se connecter
                 </span>
