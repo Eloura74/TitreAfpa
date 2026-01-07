@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 // Import d'icônes depuis la bibliothèque lucide-react pour les visuels
 import {
   CalendarDays,
-  Printer,
+  Camera,
   GalleryHorizontal,
   ShoppingCart,
 } from "lucide-react";
@@ -45,21 +45,20 @@ export default function Photographie() {
       <div className="geometric-accent" />
       {/* Ligne diagonale décorative */}
       <div className="diagonal-line" />
-      {/* Overlay sombre visible uniquement sur mobile pour assurer la lisibilité */}
-      <div className="md:hidden fixed inset-0 z-0 bg-black/70 pointer-events-none" />
       {/* Contenu principal de la page, centré verticalement et horizontalement */}
-      <main className="flex flex-col items-center justify-center flex-1 relative z-10 pt-20 pb-10">
+      <main className="flex flex-col items-center justify-center flex-1 relative z-10 pt-28 pb-16">
         {/* Titre principal avec dégradé de couleurs et style responsive */}
-        <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-center bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-600 bg-clip-text text-transparent mb-6 mt-12 break-words drop-shadow-lg">
-          Fabien Photographie
+        <h1 className="hero-title mb-6 mt-16 md:mt-24">
+          <span className="hero-title-gradient">Fabien Photographie</span>
         </h1>
 
         {/* Paragraphe d’introduction avec fond semi-transparent et arrondi */}
-        <p className="text-base sm:text-lg text-white/90 mb-8 max-w-2xl text-center px-4 bg-black/40 rounded py-2">
+        <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl text-center">
           Bienvenue dans l’univers <b>Photographie</b> de Fabien. Retrouvez ici
           l’ensemble des services liés à la photo : événements, tirage en ligne,
           galerie artistique et plus encore.
-          <span className="block mt-2 text-sm text-white/70">
+          <br />
+          <span className="block mt-2 text-base text-white/70">
             Sélectionnez un menu ci-dessous pour explorer chaque fonctionnalité.
           </span>
         </p>
@@ -82,19 +81,19 @@ export default function Photographie() {
             </span>
           </Link>
 
-          {/* Lien vers la page de tirage en ligne */}
+          {/* Lien vers la page des services */}
           <Link
-            to="/tirage"
+            to="/services"
             className="w-full bg-gradient-to-b from-yellow-900/70 to-black/80 rounded-2xl shadow-xl px-4 py-6 text-yellow-200 text-center flex flex-col gap-2 items-center transition-transform hover:scale-105 hover:shadow-yellow-400/30 focus:outline-none focus:ring-2 focus:ring-yellow-400 md:rounded-xl md:shadow-lg"
           >
-            {/* Icône imprimante */}
-            <Printer
+            {/* Icône camera */}
+            <Camera
               className="w-7 h-7 mb-1 text-[#d6c487]"
               aria-hidden="true"
             />
-            <span className="text-lg font-semibold">Tirage en ligne</span>
+            <span className="text-lg font-semibold">Services</span>
             <span className="text-sm text-yellow-100">
-              Importez vos photos à imprimer sur supports pros.
+              Mariages, shootings, événements...
             </span>
           </Link>
 

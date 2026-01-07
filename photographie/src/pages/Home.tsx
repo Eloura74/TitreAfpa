@@ -31,7 +31,7 @@ export default function Home() {
 
   const handleChoix = (choix: "photographie" | "photo-graphiste") => {
     setChoix(choix);
-    navigate(choix === "photographie" ? "/galerie" : "/galerie-graphique");
+    navigate(choix === "photographie" ? "/photographie" : "/graphisme");
   };
 
   return (
