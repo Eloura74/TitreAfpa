@@ -98,26 +98,33 @@ export default function ClientEvenement() {
   }, [lightboxIndex, evenement]);
 
   const toggleSelection = (photoId: string) => {
-    setSelectedPhotos((prev) => {
-      const newSelection = prev.includes(photoId)
-        ? prev.filter((id) => id !== photoId)
-        : [...prev, photoId];
+    const isSelected = selectedPhotos.includes(photoId);
+
+    if (isSelected) {
+      setSelectedPhotos((prev) => prev.filter((id) => id !== photoId));
+      setConfig((prev) => {
+        const newConfig = { ...prev };
+        delete newConfig[photoId];
+        return newConfig;
+      });
+    } else {
+      setSelectedPhotos((prev) => [...prev, photoId]);
 
       // Initialiser la config par défaut si nouvelle sélection
-      if (!prev.includes(photoId) && evenement) {
+      if (evenement) {
         const photo = evenement.photos.find((p) => p._id === photoId);
         if (photo && photo.tarifs && photo.tarifs.length > 0) {
-          setConfig((curr) => ({
-            ...curr,
+          const defaultTarifId = photo.tarifs[0]._id || photo.tarifs[0].id;
+          setConfig((prev) => ({
+            ...prev,
             [photoId]: {
-              tarifId: (photo.tarifs![0]._id || photo.tarifs![0].id) as string,
+              tarifId: defaultTarifId as string,
               quantite: 1,
             },
           }));
         }
       }
-      return newSelection;
-    });
+    }
   };
 
   const handleAddToQuote = () => {
@@ -410,13 +417,18 @@ export default function ClientEvenement() {
                               <select
                                 value={currentTarifId || ""}
                                 onChange={(e) =>
-                                  setConfig((prev) => ({
-                                    ...prev,
-                                    [photoId]: {
-                                      ...prev[photoId],
-                                      tarifId: e.target.value,
-                                    },
-                                  }))
+                                  setConfig((prev) => {
+                                    const currentConfig = prev[photoId] || {
+                                      quantite: 1,
+                                    };
+                                    return {
+                                      ...prev,
+                                      [photoId]: {
+                                        ...currentConfig,
+                                        tarifId: e.target.value,
+                                      },
+                                    };
+                                  })
                                 }
                                 className="w-full bg-[#1a1a24] border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-[#ffe992] focus:outline-none appearance-none cursor-pointer hover:bg-[#22222e] transition-colors"
                               >
@@ -442,16 +454,22 @@ export default function ClientEvenement() {
                             <div className="flex items-center gap-3 bg-[#1a1a24] border border-white/10 rounded-lg p-1 w-fit">
                               <button
                                 onClick={() =>
-                                  setConfig((prev) => ({
-                                    ...prev,
-                                    [photoId]: {
-                                      ...prev[photoId],
-                                      quantite: Math.max(
-                                        1,
-                                        (prev[photoId]?.quantite || 1) - 1
-                                      ),
-                                    },
-                                  }))
+                                  setConfig((prev) => {
+                                    const currentConfig = prev[photoId] || {
+                                      tarifId: currentTarifId as string,
+                                      quantite: 1,
+                                    };
+                                    return {
+                                      ...prev,
+                                      [photoId]: {
+                                        ...currentConfig,
+                                        quantite: Math.max(
+                                          1,
+                                          (currentConfig.quantite || 1) - 1
+                                        ),
+                                      },
+                                    };
+                                  })
                                 }
                                 className="w-8 h-8 rounded-md bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors"
                               >
@@ -462,14 +480,20 @@ export default function ClientEvenement() {
                               </span>
                               <button
                                 onClick={() =>
-                                  setConfig((prev) => ({
-                                    ...prev,
-                                    [photoId]: {
-                                      ...prev[photoId],
-                                      quantite:
-                                        (prev[photoId]?.quantite || 1) + 1,
-                                    },
-                                  }))
+                                  setConfig((prev) => {
+                                    const currentConfig = prev[photoId] || {
+                                      tarifId: currentTarifId as string,
+                                      quantite: 1,
+                                    };
+                                    return {
+                                      ...prev,
+                                      [photoId]: {
+                                        ...currentConfig,
+                                        quantite:
+                                          (currentConfig.quantite || 1) + 1,
+                                      },
+                                    };
+                                  })
                                 }
                                 className="w-8 h-8 rounded-md bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors"
                               >
