@@ -49,6 +49,9 @@ export default function ClientEvenement() {
   const [showConfig, setShowConfig] = useState(false);
 
   // Configuration de la commande
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  // Configuration de la commande
   const [config, setConfig] = useState<{
     [photoId: string]: {
       tarifId: string;
@@ -71,6 +74,28 @@ export default function ClientEvenement() {
     };
     fetchEvenement();
   }, [id]);
+
+  // Gestion du clavier pour la lightbox
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (lightboxIndex === null || !evenement) return;
+
+      if (e.key === "Escape") setLightboxIndex(null);
+      if (e.key === "ArrowLeft") {
+        setLightboxIndex((prev) =>
+          prev !== null && prev > 0 ? prev - 1 : prev
+        );
+      }
+      if (e.key === "ArrowRight") {
+        setLightboxIndex((prev) =>
+          prev !== null && prev < evenement.photos.length - 1 ? prev + 1 : prev
+        );
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxIndex, evenement]);
 
   const toggleSelection = (photoId: string) => {
     setSelectedPhotos((prev) => {
@@ -187,7 +212,7 @@ export default function ClientEvenement() {
 
         {/* Grid Photos */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-32">
-          {evenement.photos.map((photo) => (
+          {evenement.photos.map((photo, index) => (
             <motion.div
               key={photo._id}
               initial={{ opacity: 0, y: 20 }}
@@ -198,36 +223,58 @@ export default function ClientEvenement() {
                   ? "border-[#ffe992] shadow-[0_0_20px_rgba(255,233,146,0.2)]"
                   : "border-white/10 hover:border-[#ffe992]/50"
               }`}
-              onClick={() => toggleSelection(photo._id)}
             >
               <img
                 src={photo.src}
                 alt={photo.titre}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                onClick={() => toggleSelection(photo._id)}
               />
 
-              {/* Overlay Selection */}
+              {/* Overlay Selection & Actions */}
               <div
-                className={`absolute inset-0 bg-black/40 transition-opacity duration-300 flex items-center justify-center ${
+                className={`absolute inset-0 bg-black/40 transition-opacity duration-300 flex items-center justify-center gap-4 ${
                   selectedPhotos.includes(photo._id)
                     ? "opacity-100"
                     : "opacity-0 group-hover:opacity-100"
                 }`}
               >
-                <div
+                {/* Bouton Voir */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxIndex(index);
+                  }}
+                  className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm text-white flex items-center justify-center hover:bg-white/30 transition-all hover:scale-110"
+                  title="Voir en grand"
+                >
+                  <ImageIcon size={24} />
+                </button>
+
+                {/* Bouton Sélectionner */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleSelection(photo._id);
+                  }}
                   className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
                     selectedPhotos.includes(photo._id)
                       ? "bg-[#ffe992] text-black scale-100 shadow-lg"
-                      : "bg-white/20 text-white backdrop-blur-sm scale-90 hover:bg-white/30"
+                      : "bg-white/20 text-white backdrop-blur-sm hover:bg-white/30"
                   }`}
+                  title={
+                    selectedPhotos.includes(photo._id)
+                      ? "Désélectionner"
+                      : "Sélectionner"
+                  }
                 >
                   <Check size={24} />
-                </div>
+                </button>
               </div>
 
               {/* Prix à partir de */}
               {photo.tarifs && photo.tarifs.length > 0 && (
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 pt-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 pt-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                   <p className="text-xs text-center text-gray-300 font-light tracking-wide uppercase">
                     À partir de{" "}
                     <span className="text-[#ffe992] font-bold text-sm ml-1">
@@ -318,6 +365,16 @@ export default function ClientEvenement() {
                   );
                   if (!photo) return null;
 
+                  // Fallback safe pour le tarif
+                  const currentTarifId =
+                    config[photoId]?.tarifId ||
+                    photo.tarifs?.[0]?._id ||
+                    photo.tarifs?.[0]?.id;
+
+                  const currentTarif = photo.tarifs?.find(
+                    (t) => t._id === currentTarifId || t.id === currentTarifId
+                  );
+
                   return (
                     <div
                       key={photoId}
@@ -351,7 +408,7 @@ export default function ClientEvenement() {
                             </label>
                             <div className="relative">
                               <select
-                                value={config[photoId]?.tarifId || ""}
+                                value={currentTarifId || ""}
                                 onChange={(e) =>
                                   setConfig((prev) => ({
                                     ...prev,
@@ -426,14 +483,7 @@ export default function ClientEvenement() {
                           <p className="text-sm text-gray-400">
                             Prix unitaire :{" "}
                             <span className="text-white font-bold">
-                              {
-                                photo.tarifs?.find(
-                                  (t) =>
-                                    t._id === config[photoId]?.tarifId ||
-                                    t.id === config[photoId]?.tarifId
-                                )?.prix
-                              }
-                              €
+                              {currentTarif?.prix || 0} €
                             </span>
                           </p>
                         </div>
@@ -456,10 +506,18 @@ export default function ClientEvenement() {
                           (p) => p._id === id
                         );
                         const conf = config[id];
+
+                        // Même logique de fallback pour le total
+                        const currentTarifId =
+                          conf?.tarifId ||
+                          photo?.tarifs?.[0]?._id ||
+                          photo?.tarifs?.[0]?.id;
+
                         const tarif = photo?.tarifs?.find(
                           (t) =>
-                            t._id === conf?.tarifId || t.id === conf?.tarifId
+                            t._id === currentTarifId || t.id === currentTarifId
                         );
+
                         return acc + (tarif?.prix || 0) * (conf?.quantite || 1);
                       }, 0)
                       .toFixed(2)}{" "}
@@ -476,6 +534,76 @@ export default function ClientEvenement() {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {lightboxIndex !== null && evenement && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center"
+            onClick={() => setLightboxIndex(null)}
+          >
+            {/* Bouton Fermer */}
+            <button
+              onClick={() => setLightboxIndex(null)}
+              className="absolute top-4 right-4 p-2 text-white/50 hover:text-white transition-colors z-50"
+            >
+              <X size={32} />
+            </button>
+
+            {/* Navigation Gauche */}
+            {lightboxIndex > 0 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex(lightboxIndex - 1);
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-4 text-white/50 hover:text-white transition-colors z-50"
+              >
+                <ArrowLeft size={40} />
+              </button>
+            )}
+
+            {/* Image */}
+            <motion.img
+              key={evenement.photos[lightboxIndex]._id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              src={evenement.photos[lightboxIndex].src}
+              alt={evenement.photos[lightboxIndex].titre || "Photo"}
+              className="max-w-full max-h-[90vh] object-contain select-none"
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            {/* Navigation Droite */}
+            {lightboxIndex < evenement.photos.length - 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex(lightboxIndex + 1);
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-4 text-white/50 hover:text-white transition-colors z-50"
+              >
+                <ArrowRight size={40} />
+              </button>
+            )}
+
+            {/* Info Photo */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/50 to-transparent text-center">
+              <h3 className="text-xl font-serif text-[#ffe992] mb-1">
+                {evenement.photos[lightboxIndex].titre || "Sans titre"}
+              </h3>
+              <p className="text-sm text-gray-400">
+                {lightboxIndex + 1} / {evenement.photos.length}
+              </p>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
