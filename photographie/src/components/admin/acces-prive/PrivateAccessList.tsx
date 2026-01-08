@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Evenement } from "../../../types/evenement";
+import { ChevronDown, ChevronUp, Image as ImageIcon } from "lucide-react";
 
 // ==========================================
 // 📝 Interface des Props
@@ -23,6 +25,12 @@ export default function PrivateAccessList({
   onEdit,
   onDelete,
 }: PrivateAccessListProps) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const toggleExpand = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedId(expandedId === id ? null : id);
+  };
   return (
     <div className="border-l border-white/10 pl-8 h-full flex flex-col">
       <h3 className="text-xl font-semibold text-white mb-4 sticky top-0 bg-[#181824] z-10 py-2">
@@ -68,6 +76,21 @@ export default function PrivateAccessList({
                   </span>
                 </div>
 
+                {/* Bouton Expand */}
+                <span className="absolute top-3 right-28 text-gray-400 hover:text-white transition-colors">
+                  Voir Images
+                </span>
+                <button
+                  onClick={(e) => toggleExpand(event.id || event._id || "", e)}
+                  className="absolute top-3 right-18 text-gray-400 hover:text-white transition-colors"
+                >
+                  {expandedId === (event.id || event._id) ? (
+                    <ChevronUp size={26} />
+                  ) : (
+                    <ChevronDown size={26} />
+                  )}
+                </button>
+
                 {/* Infos Client */}
                 <p className="text-sm text-gray-400 mb-1 flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
@@ -79,7 +102,33 @@ export default function PrivateAccessList({
                 {/* Date */}
                 <p className="text-xs text-gray-500 mb-3 ml-3.5">
                   {new Date(event.dateDebut).toLocaleDateString()}
+                  {" - "}
+                  {new Date(event.dateFin).toLocaleDateString()}
                 </p>
+
+                {/* Thumbnails Grid */}
+                {expandedId === (event.id || event._id) && (
+                  <div className="mt-3 mb-3 grid grid-cols-4 gap-2 bg-black/20 p-2 rounded">
+                    {event.photos && event.photos.length > 0 ? (
+                      event.photos.map((photo: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="aspect-square rounded overflow-hidden border border-white/5"
+                        >
+                          <img
+                            src={photo.src || photo}
+                            alt="miniature"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-span-4 text-center text-xs text-gray-500 py-2 flex items-center justify-center gap-2">
+                        <ImageIcon size={12} /> Aucune photo
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Actions */}
                 <div

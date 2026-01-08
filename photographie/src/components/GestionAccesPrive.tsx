@@ -336,9 +336,10 @@ export default function GestionAccesPrive() {
   };
 
   const handleEdit = (evt: Evenement) => {
+    const eventId = evt.id || evt._id || "";
     setForm({
       ...evt,
-      id: evt.id || "",
+      id: eventId,
       dateDebut: evt.dateDebut ? evt.dateDebut.split("T")[0] : "",
       dateFin: evt.dateFin ? evt.dateFin.split("T")[0] : "",
       image: evt.image || "",
@@ -350,7 +351,7 @@ export default function GestionAccesPrive() {
       clientEmail: evt.clientEmail || "",
     });
     setImagePreview(evt.image || "");
-    setEditId(evt.id || null);
+    setEditId(eventId);
     setError(null);
     setSuccess(null);
   };
