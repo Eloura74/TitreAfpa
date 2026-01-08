@@ -39,7 +39,8 @@ export default function GestionAccesPrive() {
   });
 
   const [editingPhoto, setEditingPhoto] = useState<any | null>(null);
-  const [filesToUpload, setFilesToUpload] = useState<File[]>([]);
+  const [pendingPhotos, setPendingPhotos] = useState<any[]>([]);
+
   const [imagePreview, setImagePreview] = useState<string>("");
   const [editId, setEditId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -109,7 +110,7 @@ export default function GestionAccesPrive() {
     setError(null);
     setSuccess(null);
     setShowClientForm(false);
-    setFilesToUpload([]);
+    setPendingPhotos([]);
   };
 
   const handleCreateClient = async (e: React.FormEvent) => {
@@ -206,58 +207,54 @@ export default function GestionAccesPrive() {
     }
   };
 
-  const handlePhotosUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!editId || !e.target.files) return;
-
-    if (selectedTariffs.length === 0) {
-      alert("Veuillez sélectionner au moins un tarif à appliquer aux photos.");
-      return;
-    }
-
+  const processPhotosUpload = async (photos: any[], eventId: string) => {
     setLoading(true);
-    const files = Array.from(e.target.files);
     const uploadedPhotoIds: string[] = [];
 
     try {
-      const tarifsToApply = selectedTariffs
-        .map((id) => {
-          const t = tarifs.find((tarif) => tarif.id === id || tarif._id === id);
-          return t
-            ? {
-                id: t.id || t._id,
-                format: t.format,
-                support: t.support,
-                prix: t.prix,
-              }
-            : null;
-        })
-        .filter(Boolean);
+      for (const photoData of photos) {
+        const { file, title, description, selectedTariffs } = photoData;
 
-      for (const file of files) {
         try {
           const compressedFile = await compressImage(file);
-          // Upload direct vers Cloudinary
           const imageUrl = await uploadToCloudinary(compressedFile);
 
           if (!imageUrl) throw new Error("Erreur upload image");
+
+          const tariffsToApply = selectedTariffs
+            .map((id: string) => {
+              const t = tarifs.find(
+                (tarif) => tarif.id === id || tarif._id === id
+              );
+              return t
+                ? {
+                    id: t.id || t._id,
+                    format: t.format,
+                    support: t.support,
+                    prix: t.prix,
+                  }
+                : null;
+            })
+            .filter(Boolean);
 
           const resPhoto = await axios.post(
             `${BASE_API_URL}/api/galerie`,
             {
               src: imageUrl,
-              titre: file.name,
+              titre: title || file.name,
               categorie: "EvenementPrive",
-              tarifs: tarifsToApply,
+              tarifs: tariffsToApply,
               alt: `Photo privée ${form.titre}`,
-              description: `Photo privée pour ${form.titre}`,
+              description: description || `Photo privée pour ${form.titre}`,
             },
             {
               withCredentials: true,
             }
           );
 
-          if (resPhoto.data && resPhoto.data._id) {
-            uploadedPhotoIds.push(resPhoto.data._id);
+          const photoId = resPhoto.data._id || resPhoto.data.id;
+          if (photoId) {
+            uploadedPhotoIds.push(photoId);
           }
         } catch (err) {
           console.error(`Erreur upload fichier ${file.name}`, err);
@@ -266,7 +263,7 @@ export default function GestionAccesPrive() {
 
       if (uploadedPhotoIds.length > 0) {
         await axios.post(
-          `${API_URL}/${editId}/photos`,
+          `${API_URL}/${eventId}/photos`,
           { photoIds: uploadedPhotoIds },
           {
             withCredentials: true,
@@ -275,6 +272,7 @@ export default function GestionAccesPrive() {
 
         loadEvenements();
         setSuccess(`${uploadedPhotoIds.length} photos ajoutées avec succès !`);
+        setPendingPhotos([]);
       }
     } catch (err) {
       console.error(err);
@@ -282,6 +280,20 @@ export default function GestionAccesPrive() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePhotosUpload = async (stagedPhotos: any[]) => {
+    if (!stagedPhotos || stagedPhotos.length === 0) return;
+
+    if (!editId) {
+      setPendingPhotos(stagedPhotos);
+      setSuccess(
+        `${stagedPhotos.length} photos en attente. Enregistrez l'événement pour valider.`
+      );
+      return;
+    }
+
+    await processPhotosUpload(stagedPhotos, editId);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -307,72 +319,8 @@ export default function GestionAccesPrive() {
         setSuccess("Accès privé créé avec succès.");
       }
 
-      if (filesToUpload.length > 0 && targetId) {
-        setSuccess(
-          (prev) =>
-            `${prev} Upload de ${filesToUpload.length} photos en cours...`
-        );
-
-        const uploadedPhotoIds: string[] = [];
-        const tarifsToApply = selectedTariffs
-          .map((id) => {
-            const t = tarifs.find(
-              (tarif) => tarif.id === id || tarif._id === id
-            );
-            return t
-              ? {
-                  id: t.id || t._id,
-                  format: t.format,
-                  support: t.support,
-                  prix: t.prix,
-                }
-              : null;
-          })
-          .filter(Boolean);
-
-        for (const file of filesToUpload) {
-          try {
-            const compressedFile = await compressImage(file);
-            // Upload direct vers Cloudinary
-            const imageUrl = await uploadToCloudinary(compressedFile);
-
-            if (imageUrl) {
-              const resPhoto = await axios.post(
-                `${BASE_API_URL}/api/galerie`,
-                {
-                  src: imageUrl,
-                  titre: file.name,
-                  categorie: "EvenementPrive",
-                  tarifs: tarifsToApply,
-                  alt: `Photo privée ${form.titre}`,
-                  description: `Photo privée pour ${form.titre}`,
-                },
-                {
-                  withCredentials: true,
-                }
-              );
-
-              if (resPhoto.data && resPhoto.data._id) {
-                uploadedPhotoIds.push(resPhoto.data._id);
-              }
-            }
-          } catch (err) {
-            console.error(`Erreur upload fichier ${file.name}`, err);
-          }
-        }
-
-        if (uploadedPhotoIds.length > 0) {
-          await axios.post(
-            `${API_URL}/${targetId}/photos`,
-            { photoIds: uploadedPhotoIds },
-            {
-              withCredentials: true,
-            }
-          );
-          setSuccess(
-            (prev) => `${prev} ${uploadedPhotoIds.length} photos ajoutées !`
-          );
-        }
+      if (pendingPhotos.length > 0 && targetId) {
+        await processPhotosUpload(pendingPhotos, targetId);
       }
 
       loadEvenements();
@@ -490,8 +438,6 @@ export default function GestionAccesPrive() {
             tarifs={tarifs}
             selectedTariffs={selectedTariffs}
             setSelectedTariffs={setSelectedTariffs}
-            filesToUpload={filesToUpload}
-            setFilesToUpload={setFilesToUpload}
             handlePhotosUpload={handlePhotosUpload}
             onEditPhoto={setEditingPhoto}
             onDeletePhoto={handleDeletePhoto}

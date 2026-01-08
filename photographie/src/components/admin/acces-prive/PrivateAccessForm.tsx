@@ -11,7 +11,11 @@ import PhotoGallery from "./PhotoGallery";
 interface PrivateAccessFormProps {
   // État du formulaire principal
   form: Evenement;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  handleChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => void;
   handleSubmit: (e: React.FormEvent) => void;
   resetForm: () => void;
   loading: boolean;
@@ -32,9 +36,9 @@ interface PrivateAccessFormProps {
   tarifs: Tarif[];
   selectedTariffs: string[];
   setSelectedTariffs: (ids: string[]) => void;
-  filesToUpload: File[];
-  setFilesToUpload: (files: File[]) => void;
-  handlePhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  // filesToUpload: File[]; // REMOVED
+  // setFilesToUpload: (files: File[]) => void; // REMOVED
+  handlePhotosUpload: (photos: any[]) => void;
 
   // Gestion Galerie existante
   onEditPhoto: (photo: any) => void;
@@ -62,8 +66,8 @@ export default function PrivateAccessForm({
   tarifs,
   selectedTariffs,
   setSelectedTariffs,
-  filesToUpload,
-  setFilesToUpload,
+  // filesToUpload,
+  // setFilesToUpload,
   handlePhotosUpload,
   onEditPhoto,
   onDeletePhoto,
@@ -73,9 +77,8 @@ export default function PrivateAccessForm({
       <h3 className="text-xl font-semibold text-white mb-4">
         {editId ? "Modifier l'accès" : "Créer un nouvel accès privé"}
       </h3>
-      
+
       <form className="flex flex-col gap-3 mb-6" onSubmit={handleSubmit}>
-        
         {/* Titre */}
         <input
           name="titre"
@@ -97,7 +100,7 @@ export default function PrivateAccessForm({
             className="w-full bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white text-sm file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-[#ffe992] file:text-black hover:file:bg-[#d6c487] transition-colors"
           />
         </div>
-        
+
         {/* Prévisualisation Couverture */}
         {imagePreview && (
           <div className="relative group">
@@ -135,7 +138,7 @@ export default function PrivateAccessForm({
             />
           </div>
         </div>
-        
+
         {/* Description */}
         <textarea
           name="description"
@@ -148,7 +151,9 @@ export default function PrivateAccessForm({
 
         {/* Section Client */}
         <div className="bg-[#232336] p-4 rounded border border-white/10">
-          <label className="text-sm font-bold text-[#ffe992] mb-2 block">Client associé</label>
+          <label className="text-sm font-bold text-[#ffe992] mb-2 block">
+            Client associé
+          </label>
           <div className="flex gap-2 mb-2">
             <input
               name="clientEmail"
@@ -160,7 +165,7 @@ export default function PrivateAccessForm({
           </div>
 
           {/* Sous-composant Création Client */}
-          <ClientCreationForm 
+          <ClientCreationForm
             showClientForm={showClientForm}
             setShowClientForm={setShowClientForm}
             clientForm={clientForm}
@@ -170,12 +175,10 @@ export default function PrivateAccessForm({
         </div>
 
         {/* Sous-composant Upload Photos */}
-        <PhotoUploader 
+        <PhotoUploader
           tarifs={tarifs}
           selectedTariffs={selectedTariffs}
           setSelectedTariffs={setSelectedTariffs}
-          filesToUpload={filesToUpload}
-          setFilesToUpload={setFilesToUpload}
           handlePhotosUpload={handlePhotosUpload}
           isEditing={!!editId}
         />
@@ -187,7 +190,11 @@ export default function PrivateAccessForm({
             className="flex-1 bg-[#ffe992] text-black font-semibold px-6 py-2 rounded hover:bg-[#d6c487] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_10px_rgba(255,233,146,0.2)]"
             disabled={loading}
           >
-            {loading ? "Traitement en cours..." : (editId ? "Enregistrer les modifications" : "Créer l'accès privé")}
+            {loading
+              ? "Traitement en cours..."
+              : editId
+              ? "Enregistrer les modifications"
+              : "Créer l'accès privé"}
           </button>
           {editId && (
             <button
@@ -203,7 +210,7 @@ export default function PrivateAccessForm({
 
       {/* Galerie Photos (Mode Édition uniquement) */}
       {editId && (
-        <PhotoGallery 
+        <PhotoGallery
           photos={form.photos || []}
           onEdit={onEditPhoto}
           onDelete={onDeletePhoto}
