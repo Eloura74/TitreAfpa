@@ -87,6 +87,7 @@ export default function PhotoStagingModal({
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="p-2 hover:bg-white/5 rounded-full transition-colors text-gray-400 hover:text-white"
           >
@@ -100,6 +101,7 @@ export default function PhotoStagingModal({
           <div className="w-64 bg-[#12121a] border-r border-white/5 overflow-y-auto p-4 space-y-3 hidden md:block">
             {stagedPhotos.map((photo, idx) => (
               <button
+                type="button"
                 key={photo.id}
                 onClick={() => setActivePhotoIndex(idx)}
                 className={`w-full text-left p-2 rounded-lg border transition-all ${
@@ -137,6 +139,7 @@ export default function PhotoStagingModal({
               {/* Navigation Overlay (Mobile/Tablet) */}
               <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4 md:hidden">
                 <button
+                  type="button"
                   disabled={activePhotoIndex === 0}
                   onClick={() => setActivePhotoIndex((prev) => prev - 1)}
                   className="px-4 py-2 bg-black/50 backdrop-blur rounded-full text-white disabled:opacity-50"
@@ -144,6 +147,7 @@ export default function PhotoStagingModal({
                   Précédent
                 </button>
                 <button
+                  type="button"
                   disabled={activePhotoIndex === stagedPhotos.length - 1}
                   onClick={() => setActivePhotoIndex((prev) => prev + 1)}
                   className="px-4 py-2 bg-black/50 backdrop-blur rounded-full text-white disabled:opacity-50"
@@ -159,6 +163,7 @@ export default function PhotoStagingModal({
                 {/* Actions Bar */}
                 <div className="flex justify-end">
                   <button
+                    type="button"
                     onClick={() => applyToAll(activePhotoIndex)}
                     className="text-xs flex items-center gap-2 text-[#ffe992] hover:text-[#ffe992]/80 transition-colors"
                     title="Appliquer la description et les tarifs à toutes les photos"
@@ -268,12 +273,14 @@ export default function PhotoStagingModal({
           </div>
           <div className="flex gap-3">
             <button
+              type="button"
               onClick={onClose}
               className="px-6 py-2 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-colors text-sm font-bold uppercase tracking-wider"
             >
               Annuler
             </button>
             <button
+              type="button"
               onClick={() => onValidate(stagedPhotos)}
               className="px-6 py-2 bg-[#ffe992] text-black font-bold rounded-lg hover:bg-white transition-colors text-sm uppercase tracking-wider shadow-lg shadow-[#ffe992]/10 flex items-center gap-2"
             >
