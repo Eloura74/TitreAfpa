@@ -6,6 +6,7 @@
 
 const express = require("express");
 const Tarif = require("../models/Tarif"); // Modèle Mongoose pour les tarifs
+const TarifConfig = require("../models/TarifConfig"); // Modèle pour la config hiérarchique
 const { isAdmin } = require("../middleware/auth"); // Middleware pour restreindre l'accès aux admins
 const fs = require("fs"); // Pour écrire les fichiers de sauvegarde
 const path = require("path");
@@ -53,11 +54,38 @@ router.get("/", async (req, res) => {
   res.json(tarifs); // Envoie les tarifs au client en JSON
 });
 
+// -------------------------------------------------------------
+// GET /api/tarifs/config
+// -------------------------------------------------------------
+// Récupère la configuration hiérarchique des tarifs
+router.get("/config", async (req, res) => {
+  try {
+    const config = await TarifConfig.findOne().sort({ createdAt: -1 });
+    res.json(config || { categories: [] });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur chargement config", error: err });
+  }
+});
+
 // ============================================================
 // MIDDLEWARE ADMIN GLOBAL : protège toutes les routes ci-dessous
 // ============================================================
 // Toute route définie après ce `router.use()` sera accessible uniquement aux administrateurs
 router.use(isAdmin); // Vérifie que l'utilisateur est un admin
+
+// -------------------------------------------------------------
+// POST /api/tarifs/config
+// -------------------------------------------------------------
+// Sauvegarde la configuration hiérarchique
+router.post("/config", async (req, res) => {
+  try {
+    const newConfig = new TarifConfig(req.body);
+    await newConfig.save();
+    res.json(newConfig);
+  } catch (err) {
+    res.status(500).json({ message: "Erreur sauvegarde config", error: err });
+  }
+});
 
 // -------------------------------------------------------------
 // POST /api/tarifs

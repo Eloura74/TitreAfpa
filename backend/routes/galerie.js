@@ -60,8 +60,8 @@ router.get("/", async (req, res) => {
 // POST /api/galerie/upload
 // ------------------------------
 router.post("/upload", (req, res) => {
-  return res.status(400).json({ 
-    message: "L'upload local est désactivé. Utilisez /api/upload-cloudinary." 
+  return res.status(400).json({
+    message: "L'upload local est désactivé. Utilisez /api/upload-cloudinary.",
   });
 });
 
@@ -82,6 +82,7 @@ router.post("/", async (req, res) => {
       description = "", // Description facultative
       categorie = "Divers", // Catégorie (ex: mariage)
       tarifs: rawTarifs = [], // Liste des tarifs (brut)
+      availableTariffIds = [], // Nouveaux IDs hiérarchiques
     } = req.body;
 
     // Initialisation du tableau de tarifs final
@@ -128,6 +129,7 @@ router.post("/", async (req, res) => {
       description,
       categorie,
       tarifs,
+      availableTariffIds,
     });
 
     // Sauvegarde en base

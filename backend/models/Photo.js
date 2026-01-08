@@ -96,6 +96,12 @@ const photoSchema = new mongoose.Schema({
     default: [], // Par défaut, aucun tarif personnalisé
   },
 
+  // Liste des IDs de la configuration hiérarchique (nouveau système)
+  availableTariffIds: {
+    type: [String],
+    default: [],
+  },
+
   // Prix unique (optionnel) : utilisé uniquement si le tableau `tarifs` est vide
   prix: {
     type: Number,
