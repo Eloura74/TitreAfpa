@@ -177,8 +177,6 @@ export default function PrivateAccessForm({
         {/* Sous-composant Upload Photos */}
         <PhotoUploader
           tarifs={tarifs}
-          selectedTariffs={selectedTariffs}
-          setSelectedTariffs={setSelectedTariffs}
           handlePhotosUpload={handlePhotosUpload}
           isEditing={!!editId}
         />

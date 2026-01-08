@@ -7,10 +7,6 @@ import PhotoStagingModal from "./PhotoStagingModal";
 // ==========================================
 interface PhotoUploaderProps {
   tarifs: Tarif[];
-  selectedTariffs: string[];
-  setSelectedTariffs: (ids: string[]) => void;
-  // filesToUpload: File[]; // REMOVED: Managed by modal/parent via new structure
-  // setFilesToUpload: (files: File[]) => void; // REMOVED
   handlePhotosUpload?: (photos: any[]) => void; // Updated signature
   isEditing: boolean;
 }
@@ -86,8 +82,6 @@ export const compressImage = async (file: File): Promise<File> => {
 // ==========================================
 export default function PhotoUploader({
   tarifs,
-  selectedTariffs,
-  setSelectedTariffs,
   handlePhotosUpload,
   isEditing,
 }: PhotoUploaderProps) {

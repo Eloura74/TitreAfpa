@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Tarif } from "../../../types/tarif";
-import { X, Check, Copy, Image as ImageIcon } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { X, Check, Copy } from "lucide-react";
 
 interface StagedPhoto {
   id: string; // unique temp id
