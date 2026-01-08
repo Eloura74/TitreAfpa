@@ -26,11 +26,22 @@ import MonCompte from "./pages/MonCompte"; // Page Espace Client
 import ClientEvenement from "./pages/ClientEvenement"; // Page Événement Client (Photos)
 import Checkout from "./pages/Checkout"; // Page de paiement
 import { ToastProvider } from "./components/Toast"; // Provider pour les notifications Toast
+// import { useState } from "react"; // Hook pour gérer l'état local
+// import IntroVideo from "./components/intro/IntroVideo"; // Composant vidéo d'intro
 
 // ==============================
 //  Composant principal App : configuration des routes
 // ==============================
 function App() {
+  // État pour gérer l'affichage de la vidéo d'intro
+  // On initialise à true pour afficher la vidéo au chargement
+  // const [showIntro, setShowIntro] = useState(true);
+
+  // Fonction pour masquer l'intro une fois terminée
+  // const handleIntroEnd = () => {
+  //   setShowIntro(false);
+  // };
+
   return (
     // On enveloppe toute l'application dans les providers pour partager le panier et l'utilisateur globalement
     <UserProvider>
@@ -48,6 +59,19 @@ function App() {
             <meta property="og:type" content="website" />
             <meta property="og:site_name" content="Fabien Licata" />
           </Helmet>
+
+          {/* Affichage conditionnel de la vidéo d'intro */}
+          {/* {showIntro && <IntroVideo onEnded={handleIntroEnd} />} */}
+
+          {/* Le reste de l'application n'est affiché (ou du moins visible) que si l'intro est finie
+              Cependant, pour éviter un "flash" ou re-render complet, on peut soit :
+              1. Ne rien rendre d'autre tant que showIntro est true (simple)
+              2. Rendre l'app en dessous (cachée par le z-index de l'intro) pour qu'elle soit prête.
+              
+              Ici, l'IntroVideo a un z-index élevé et un fond opaque, donc elle couvre tout.
+              On peut laisser l'app se monter en arrière-plan pour que ce soit fluide à la fin de la vidéo.
+          */}
+
           {/* Router React pour gérer les différentes URL */}
           <Router>
             {/* Définition des différentes routes accessibles dans l'app */}

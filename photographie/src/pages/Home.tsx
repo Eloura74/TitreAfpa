@@ -184,30 +184,13 @@ export default function Home() {
       </motion.div>
 
       {/* EN-TÊTE : Signature Fabien Licata */}
-      <header className="absolute top-8 md:top-16 left-0 w-full z-40 flex flex-col items-center pointer-events-none px-6">
+      <header className="absolute top-2 md:top-2 left-0 w-full z-40 flex justify-center items-center pointer-events-none px-6">
         <div className="overflow-hidden">
-          <motion.h2
-            custom={0}
-            variants={revealVariants}
-            initial="hidden"
-            animate="visible"
-            className="text-2xl md:text-4xl font-extralight tracking-[0.4em] md:tracking-[0.6em] uppercase 
-                       bg-gradient-to-b from-white via-yellow-200 to-yellow-500 
-                       bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(255,255,255,0.15)] text-center font-syncopate"
-          >
-            Fabien Licata
-          </motion.h2>
-        </div>
-        <div className="overflow-hidden mt-2 md:mt-3">
-          <motion.p
-            custom={1}
-            variants={revealVariants}
-            initial="hidden"
-            animate="visible"
-            className="text-[9px] md:text-xs tracking-[0.3em] md:tracking-[0.5em] uppercase text-yellow-500/50 font-light text-center lg:ml-13 font-syncopate"
-          >
-            Photographe / Photo-Graphiste
-          </motion.p>
+          <img
+            src={"/images/logoHome.png"}
+            alt="Logo"
+            className="w-48 h-auto md:w-80 lg:w-96 object-contain drop-shadow-2xl"
+          />
         </div>
       </header>
 
@@ -257,7 +240,7 @@ export default function Home() {
       </div>
 
       {/* CONTENU PRINCIPAL */}
-      <div className="relative z-10 flex flex-col md:flex-row md:flex-wrap min-h-[100dvh] md:h-[100dvh] pt-32 pb-24 md:pt-0 md:pb-0">
+      <div className="relative z-10 flex flex-col md:flex-row md:flex-wrap min-h-[100dvh] md:h-[100dvh] pt-40 pb-24 md:pt-0 md:pb-0">
         {/* SECTION PHOTOGRAPHIE (Haut Gauche) */}
         <motion.section
           onMouseEnter={() => setHoveredSide("photo")}

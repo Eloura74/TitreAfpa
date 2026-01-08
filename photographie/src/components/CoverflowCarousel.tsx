@@ -54,7 +54,7 @@ export default function CoverflowCarousel({
 
   return (
     <div
-      className={`absolute inset-0 flex items-center justify-center pointer-events-none perspective-1000 overflow-hidden ${className}`}
+      className={`absolute inset-0 flex items-center justify-center pointer-events-none perspective-1000 ${className}`}
     >
       <div className="relative w-full h-full flex items-center justify-center perspective-[1000px]">
         <AnimatePresence initial={false}>
@@ -90,7 +90,7 @@ export default function CoverflowCarousel({
                   zIndex: 0,
                 }}
                 transition={{
-                  duration: 0.8,
+                  duration: 1.5, // Durée augmentée pour plus de fluidité
                   ease: [0.16, 1, 0.3, 1],
                 }}
                 className={`absolute cursor-pointer rounded-lg shadow-2xl overflow-hidden border border-white/10 ${
