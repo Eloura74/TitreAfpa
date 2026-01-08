@@ -436,8 +436,6 @@ export default function GestionAccesPrive() {
             handleClientChange={handleClientChange}
             handleCreateClient={handleCreateClient}
             tarifs={tarifs}
-            selectedTariffs={selectedTariffs}
-            setSelectedTariffs={setSelectedTariffs}
             handlePhotosUpload={handlePhotosUpload}
             onEditPhoto={setEditingPhoto}
             onDeletePhoto={handleDeletePhoto}

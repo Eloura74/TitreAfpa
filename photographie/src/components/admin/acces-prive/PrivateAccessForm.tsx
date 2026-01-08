@@ -34,8 +34,6 @@ interface PrivateAccessFormProps {
 
   // Gestion Photos & Tarifs
   tarifs: Tarif[];
-  selectedTariffs: string[];
-  setSelectedTariffs: (ids: string[]) => void;
   // filesToUpload: File[]; // REMOVED
   // setFilesToUpload: (files: File[]) => void; // REMOVED
   handlePhotosUpload: (photos: any[]) => void;
@@ -64,8 +62,6 @@ export default function PrivateAccessForm({
   handleClientChange,
   handleCreateClient,
   tarifs,
-  selectedTariffs,
-  setSelectedTariffs,
   // filesToUpload,
   // setFilesToUpload,
   handlePhotosUpload,
