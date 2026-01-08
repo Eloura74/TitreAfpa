@@ -54,7 +54,7 @@ export default function ClientEvenement() {
   // Configuration de la commande
   const [config, setConfig] = useState<{
     [photoId: string]: {
-      tarifId: string;
+      tarifIndex: number;
       quantite: number;
     };
   }>({});
@@ -114,11 +114,10 @@ export default function ClientEvenement() {
       if (evenement) {
         const photo = evenement.photos.find((p) => p._id === photoId);
         if (photo && photo.tarifs && photo.tarifs.length > 0) {
-          const defaultTarifId = photo.tarifs[0]._id || photo.tarifs[0].id || "tarif-0";
           setConfig((prev) => ({
             ...prev,
             [photoId]: {
-              tarifId: defaultTarifId as string,
+              tarifIndex: 0,
               quantite: 1,
             },
           }));
@@ -132,17 +131,9 @@ export default function ClientEvenement() {
     selectedPhotos.forEach((photoId) => {
       const photo = evenement?.photos.find((p) => p._id === photoId);
       const conf = config[photoId];
-      // Default to first tariff if not configured
-      const defaultTarif = photo?.tarifs?.[0];
-      const targetTarifId =
-        conf?.tarifId || defaultTarif?._id || defaultTarif?.id || "tarif-0";
-
-      const tarif = photo?.tarifs?.find(
-        (t, index) => {
-            const tId = t._id || t.id || `tarif-${index}`;
-            return tId === targetTarifId;
-        }
-      );
+      // Default to first tariff (index 0) if not configured
+      const tarifIndex = conf?.tarifIndex ?? 0;
+      const tarif = photo?.tarifs?.[tarifIndex];
 
       if (!photo || !tarif) return;
 
@@ -376,18 +367,8 @@ export default function ClientEvenement() {
                   if (!photo) return null;
 
                   // Fallback safe pour le tarif
-                  const currentTarifId =
-                    config[photoId]?.tarifId ||
-                    photo.tarifs?.[0]?._id ||
-                    photo.tarifs?.[0]?.id ||
-                    (photo.tarifs && photo.tarifs.length > 0 ? "tarif-0" : undefined);
-
-                  const currentTarif = photo.tarifs?.find(
-                    (t, index) => {
-                        const tId = t._id || t.id || `tarif-${index}`;
-                        return tId === currentTarifId;
-                    }
-                  );
+                  const currentTarifIndex = config[photoId]?.tarifIndex ?? 0;
+                  const currentTarif = photo.tarifs?.[currentTarifIndex];
 
                   return (
                     <div
@@ -420,39 +401,33 @@ export default function ClientEvenement() {
                             <label className="text-xs text-[#ffe992] uppercase tracking-wider font-bold">
                               Format & Support
                             </label>
-                              <select
-                                value={currentTarifId || ""}
-                                onChange={(e) =>
-                                  setConfig((prev) => {
-                                    const currentConfig = prev[photoId] || {
-                                      quantite: 1,
-                                    };
-                                    return {
-                                      ...prev,
-                                      [photoId]: {
-                                        ...currentConfig,
-                                        tarifId: e.target.value,
-                                      },
-                                    };
-                                  })
-                                }
-                                className="w-full bg-[#1a1a24] border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-[#ffe992] focus:outline-none appearance-none cursor-pointer hover:bg-[#22222e] transition-colors"
-                              >
-                                {photo.tarifs?.map((t: any, index: number) => {
-                                  const tarifId = t._id || t.id || `tarif-${index}`;
-                                  return (
-                                    <option
-                                      key={tarifId}
-                                      value={tarifId}
-                                    >
-                                      {t.format} — {t.support}
-                                    </option>
-                                  );
-                                })}
-                              </select>
-                              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                                <ArrowRight size={14} className="rotate-90" />
-                              </div>
+                            <select
+                              value={currentTarifIndex}
+                              onChange={(e) => {
+                                const newIndex = parseInt(e.target.value, 10);
+                                setConfig((prev) => {
+                                  const currentConfig = prev[photoId] || {
+                                    quantite: 1,
+                                  };
+                                  return {
+                                    ...prev,
+                                    [photoId]: {
+                                      ...currentConfig,
+                                      tarifIndex: newIndex,
+                                    },
+                                  };
+                                });
+                              }}
+                              className="w-full bg-[#1a1a24] border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-[#ffe992] focus:outline-none appearance-none cursor-pointer hover:bg-[#22222e] transition-colors"
+                            >
+                              {photo.tarifs?.map((t: any, index: number) => (
+                                <option key={index} value={index}>
+                                  {t.format} — {t.support}
+                                </option>
+                              ))}
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                              <ArrowRight size={14} className="rotate-90" />
                             </div>
                           </div>
 
@@ -465,7 +440,7 @@ export default function ClientEvenement() {
                                 onClick={() =>
                                   setConfig((prev) => {
                                     const currentConfig = prev[photoId] || {
-                                      tarifId: currentTarifId as string,
+                                      tarifIndex: currentTarifIndex,
                                       quantite: 1,
                                     };
                                     return {
@@ -491,7 +466,7 @@ export default function ClientEvenement() {
                                 onClick={() =>
                                   setConfig((prev) => {
                                     const currentConfig = prev[photoId] || {
-                                      tarifId: currentTarifId as string,
+                                      tarifIndex: currentTarifIndex,
                                       quantite: 1,
                                     };
                                     return {
@@ -541,18 +516,8 @@ export default function ClientEvenement() {
                         const conf = config[id];
 
                         // Même logique de fallback pour le total
-                        const currentTarifId =
-                          conf?.tarifId ||
-                          photo?.tarifs?.[0]?._id ||
-                          photo?.tarifs?.[0]?.id ||
-                          (photo?.tarifs && photo.tarifs.length > 0 ? "tarif-0" : undefined);
-
-                        const tarif = photo?.tarifs?.find(
-                          (t, index) => {
-                             const tId = t._id || t.id || `tarif-${index}`;
-                             return tId === currentTarifId;
-                          }
-                        );
+                        const currentTarifIndex = conf?.tarifIndex ?? 0;
+                        const tarif = photo?.tarifs?.[currentTarifIndex];
 
                         return acc + (tarif?.prix || 0) * (conf?.quantite || 1);
                       }, 0)
