@@ -2,16 +2,22 @@ import { useEffect, useState } from "react";
 
 export default function Footer() {
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const [copied, setCopied] = useState(false); // État pour le feedback de copie
+
+  const email = "fabien.licata@gmail.com"; // Variable pour éviter les erreurs de frappe
 
   useEffect(() => {
     if (!isContactOpen) return;
-
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsContactOpen(false);
     };
-
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isContactOpen]);
+
+  // Réinitialiser l'état "copié" quand on ferme la modale
+  useEffect(() => {
+    if (!isContactOpen) setCopied(false);
   }, [isContactOpen]);
 
   const openContact = (e: React.MouseEvent) => {
@@ -20,6 +26,14 @@ export default function Footer() {
   };
 
   const closeContact = () => setIsContactOpen(false);
+
+  // Fonction pour copier l'email dans le presse-papier
+  const handleCopy = () => {
+    navigator.clipboard.writeText(email);
+    setCopied(true);
+    // Remettre le bouton à son état normal après 2 secondes
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <>
@@ -31,7 +45,7 @@ export default function Footer() {
 
         <div className="flex gap-8 md:gap-12 text-[10px] md:text-[12px] uppercase tracking-[0.3em] md:tracking-[0.5em] font-extralight">
           <a
-            href="https://www.instagram.com/fabienlicata/"
+            href="https://www.instagram.com/fabien.licata.photographiste/"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-yellow-400 transition-colors border-b border-transparent hover:border-yellow-400"
@@ -115,10 +129,10 @@ export default function Footer() {
                     Téléphone
                   </span>
                   <a
-                    href="tel:+33600000000"
+                    href="tel:+33782080607"
                     className="mt-1 inline-flex items-center gap-2 rounded-lg px-2 py-1 -ml-2 hover:bg-white/5 hover:text-yellow-400 transition-colors"
                   >
-                    +33 6 00 00 00 00
+                    +33 7 82 08 06 07
                   </a>
                 </div>
 
@@ -128,23 +142,38 @@ export default function Footer() {
                     Email
                   </span>
                   <a
-                    href="mailto:contact@fabienlicata.com"
+                    href={`mailto:${email}`}
                     className="mt-1 inline-flex items-center gap-2 rounded-lg px-2 py-1 -ml-2 hover:bg-white/5 hover:text-yellow-400 transition-colors break-all"
                   >
-                    contact@fabienlicata.com
+                    {email}
                   </a>
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="mt-8 flex items-center justify-end gap-3">
-                <a
-                  href="mailto:contact@fabienlicata.com?subject=Contact%20site"
-                  className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-xs uppercase tracking-[0.25em] font-extralight
-                        border border-yellow-400/30 bg-yellow-400/10 hover:bg-yellow-400/15 hover:border-yellow-400/60 hover:text-yellow-200
-                        transition-colors"
+              {/* Actions - DOUBLE BOUTONS POUR UX OPTIMALE */}
+              <div className="mt-8 grid grid-cols-2 gap-3">
+                {/* Bouton Copier */}
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className={`inline-flex items-center justify-center rounded-xl px-4 py-3 text-xs uppercase tracking-[0.15em] font-extralight border transition-all duration-300
+                    ${
+                      copied
+                        ? "bg-green-500/20 border-green-500/50 text-green-200"
+                        : "border-white/20 bg-white/5 hover:bg-white/10 text-white"
+                    }`}
                 >
-                  Envoyer un mail
+                  {copied ? "Email Copié !" : "Copier l'email"}
+                </button>
+
+                {/* Bouton Mailto */}
+                <a
+                  href={`mailto:${email}?subject=Contact%20site`}
+                  className="inline-flex items-center justify-center rounded-xl px-4 py-3 text-xs uppercase tracking-[0.15em] font-extralight
+                        border border-yellow-400/30 bg-yellow-400/10 hover:bg-yellow-400/20 hover:border-yellow-400/60 hover:text-yellow-200
+                        transition-colors text-center"
+                >
+                  Ouvrir Mail
                 </a>
               </div>
             </div>

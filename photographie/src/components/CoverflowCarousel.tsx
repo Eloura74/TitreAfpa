@@ -20,7 +20,7 @@ export default function CoverflowCarousel({
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) => prev + 1);
-    }, 3000);
+    }, 1500); // 1.5 secondes entre chaque image
 
     return () => clearInterval(interval);
   }, [isVisible]);
