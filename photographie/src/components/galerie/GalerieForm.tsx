@@ -4,7 +4,10 @@ import { useNavigate } from "react-router-dom";
 import galerieData from "../../config/galerie.json";
 import { API_URL as BASE_API_URL } from "../../config/api";
 import { useToast } from "../../components/Toast";
-import { ArrowLeft, Upload, Check, AlertCircle } from "lucide-react";
+import { ArrowLeft, Upload } from "lucide-react";
+import { tariffService } from "../../services/tariffService";
+import { TariffConfig } from "../../types/tarifConfig";
+import TariffSelector from "../admin/tarifs/TariffSelector";
 
 const API_URL = `${BASE_API_URL}/api/galerie`;
 
@@ -15,40 +18,20 @@ interface FormType {
   titre: string;
   description: string;
   categorie: string;
-  tarifs: TarifOeuvre[];
+  availableTariffIds: string[]; // Updated for new system
 }
 
-// --- TYPE POUR UN TARIF (FORMAT/SUPPORT/PRIX) ---
-interface TarifOeuvre {
-  id: string;
-  format: string;
-  support: string;
-  prix: number;
-}
-
-// --- TYPE POUR UN TARIF PRÉDÉFINI ---
-interface TarifPredefini {
-  _id: string;
-  id: string;
-  nom: string;
-  type: string;
-  format: string;
-  prix: number;
-  support: string;
-  actif: boolean;
-}
-
-// --- FORMULAIRE INITIAL AVEC TARIFS VIDE ---
+// --- FORMULAIRE INITIAL ---
 const formInitial: FormType = {
   src: "",
   alt: "",
   titre: "",
   description: "",
   categorie: "",
-  tarifs: [],
+  availableTariffIds: [],
 };
 
-// Interface pour les photos (structure des objets photo)
+// Interface pour les photos
 interface Photo {
   _id?: string;
   src: string;
@@ -57,16 +40,15 @@ interface Photo {
   description: string;
   prix: number;
   categorie: string;
-  tarifs: TarifOeuvre[];
+  availableTariffIds?: string[];
 }
 
 export default function GalerieForm() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [form, setForm] = useState<FormType>(formInitial);
-  const [tarifsPredéfinis, setTarifsPredéfinis] = useState<TarifPredefini[]>(
-    []
-  );
-  const [tarifsSélectionnés, setTarifsSélectionnés] = useState<string[]>([]);
+  const [tariffConfig, setTariffConfig] = useState<TariffConfig>({
+    categories: [],
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addToast } = useToast();
   const [editId, setEditId] = useState<string | null>(null);
@@ -79,9 +61,8 @@ export default function GalerieForm() {
         const dataPhotos = await resPhotos.json();
         setPhotos(dataPhotos);
 
-        const resTarifs = await fetch(`${BASE_API_URL}/api/tarifs`);
-        const dataTarifs = await resTarifs.json();
-        setTarifsPredéfinis(dataTarifs.filter((t: TarifPredefini) => t.actif));
+        const config = await tariffService.getTariffConfig();
+        setTariffConfig(config);
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
         addToast("Erreur lors du chargement des données", "error");
@@ -116,7 +97,7 @@ export default function GalerieForm() {
     setIsSubmitting(true);
 
     try {
-      if (tarifsSélectionnés.length === 0) {
+      if (form.availableTariffIds.length === 0) {
         addToast(
           "Veuillez sélectionner au moins un tarif pour cette photo.",
           "warning"
@@ -125,31 +106,13 @@ export default function GalerieForm() {
         return;
       }
 
-      const tarifsÀEnvoyer = tarifsSélectionnés
-        .map((id) => {
-          const tarifTrouvé = tarifsPredéfinis.find(
-            (t) => t._id === id || t.id === id
-          );
-
-          if (tarifTrouvé) {
-            return {
-              id: tarifTrouvé._id || tarifTrouvé.id,
-              format: tarifTrouvé.format,
-              support: tarifTrouvé.support,
-              prix: tarifTrouvé.prix,
-            };
-          }
-          return null;
-        })
-        .filter((t) => t !== null) as TarifOeuvre[];
-
-      const formAvecTarifs = {
+      const dataToSend = {
         src: form.src,
         alt: form.alt,
         titre: form.titre,
         description: form.description,
         categorie: form.categorie,
-        tarifs: tarifsÀEnvoyer,
+        availableTariffIds: form.availableTariffIds,
       };
 
       try {
@@ -157,7 +120,7 @@ export default function GalerieForm() {
           const res = await fetch(`${API_URL}/${editId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formAvecTarifs),
+            body: JSON.stringify(dataToSend),
           });
           if (!res.ok) {
             const err = await res.text();
@@ -172,68 +135,20 @@ export default function GalerieForm() {
           setEditId(null);
           addToast("Photo modifiée avec succès !", "success");
         } else {
-          const photoMinimale = {
-            src: formAvecTarifs.src,
-            alt: formAvecTarifs.alt,
-            titre: formAvecTarifs.titre,
-            description: formAvecTarifs.description,
-            categorie: formAvecTarifs.categorie,
-          };
-
           const res = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(photoMinimale),
+            body: JSON.stringify(dataToSend),
           });
 
-          const responseText = await res.text();
-
           if (!res.ok) {
-            let errorMessage = `Erreur étape 1 - ${res.status}: ${res.statusText}`;
-            try {
-              const errorJson = JSON.parse(responseText);
-              errorMessage += `\n\nDétails: ${JSON.stringify(
-                errorJson,
-                null,
-                2
-              )}`;
-            } catch {
-              errorMessage += `\n\nDétails: ${responseText}`;
-            }
-            addToast("Erreur lors de la création : " + errorMessage, "error");
+            const err = await res.text();
+            addToast("Erreur lors de la création : " + err, "error");
             setIsSubmitting(false);
             return;
           }
 
-          let photoCreee = JSON.parse(responseText);
-
-          try {
-            if (photoCreee && photoCreee._id) {
-              const updateRes = await fetch(`${API_URL}/${photoCreee._id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ tarifs: formAvecTarifs.tarifs }),
-              });
-
-              const updateResponseText = await updateRes.text();
-
-              if (!updateRes.ok) {
-                addToast(
-                  "Photo créée, mais erreur lors de l'ajout des tarifs.",
-                  "warning"
-                );
-              } else {
-                try {
-                  photoCreee = JSON.parse(updateResponseText);
-                } catch (e) {
-                  console.error("Erreur de parsing de la réponse étape 2:", e);
-                }
-              }
-            }
-          } catch (updateErr) {
-            addToast("Erreur lors de l'ajout des tarifs.", "warning");
-          }
-
+          const photoCreee = await res.json();
           setPhotos((prevPhotos) => [...prevPhotos, photoCreee]);
           addToast("Photo ajoutée avec succès !", "success");
         }
@@ -244,7 +159,6 @@ export default function GalerieForm() {
       }
 
       setForm(formInitial);
-      setTarifsSélectionnés([]);
       setIsSubmitting(false);
     } catch (error) {
       console.error("Erreur lors de l'enregistrement :", error);
@@ -449,83 +363,17 @@ export default function GalerieForm() {
             </a>
           </div>
 
-          <div className="bg-[#0a0a10] rounded-xl border border-white/10 overflow-hidden h-[600px] overflow-y-auto custom-scrollbar">
-            {tarifsPredéfinis.length === 0 ? (
-              <div className="p-8 text-center text-gray-500 flex flex-col items-center gap-3">
-                <AlertCircle size={32} />
-                <p>Aucun tarif disponible.</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-white/5">
-                {tarifsPredéfinis.map((tarif) => {
-                  const isSelected = tarifsSélectionnés.includes(
-                    tarif._id || tarif.id
-                  );
-                  return (
-                    <div
-                      key={tarif._id || tarif.id}
-                      onClick={() => {
-                        if (isSelected) {
-                          setTarifsSélectionnés(
-                            tarifsSélectionnés.filter(
-                              (id) => id !== (tarif._id || tarif.id)
-                            )
-                          );
-                        } else {
-                          setTarifsSélectionnés([
-                            ...tarifsSélectionnés,
-                            tarif._id || tarif.id,
-                          ]);
-                        }
-                      }}
-                      className={`p-4 cursor-pointer transition-all duration-200 flex items-start gap-4 group ${
-                        isSelected
-                          ? "bg-[#ffe992]/10 hover:bg-[#ffe992]/20"
-                          : "hover:bg-white/5"
-                      }`}
-                    >
-                      <div
-                        className={`mt-1 w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-                          isSelected
-                            ? "bg-[#ffe992] border-[#ffe992] text-black"
-                            : "border-gray-600 group-hover:border-gray-400 bg-transparent"
-                        }`}
-                      >
-                        {isSelected && <Check size={14} strokeWidth={3} />}
-                      </div>
-
-                      <div className="flex-1">
-                        <div
-                          className={`font-medium mb-1 transition-colors ${
-                            isSelected ? "text-[#ffe992]" : "text-white"
-                          }`}
-                        >
-                          {tarif.nom}
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5">
-                            {tarif.format}
-                          </span>
-                          <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5">
-                            {tarif.support}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <span
-                          className={`text-lg font-bold ${
-                            isSelected ? "text-[#ffe992]" : "text-white"
-                          }`}
-                        >
-                          {tarif.prix}€
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+          <div className="bg-[#0a0a10] rounded-xl border border-white/10 overflow-hidden h-[600px] overflow-y-auto custom-scrollbar p-4">
+            <TariffSelector
+              config={tariffConfig}
+              selectedIds={form.availableTariffIds}
+              onToggle={(ids: string[], checked: boolean) => {
+                const newSelection = checked
+                  ? [...new Set([...form.availableTariffIds, ...ids])]
+                  : form.availableTariffIds.filter((id) => !ids.includes(id));
+                setForm({ ...form, availableTariffIds: newSelection });
+              }}
+            />
           </div>
         </div>
       </div>
@@ -541,7 +389,8 @@ export default function GalerieForm() {
             !form.alt ||
             !form.description ||
             !form.categorie ||
-            tarifsSélectionnés.length === 0
+            !form.categorie ||
+            form.availableTariffIds.length === 0
           }
           className={`w-full py-4 rounded-xl font-bold uppercase tracking-widest transition-all duration-300 shadow-lg ${
             isSubmitting ||
@@ -550,7 +399,7 @@ export default function GalerieForm() {
             !form.alt ||
             !form.description ||
             !form.categorie ||
-            tarifsSélectionnés.length === 0
+            form.availableTariffIds.length === 0
               ? "bg-gray-800 text-gray-500 cursor-not-allowed shadow-none"
               : "bg-[#ffe992] text-black hover:bg-white hover:shadow-[#ffe992]/20 transform hover:-translate-y-1"
           }`}
@@ -571,7 +420,7 @@ export default function GalerieForm() {
         <div className="mt-4 flex flex-wrap gap-4 justify-center text-xs text-red-400/80 font-mono">
           {!form.src && <span>* Image requise</span>}
           {!form.titre && <span>* Titre requis</span>}
-          {tarifsSélectionnés.length === 0 && (
+          {form.availableTariffIds.length === 0 && (
             <span>* Au moins un tarif requis</span>
           )}
         </div>

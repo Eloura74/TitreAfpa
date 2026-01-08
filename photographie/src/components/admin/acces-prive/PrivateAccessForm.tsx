@@ -1,6 +1,5 @@
 import React from "react";
 import { Evenement } from "../../../types/evenement";
-import { Tarif } from "../../../types/tarif";
 import ClientCreationForm from "./ClientCreationForm";
 import PhotoUploader from "./PhotoUploader";
 import PhotoGallery from "./PhotoGallery";
@@ -33,7 +32,7 @@ interface PrivateAccessFormProps {
   handleCreateClient: (e: React.FormEvent) => void;
 
   // Gestion Photos & Tarifs
-  tarifs: Tarif[];
+  // tarifs: Tarif[];
   // filesToUpload: File[]; // REMOVED
   // setFilesToUpload: (files: File[]) => void; // REMOVED
   handlePhotosUpload: (photos: any[]) => void;
@@ -61,7 +60,7 @@ export default function PrivateAccessForm({
   clientForm,
   handleClientChange,
   handleCreateClient,
-  tarifs,
+  // tarifs,
   // filesToUpload,
   // setFilesToUpload,
   handlePhotosUpload,
@@ -172,7 +171,6 @@ export default function PrivateAccessForm({
 
         {/* Sous-composant Upload Photos */}
         <PhotoUploader
-          tarifs={tarifs}
           handlePhotosUpload={handlePhotosUpload}
           isEditing={!!editId}
         />

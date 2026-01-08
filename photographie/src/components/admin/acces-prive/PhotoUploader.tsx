@@ -1,12 +1,10 @@
 import React, { useState } from "react";
-import { Tarif } from "../../../types/tarif";
 import PhotoStagingModal from "./PhotoStagingModal";
 
 // ==========================================
 // 📝 Interface des Props
 // ==========================================
 interface PhotoUploaderProps {
-  tarifs: Tarif[];
   handlePhotosUpload?: (photos: any[]) => void; // Updated signature
   isEditing: boolean;
 }
@@ -81,7 +79,6 @@ export const compressImage = async (file: File): Promise<File> => {
 // 📷 Composant PhotoUploader
 // ==========================================
 export default function PhotoUploader({
-  tarifs,
   handlePhotosUpload,
   isEditing,
 }: PhotoUploaderProps) {
@@ -134,7 +131,6 @@ export default function PhotoUploader({
       {showModal && (
         <PhotoStagingModal
           files={tempFiles}
-          tarifs={tarifs}
           onClose={() => setShowModal(false)}
           onValidate={handleModalValidate}
         />

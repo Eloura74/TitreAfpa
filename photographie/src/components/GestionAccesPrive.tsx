@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Evenement } from "../types/evenement";
-import { Tarif } from "../types/tarif";
 import { API_URL as BASE_API_URL } from "../config/api";
 import PrivateAccessForm from "./admin/acces-prive/PrivateAccessForm";
 import PrivateAccessList from "./admin/acces-prive/PrivateAccessList";
@@ -26,7 +25,7 @@ export default function GestionAccesPrive() {
     clientEmail: "",
   });
 
-  const [tarifs, setTarifs] = useState<Tarif[]>([]);
+  // const [tarifs, setTarifs] = useState<Tarif[]>([]);
   const [showClientForm, setShowClientForm] = useState(false);
   const [clientForm, setClientForm] = useState({
     nom: "",
@@ -48,7 +47,7 @@ export default function GestionAccesPrive() {
 
   useEffect(() => {
     loadEvenements();
-    loadTarifs();
+    // loadTarifs();
   }, []);
 
   const loadEvenements = () => {
@@ -66,16 +65,16 @@ export default function GestionAccesPrive() {
       .finally(() => setLoading(false));
   };
 
-  const loadTarifs = () => {
-    axios
-      .get(`${BASE_API_URL}/api/tarifs`)
-      .then((res) => {
-        if (Array.isArray(res.data)) {
-          setTarifs(res.data.filter((t: any) => t.actif));
-        }
-      })
-      .catch((err) => console.error("Erreur chargement tarifs", err));
-  };
+  // const loadTarifs = () => {
+  //   axios
+  //     .get(`${BASE_API_URL}/api/tarifs`)
+  //     .then((res) => {
+  //       if (Array.isArray(res.data)) {
+  //         setTarifs(res.data.filter((t: any) => t.actif));
+  //       }
+  //     })
+  //     .catch((err) => console.error("Erreur chargement tarifs", err));
+  // };
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -219,21 +218,8 @@ export default function GestionAccesPrive() {
 
           if (!imageUrl) throw new Error("Erreur upload image");
 
-          const tariffsToApply = selectedTariffs
-            .map((id: string) => {
-              const t = tarifs.find(
-                (tarif) => tarif.id === id || tarif._id === id
-              );
-              return t
-                ? {
-                    id: t.id || t._id,
-                    format: t.format,
-                    support: t.support,
-                    prix: t.prix,
-                  }
-                : null;
-            })
-            .filter(Boolean);
+          // Legacy tariff mapping removed
+          // const tariffsToApply = ...
 
           const resPhoto = await axios.post(
             `${BASE_API_URL}/api/galerie`,
@@ -241,7 +227,8 @@ export default function GestionAccesPrive() {
               src: imageUrl,
               titre: title || file.name,
               categorie: "EvenementPrive",
-              tarifs: tariffsToApply,
+              // tarifs: tariffsToApply,
+              availableTariffIds: selectedTariffs,
               alt: `Photo privée ${form.titre}`,
               description: description || `Photo privée pour ${form.titre}`,
             },
@@ -434,7 +421,7 @@ export default function GestionAccesPrive() {
             clientForm={clientForm}
             handleClientChange={handleClientChange}
             handleCreateClient={handleCreateClient}
-            tarifs={tarifs}
+            // tarifs={tarifs}
             handlePhotosUpload={handlePhotosUpload}
             onEditPhoto={setEditingPhoto}
             onDeletePhoto={handleDeletePhoto}

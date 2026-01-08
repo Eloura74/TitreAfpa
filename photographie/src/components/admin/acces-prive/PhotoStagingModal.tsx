@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { Tarif } from "../../../types/tarif";
+import { TariffConfig } from "../../../types/tarifConfig";
+import { tariffService } from "../../../services/tariffService";
+import TariffSelector from "../tarifs/TariffSelector";
 import { X, Check, Copy } from "lucide-react";
 
 interface StagedPhoto {
@@ -8,40 +10,49 @@ interface StagedPhoto {
   preview: string;
   title: string;
   description: string;
-  selectedTariffs: string[];
+  selectedTariffs: string[]; // List of ENABLED IDs
 }
 
 interface PhotoStagingModalProps {
   files: File[];
-  tarifs: Tarif[];
   onClose: () => void;
   onValidate: (photos: StagedPhoto[]) => void;
 }
 
 export default function PhotoStagingModal({
   files,
-  tarifs,
   onClose,
   onValidate,
 }: PhotoStagingModalProps) {
   const [stagedPhotos, setStagedPhotos] = useState<StagedPhoto[]>([]);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  const [tariffConfig, setTariffConfig] = useState<TariffConfig>({
+    categories: [],
+  });
 
   useEffect(() => {
-    // Initialize staged photos from files
-    const newPhotos = files.map((file) => ({
-      id: Math.random().toString(36).substr(2, 9),
-      file,
-      preview: URL.createObjectURL(file),
-      title: file.name.split(".")[0], // Default title from filename
-      description: "",
-      selectedTariffs: [], // No tariffs selected by default
-    }));
-    setStagedPhotos(newPhotos);
+    const loadConfig = async () => {
+      const config = await tariffService.getTariffConfig();
+      setTariffConfig(config);
 
-    // Cleanup object URLs on unmount
+      // Pre-select ALL tariffs by default for new photos
+      const allIds = getAllIds(config);
+
+      // Initialize staged photos
+      const newPhotos = files.map((file) => ({
+        id: Math.random().toString(36).substr(2, 9),
+        file,
+        preview: URL.createObjectURL(file),
+        title: file.name.split(".")[0],
+        description: "",
+        selectedTariffs: allIds,
+      }));
+      setStagedPhotos(newPhotos);
+    };
+    loadConfig();
+
     return () => {
-      newPhotos.forEach((p) => URL.revokeObjectURL(p.preview));
+      stagedPhotos.forEach((p) => URL.revokeObjectURL(p.preview));
     };
   }, [files]);
 
@@ -206,59 +217,32 @@ export default function PhotoStagingModal({
                 </div>
 
                 {/* Tariffs Selection */}
-                <div className="space-y-2">
+                <div className="space-y-2 flex-1 flex flex-col min-h-0">
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex justify-between items-center">
                     <span>Tarifs applicables</span>
-                    <span className="text-xs font-normal text-gray-400">
-                      {currentPhoto.selectedTariffs.length} sélectionné(s)
-                    </span>
                   </label>
-                  <div className="bg-[#232336] rounded-lg border border-white/10 max-h-60 overflow-y-auto p-2 space-y-1">
-                    {tarifs.map((tarif) => {
-                      const isSelected = currentPhoto.selectedTariffs.includes(
-                        tarif.id || tarif._id || ""
-                      );
-                      return (
-                        <label
-                          key={tarif.id || tarif._id}
-                          className={`flex items-center gap-3 p-2 rounded cursor-pointer transition-colors ${
-                            isSelected ? "bg-[#ffe992]/10" : "hover:bg-white/5"
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={(e) => {
-                              const tid = tarif.id || tarif._id || "";
-                              let newSelection;
-                              if (e.target.checked) {
-                                newSelection = [
+                  <div className="bg-[#232336] rounded-lg border border-white/10 overflow-y-auto p-2 space-y-1 flex-1 min-h-[200px]">
+                    <div className="bg-[#232336] rounded-lg border border-white/10 overflow-y-auto p-2 space-y-1 flex-1 min-h-[200px]">
+                      <TariffSelector
+                        config={tariffConfig}
+                        selectedIds={currentPhoto.selectedTariffs}
+                        onToggle={(ids: string[], checked: boolean) => {
+                          const newSelection = checked
+                            ? [
+                                ...new Set([
                                   ...currentPhoto.selectedTariffs,
-                                  tid,
-                                ];
-                              } else {
-                                newSelection =
-                                  currentPhoto.selectedTariffs.filter(
-                                    (id) => id !== tid
-                                  );
-                              }
-                              updatePhoto(activePhotoIndex, {
-                                selectedTariffs: newSelection,
-                              });
-                            }}
-                            className="rounded border-gray-600 bg-black/50 text-[#ffe992] focus:ring-[#ffe992]"
-                          />
-                          <div className="flex-1">
-                            <div className="text-sm text-gray-200">
-                              {tarif.nom}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {tarif.format} - {tarif.prix}€
-                            </div>
-                          </div>
-                        </label>
-                      );
-                    })}
+                                  ...ids,
+                                ]),
+                              ]
+                            : currentPhoto.selectedTariffs.filter(
+                                (id) => !ids.includes(id)
+                              );
+                          updatePhoto(activePhotoIndex, {
+                            selectedTariffs: newSelection,
+                          });
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -291,4 +275,18 @@ export default function PhotoStagingModal({
       </div>
     </div>
   );
+}
+
+// Helper to get all IDs from a config (for default selection)
+function getAllIds(config: TariffConfig): string[] {
+  const ids: string[] = [];
+  const traverse = (node: any) => {
+    if (node.id) ids.push(node.id);
+    if (node.finishes) node.finishes.forEach(traverse);
+    if (node.sizes) node.sizes.forEach(traverse);
+    if (node.papers) node.papers.forEach(traverse);
+    if (node.frames) node.frames.forEach(traverse);
+  };
+  config.categories.forEach(traverse);
+  return ids;
 }
