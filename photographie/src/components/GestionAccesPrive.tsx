@@ -27,7 +27,6 @@ export default function GestionAccesPrive() {
   });
 
   const [tarifs, setTarifs] = useState<Tarif[]>([]);
-  const [selectedTariffs, setSelectedTariffs] = useState<string[]>([]);
   const [showClientForm, setShowClientForm] = useState(false);
   const [clientForm, setClientForm] = useState({
     nom: "",
@@ -106,7 +105,6 @@ export default function GestionAccesPrive() {
     });
     setImagePreview("");
     setEditId(null);
-    setSelectedTariffs([]);
     setError(null);
     setSuccess(null);
     setShowClientForm(false);
