@@ -17,7 +17,7 @@ import {
 import { TariffConfig, TariffSize } from "../../../types/tarifConfig";
 
 // --- INTERFACES ---
-// Props du composant principal de sélection de tarifs
+// Props du composant principal de sélection de tarifs et de gestion des états
 interface TariffSelectorProps {
   config: TariffConfig;
   selectedIds: string[];
