@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Eye, X } from "lucide-react";
+import {
+  getWatermarkedImageUrl,
+  preventRightClick,
+} from "../utils/cloudinaryUtils";
 
 // Composants Layout & UI
 import Navbar from "../components/layout/navbar";
@@ -234,11 +238,12 @@ export default function GalerieGraphique() {
                         <motion.img
                           whileHover={{ scale: 1.05 }}
                           transition={{ duration: 0.8, ease: "easeOut" }}
-                          src={oeuvre.image}
+                          src={getWatermarkedImageUrl(oeuvre.image)}
                           alt={oeuvre.titre}
                           loading="lazy"
                           decoding="async"
                           className="w-full h-full object-cover transition-opacity duration-700"
+                          onContextMenu={preventRightClick}
                         />
 
                         {/* Overlay au survol */}
@@ -341,10 +346,11 @@ export default function GalerieGraphique() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              src={oeuvres[lightboxIndex].image}
+              src={getWatermarkedImageUrl(oeuvres[lightboxIndex].image)}
               alt={oeuvres[lightboxIndex].titre || "Oeuvre"}
               className="max-w-full max-h-[90vh] object-contain select-none"
               onClick={(e) => e.stopPropagation()}
+              onContextMenu={preventRightClick}
             />
 
             {/* Navigation Droite */}

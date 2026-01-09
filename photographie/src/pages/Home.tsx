@@ -9,6 +9,7 @@ import GoldDust from "../components/GoldDust";
 import ContactFooter from "./ContactFooter";
 import CoverflowCarousel from "../components/CoverflowCarousel";
 import { API_URL } from "../config/api";
+import { getWatermarkedImageUrl } from "../utils/cloudinaryUtils";
 
 const revealVariants = {
   hidden: { y: "30%", opacity: 0 },
@@ -76,7 +77,8 @@ export default function Home() {
               if (p.src?.startsWith("http")) return p.src;
               if (p.src?.startsWith("/uploads/")) return `${API_URL}${p.src}`;
               if (p.src?.startsWith("/images/")) return p.src;
-              return `/images/${p.src}`;
+              if (p.src?.startsWith("/images/")) return p.src;
+              return getWatermarkedImageUrl(`/images/${p.src}`);
             });
           setDynamicPhotoImages(images);
         }
@@ -91,7 +93,10 @@ export default function Home() {
             if (oeuvre.image?.startsWith("/uploads/"))
               return `${API_URL}${oeuvre.image}`;
             if (oeuvre.image?.startsWith("/images/")) return oeuvre.image;
-            return `/images/${oeuvre.image || "/placeholder.jpg"}`;
+            if (oeuvre.image?.startsWith("/images/")) return oeuvre.image;
+            return getWatermarkedImageUrl(
+              `/images/${oeuvre.image || "/placeholder.jpg"}`
+            );
           });
           setDynamicGraphismeImages(images);
         }

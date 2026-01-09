@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { preventRightClick } from "../utils/cloudinaryUtils";
 
 interface CoverflowCarouselProps {
   images: string[];
@@ -107,6 +108,7 @@ export default function CoverflowCarousel({
                   src={src}
                   alt={`Gallery item`}
                   className="w-full h-full object-cover"
+                  onContextMenu={preventRightClick}
                 />
                 {/* Effet de reflet */}
                 <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent opacity-50" />

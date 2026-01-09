@@ -17,6 +17,10 @@ import { tariffService } from "../services/tariffService";
 import { TariffConfig } from "../types/tarifConfig";
 import { albumService, Album } from "../services/albumService";
 import { Folder, ArrowLeft, Eye, X, ArrowRight } from "lucide-react";
+import {
+  getWatermarkedImageUrl,
+  preventRightClick,
+} from "../utils/cloudinaryUtils";
 
 // Styles
 import "../styles/globals.css";
@@ -441,9 +445,10 @@ export default function Galerie() {
                           <motion.img
                             whileHover={{ scale: 1.05 }}
                             transition={{ duration: 0.8, ease: "easeOut" }}
-                            src={album.imageCouverture}
+                            src={getWatermarkedImageUrl(album.imageCouverture)}
                             alt={album.titre}
                             className="w-full h-full object-cover transition-opacity duration-700 opacity-80 group-hover:opacity-100"
+                            onContextMenu={preventRightClick}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-white/5 text-gray-600">
@@ -484,11 +489,12 @@ export default function Galerie() {
                         <motion.img
                           whileHover={{ scale: 1.05 }}
                           transition={{ duration: 0.8, ease: "easeOut" }}
-                          src={photo.src}
+                          src={getWatermarkedImageUrl(photo.src)}
                           alt={photo.alt}
                           loading="lazy"
                           decoding="async"
                           className="w-full h-full object-cover transition-opacity duration-700"
+                          onContextMenu={preventRightClick}
                         />
 
                         {/* Overlay au survol */}
@@ -592,10 +598,11 @@ export default function Galerie() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              src={filtered[lightboxIndex].src}
+              src={getWatermarkedImageUrl(filtered[lightboxIndex].src)}
               alt={filtered[lightboxIndex].titre || "Photo"}
               className="max-w-full max-h-[90vh] object-contain select-none"
               onClick={(e) => e.stopPropagation()}
+              onContextMenu={preventRightClick}
             />
 
             {/* Navigation Droite */}
