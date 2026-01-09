@@ -8,8 +8,8 @@ import {
   TariffPaper,
   TariffFrame,
 } from "../../types/tarifConfig";
-import { X, Check, Info, Minus, Plus } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { X, Info, Minus, Plus } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface SelectionFormatModalProps {
   tarifs: (TarifOeuvre | Tarif)[];
