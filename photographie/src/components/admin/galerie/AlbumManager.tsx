@@ -4,7 +4,11 @@ import { albumService, Album } from "../../../services/albumService";
 import { useToast } from "../../../components/Toast";
 import { Trash2, Edit2, Plus, Image as ImageIcon } from "lucide-react";
 
-export default function AlbumManager() {
+interface AlbumManagerProps {
+  onAlbumChange?: () => void;
+}
+
+export default function AlbumManager({ onAlbumChange }: AlbumManagerProps) {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingAlbum, setEditingAlbum] = useState<Partial<Album> | null>(null);
@@ -43,6 +47,7 @@ export default function AlbumManager() {
       }
       setEditingAlbum(null);
       fetchAlbums();
+      if (onAlbumChange) onAlbumChange();
     } catch (error) {
       console.error("Erreur sauvegarde album:", error);
       addToast("Erreur lors de la sauvegarde", "error");
@@ -56,6 +61,7 @@ export default function AlbumManager() {
       await albumService.deleteAlbum(id);
       addToast("Album supprimé", "success");
       fetchAlbums();
+      if (onAlbumChange) onAlbumChange();
     } catch (error) {
       console.error("Erreur suppression album:", error);
       addToast("Erreur lors de la suppression", "error");

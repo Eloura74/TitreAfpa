@@ -15,6 +15,11 @@ import AlbumManager from "./admin/galerie/AlbumManager";
 export default function OngletsGestionGalerie() {
   const [actif, setActif] = useState(0);
   const [showAlbumManager, setShowAlbumManager] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleAlbumChange = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
 
   const onglets = [
     {
@@ -31,7 +36,7 @@ export default function OngletsGestionGalerie() {
               Gérer les albums
             </button>
           </div>
-          <GalerieForm />
+          <GalerieForm key={refreshKey} />
         </div>
       ),
     },
@@ -106,7 +111,7 @@ export default function OngletsGestionGalerie() {
                 </button>
               </div>
               <div className="p-6">
-                <AlbumManager />
+                <AlbumManager onAlbumChange={handleAlbumChange} />
               </div>
             </motion.div>
           </div>
