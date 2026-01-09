@@ -31,6 +31,7 @@ const uploadCloudinaryRoutes = require("./routes/upload"); // Routes d’upload 
 const paypalRoutes = require("./routes/paypal"); // Routes pour PayPal
 const accesPriveRoutes = require("./routes/accesPrive"); // Routes pour les accès privés (Nouvelle collection)
 const servicesRoutes = require("./routes/services"); // Routes pour les services (Prestations)
+const albumsRoutes = require("./routes/albums"); // Routes pour les albums
 
 // Module pour gérer les chemins de fichiers
 const path = require("path");
@@ -312,6 +313,11 @@ console.log("✅ Route /api/acces-prive montée");
 // Services (Prestations)
 app.use("/api/services", servicesRoutes);
 console.log("✅ Route /api/services montée");
+
+// Albums
+app.use("/api/albums", albumsRoutes);
+console.log("✅ Route /api/albums montée");
+
 console.log(
   "✅ GET /api/tarifs fonctionne et la grille tarifaire dynamique est accessible côté front"
 );

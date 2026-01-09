@@ -24,7 +24,11 @@ const router = express.Router(); // Création d’un routeur Express
 router.get("/", async (req, res) => {
   try {
     // Récupération brute depuis MongoDB (Exclusion des photos privées via Regex insensible à la casse)
-    const photos = await Photo.find({ categorie: { $not: /EvenementPrive/i } });
+    const filter = { categorie: { $not: /EvenementPrive/i } };
+    if (req.query.albumId) {
+      filter.album = req.query.albumId;
+    }
+    const photos = await Photo.find(filter);
 
     // Convertit les documents Mongoose en objets JavaScript simples
     const photosObj = photos.map((p) => p.toObject());
@@ -83,6 +87,7 @@ router.post("/", async (req, res) => {
       categorie = "Divers", // Catégorie (ex: mariage)
       tarifs: rawTarifs = [], // Liste des tarifs (brut)
       availableTariffIds = [], // Nouveaux IDs hiérarchiques
+      album = null, // ID de l'album (optionnel)
     } = req.body;
 
     // Initialisation du tableau de tarifs final
@@ -130,6 +135,7 @@ router.post("/", async (req, res) => {
       categorie,
       tarifs,
       availableTariffIds,
+      album,
     });
 
     // Sauvegarde en base

@@ -121,6 +121,13 @@ const photoSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User", // Lien vers un document de la collection "users"
   },
+
+  // Référence à un Album (Nouveau feature)
+  album: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Album",
+    default: null,
+  },
 });
 
 // *************************************
