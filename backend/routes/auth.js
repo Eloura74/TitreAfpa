@@ -202,8 +202,8 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Identifiants invalides" });
     }
 
-    // Vérification si le compte est activé
-    if (!user.isVerified) {
+    // Vérification si le compte est activé (sauf pour les admins)
+    if (!user.isVerified && user.role !== "admin") {
       return res.status(403).json({
         error: "Veuillez vérifier votre email avant de vous connecter.",
       });
