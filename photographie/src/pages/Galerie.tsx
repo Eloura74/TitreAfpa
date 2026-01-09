@@ -16,7 +16,7 @@ import { Tarif, TarifOeuvre } from "../types/tarif";
 import { tariffService } from "../services/tariffService";
 import { TariffConfig } from "../types/tarifConfig";
 import { albumService, Album } from "../services/albumService";
-import { Folder, ArrowLeft } from "lucide-react";
+import { Folder, ArrowLeft, Eye, X, ArrowRight } from "lucide-react";
 
 // Styles
 import "../styles/globals.css";
@@ -84,6 +84,9 @@ export default function Galerie() {
 
   const { ajouterArticle } = usePanier();
   const { addToast } = useToast();
+
+  // Lightbox State
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // 1. Fetch & Normalisation
   useEffect(() => {
@@ -270,6 +273,28 @@ export default function Galerie() {
     return currentPhotos.filter((p) => p.categorie === categorieActive);
   }, [photos, categorieActive, viewMode, selectedAlbum, albums]);
 
+  // Keyboard Navigation for Lightbox
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (lightboxIndex === null) return;
+
+      if (e.key === "Escape") setLightboxIndex(null);
+      if (e.key === "ArrowLeft") {
+        setLightboxIndex((prev) =>
+          prev !== null && prev > 0 ? prev - 1 : prev
+        );
+      }
+      if (e.key === "ArrowRight") {
+        setLightboxIndex((prev) =>
+          prev !== null && prev < filtered.length - 1 ? prev + 1 : prev
+        );
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxIndex, filtered]);
+
   return (
     <div className="min-h-screen bg-[#0a0a10] text-white selection:bg-yellow-500/30 selection:text-white font-sans">
       <Helmet>
@@ -433,7 +458,19 @@ export default function Galerie() {
                         />
 
                         {/* Overlay au survol */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6 gap-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const index = filtered.findIndex(
+                                (p) => p._id === photo._id
+                              );
+                              setLightboxIndex(index);
+                            }}
+                            className="w-full bg-white/10 backdrop-blur-md text-white font-bold text-xs uppercase tracking-widest py-3 rounded hover:bg-white/20 transition-colors transform translate-y-4 group-hover:translate-y-0 duration-500 delay-75 flex items-center justify-center gap-2"
+                          >
+                            <Eye size={16} /> Voir en grand
+                          </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -478,6 +515,76 @@ export default function Galerie() {
             onSelect={handleSelectFormat}
             onClose={() => setModalVisible(false)}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {lightboxIndex !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center"
+            onClick={() => setLightboxIndex(null)}
+          >
+            {/* Bouton Fermer */}
+            <button
+              onClick={() => setLightboxIndex(null)}
+              className="absolute top-4 right-4 p-2 text-white/50 hover:text-white transition-colors z-50"
+            >
+              <X size={32} />
+            </button>
+
+            {/* Navigation Gauche */}
+            {lightboxIndex > 0 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex(lightboxIndex - 1);
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-4 text-white/50 hover:text-white transition-colors z-50"
+              >
+                <ArrowLeft size={40} />
+              </button>
+            )}
+
+            {/* Image */}
+            <motion.img
+              key={filtered[lightboxIndex]._id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              src={filtered[lightboxIndex].src}
+              alt={filtered[lightboxIndex].titre || "Photo"}
+              className="max-w-full max-h-[90vh] object-contain select-none"
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            {/* Navigation Droite */}
+            {lightboxIndex < filtered.length - 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex(lightboxIndex + 1);
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-4 text-white/50 hover:text-white transition-colors z-50"
+              >
+                <ArrowRight size={40} />
+              </button>
+            )}
+
+            {/* Info Photo */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/50 to-transparent text-center pointer-events-none">
+              <h3 className="text-xl font-serif text-[#ffe992] mb-1">
+                {filtered[lightboxIndex].titre || "Sans titre"}
+              </h3>
+              <p className="text-sm text-gray-400">
+                {lightboxIndex + 1} / {filtered.length}
+              </p>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
