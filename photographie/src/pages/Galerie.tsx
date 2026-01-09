@@ -254,6 +254,19 @@ export default function Galerie() {
     [photos]
   );
 
+  // Calcul du nombre de photos par album
+  const photoCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    photos.forEach((p) => {
+      // On suppose que la propriété album est présente sur la photo (même si le type Photo ne l'a pas explicitement, l'API le renvoie)
+      const albumId = (p as any).album;
+      if (albumId) {
+        counts[albumId] = (counts[albumId] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [photos]);
+
   const filtered = useMemo(() => {
     let currentPhotos = photos;
 
@@ -430,6 +443,12 @@ export default function Galerie() {
                           <p className="text-sm text-gray-400 line-clamp-2">
                             {album.description}
                           </p>
+                          <div className="mt-3 flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-[10px] font-medium uppercase tracking-wider text-[#ffe992]">
+                              <Eye size={12} />
+                              {photoCounts[album._id] || 0} Photos
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
