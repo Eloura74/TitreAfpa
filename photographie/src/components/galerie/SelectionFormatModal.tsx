@@ -10,6 +10,7 @@ import {
 } from "../../types/tarifConfig";
 import { X, Info, Minus, Plus } from "lucide-react";
 import { motion } from "framer-motion";
+import { Tooltip } from "../ui/Tooltip";
 
 interface SelectionFormatModalProps {
   tarifs: (TarifOeuvre | Tarif)[];
@@ -191,12 +192,12 @@ export const SelectionFormatModal: React.FC<SelectionFormatModalProps> = ({
 
   // --- Configurator Mode Render ---
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-md z-50 p-4 md:p-8">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-md z-[100] p-4 md:p-8">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-[#121218] w-full max-w-6xl h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row border border-white/10"
+        className="bg-[#121218] w-full max-w-6xl h-[85vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row border border-white/10"
       >
         {/* Left Column: Image Preview */}
         <div className="w-full md:w-2/3 bg-black/50 relative flex flex-col">
@@ -257,9 +258,12 @@ export const SelectionFormatModal: React.FC<SelectionFormatModalProps> = ({
 
             {/* 1. Finition (Category/Finish) */}
             <div className="mb-8">
-              <label className="block text-xs uppercase tracking-widest text-gray-500 mb-3">
-                1. Finition
-              </label>
+              <div className="flex items-center mb-3">
+                <label className="block text-xs uppercase tracking-widest text-gray-500">
+                  1. Finition
+                </label>
+                <Tooltip content="Choisissez le type de rendu souhaité pour votre tirage (ex: Papier Fine Art, Contrecollage, etc.)." />
+              </div>
               <div className="grid grid-cols-1 gap-3">
                 {config?.categories.map((cat) =>
                   cat.finishes.map((finish) => {
@@ -299,9 +303,12 @@ export const SelectionFormatModal: React.FC<SelectionFormatModalProps> = ({
             {/* 2. Format (Size) */}
             {selectedFinish && (
               <div className="mb-8">
-                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-3">
-                  2. Format
-                </label>
+                <div className="flex items-center mb-3">
+                  <label className="block text-xs uppercase tracking-widest text-gray-500">
+                    2. Format
+                  </label>
+                  <Tooltip content="Sélectionnez les dimensions de votre tirage. Assurez-vous de mesurer votre espace." />
+                </div>
                 <div className="grid grid-cols-2 gap-2">
                   {selectedFinish.sizes.map((size) => {
                     const isAvailable = [...size.papers, ...size.frames].some(
@@ -332,9 +339,12 @@ export const SelectionFormatModal: React.FC<SelectionFormatModalProps> = ({
             {/* 3. Support / Cadre */}
             {selectedSize && (
               <div className="mb-8">
-                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-3">
-                  3. Support & Cadre
-                </label>
+                <div className="flex items-center mb-3">
+                  <label className="block text-xs uppercase tracking-widest text-gray-500">
+                    3. Support & Cadre
+                  </label>
+                  <Tooltip content="Optez pour un support spécifique ou ajoutez un cadre pour sublimer votre œuvre." />
+                </div>
                 <div className="space-y-2">
                   {[...selectedSize.papers, ...selectedSize.frames].map(
                     (opt) => {
