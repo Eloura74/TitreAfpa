@@ -77,6 +77,8 @@ export default function Galerie() {
     (TarifOeuvre | Tarif)[]
   >([]);
 
+  const [tariffConfig, setTariffConfig] = useState<TariffConfig | null>(null);
+
   // Album Logic
   const [albums, setAlbums] = useState<Album[]>([]);
   const [viewMode, setViewMode] = useState<"albums" | "photos">("albums");
@@ -101,6 +103,7 @@ export default function Galerie() {
 
         const data: Photo[] = await resPhotos.json();
         setAlbums(albumsData);
+        setTariffConfig(config);
 
         // If albums exist, start in album mode, otherwise show all photos
         if (albumsData.length > 0) {
@@ -191,6 +194,18 @@ export default function Galerie() {
   // 2. Logique de Panier
   const handleAjouterAuPanier = useCallback(
     (photo: Photo) => {
+      // Si on a une config tarifaire et des IDs disponibles, on ouvre le nouveau configurateur
+      if (
+        tariffConfig &&
+        photo.availableTariffIds &&
+        photo.availableTariffIds.length > 0
+      ) {
+        setPhotoSelectionnee(photo);
+        setModalVisible(true);
+        return;
+      }
+
+      // Fallback: ancienne logique pour les tarifs simples (si nécessaire)
       const tarifsDisponibles =
         photo.tarifs && photo.tarifs.length > 0
           ? photo.tarifs
@@ -222,7 +237,7 @@ export default function Galerie() {
         setModalVisible(true);
       }
     },
-    [ajouterArticle, addToast]
+    [ajouterArticle, addToast, tariffConfig]
   );
 
   // 3. Gestion de la sélection de format via la modale
@@ -531,6 +546,8 @@ export default function Galerie() {
         {modalVisible && photoSelectionnee && (
           <SelectionFormatModal
             tarifs={tarifsPourModale}
+            config={tariffConfig}
+            photo={photoSelectionnee}
             onSelect={handleSelectFormat}
             onClose={() => setModalVisible(false)}
           />
