@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, ArrowRight, Eye, X } from "lucide-react";
 
 // Composants Layout & UI
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import Skeleton from "../components/Skeleton";
 import { useToast } from "../components/Toast";
+import { SelectionFormatModal } from "../components/galerie/SelectionFormatModal";
 
 // Contextes & Types
 import { usePanier } from "../store/panierContext";
 import { API_URL } from "../config/api";
+import { Tarif, TarifOeuvre } from "../types/tarif";
 
 // Styles
 import "../styles/globals.css";
@@ -22,6 +25,10 @@ interface OeuvreGraphique {
   image: string;
   prix: number;
   description?: string;
+  // Ajout pour compatibilité avec le modal
+  src?: string;
+  categorie?: string;
+  availableTariffIds?: string[];
 }
 
 // --- Variantes d'animation ---
@@ -56,6 +63,15 @@ export default function GalerieGraphique() {
   const [oeuvres, setOeuvres] = useState<OeuvreGraphique[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Modal & Lightbox State
+  const [modalVisible, setModalVisible] = useState(false);
+  const [photoSelectionnee, setPhotoSelectionnee] =
+    useState<OeuvreGraphique | null>(null);
+  const [tarifsPourModale, setTarifsPourModale] = useState<
+    (TarifOeuvre | Tarif)[]
+  >([]);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
   const { ajouterArticle } = usePanier();
   const { addToast } = useToast();
 
@@ -68,19 +84,25 @@ export default function GalerieGraphique() {
         if (!res.ok) throw new Error("Erreur réseau");
         const data = await res.json();
 
-        const sanitized = data.map((oeuvre: any) => ({
-          id: oeuvre._id || oeuvre.id,
-          titre: oeuvre.titre,
-          image: oeuvre.image?.startsWith("http")
+        const sanitized = data.map((oeuvre: any) => {
+          const imgSrc = oeuvre.image?.startsWith("http")
             ? oeuvre.image
             : oeuvre.image?.startsWith("/uploads/")
             ? `${API_URL}${oeuvre.image}`
             : oeuvre.image?.startsWith("/images/")
             ? oeuvre.image
-            : `/images/${oeuvre.image || "/placeholder.jpg"}`,
-          prix: oeuvre.prix,
-          description: oeuvre.description,
-        }));
+            : `/images/${oeuvre.image || "/placeholder.jpg"}`;
+
+          return {
+            id: oeuvre._id || oeuvre.id,
+            titre: oeuvre.titre,
+            image: imgSrc,
+            src: imgSrc, // Alias pour compatibilité
+            categorie: "Art Graphique", // Catégorie par défaut
+            prix: oeuvre.prix,
+            description: oeuvre.description,
+          };
+        });
 
         setOeuvres(sanitized);
       } catch (err) {
@@ -93,18 +115,64 @@ export default function GalerieGraphique() {
     fetchOeuvres();
   }, [addToast]);
 
-  // 2. Logique Panier (Oeuvre unique)
+  // 2. Logique Panier (Via Modal)
   const handleAjouterAuPanier = (oeuvre: OeuvreGraphique) => {
+    // Créer un tarif "Standard" par défaut pour le modal
+    const tarifStandard: Tarif = {
+      id: `std-${oeuvre.id}`,
+      nom: "Standard",
+      type: "tirage",
+      actif: true,
+      format: "Format Unique",
+      support: "Impression Fine Art",
+      prix: oeuvre.prix,
+    };
+
+    setTarifsPourModale([tarifStandard]);
+    setPhotoSelectionnee(oeuvre);
+    setModalVisible(true);
+  };
+
+  const handleSelectFormat = (tarif: TarifOeuvre | Tarif) => {
+    if (!photoSelectionnee) return;
+
     ajouterArticle({
       id: crypto.randomUUID(),
-      photoId: oeuvre.id,
-      nom: `${oeuvre.titre} (Oeuvre Graphique)`,
-      prix: oeuvre.prix,
+      photoId: photoSelectionnee.id,
+      nom: `${photoSelectionnee.titre} (${tarif.format})`,
+      prix: tarif.prix,
       quantite: 1,
-      image: oeuvre.image,
+      image: photoSelectionnee.image,
+      format: tarif.format,
+      support: tarif.support,
     });
-    addToast(`${oeuvre.titre} ajouté au panier`, "success");
+
+    addToast(`${photoSelectionnee.titre} ajouté au panier`, "success");
+    setModalVisible(false);
+    setPhotoSelectionnee(null);
   };
+
+  // Keyboard Navigation for Lightbox
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (lightboxIndex === null) return;
+
+      if (e.key === "Escape") setLightboxIndex(null);
+      if (e.key === "ArrowLeft") {
+        setLightboxIndex((prev) =>
+          prev !== null && prev > 0 ? prev - 1 : prev
+        );
+      }
+      if (e.key === "ArrowRight") {
+        setLightboxIndex((prev) =>
+          prev !== null && prev < oeuvres.length - 1 ? prev + 1 : prev
+        );
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxIndex, oeuvres]);
 
   return (
     <div className="min-h-screen bg-[#0a0a10] text-white selection:bg-yellow-500/30 selection:text-white font-sans">
@@ -152,7 +220,7 @@ export default function GalerieGraphique() {
                       <Skeleton height={20} width="60%" />
                     </div>
                   ))
-              : oeuvres.map((oeuvre) => (
+              : oeuvres.map((oeuvre, index) => (
                   <motion.div
                     key={oeuvre.id}
                     variants={cardVariants}
@@ -174,7 +242,16 @@ export default function GalerieGraphique() {
                         />
 
                         {/* Overlay au survol */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6 gap-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setLightboxIndex(index);
+                            }}
+                            className="w-full bg-white/10 backdrop-blur-md text-white font-bold text-xs uppercase tracking-widest py-3 rounded hover:bg-white/20 transition-colors transform translate-y-4 group-hover:translate-y-0 duration-500 delay-75 flex items-center justify-center gap-2"
+                          >
+                            <Eye size={16} /> Voir en grand
+                          </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -212,6 +289,89 @@ export default function GalerieGraphique() {
           </AnimatePresence>
         </motion.div>
       </main>
+
+      {/* Modal - Animée */}
+      <AnimatePresence>
+        {modalVisible && photoSelectionnee && (
+          <SelectionFormatModal
+            tarifs={tarifsPourModale}
+            config={null} // Pas de config complexe pour l'art graphique pour l'instant
+            photo={photoSelectionnee}
+            onSelect={handleSelectFormat}
+            onClose={() => setModalVisible(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {lightboxIndex !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[110] bg-black/95 flex items-center justify-center"
+            onClick={() => setLightboxIndex(null)}
+          >
+            {/* Bouton Fermer */}
+            <button
+              onClick={() => setLightboxIndex(null)}
+              className="absolute top-4 right-4 p-2 text-white/50 hover:text-white transition-colors z-50"
+            >
+              <X size={32} />
+            </button>
+
+            {/* Navigation Gauche */}
+            {lightboxIndex > 0 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex(lightboxIndex - 1);
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-4 text-white/50 hover:text-white transition-colors z-50"
+              >
+                <ArrowLeft size={40} />
+              </button>
+            )}
+
+            {/* Image */}
+            <motion.img
+              key={oeuvres[lightboxIndex].id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              src={oeuvres[lightboxIndex].image}
+              alt={oeuvres[lightboxIndex].titre || "Oeuvre"}
+              className="max-w-full max-h-[90vh] object-contain select-none"
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            {/* Navigation Droite */}
+            {lightboxIndex < oeuvres.length - 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex(lightboxIndex + 1);
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-4 text-white/50 hover:text-white transition-colors z-50"
+              >
+                <ArrowRight size={40} />
+              </button>
+            )}
+
+            {/* Info Photo */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/50 to-transparent text-center pointer-events-none">
+              <h3 className="text-xl font-serif text-[#ffe992] mb-1">
+                {oeuvres[lightboxIndex].titre || "Sans titre"}
+              </h3>
+              <p className="text-sm text-gray-400">
+                {lightboxIndex + 1} / {oeuvres.length}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Footer />
     </div>
