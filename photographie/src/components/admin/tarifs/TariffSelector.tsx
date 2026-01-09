@@ -59,52 +59,10 @@ export default function TariffSelector({
     return ids;
   }, [config]);
 
-  // --- GESTION: Affichage si aucun tarif configuré ---
-  if (!config.categories || config.categories.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center p-8 text-center">
-        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-          <Euro size={24} className="text-gray-500" />
-        </div>
-        <p className="text-sm text-gray-400 mb-2">Aucun tarif configuré</p>
-        <a
-          href="/admin/gestion-galerie"
-          className="text-xs text-[#ffe992] hover:underline"
-          onClick={(e) => {
-            e.preventDefault();
-            // Scroll vers l'onglet Tarifs
-            const tabButtons = document.querySelectorAll("button");
-            tabButtons.forEach((btn) => {
-              if (btn.textContent?.includes("Tarifs")) {
-                btn.click();
-              }
-            });
-          }}
-        >
-          Configurer les tarifs →
-        </a>
-      </div>
-    );
-  }
-
-  // Compte le nombre de tarifs sélectionnés
-  const selectedCount = selectedIds.length;
-  const totalCount = allIds.length;
-
-  // --- HANDLERS ---
-  // Gère la sélection/désélection de tous les tarifs
-  const handleSelectAll = () => {
-    // Si tous sont sélectionnés, on désélectionne tout
-    if (selectedCount === totalCount) {
-      onToggle(allIds, false);
-    } else {
-      // Sinon on sélectionne tout
-      onToggle(allIds, true);
-    }
-  };
-
   // Filtre les catégories selon la recherche
+  // NOTE: Ce hook DOIT être appelé avant tout return conditionnel pour respecter les règles des hooks React
   const filteredCategories = useMemo(() => {
+    if (!config.categories) return [];
     if (!searchQuery.trim()) return config.categories;
 
     const query = searchQuery.toLowerCase();
@@ -141,6 +99,51 @@ export default function TariffSelector({
 
     return config.categories.map(filterNode).filter(Boolean);
   }, [config.categories, searchQuery]);
+
+  // Compte le nombre de tarifs sélectionnés
+  const selectedCount = selectedIds.length;
+  const totalCount = allIds.length;
+
+  // --- GESTION: Affichage si aucun tarif configuré ---
+  // NOTE: Ce return conditionnel est placé APRÈS tous les hooks pour respecter les règles React
+  if (!config.categories || config.categories.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+          <Euro size={24} className="text-gray-500" />
+        </div>
+        <p className="text-sm text-gray-400 mb-2">Aucun tarif configuré</p>
+        <a
+          href="/admin/gestion-galerie"
+          className="text-xs text-[#ffe992] hover:underline"
+          onClick={(e) => {
+            e.preventDefault();
+            // Scroll vers l'onglet Tarifs
+            const tabButtons = document.querySelectorAll("button");
+            tabButtons.forEach((btn) => {
+              if (btn.textContent?.includes("Tarifs")) {
+                btn.click();
+              }
+            });
+          }}
+        >
+          Configurer les tarifs →
+        </a>
+      </div>
+    );
+  }
+
+  // --- HANDLERS ---
+  // Gère la sélection/désélection de tous les tarifs
+  const handleSelectAll = () => {
+    // Si tous sont sélectionnés, on désélectionne tout
+    if (selectedCount === totalCount) {
+      onToggle(allIds, false);
+    } else {
+      // Sinon on sélectionne tout
+      onToggle(allIds, true);
+    }
+  };
 
   return (
     <div className="space-y-4">
