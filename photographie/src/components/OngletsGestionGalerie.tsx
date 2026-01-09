@@ -9,8 +9,18 @@ import GestionServices from "./GestionServices";
 import { useState } from "react";
 import { motion } from "framer-motion";
 
+import AlbumManager from "./admin/galerie/AlbumManager";
+
 const onglets = [
-  { nom: "Galerie", composant: <GalerieForm /> },
+  {
+    nom: "Galerie",
+    composant: (
+      <div className="space-y-12">
+        <GalerieForm />
+        <AlbumManager />
+      </div>
+    ),
+  },
   { nom: "Galerie Graphique", composant: <GestionGalerieGraphique /> },
   { nom: "Événements", composant: <GestionEvenements /> },
   { nom: "Paiements", composant: <GestionPaiements /> },

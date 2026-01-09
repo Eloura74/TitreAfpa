@@ -8,6 +8,7 @@ import { ArrowLeft, Upload } from "lucide-react";
 import { tariffService } from "../../services/tariffService";
 import { TariffConfig } from "../../types/tarifConfig";
 import TariffSelector from "../admin/tarifs/TariffSelector";
+import { albumService, Album } from "../../services/albumService";
 
 const API_URL = `${BASE_API_URL}/api/galerie`;
 
@@ -19,6 +20,7 @@ interface FormType {
   description: string;
   categorie: string;
   availableTariffIds: string[]; // Updated for new system
+  album?: string;
 }
 
 // --- FORMULAIRE INITIAL ---
@@ -29,6 +31,7 @@ const formInitial: FormType = {
   description: "",
   categorie: "",
   availableTariffIds: [],
+  album: "",
 };
 
 // Interface pour les photos
@@ -41,6 +44,7 @@ interface Photo {
   prix: number;
   categorie: string;
   availableTariffIds?: string[];
+  album?: string;
 }
 
 export default function GalerieForm() {
@@ -49,6 +53,7 @@ export default function GalerieForm() {
   const [tariffConfig, setTariffConfig] = useState<TariffConfig>({
     categories: [],
   });
+  const [albums, setAlbums] = useState<Album[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addToast } = useToast();
   const [editId, setEditId] = useState<string | null>(null);
@@ -63,6 +68,9 @@ export default function GalerieForm() {
 
         const config = await tariffService.getTariffConfig();
         setTariffConfig(config);
+
+        const albumsData = await albumService.getAlbums();
+        setAlbums(albumsData);
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
         addToast("Erreur lors du chargement des données", "error");
@@ -113,6 +121,7 @@ export default function GalerieForm() {
         description: form.description,
         categorie: form.categorie,
         availableTariffIds: form.availableTariffIds,
+        album: form.album,
       };
 
       try {
@@ -345,6 +354,25 @@ export default function GalerieForm() {
                 className="w-full bg-[#0a0a10] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:border-[#ffe992] focus:outline-none focus:ring-1 focus:ring-[#ffe992]/50 transition-all resize-none"
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-[#ffe992] uppercase tracking-wider">
+              Album (Optionnel)
+            </label>
+            <select
+              name="album"
+              value={form.album || ""}
+              onChange={(e) => setForm({ ...form, album: e.target.value })}
+              className="w-full bg-[#0a0a10] border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#ffe992] focus:outline-none focus:ring-1 focus:ring-[#ffe992]/50 transition-all"
+            >
+              <option value="">Aucun album</option>
+              {albums.map((album) => (
+                <option key={album._id} value={album._id}>
+                  {album.titre}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

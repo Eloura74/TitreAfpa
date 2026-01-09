@@ -15,6 +15,8 @@ import { API_URL } from "../config/api";
 import { Tarif, TarifOeuvre } from "../types/tarif";
 import { tariffService } from "../services/tariffService";
 import { TariffConfig } from "../types/tarifConfig";
+import { albumService, Album } from "../services/albumService";
+import { Folder, ArrowLeft } from "lucide-react";
 
 // Styles
 import "../styles/globals.css";
@@ -75,6 +77,11 @@ export default function Galerie() {
     (TarifOeuvre | Tarif)[]
   >([]);
 
+  // Album Logic
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [viewMode, setViewMode] = useState<"albums" | "photos">("albums");
+  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+
   const { ajouterArticle } = usePanier();
   const { addToast } = useToast();
 
@@ -83,12 +90,21 @@ export default function Galerie() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [resPhotos, config] = await Promise.all([
+        const [resPhotos, config, albumsData] = await Promise.all([
           fetch(`${API_URL}/api/galerie`),
           tariffService.getTariffConfig(),
+          albumService.getAlbums(),
         ]);
 
         const data: Photo[] = await resPhotos.json();
+        setAlbums(albumsData);
+
+        // If albums exist, start in album mode, otherwise show all photos
+        if (albumsData.length > 0) {
+          setViewMode("albums");
+        } else {
+          setViewMode("photos");
+        }
 
         // Helper to resolve tariffs
         const resolveTariffs = (
@@ -235,13 +251,24 @@ export default function Galerie() {
     [photos]
   );
 
-  const filtered = useMemo(
-    () =>
-      categorieActive === "Toutes"
-        ? photos
-        : photos.filter((p) => p.categorie === categorieActive),
-    [photos, categorieActive]
-  );
+  const filtered = useMemo(() => {
+    let currentPhotos = photos;
+
+    // Filter by Album if selected
+    if (viewMode === "photos" && selectedAlbum) {
+      currentPhotos = currentPhotos.filter(
+        (p) => (p as any).album === selectedAlbum._id
+      );
+    } else if (viewMode === "photos" && !selectedAlbum && albums.length > 0) {
+      // If in photo mode but no album selected (and albums exist), show nothing or all?
+      // Let's assume we only show photos when an album is selected if albums exist.
+      // Or maybe we have a "All Photos" album?
+      // For now, if no album selected, show all (legacy behavior)
+    }
+
+    if (categorieActive === "Toutes") return currentPhotos;
+    return currentPhotos.filter((p) => p.categorie === categorieActive);
+  }, [photos, categorieActive, viewMode, selectedAlbum, albums]);
 
   return (
     <div className="min-h-screen bg-[#0a0a10] text-white selection:bg-yellow-500/30 selection:text-white font-sans">
@@ -286,8 +313,25 @@ export default function Galerie() {
       {/* Navigation des filtres - Style Glassmorphism */}
       <nav className="sticky top-20 z-40 px-4 py-2 mb-8 mt-0">
         <div className="max-w-fit mx-auto flex flex-wrap justify-center items-center gap-2 md:gap-4 bg-white/5 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
+          {viewMode === "photos" && selectedAlbum && (
+            <button
+              onClick={() => {
+                setViewMode("albums");
+                setSelectedAlbum(null);
+                setCategorieActive("Toutes");
+              }}
+              className="flex items-center gap-2 text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all duration-300 px-4 py-2 rounded-full text-[#ffe992] hover:bg-white/10 mr-4 border-r border-white/10 pr-6"
+            >
+              <ArrowLeft size={14} /> Albums
+            </button>
+          )}
+
           {loading ? (
             <Skeleton width={200} height={30} className="rounded-full" />
+          ) : viewMode === "albums" ? (
+            <span className="text-xs text-gray-400 uppercase tracking-widest px-4">
+              Sélectionnez un album
+            </span>
           ) : (
             categories.map((cat) => (
               <button
@@ -324,7 +368,50 @@ export default function Galerie() {
                       <Skeleton height={20} width="60%" />
                     </div>
                   ))
-              : filtered.map((photo) => (
+              : viewMode === "albums"
+              ? // ALBUM GRID
+                albums.map((album) => (
+                  <motion.div
+                    key={album._id}
+                    variants={cardVariants}
+                    layout
+                    onClick={() => {
+                      setSelectedAlbum(album);
+                      setViewMode("photos");
+                    }}
+                    className="group relative cursor-pointer"
+                  >
+                    <div className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/30 hover:shadow-[0_0_30px_rgba(255,233,146,0.1)] hover:-translate-y-2 aspect-square flex flex-col">
+                      {/* Cover Image */}
+                      <div className="relative w-full h-full overflow-hidden">
+                        {album.imageCouverture ? (
+                          <motion.img
+                            whileHover={{ scale: 1.05 }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            src={album.imageCouverture}
+                            alt={album.titre}
+                            className="w-full h-full object-cover transition-opacity duration-700 opacity-80 group-hover:opacity-100"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-white/5 text-gray-600">
+                            <Folder size={64} />
+                          </div>
+                        )}
+                        {/* Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-6">
+                          <h3 className="text-2xl font-serif font-bold text-white tracking-wide mb-1 group-hover:text-[#ffe992] transition-colors duration-300">
+                            {album.titre}
+                          </h3>
+                          <p className="text-sm text-gray-400 line-clamp-2">
+                            {album.description}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              : // PHOTO GRID
+                filtered.map((photo) => (
                   <motion.div
                     key={photo._id || photo.id}
                     variants={cardVariants}
