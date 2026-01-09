@@ -1,5 +1,5 @@
 // Importations des modules nécessaires pour le composant de sélection de tarifs
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Folder,
   Image,
@@ -261,7 +261,7 @@ function TariffTreeItem({
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   // Met à jour l'état d'expansion quand le prop change (action globale)
-  useMemo(() => {
+  useEffect(() => {
     setExpanded(defaultExpanded);
   }, [defaultExpanded]);
 
