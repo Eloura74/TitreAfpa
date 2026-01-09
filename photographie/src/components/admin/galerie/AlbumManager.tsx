@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_URL as BASE_API_URL } from "../../../config/api";
 import { albumService, Album } from "../../../services/albumService";
 import { useToast } from "../../../components/Toast";
 import { Trash2, Edit2, Plus, Image as ImageIcon } from "lucide-react";
@@ -109,19 +110,88 @@ export default function AlbumManager() {
           </div>
           <div className="space-y-2">
             <label className="text-xs font-bold text-[#ffe992] uppercase">
-              Image de couverture (URL)
+              Image de couverture
             </label>
-            <input
-              value={editingAlbum.imageCouverture || ""}
-              onChange={(e) =>
-                setEditingAlbum({
-                  ...editingAlbum,
-                  imageCouverture: e.target.value,
-                })
-              }
-              className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
-              placeholder="https://..."
-            />
+            <div className="relative group">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  try {
+                    const signRes = await fetch(
+                      `${BASE_API_URL}/api/upload-cloudinary/sign`,
+                      { method: "GET", credentials: "include" }
+                    );
+
+                    if (!signRes.ok) throw new Error("Erreur signature");
+
+                    const signData = await signRes.json();
+                    const {
+                      signature,
+                      timestamp,
+                      cloud_name,
+                      api_key,
+                      folder,
+                    } = signData;
+
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("signature", signature);
+                    formData.append("timestamp", timestamp.toString());
+                    formData.append("api_key", api_key);
+                    formData.append("folder", folder);
+
+                    const uploadRes = await fetch(
+                      `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
+                      { method: "POST", body: formData }
+                    );
+
+                    const uploadData = await uploadRes.json();
+
+                    if (uploadData.secure_url) {
+                      setEditingAlbum({
+                        ...editingAlbum,
+                        imageCouverture: uploadData.secure_url,
+                      });
+                      addToast("Image uploadée avec succès !", "success");
+                    } else {
+                      addToast("L'upload a échoué", "error");
+                    }
+                  } catch (err) {
+                    console.error(err);
+                    addToast("Erreur lors de l'envoi de l'image.", "error");
+                  }
+                }}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              />
+              <div
+                className={`w-full h-32 rounded-xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center gap-3 ${
+                  editingAlbum.imageCouverture
+                    ? "border-[#ffe992]/50 bg-black/40"
+                    : "border-white/10 bg-white/5 hover:border-[#ffe992]/30 hover:bg-white/10"
+                }`}
+              >
+                {editingAlbum.imageCouverture ? (
+                  <img
+                    src={editingAlbum.imageCouverture}
+                    alt="Aperçu"
+                    className="w-full h-full object-contain rounded-lg p-2"
+                  />
+                ) : (
+                  <>
+                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-[#ffe992] transition-colors">
+                      <ImageIcon size={16} />
+                    </div>
+                    <p className="text-xs text-gray-400 group-hover:text-white transition-colors">
+                      Cliquez ou glissez une image
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
           <div className="flex justify-end gap-2 mt-4">
             <button
