@@ -13,6 +13,8 @@ import { SelectionFormatModal } from "../components/galerie/SelectionFormatModal
 import { usePanier } from "../store/panierContext";
 import { API_URL } from "../config/api";
 import { Tarif, TarifOeuvre } from "../types/tarif";
+import { tariffService } from "../services/tariffService";
+import { TariffConfig } from "../types/tarifConfig";
 
 // Styles
 import "../styles/globals.css";
@@ -30,6 +32,7 @@ interface Photo {
   categorie: string;
   type: string;
   tarifs?: TarifOeuvre[];
+  availableTariffIds?: string[];
 }
 
 // --- Variantes d'animation (Douces comme Home) ---
@@ -77,25 +80,83 @@ export default function Galerie() {
 
   // 1. Fetch & Normalisation
   useEffect(() => {
-    const fetchPhotos = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${API_URL}/api/galerie`);
-        const data: Photo[] = await res.json();
+        const [resPhotos, config] = await Promise.all([
+          fetch(`${API_URL}/api/galerie`),
+          tariffService.getTariffConfig(),
+        ]);
+
+        const data: Photo[] = await resPhotos.json();
+
+        // Helper to resolve tariffs
+        const resolveTariffs = (
+          availableIds: string[] | undefined,
+          config: TariffConfig
+        ): TarifOeuvre[] => {
+          if (!availableIds || availableIds.length === 0 || !config.categories)
+            return [];
+          const resolved: TarifOeuvre[] = [];
+
+          config.categories.forEach((cat) => {
+            cat.finishes.forEach((finish) => {
+              finish.sizes.forEach((size) => {
+                // Check papers
+                size.papers.forEach((paper) => {
+                  if (availableIds.includes(paper.id)) {
+                    resolved.push({
+                      id: paper.id,
+                      format: size.name,
+                      support: `${paper.name} (${finish.name})`,
+                      prix: size.basePrice + paper.priceModifier,
+                    });
+                  }
+                });
+                // Check frames
+                size.frames.forEach((frame) => {
+                  if (availableIds.includes(frame.id)) {
+                    resolved.push({
+                      id: frame.id,
+                      format: size.name,
+                      support: `${frame.name} (${finish.name})`,
+                      prix: size.basePrice + frame.priceModifier,
+                    });
+                  }
+                });
+              });
+            });
+          });
+
+          return resolved;
+        };
 
         const sanitized = data
           .filter((p) => p.categorie !== "EvenementPrive") // Double sécurité côté front
-          .map((p) => ({
-            ...p,
-            src: p.src?.startsWith("http")
-              ? p.src
-              : p.src?.startsWith("/uploads/")
-              ? `${API_URL}${p.src}`
-              : p.src?.startsWith("/images/")
-              ? p.src
-              : `/images/${p.src}`,
-            tarifs: Array.isArray(p.tarifs) ? p.tarifs : [],
-          }));
+          .map((p) => {
+            // Resolve dynamic tariffs if available
+            const resolvedTariffs = resolveTariffs(
+              p.availableTariffIds,
+              config
+            );
+
+            return {
+              ...p,
+              src: p.src?.startsWith("http")
+                ? p.src
+                : p.src?.startsWith("/uploads/")
+                ? `${API_URL}${p.src}`
+                : p.src?.startsWith("/images/")
+                ? p.src
+                : `/images/${p.src}`,
+              tarifs:
+                resolvedTariffs.length > 0
+                  ? resolvedTariffs
+                  : Array.isArray(p.tarifs)
+                  ? p.tarifs
+                  : [],
+            };
+          });
 
         setPhotos(sanitized);
       } catch (err) {
@@ -105,7 +166,7 @@ export default function Galerie() {
         setLoading(false);
       }
     };
-    fetchPhotos();
+    fetchData();
   }, [addToast]);
 
   // 2. Logique de Panier
