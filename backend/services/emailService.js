@@ -1,94 +1,82 @@
-// Service d'envoi d'emails (générique)
-// Utilise Nodemailer pour envoyer des emails via SMTP (Gmail, SendGrid, etc.)
-
 const nodemailer = require("nodemailer");
 
-// Configuration du transporteur SMTP
-// Les variables doivent être définies dans le .env
+// Configuration du transporteur (Gmail)
+// Nécessite EMAIL_USER et EMAIL_PASS dans le .env
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "smtp.gmail.com",
-  port: process.env.EMAIL_PORT || 587,
-  secure: false, // true pour 465, false pour les autres ports
+  service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER, // Votre email (ex: fabien.licata@gmail.com)
-    pass: process.env.EMAIL_PASS, // Votre mot de passe d'application (App Password)
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
 /**
- * Envoie un email générique
- * @param {string} to - Destinataire
- * @param {string} subject - Sujet
- * @param {string} html - Contenu HTML
+ * Envoie un email de vérification
+ * @param {string} to - Email du destinataire
+ * @param {string} token - Token de vérification
  */
-const sendEmail = async (to, subject, html) => {
+const sendVerificationEmail = async (to, token) => {
+  const verificationLink = `${
+    process.env.FRONTEND_URL || "http://localhost:5173"
+  }/verify-email?token=${token}`;
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: to,
+    subject: "Vérifiez votre compte - Fabien Licata Photographie",
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333;">
+        <h2>Bienvenue !</h2>
+        <p>Merci de vous être inscrit. Pour activer votre compte, veuillez cliquer sur le lien ci-dessous :</p>
+        <p>
+          <a href="${verificationLink}" style="background-color: #d6c487; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+            Vérifier mon email
+          </a>
+        </p>
+        <p>Ou copiez ce lien : <br> ${verificationLink}</p>
+        <p>Ce lien est valide pendant 24 heures.</p>
+      </div>
+    `,
+  };
+
   try {
-    const info = await transporter.sendMail({
-      from: `"Photographie Art" <${process.env.EMAIL_USER}>`,
-      to,
-      subject,
-      html,
-    });
-    console.log("📧 Email envoyé : %s", info.messageId);
-    return info;
+    await transporter.sendMail(mailOptions);
+    console.log(`[EMAIL] Verification email sent to ${to}`);
   } catch (error) {
-    console.error("❌ Erreur envoi email :", error);
-    // On ne bloque pas l'application si l'email échoue, mais on log l'erreur
-    return null;
+    console.error("[EMAIL] Error sending verification email:", error);
+    throw error; // Propager l'erreur pour la gérer dans le contrôleur
   }
 };
 
 /**
- * Envoie un email de confirmation de commande
- * @param {string} to - Email du client
- * @param {object} commande - Détails de la commande (id, montant, articles...)
- */
-const sendOrderConfirmation = async (to, commande) => {
-  const subject = `Confirmation de votre commande #${commande.transactionId}`;
-  
-  const html = `
-    <div style="font-family: Arial, sans-serif; color: #333;">
-      <h1 style="color: #d4af37;">Merci pour votre commande !</h1>
-      <p>Bonjour ${commande.nomClient},</p>
-      <p>Nous avons bien reçu votre paiement de <strong>${commande.montant} €</strong>.</p>
-      <p>Votre commande <strong>#${commande.transactionId}</strong> est en cours de traitement.</p>
-      <hr />
-      <h3>Détails de la transaction :</h3>
-      <ul>
-        <li>Date : ${new Date(commande.date).toLocaleString()}</li>
-        <li>Montant : ${commande.montant} €</li>
-        <li>Moyen de paiement : ${commande.source}</li>
-      </ul>
-      <p>Vous recevrez un nouvel email lors de l'expédition de vos œuvres.</p>
-      <p>Cordialement,<br/>L'équipe Photographie Art</p>
-    </div>
-  `;
-
-  return sendEmail(to, subject, html);
-};
-
-/**
- * Envoie un email de bienvenue après inscription
- * @param {string} to - Email du nouvel utilisateur
+ * Envoie un email de bienvenue (après vérification réussie)
+ * @param {string} to - Email du destinataire
  * @param {string} prenom - Prénom de l'utilisateur
  */
 const sendWelcomeEmail = async (to, prenom) => {
-  const subject = "Bienvenue sur Photographie Art !";
-  
-  const html = `
-    <div style="font-family: Arial, sans-serif; color: #333;">
-      <h1 style="color: #d4af37;">Bienvenue ${prenom} !</h1>
-      <p>Nous sommes ravis de vous compter parmi nos membres.</p>
-      <p>Vous pouvez dès à présent accéder à votre espace client, suivre vos commandes et découvrir nos collections exclusives.</p>
-      <p>À très bientôt,<br/>L'équipe Photographie Art</p>
-    </div>
-  `;
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: to,
+    subject: "Bienvenue sur Fabien Licata Photographie",
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333;">
+        <h2>Bonjour ${prenom || "cher client"},</h2>
+        <p>Votre compte a été vérifié avec succès !</p>
+        <p>Vous pouvez maintenant accéder à votre espace client et parcourir les galeries privées.</p>
+        <p>À bientôt,<br>L'équipe Fabien Licata</p>
+      </div>
+    `,
+  };
 
-  return sendEmail(to, subject, html);
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`[EMAIL] Welcome email sent to ${to}`);
+  } catch (error) {
+    console.error("[EMAIL] Error sending welcome email:", error);
+  }
 };
 
 module.exports = {
-  sendEmail,
-  sendOrderConfirmation,
+  sendVerificationEmail,
   sendWelcomeEmail,
 };

@@ -16,6 +16,7 @@ import GalerieForm from "./components/galerie/GalerieForm"; // Formulaire de ges
 // import CalendarTest from "../test/calendarTest";        // Route de test, commentée
 import Panier from "./pages/Panier"; // Page Panier
 import Auth from "./pages/Auth"; // Page Authentification (connexion / inscription)
+import VerifyEmail from "./pages/VerifyEmail"; // Page de vérification d'email
 import { PanierProvider } from "./store/panierContext"; // Provider pour gérer le panier globalement
 import { UserProvider } from "./context/UserContext"; // Provider pour gérer le contexte utilisateur
 import GestionGalerie from "./pages/GestionGalerie"; // Page admin gestion galerie
@@ -107,6 +108,9 @@ function App() {
 
               {/* Route pour inscription / connexion */}
               <Route path="/inscription" element={<Auth />} />
+
+              {/* Route pour la vérification d'email */}
+              <Route path="/verify-email" element={<VerifyEmail />} />
 
               {/* Route protégée uniquement accessible aux admins pour la gestion galerie */}
               <Route

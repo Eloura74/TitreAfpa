@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema({
     codePostal: { type: String, required: false },
     pays: { type: String, required: false },
   },
+
+  // Champs pour la vérification d'email
+  isVerified: { type: Boolean, default: false },
+  verificationToken: { type: String },
 });
 
 // Middleware (pré-hook) exécuté **avant la sauvegarde** d'un document utilisateur

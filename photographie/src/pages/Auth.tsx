@@ -39,7 +39,9 @@ const Auth: React.FC = () => {
   });
 
   // Gestion des changements dans les inputs
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -53,8 +55,6 @@ const Auth: React.FC = () => {
     setError("");
 
     try {
-
-
       if (isRegister) {
         // 🟢 Mode inscription
         if (formData.motdepasse.length < 6) {
@@ -82,13 +82,14 @@ const Auth: React.FC = () => {
         if (res.error) {
           setError(res.error);
         } else {
-          const loginRes = await login(formData.email, formData.motdepasse);
-          if (loginRes.error) {
-            setMessage("Inscription réussie, veuillez vous connecter.");
-            setIsRegister(false);
-          } else {
-            handleLoginSuccess(loginRes);
-          }
+          // Succès de l'inscription
+          setMessage(
+            res.message ||
+              "Inscription réussie ! Veuillez vérifier votre email."
+          );
+          setIsRegister(false); // Revenir au mode connexion pour afficher le message
+          // Optionnel : Rediriger vers l'accueil après un délai
+          // setTimeout(() => navigate("/"), 3000);
         }
       } else {
         // 🔵 Mode connexion
@@ -136,7 +137,8 @@ const Auth: React.FC = () => {
     });
 
     setEmailAuth(res.email || null);
-    const isAdmin = res.isAdmin !== undefined ? !!res.isAdmin : res.role === "admin";
+    const isAdmin =
+      res.isAdmin !== undefined ? !!res.isAdmin : res.role === "admin";
     setIsAdminAuth(isAdmin);
 
     setMessage("Connexion réussie !");
@@ -152,8 +154,10 @@ const Auth: React.FC = () => {
   };
 
   // Styles communs pour les inputs
-  const inputClassName = "input w-full bg-black/40 border border-white/10 focus:border-yellow-400/50 focus:ring-1 focus:ring-yellow-400/50 text-white placeholder-gray-500 transition-all duration-300 backdrop-blur-sm";
-  const labelClassName = "label-text text-gray-400 text-xs uppercase tracking-wider font-semibold mb-1 block";
+  const inputClassName =
+    "input w-full bg-black/40 border border-white/10 focus:border-yellow-400/50 focus:ring-1 focus:ring-yellow-400/50 text-white placeholder-gray-500 transition-all duration-300 backdrop-blur-sm";
+  const labelClassName =
+    "label-text text-gray-400 text-xs uppercase tracking-wider font-semibold mb-1 block";
 
   // ------------------------------------------------------------------------
   // 🎨 AFFICHAGE JSX
@@ -163,26 +167,24 @@ const Auth: React.FC = () => {
       {/* Éléments de fond décoratifs */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-yellow-500/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
-      
+
       <Navbar />
 
       <div className="flex-1 flex flex-col items-center justify-center p-4 mt-16 relative z-10">
         <div className="w-full max-w-2xl bg-[#12121a]/80 backdrop-blur-xl p-8 md:p-10 rounded-2xl shadow-2xl border border-white/5">
-          
           {/* En-tête avec dégradé doré */}
           <div className="text-center mb-8">
             <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-600 bg-clip-text text-transparent drop-shadow-sm mb-2">
               {isRegister ? "Créer un compte" : "Connexion"}
             </h2>
             <p className="text-gray-400 text-sm">
-              {isRegister 
-                ? "Rejoignez l'univers Fabien Photographie" 
+              {isRegister
+                ? "Rejoignez l'univers Fabien Photographie"
                 : "Accédez à votre espace personnel"}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            
             {/* Section Identifiants */}
             <div className="grid gap-5">
               <div className="form-control">
@@ -209,20 +211,30 @@ const Auth: React.FC = () => {
                   required
                 />
                 {isRegister && (
-                  <span className="text-[10px] text-gray-500 mt-1 ml-1">Minimum 6 caractères</span>
+                  <span className="text-[10px] text-gray-500 mt-1 ml-1">
+                    Minimum 6 caractères
+                  </span>
                 )}
               </div>
             </div>
 
             {/* Section Informations Personnelles (Animation fluide) */}
-            <div className={`grid transition-all duration-500 ease-in-out overflow-hidden ${isRegister ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+            <div
+              className={`grid transition-all duration-500 ease-in-out overflow-hidden ${
+                isRegister
+                  ? "grid-rows-[1fr] opacity-100 mt-2"
+                  : "grid-rows-[0fr] opacity-0 mt-0"
+              }`}
+            >
               <div className="min-h-0">
                 <div className="flex items-center gap-4 mb-6 mt-2">
                   <div className="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent flex-1" />
-                  <span className="text-xs text-gray-500 font-medium uppercase tracking-widest">Informations</span>
+                  <span className="text-xs text-gray-500 font-medium uppercase tracking-widest">
+                    Informations
+                  </span>
                   <div className="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent flex-1" />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                   <div className="form-control">
                     <label className={labelClassName}>Nom</label>
@@ -308,13 +320,35 @@ const Auth: React.FC = () => {
             {/* Messages */}
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg flex items-center gap-2 animate-pulse">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
                 {error}
               </div>
             )}
             {message && (
               <div className="bg-green-500/10 border border-green-500/20 text-green-400 text-sm p-3 rounded-lg flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
                 {message}
               </div>
             )}
@@ -324,22 +358,43 @@ const Auth: React.FC = () => {
               <button
                 type="submit"
                 className={`w-full py-3.5 px-6 rounded-lg font-bold text-black uppercase tracking-wide transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-yellow-500/20 ${
-                  loading 
-                    ? "bg-gray-600 cursor-not-allowed" 
+                  loading
+                    ? "bg-gray-600 cursor-not-allowed"
                     : "bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 hover:brightness-110"
                 }`}
                 disabled={loading}
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <svg
+                      className="animate-spin h-5 w-5 text-black"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
                     Traitement...
                   </span>
+                ) : isRegister ? (
+                  "Confirmer l'inscription"
                 ) : (
-                  isRegister ? "Confirmer l'inscription" : "Se connecter"
+                  "Se connecter"
                 )}
               </button>
-              
+
               <div className="text-center">
                 <button
                   type="button"
@@ -350,17 +405,28 @@ const Auth: React.FC = () => {
                   }}
                   className="text-sm text-gray-400 hover:text-yellow-400 transition-colors duration-300"
                 >
-                  {isRegister 
-                    ? <span>Déjà membre ? <span className="text-yellow-400 font-semibold underline decoration-yellow-400/30 underline-offset-4">Connectez-vous</span></span>
-                    : <span>Nouveau client ? <span className="text-yellow-400 font-semibold underline decoration-yellow-400/30 underline-offset-4">Créer un compte</span></span>
-                  }
+                  {isRegister ? (
+                    <span>
+                      Déjà membre ?{" "}
+                      <span className="text-yellow-400 font-semibold underline decoration-yellow-400/30 underline-offset-4">
+                        Connectez-vous
+                      </span>
+                    </span>
+                  ) : (
+                    <span>
+                      Nouveau client ?{" "}
+                      <span className="text-yellow-400 font-semibold underline decoration-yellow-400/30 underline-offset-4">
+                        Créer un compte
+                      </span>
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
           </form>
         </div>
       </div>
-      
+
       {/* CSS Hack pour l'autofill */}
       <style>{`
         input:-webkit-autofill,
@@ -372,7 +438,7 @@ const Auth: React.FC = () => {
             transition: background-color 5000s ease-in-out 0s;
         }
       `}</style>
-      
+
       <Footer />
     </div>
   );

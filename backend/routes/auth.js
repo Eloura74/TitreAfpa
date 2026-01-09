@@ -10,8 +10,17 @@ const bcrypt = require("bcryptjs");
 // Importation de jsonwebtoken pour générer des tokens JWT (authentification sécurisée)
 const jwt = require("jsonwebtoken");
 
+// Importation de crypto pour générer le token de vérification
+const crypto = require("crypto");
+
 // Importation du modèle User pour interagir avec la collection des utilisateurs dans MongoDB
 const User = require("../models/User.js");
+
+// Importation du service d'email
+const {
+  sendVerificationEmail,
+  sendWelcomeEmail,
+} = require("../services/emailService");
 
 // Importation du middleware d'authentification
 const { authenticate } = require("../middleware/auth");
@@ -26,7 +35,7 @@ router.post(
   "/register",
   [
     // Validation des champs
-    body("email").isEmail().withMessage("Email invalide"), // Suppression de .normalizeEmail() qui modifiait l'email (ex: suppression des points)
+    body("email").isEmail().withMessage("Email invalide"),
     body("motdepasse")
       .isLength({ min: 6 })
       .withMessage("Le mot de passe doit contenir au moins 6 caractères"),
@@ -50,16 +59,24 @@ router.post(
       console.log("[AUTH] Register request received for:", req.body.email);
       let { email, motdepasse, nom, prenom, telephone, adresse } = req.body;
 
-      // Normalisation manuelle pour garantir la cohérence avec le login (minuscules + trim, mais conservation des points)
+      // Normalisation manuelle pour garantir la cohérence avec le login
       if (email) {
         email = email.toLowerCase().trim();
+      }
+
+      // Vérifier si l'utilisateur existe déjà
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({ error: "Cet email est déjà utilisé." });
       }
 
       // Définition du rôle par défaut : 'user'
       let role = "user";
 
-      // Création d'une nouvelle instance de l'utilisateur avec les données fournies
-      // Le mot de passe sera automatiquement hashé grâce au middleware défini dans le modèle User
+      // Génération du token de vérification
+      const verificationToken = crypto.randomBytes(32).toString("hex");
+
+      // Création d'une nouvelle instance de l'utilisateur
       const user = new User({
         email,
         motdepasse,
@@ -68,68 +85,65 @@ router.post(
         prenom,
         telephone,
         adresse,
+        isVerified: false, // Par défaut non vérifié
+        verificationToken,
       });
 
-      // Sauvegarde de l'utilisateur dans la base de données MongoDB
+      // Sauvegarde de l'utilisateur
       console.log(`[AUTH] Saving new user: ${email}`);
       await user.save();
       console.log(`[AUTH] User saved successfully: ${email}`);
 
-      // Envoi de l'email de bienvenue (asynchrone, on n'attend pas forcément le résultat pour répondre)
-      // Import dynamique ou require en haut de fichier (je vais ajouter le require en haut)
-      const { sendWelcomeEmail } = require("../services/emailService");
-      sendWelcomeEmail(email, prenom).catch((err) =>
-        console.error("Erreur envoi email bienvenue:", err)
-      );
-
-      // Réponse avec un statut 201 (Créé) et un message de succès
-      res.status(201).json({ message: "Utilisateur créé" });
+      // Envoi de l'email de vérification
+      try {
+        await sendVerificationEmail(email, verificationToken);
+        res.status(201).json({
+          message:
+            "Inscription réussie. Veuillez vérifier votre email pour activer votre compte.",
+        });
+      } catch (emailError) {
+        console.error("Erreur envoi email vérification:", emailError);
+        // On ne supprime pas l'utilisateur, mais on prévient le front
+        res.status(201).json({
+          message:
+            "Inscription réussie, mais l'email de vérification n'a pas pu être envoyé. Contactez le support.",
+        });
+      }
     } catch (err) {
-      // En cas d'erreur (ex: email déjà utilisé), renvoi d'une réponse avec un statut 400 (Bad Request) et le message d'erreur
       res.status(400).json({ error: err.message });
     }
   }
 );
 
 // ==========================
-// Route POST : Connexion
+// Route GET : Vérification Email
 // ==========================
-router.post("/login", async (req, res) => {
+router.get("/verify-email/:token", async (req, res) => {
   try {
-    // Récupération des identifiants fournis par l'utilisateur
-    // Récupération des identifiants fournis par l'utilisateur
-    let { email, motdepasse } = req.body;
+    const { token } = req.params;
 
-    // Normalisation de l'email (minuscules et suppression des espaces) pour correspondre au format d'enregistrement
-    if (email) {
-      email = email.toLowerCase().trim();
-    }
-
-    console.log(`[AUTH] Login request for: '${email}'`);
-
-    // Recherche de l'utilisateur dans la base de données via son email
-    const user = await User.findOne({ email });
-    console.log(`[AUTH] User found result: ${user ? "YES" : "NO"}`);
+    // Trouver l'utilisateur avec ce token
+    const user = await User.findOne({ verificationToken: token });
 
     if (!user) {
-      console.log(
-        `[AUTH] Login failed: User '${email}' NOT FOUND in database.`
-      );
-      return res.status(401).json({ error: "Identifiants invalides" });
+      return res
+        .status(400)
+        .json({ error: "Lien de vérification invalide ou expiré." });
     }
 
-    // Vérification du mot de passe
-    const isMatch = await user.comparePassword(motdepasse);
-    console.log(`[AUTH] Password match result for '${email}': ${isMatch}`);
+    // Activer le compte
+    user.isVerified = true;
+    user.verificationToken = undefined; // Supprimer le token
+    await user.save();
 
-    if (!isMatch) {
-      console.log(`[AUTH] Login failed: Password INCORRECT for '${email}'.`);
-      return res.status(401).json({ error: "Identifiants invalides" });
-    }
-    console.log(`[AUTH] Login success for ${email}`);
+    // Envoyer email de bienvenue
+    sendWelcomeEmail(user.email, user.prenom).catch((err) =>
+      console.error(err)
+    );
 
-    // Génération d'un token JWT contenant l'ID utilisateur et son rôle
-    const token = jwt.sign(
+    // --- AUTO-LOGIN ---
+    // Génération du token JWT
+    const jwtToken = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "2h" }
@@ -137,16 +151,81 @@ router.post("/login", async (req, res) => {
 
     // Configuration du cookie
     const cookieOptions = {
-      httpOnly: true, // Empêche l'accès via JS (protection XSS)
-      secure: process.env.NODE_ENV === "production", // HTTPS uniquement en prod
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // 'none' pour Vercel (cross-site), 'lax' en local
-      maxAge: 2 * 60 * 60 * 1000, // 2 heures en millisecondes
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 2 * 60 * 60 * 1000,
     };
 
     // Envoi du cookie
+    res.cookie("token", jwtToken, cookieOptions);
+
+    res.json({
+      message: "Email vérifié avec succès. Connexion en cours...",
+      user: {
+        email: user.email,
+        role: user.role,
+        nom: user.nom,
+        prenom: user.prenom,
+        telephone: user.telephone,
+        adresse: user.adresse,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur lors de la vérification." });
+  }
+});
+
+// ==========================
+// Route POST : Connexion
+// ==========================
+router.post("/login", async (req, res) => {
+  try {
+    let { email, motdepasse } = req.body;
+
+    if (email) {
+      email = email.toLowerCase().trim();
+    }
+
+    console.log(`[AUTH] Login request for: '${email}'`);
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({ error: "Identifiants invalides" });
+    }
+
+    // Vérification du mot de passe
+    const isMatch = await user.comparePassword(motdepasse);
+
+    if (!isMatch) {
+      return res.status(401).json({ error: "Identifiants invalides" });
+    }
+
+    // Vérification si le compte est activé
+    if (!user.isVerified) {
+      return res.status(403).json({
+        error: "Veuillez vérifier votre email avant de vous connecter.",
+      });
+    }
+
+    console.log(`[AUTH] Login success for ${email}`);
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "2h" }
+    );
+
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 2 * 60 * 60 * 1000,
+    };
+
     res.cookie("token", token, cookieOptions);
 
-    // Réponse JSON (sans le token dans le body)
     res.json({
       message: "Connexion réussie",
       email: user.email,
@@ -157,7 +236,6 @@ router.post("/login", async (req, res) => {
       adresse: user.adresse,
     });
   } catch (err) {
-    // Gestion des erreurs avec une réponse 400 en cas de problèmes
     res.status(400).json({ error: err.message });
   }
 });
@@ -179,5 +257,4 @@ router.post("/logout", (req, res) => {
   res.json({ message: "Déconnexion réussie" });
 });
 
-// Exportation du routeur pour pouvoir l'utiliser dans l'application principale (app.js ou server.js)
 module.exports = router;
