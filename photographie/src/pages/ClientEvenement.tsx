@@ -14,15 +14,9 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { usePanier } from "../store/panierContext";
+import { ClientTariffSelector } from "../components/galerie/ClientTariffSelector";
 
 // Types
-interface Tarif {
-  _id?: string;
-  id?: string;
-  format: string;
-  support: string;
-  prix: number;
-}
 
 interface Photo {
   _id: string;
@@ -54,7 +48,8 @@ export default function ClientEvenement() {
   // Configuration de la commande
   const [config, setConfig] = useState<{
     [photoId: string]: {
-      tarifIndex: number;
+      selectedTarif?: any;
+      hdSelected?: boolean;
       quantite: number;
     };
   }>({});
@@ -131,30 +126,49 @@ export default function ClientEvenement() {
     selectedPhotos.forEach((photoId) => {
       const photo = evenement?.photos.find((p) => p._id === photoId);
       const conf = config[photoId];
-      // Default to first tariff (index 0) if not configured
-      const tarifIndex = conf?.tarifIndex ?? 0;
-      const tarif = photo?.tarifs?.[tarifIndex];
+      if (!photo || !conf) return;
 
-      if (!photo || !tarif) return;
+      const quantity = conf.quantite || 1;
 
-      ajouterArticle({
-        id: `${photo._id}-${tarif._id || tarif.id}`,
-        nom: photo.titre || "Photo",
-        prix: tarif.prix,
-        quantite: conf?.quantite || 1,
-        image: photo.src,
-        photoId: photo._id,
-        format: tarif.format,
-        support: tarif.support,
-      });
-      addedCount++;
+      // 1. Add Physical Print if selected
+      if (conf.selectedTarif) {
+        ajouterArticle({
+          id: `${photo._id}-${conf.selectedTarif.id}-${Date.now()}`,
+          nom: photo.titre || "Photo",
+          prix: conf.selectedTarif.prix,
+          quantite: quantity,
+          image: photo.src,
+          photoId: photo._id,
+          format: conf.selectedTarif.format,
+          support: conf.selectedTarif.support,
+        });
+        addedCount++;
+      }
+
+      // 2. Add HD Digital if selected
+      if (conf.hdSelected) {
+        ajouterArticle({
+          id: `${photo._id}-HD-${Date.now()}`,
+          nom: `${photo.titre || "Photo"} (Fichier Numérique HD)`,
+          prix: 25, // Prix fixe pour l'instant, à rendre dynamique si besoin
+          quantite: quantity,
+          image: photo.src,
+          photoId: photo._id,
+          format: "Numérique",
+          support: "Fichier HD",
+        });
+        addedCount++;
+      }
     });
 
     if (addedCount > 0) {
-      // alert("Vos photos ont été ajoutées au panier !");
       setShowConfig(false);
       setSelectedPhotos([]);
       navigate("/panier");
+    } else {
+      alert(
+        "Veuillez sélectionner un format ou l'option HD pour au moins une photo."
+      );
     }
   };
 
@@ -359,125 +373,136 @@ export default function ClientEvenement() {
               </div>
 
               {/* Modal Body */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#0a0a10]">
+              <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-[#0a0a10]">
                 {selectedPhotos.map((photoId) => {
                   const photo = evenement?.photos.find(
                     (p) => p._id === photoId
                   );
                   if (!photo) return null;
 
-                  // Fallback safe pour le tarif
-                  const currentTarifIndex = config[photoId]?.tarifIndex ?? 0;
-                  const currentTarif = photo.tarifs?.[currentTarifIndex];
+                  const conf = config[photoId] || { quantite: 1 };
 
                   return (
                     <div
                       key={photoId}
-                      className="flex flex-col sm:flex-row gap-6 bg-white/5 p-4 rounded-xl border border-white/5 hover:border-[#ffe992]/20 transition-colors"
+                      className="flex flex-col lg:flex-row gap-8 bg-white/5 p-6 rounded-xl border border-white/5 hover:border-[#ffe992]/20 transition-colors"
                     >
-                      <div className="w-full sm:w-32 aspect-[2/3] rounded-lg overflow-hidden bg-black flex-shrink-0">
-                        <img
-                          src={photo.src}
-                          alt={photo.titre}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-
-                      <div className="flex-1 space-y-4">
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-medium text-white text-lg">
+                      {/* Photo Preview */}
+                      <div className="w-full lg:w-1/3 space-y-4">
+                        <div className="aspect-[2/3] rounded-lg overflow-hidden bg-black shadow-lg">
+                          <img
+                            src={photo.src}
+                            alt={photo.titre}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <h4 className="font-medium text-white text-lg truncate pr-4">
                             {photo.titre || "Sans titre"}
                           </h4>
                           <button
                             onClick={() => toggleSelection(photoId)}
-                            className="text-xs text-red-400 hover:text-red-300 underline"
+                            className="text-xs text-red-400 hover:text-red-300 underline whitespace-nowrap"
                           >
                             Retirer
                           </button>
                         </div>
+                      </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                            <label className="text-xs text-[#ffe992] uppercase tracking-wider font-bold">
-                              Format & Support
-                            </label>
-                            <select
-                              value={currentTarifIndex}
-                              onChange={(e) => {
-                                const newIndex = parseInt(e.target.value, 10);
-                                setConfig((prev) => {
-                                  const currentConfig = prev[photoId] || {
-                                    quantite: 1,
-                                  };
-                                  return {
-                                    ...prev,
-                                    [photoId]: {
-                                      ...currentConfig,
-                                      tarifIndex: newIndex,
-                                    },
-                                  };
-                                });
-                              }}
-                              className="w-full bg-[#1a1a24] border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:border-[#ffe992] focus:outline-none appearance-none cursor-pointer hover:bg-[#22222e] transition-colors"
+                      {/* Configuration Panel */}
+                      <div className="flex-1 space-y-6">
+                        {/* Option HD Checkbox */}
+                        <div
+                          className="bg-[#1a1a24] border border-[#ffe992]/30 rounded-lg p-4 flex items-center justify-between group cursor-pointer hover:bg-[#22222e] transition-colors"
+                          onClick={() => {
+                            setConfig((prev) => ({
+                              ...prev,
+                              [photoId]: {
+                                ...prev[photoId],
+                                hdSelected: !prev[photoId]?.hdSelected,
+                              },
+                            }));
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                                conf.hdSelected
+                                  ? "bg-[#ffe992] border-[#ffe992] text-black"
+                                  : "border-gray-500 group-hover:border-[#ffe992]"
+                              }`}
                             >
-                              {photo.tarifs?.map((t: any, index: number) => (
-                                <option key={index} value={index}>
-                                  {t.format} — {t.support}
-                                </option>
-                              ))}
-                            </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                              <ArrowRight size={14} className="rotate-90" />
+                              {conf.hdSelected && (
+                                <Check size={14} strokeWidth={3} />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-bold text-white text-sm">
+                                Fichier Numérique HD
+                              </p>
+                              <p className="text-xs text-gray-400">
+                                Téléchargement haute définition
+                              </p>
                             </div>
                           </div>
+                          <span className="text-[#ffe992] font-bold">
+                            25.00 €
+                          </span>
+                        </div>
 
-                          <div className="space-y-2">
-                            <label className="text-xs text-[#ffe992] uppercase tracking-wider font-bold">
+                        <div className="w-full h-[1px] bg-white/10" />
+
+                        {/* Tariff Selector */}
+                        <ClientTariffSelector
+                          selectedTarif={conf.selectedTarif}
+                          onSelect={(tarif) => {
+                            setConfig((prev) => ({
+                              ...prev,
+                              [photoId]: {
+                                ...prev[photoId],
+                                selectedTarif: tarif,
+                              },
+                            }));
+                          }}
+                        />
+
+                        {/* Quantity */}
+                        <div className="flex justify-end pt-4 border-t border-white/5">
+                          <div className="flex items-center gap-4">
+                            <span className="text-xs text-gray-400 uppercase tracking-wider">
                               Quantité
-                            </label>
-                            <div className="flex items-center gap-3 bg-[#1a1a24] border border-white/10 rounded-lg p-1 w-fit">
+                            </span>
+                            <div className="flex items-center gap-3 bg-[#1a1a24] border border-white/10 rounded-lg p-1">
                               <button
                                 onClick={() =>
-                                  setConfig((prev) => {
-                                    const currentConfig = prev[photoId] || {
-                                      tarifIndex: currentTarifIndex,
-                                      quantite: 1,
-                                    };
-                                    return {
-                                      ...prev,
-                                      [photoId]: {
-                                        ...currentConfig,
-                                        quantite: Math.max(
-                                          1,
-                                          (currentConfig.quantite || 1) - 1
-                                        ),
-                                      },
-                                    };
-                                  })
+                                  setConfig((prev) => ({
+                                    ...prev,
+                                    [photoId]: {
+                                      ...prev[photoId],
+                                      quantite: Math.max(
+                                        1,
+                                        (prev[photoId]?.quantite || 1) - 1
+                                      ),
+                                    },
+                                  }))
                                 }
                                 className="w-8 h-8 rounded-md bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors"
                               >
                                 -
                               </button>
                               <span className="w-8 text-center font-mono text-lg">
-                                {config[photoId]?.quantite || 1}
+                                {conf.quantite || 1}
                               </span>
                               <button
                                 onClick={() =>
-                                  setConfig((prev) => {
-                                    const currentConfig = prev[photoId] || {
-                                      tarifIndex: currentTarifIndex,
-                                      quantite: 1,
-                                    };
-                                    return {
-                                      ...prev,
-                                      [photoId]: {
-                                        ...currentConfig,
-                                        quantite:
-                                          (currentConfig.quantite || 1) + 1,
-                                      },
-                                    };
-                                  })
+                                  setConfig((prev) => ({
+                                    ...prev,
+                                    [photoId]: {
+                                      ...prev[photoId],
+                                      quantite:
+                                        (prev[photoId]?.quantite || 1) + 1,
+                                    },
+                                  }))
                                 }
                                 className="w-8 h-8 rounded-md bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors"
                               >
@@ -487,13 +512,19 @@ export default function ClientEvenement() {
                           </div>
                         </div>
 
-                        <div className="flex justify-end pt-2">
-                          <p className="text-sm text-gray-400">
-                            Prix unitaire :{" "}
-                            <span className="text-white font-bold">
-                              {currentTarif?.prix || 0} €
-                            </span>
-                          </p>
+                        {/* Subtotal for this photo */}
+                        <div className="flex justify-end items-center gap-2">
+                          <span className="text-sm text-gray-400">
+                            Sous-total :
+                          </span>
+                          <span className="text-xl font-bold text-white">
+                            {(
+                              ((conf.selectedTarif?.prix || 0) +
+                                (conf.hdSelected ? 25 : 0)) *
+                              (conf.quantite || 1)
+                            ).toFixed(2)}{" "}
+                            €
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -510,16 +541,11 @@ export default function ClientEvenement() {
                   <p className="text-3xl font-serif text-[#ffe992]">
                     {selectedPhotos
                       .reduce((acc, id) => {
-                        const photo = evenement?.photos.find(
-                          (p) => p._id === id
-                        );
-                        const conf = config[id];
-
-                        // Même logique de fallback pour le total
-                        const currentTarifIndex = conf?.tarifIndex ?? 0;
-                        const tarif = photo?.tarifs?.[currentTarifIndex];
-
-                        return acc + (tarif?.prix || 0) * (conf?.quantite || 1);
+                        const conf = config[id] || { quantite: 1 };
+                        const price =
+                          (conf.selectedTarif?.prix || 0) +
+                          (conf.hdSelected ? 25 : 0);
+                        return acc + price * (conf.quantite || 1);
                       }, 0)
                       .toFixed(2)}{" "}
                     €

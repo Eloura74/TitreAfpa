@@ -76,7 +76,87 @@ const sendWelcomeEmail = async (to, prenom) => {
   }
 };
 
+/**
+ * Envoie un email de confirmation de commande au client
+ * @param {string} to - Email du client
+ * @param {object} commande - Détails de la commande
+ */
+const sendOrderConfirmation = async (to, commande) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: to,
+    subject: `Confirmation de votre commande #${commande.transactionId}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333;">
+        <h2>Merci pour votre commande !</h2>
+        <p>Bonjour ${commande.nomClient},</p>
+        <p>Nous avons bien reçu votre paiement de <strong>${commande.montant} €</strong>.</p>
+        <p>Votre commande est en cours de traitement. Vous recevrez bientôt vos photos.</p>
+        <p>Référence transaction : ${commande.transactionId}</p>
+        <p>À bientôt,<br>L'équipe Fabien Licata</p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`[EMAIL] Order confirmation sent to ${to}`);
+  } catch (error) {
+    console.error("[EMAIL] Error sending order confirmation:", error);
+  }
+};
+
+/**
+ * Envoie une notification de nouvelle commande à l'administrateur
+ * @param {object} commande - Détails de la commande
+ * @param {Array} articles - Liste des articles commandés
+ */
+const sendAdminNotification = async (commande, articles) => {
+  // Construire la liste des articles pour l'email
+  const articlesListHtml = articles
+    .map(
+      (item) => `
+    <li style="margin-bottom: 10px;">
+      <strong>${item.name}</strong><br>
+      Quantité: ${item.quantity}<br>
+      Prix unitaire: ${item.unit_amount.value} €
+    </li>
+  `
+    )
+    .join("");
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: process.env.EMAIL_USER, // L'admin reçoit l'email sur son propre compte
+    subject: `[ADMIN] Nouvelle commande #${commande.transactionId} - ${commande.montant} €`,
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333;">
+        <h2>Nouvelle commande reçue !</h2>
+        <p><strong>Client :</strong> ${commande.nomClient} (${commande.emailClient})</p>
+        <p><strong>Montant :</strong> ${commande.montant} €</p>
+        <p><strong>Transaction :</strong> ${commande.transactionId}</p>
+        
+        <h3>Détails de la commande :</h3>
+        <ul>
+          ${articlesListHtml}
+        </ul>
+        
+        <p>Connectez-vous à votre espace administration pour plus de détails.</p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`[EMAIL] Admin notification sent`);
+  } catch (error) {
+    console.error("[EMAIL] Error sending admin notification:", error);
+  }
+};
+
 module.exports = {
   sendVerificationEmail,
   sendWelcomeEmail,
+  sendOrderConfirmation,
+  sendAdminNotification,
 };

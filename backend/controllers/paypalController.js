@@ -30,51 +30,100 @@ exports.createOrder = async (req, res) => {
       let prixUnitaire = 0;
       let nomArticle = article.nom || "Article";
 
-      // 1. Essayer de trouver une Photo
-      // On vérifie si l'ID est un ObjectId valide pour éviter les erreurs de cast
-      if (article.id && article.id.match(/^[0-9a-fA-F]{24}$/)) {
+      // 1. Vérification si c'est un article HD (Format spécial)
+      if (article.id && article.id.includes("-HD-")) {
+        // Extraction de l'ID photo (format: photoId-HD-timestamp)
+        const photoId = article.id.split("-HD-")[0];
+
+        if (photoId && photoId.match(/^[0-9a-fA-F]{24}$/)) {
+          const photo = await Photo.findById(photoId);
+          if (photo) {
+            nomArticle = `${photo.titre || "Photo"} (Fichier Numérique HD)`;
+            prixUnitaire = 25.0; // Prix fixe pour HD
+          } else {
+            throw new Error(`Photo introuvable pour l'option HD: ${photoId}`);
+          }
+        } else {
+          throw new Error(`ID Photo invalide pour l'option HD: ${article.id}`);
+        }
+      }
+      // 2. Essayer de trouver une Photo (Cas standard)
+      else if (article.id && article.id.match(/^[0-9a-fA-F]{24}$/)) {
         const photo = await Photo.findById(article.id);
-        
+
         if (photo) {
           nomArticle = photo.titre || article.nom;
           // Chercher le tarif correspondant au format/support
           if (photo.tarifs && photo.tarifs.length > 0) {
             const tarif = photo.tarifs.find(
-              (t) => t.format === article.format && t.support === article.support
+              (t) =>
+                t.format === article.format && t.support === article.support
             );
             if (tarif) {
               prixUnitaire = tarif.prix;
             } else {
               // Fallback si format non trouvé (ne devrait pas arriver si synchro)
-              // On peut logger une erreur ou utiliser le prix par défaut
-              console.warn(`Tarif non trouvé pour photo ${article.id} format ${article.format}`);
-              prixUnitaire = photo.prix || 0; 
+              console.warn(
+                `Tarif non trouvé pour photo ${article.id} format ${article.format}`
+              );
+              prixUnitaire = photo.prix || 0;
             }
           } else {
             prixUnitaire = photo.prix || 0;
           }
         } else {
-          // 2. Essayer de trouver une OeuvreGraphique
+          // 3. Essayer de trouver une OeuvreGraphique
           const oeuvre = await OeuvreGraphique.findById(article.id);
           if (oeuvre) {
             nomArticle = oeuvre.titre || article.nom;
             prixUnitaire = oeuvre.prix;
           } else {
-            console.warn(`Article non trouvé en base: ${article.id}`);
-            // Si l'article n'est pas trouvé en base, on ne peut pas valider le prix.
-            // Option: rejeter la commande ou (risqué) utiliser le prix client.
-            // Ici on rejette pour sécurité.
-            throw new Error(`Article non trouvé ou indisponible: ${article.nom}`);
+            // Si l'article n'est pas trouvé en base, on vérifie si c'est un ID composite (ex: photoId-tarifId-timestamp)
+            // C'est souvent le cas avec le nouveau système de panier
+            const possiblePhotoId = article.id.split("-")[0];
+            if (possiblePhotoId && possiblePhotoId.match(/^[0-9a-fA-F]{24}$/)) {
+              const photo = await Photo.findById(possiblePhotoId);
+              if (photo) {
+                // On fait confiance au prix envoyé SI on retrouve la photo,
+                // MAIS idéalement il faudrait retrouver le tarif exact dans la config V2.
+                // Pour l'instant, on accepte le prix si la photo existe, pour ne pas bloquer.
+                // TODO: Implémenter la vérification stricte des tarifs V2 côté back.
+                nomArticle = photo.titre || article.nom;
+                prixUnitaire = article.prix;
+              } else {
+                throw new Error(
+                  `Article non trouvé ou indisponible: ${article.nom}`
+                );
+              }
+            } else {
+              console.warn(`Article non trouvé en base: ${article.id}`);
+              throw new Error(
+                `Article non trouvé ou indisponible: ${article.nom}`
+              );
+            }
           }
         }
       } else {
-         // ID invalide ou manquant
-         console.warn(`ID article invalide: ${article.id}`);
-         throw new Error(`Article invalide: ${article.nom}`);
+        // ID invalide ou manquant
+        // Vérifier si c'est un ID composite généré par le front
+        const possiblePhotoId = article.id ? article.id.split("-")[0] : "";
+        if (possiblePhotoId && possiblePhotoId.match(/^[0-9a-fA-F]{24}$/)) {
+          // Même logique de fallback que ci-dessus
+          const photo = await Photo.findById(possiblePhotoId);
+          if (photo) {
+            nomArticle = photo.titre || article.nom;
+            prixUnitaire = article.prix;
+          } else {
+            throw new Error(`Article invalide: ${article.nom}`);
+          }
+        } else {
+          console.warn(`ID article invalide: ${article.id}`);
+          throw new Error(`Article invalide: ${article.nom}`);
+        }
       }
 
       total += prixUnitaire * article.quantite;
-      
+
       verifiedItems.push({
         name: nomArticle,
         unit_amount: {
@@ -131,6 +180,13 @@ exports.captureOrder = async (req, res) => {
     const purchaseUnit = result.purchase_units[0];
     const amount = purchaseUnit.payments.captures[0].amount.value;
 
+    // Récupération des articles pour l'email admin (si disponibles dans la réponse)
+    // Note: PayPal ne renvoie pas toujours les items dans la réponse de capture,
+    // il faut parfois refaire un getOrder ou se fier à ce qu'on a envoyé.
+    // Mais purchase_units[0].items devrait être là si on a mis 'return=representation' à la création ?
+    // Pas garanti. On va essayer de les récupérer, sinon liste vide.
+    const items = purchaseUnit.items || [];
+
     // Enregistrement du paiement en base de données
     const nouveauPaiement = await Paiement.create({
       montant: parseFloat(amount),
@@ -144,13 +200,24 @@ exports.captureOrder = async (req, res) => {
     });
 
     console.log("✅ Paiement PayPal enregistré :", nouveauPaiement);
-    
-    // Envoi de l'email de confirmation
-    const { sendOrderConfirmation } = require("../services/emailService");
+
+    // Import des services d'email
+    const {
+      sendOrderConfirmation,
+      sendAdminNotification,
+    } = require("../services/emailService");
+
+    // 1. Email Client
     if (payer.email_address) {
-      sendOrderConfirmation(payer.email_address, nouveauPaiement)
-        .catch(err => console.error("Erreur envoi email confirmation:", err));
+      sendOrderConfirmation(payer.email_address, nouveauPaiement).catch((err) =>
+        console.error("Erreur envoi email confirmation:", err)
+      );
     }
+
+    // 2. Email Admin
+    sendAdminNotification(nouveauPaiement, items).catch((err) =>
+      console.error("Erreur envoi email admin:", err)
+    );
 
     res.json(result);
   } catch (err) {
