@@ -116,6 +116,77 @@ router.post(
 );
 
 // ==========================
+// Route POST : Création Client (Admin) - Auto-Vérifié
+// ==========================
+router.post(
+  "/create-client",
+  authenticate, // Doit être connecté
+  async (req, res, next) => {
+    // Vérification admin manuelle ou via middleware si dispo
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Accès refusé. Admin uniquement." });
+    }
+    next();
+  },
+  [
+    body("email").isEmail().withMessage("Email invalide"),
+    body("motdepasse")
+      .isLength({ min: 6 })
+      .withMessage("Le mot de passe doit contenir au moins 6 caractères"),
+    body("nom").trim().escape(),
+    body("prenom").trim().escape(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      let { email, motdepasse, nom, prenom, telephone, adresse } = req.body;
+
+      if (email) email = email.toLowerCase().trim();
+
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({ error: "Cet email est déjà utilisé." });
+      }
+
+      // Création utilisateur DIRECTEMENT VÉRIFIÉ
+      const user = new User({
+        email,
+        motdepasse,
+        role: "user",
+        nom,
+        prenom,
+        telephone,
+        adresse,
+        isVerified: true, // <--- C'est ici que ça change tout !
+        verificationToken: undefined,
+      });
+
+      await user.save();
+      console.log(`[AUTH] Admin created verified user: ${email}`);
+
+      // Optionnel : Envoyer un email de bienvenue avec les identifiants
+      // sendWelcomeEmail(email, prenom);
+
+      res.status(201).json({
+        message: "Client créé avec succès et activé.",
+        user: {
+          id: user._id,
+          email: user.email,
+          nom: user.nom,
+          prenom: user.prenom,
+        },
+      });
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+);
+
+// ==========================
 // Route GET : Vérification Email
 // ==========================
 router.get("/verify-email/:token", async (req, res) => {

@@ -117,7 +117,9 @@ export default function GestionAccesPrive() {
     setSuccess(null);
 
     try {
-      await axios.post(`${BASE_API_URL}/api/auth/register`, clientForm);
+      await axios.post(`${BASE_API_URL}/api/auth/create-client`, clientForm, {
+        withCredentials: true,
+      });
       setSuccess(
         `Client ${clientForm.prenom} ${clientForm.nom} créé avec succès !`
       );
