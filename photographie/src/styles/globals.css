@@ -300,3 +300,35 @@ a:hover {
 .input {
   @apply bg-[#252530] p-2 rounded text-white placeholder-gray-400;
 }
+
+/* ********************************************** */
+/* SCROLLBAR UTILITIES                           */
+/* ********************************************** */
+/* Cache la scrollbar tout en gardant le scroll fonctionnel */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE et Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Scrollbar personnalisée sombre */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 233, 146, 0.3);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 233, 146, 0.5);
+}

@@ -184,26 +184,26 @@ export default function GalerieForm() {
   ].sort((a, b) => a.localeCompare(b));
 
   return (
-    <div className="p-8 max-w-4xl mx-auto text-white bg-[#12121a]/50 backdrop-blur-md rounded-2xl border border-white/5 shadow-xl">
+    <div className="p-4 md:p-8 max-w-4xl mx-auto text-white bg-[#12121a]/50 backdrop-blur-md rounded-xl md:rounded-2xl border border-white/5 shadow-xl">
       {/* En-tête du formulaire */}
-      <div className="flex justify-between items-center mb-8 pb-6 border-b border-white/5">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8 pb-4 md:pb-6 border-b border-white/5">
         <div>
-          <h2 className="text-2xl font-serif italic text-[#ffe992] mb-1">
+          <h2 className="text-xl md:text-2xl font-serif italic text-[#ffe992] mb-1">
             Gestion de la Galerie
           </h2>
-          <p className="text-xs text-gray-400 uppercase tracking-wider">
+          <p className="text-[10px] md:text-xs text-gray-400 uppercase tracking-wider">
             Ajouter ou modifier une œuvre
           </p>
         </div>
         <button
           onClick={() => navigate("/galerie")}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition-colors text-sm font-medium border border-white/5"
+          className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition-colors text-xs md:text-sm font-medium border border-white/5"
         >
           <ArrowLeft size={16} /> Retour à la galerie
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         {/* Colonne Gauche : Upload et Infos */}
         <div className="space-y-6">
           {/* Upload */}
@@ -391,7 +391,7 @@ export default function GalerieForm() {
             </a>
           </div>
 
-          <div className="bg-[#0a0a10] rounded-xl border border-white/10 overflow-hidden h-[600px] overflow-y-auto custom-scrollbar p-4">
+          <div className="bg-[#0a0a10] rounded-lg md:rounded-xl border border-white/10 overflow-hidden h-[350px] md:h-[600px] overflow-y-auto custom-scrollbar p-3 md:p-4">
             <TariffSelector
               config={tariffConfig}
               selectedIds={form.availableTariffIds}

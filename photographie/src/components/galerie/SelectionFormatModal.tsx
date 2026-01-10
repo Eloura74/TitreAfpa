@@ -192,15 +192,39 @@ export const SelectionFormatModal: React.FC<SelectionFormatModalProps> = ({
 
   // --- Configurator Mode Render ---
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-md z-[100] p-4 md:p-8">
+    <div className="fixed inset-0 flex items-end md:items-center justify-center bg-black/90 backdrop-blur-md z-[100] p-0 md:p-8">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-[#121218] w-full max-w-6xl h-[85vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row border border-white/10"
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 50 }}
+        className="bg-[#121218] w-full max-w-6xl h-[90dvh] md:h-[85vh] rounded-t-3xl md:rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row border border-white/10"
       >
-        {/* Left Column: Image Preview */}
-        <div className="w-full md:w-2/3 bg-black/50 relative flex flex-col">
+        {/* Mobile Header with Image Preview (compact) */}
+        <div className="md:hidden relative w-full h-32 bg-black/50 flex-shrink-0">
+          <img
+            src={photo.src}
+            alt={photo.titre}
+            className="w-full h-full object-cover opacity-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#121218] flex items-end p-4">
+            <div>
+              <h2 className="text-lg font-serif font-bold text-white">
+                {photo.titre}
+              </h2>
+              <p className="text-gray-400 text-xs">{photo.categorie}</p>
+            </div>
+          </div>
+          {/* Close Button Mobile */}
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 p-2 text-white bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Desktop: Left Column - Image Preview (hidden on mobile) */}
+        <div className="hidden md:flex w-full md:w-2/3 bg-black/50 relative flex-col flex-1">
           {/* Header overlay */}
           <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start z-10 bg-gradient-to-b from-black/60 to-transparent">
             <div>
@@ -239,9 +263,9 @@ export const SelectionFormatModal: React.FC<SelectionFormatModalProps> = ({
         </div>
 
         {/* Right Column: Configuration Form */}
-        <div className="w-full md:w-1/3 bg-[#1a1a20] flex flex-col border-l border-white/10">
-          {/* Close Button */}
-          <div className="flex justify-end p-4">
+        <div className="flex-1 md:w-1/3 bg-[#1a1a20] flex flex-col border-l border-white/10 overflow-hidden">
+          {/* Close Button - Desktop Only */}
+          <div className="hidden md:flex justify-end p-4">
             <button
               onClick={onClose}
               className="p-2 text-gray-400 hover:text-white transition-colors rounded-full hover:bg-white/5"
@@ -250,21 +274,21 @@ export const SelectionFormatModal: React.FC<SelectionFormatModalProps> = ({
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar">
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <span className="w-1 h-6 bg-[#ffe992] rounded-full" />
+          <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-4 md:pb-6 custom-scrollbar">
+            <h3 className="text-base md:text-xl font-bold text-white mb-4 md:mb-6 flex items-center gap-2 pt-4 md:pt-0">
+              <span className="w-1 h-5 md:h-6 bg-[#ffe992] rounded-full" />
               Configuration
             </h3>
 
             {/* 1. Finition (Category/Finish) */}
-            <div className="mb-8">
-              <div className="flex items-center mb-3">
-                <label className="block text-xs uppercase tracking-widest text-gray-500">
+            <div className="mb-4 md:mb-8">
+              <div className="flex items-center mb-2 md:mb-3">
+                <label className="block text-[10px] md:text-xs uppercase tracking-widest text-gray-500">
                   1. Finition
                 </label>
                 <Tooltip content="Choisissez le type de rendu souhaité pour votre tirage (ex: Papier Fine Art, Contrecollage, etc.)." />
               </div>
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 gap-2 md:gap-3">
                 {config?.categories.map((cat) =>
                   cat.finishes.map((finish) => {
                     // Check availability
@@ -285,14 +309,18 @@ export const SelectionFormatModal: React.FC<SelectionFormatModalProps> = ({
                           setSelectedCategory(cat);
                           setSelectedFinish(finish);
                         }}
-                        className={`text-left p-4 rounded-xl border transition-all duration-300 ${
+                        className={`text-left p-2.5 md:p-4 rounded-lg md:rounded-xl border transition-all duration-300 ${
                           isSelected
                             ? "bg-[#ffe992]/10 border-[#ffe992] text-white"
                             : "bg-white/5 border-white/5 text-gray-400 hover:bg-white/10 hover:border-white/20"
                         }`}
                       >
-                        <div className="font-medium mb-1">{finish.name}</div>
-                        <div className="text-xs opacity-70">{cat.name}</div>
+                        <div className="font-medium text-sm md:text-base mb-0.5 md:mb-1">
+                          {finish.name}
+                        </div>
+                        <div className="text-[10px] md:text-xs opacity-70">
+                          {cat.name}
+                        </div>
                       </button>
                     );
                   })
@@ -302,14 +330,14 @@ export const SelectionFormatModal: React.FC<SelectionFormatModalProps> = ({
 
             {/* 2. Format (Size) */}
             {selectedFinish && (
-              <div className="mb-8">
-                <div className="flex items-center mb-3">
-                  <label className="block text-xs uppercase tracking-widest text-gray-500">
+              <div className="mb-4 md:mb-8">
+                <div className="flex items-center mb-2 md:mb-3">
+                  <label className="block text-[10px] md:text-xs uppercase tracking-widest text-gray-500">
                     2. Format
                   </label>
                   <Tooltip content="Sélectionnez les dimensions de votre tirage. Assurez-vous de mesurer votre espace." />
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 md:grid-cols-2 gap-1.5 md:gap-2">
                   {selectedFinish.sizes.map((size) => {
                     const isAvailable = [...size.papers, ...size.frames].some(
                       (opt) => photo.availableTariffIds.includes(opt.id)
@@ -322,7 +350,7 @@ export const SelectionFormatModal: React.FC<SelectionFormatModalProps> = ({
                       <button
                         key={size.id}
                         onClick={() => setSelectedSize(size)}
-                        className={`px-3 py-2 rounded-lg border text-sm transition-all ${
+                        className={`px-2 md:px-3 py-1.5 md:py-2 rounded-md md:rounded-lg border text-xs md:text-sm transition-all ${
                           isSelected
                             ? "bg-[#ffe992] text-black border-[#ffe992] font-bold"
                             : "bg-white/5 border-white/10 text-gray-300 hover:border-white/30"
@@ -338,14 +366,14 @@ export const SelectionFormatModal: React.FC<SelectionFormatModalProps> = ({
 
             {/* 3. Support / Cadre */}
             {selectedSize && (
-              <div className="mb-8">
-                <div className="flex items-center mb-3">
-                  <label className="block text-xs uppercase tracking-widest text-gray-500">
+              <div className="mb-4 md:mb-8">
+                <div className="flex items-center mb-2 md:mb-3">
+                  <label className="block text-[10px] md:text-xs uppercase tracking-widest text-gray-500">
                     3. Support & Cadre
                   </label>
                   <Tooltip content="Optez pour un support spécifique ou ajoutez un cadre pour sublimer votre œuvre." />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5 md:space-y-2">
                   {[...selectedSize.papers, ...selectedSize.frames].map(
                     (opt) => {
                       if (!photo.availableTariffIds.includes(opt.id))
@@ -358,14 +386,16 @@ export const SelectionFormatModal: React.FC<SelectionFormatModalProps> = ({
                         <button
                           key={opt.id}
                           onClick={() => setSelectedOption(opt)}
-                          className={`w-full flex items-center justify-between p-3 rounded-lg border transition-all ${
+                          className={`w-full flex items-center justify-between p-2 md:p-3 rounded-md md:rounded-lg border transition-all ${
                             isSelected
                               ? "bg-white/10 border-[#ffe992] text-white shadow-[0_0_15px_rgba(255,233,146,0.1)]"
                               : "bg-transparent border-white/10 text-gray-400 hover:bg-white/5"
                           }`}
                         >
-                          <span className="text-sm">{opt.name}</span>
-                          <span className="text-sm font-medium">{price} €</span>
+                          <span className="text-xs md:text-sm">{opt.name}</span>
+                          <span className="text-xs md:text-sm font-medium">
+                            {price} €
+                          </span>
                         </button>
                       );
                     }
@@ -376,17 +406,17 @@ export const SelectionFormatModal: React.FC<SelectionFormatModalProps> = ({
           </div>
 
           {/* Footer: Price & Action */}
-          <div className="p-6 border-t border-white/10 bg-[#121218]">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-gray-400 text-sm">Quantité</span>
-              <div className="flex items-center gap-3 bg-white/5 rounded-full px-3 py-1 border border-white/10">
+          <div className="p-4 md:p-6 border-t border-white/10 bg-[#121218] pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-6 flex-shrink-0">
+            <div className="flex items-center justify-between mb-3 md:mb-4">
+              <span className="text-gray-400 text-xs md:text-sm">Quantité</span>
+              <div className="flex items-center gap-2 md:gap-3 bg-white/5 rounded-full px-2 md:px-3 py-1 border border-white/10">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   className="p-1 hover:text-[#ffe992] transition-colors"
                 >
                   <Minus size={14} />
                 </button>
-                <span className="text-white font-medium w-4 text-center">
+                <span className="text-white font-medium w-4 text-center text-sm">
                   {quantity}
                 </span>
                 <button
@@ -398,8 +428,8 @@ export const SelectionFormatModal: React.FC<SelectionFormatModalProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-gray-400">Total</span>
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <span className="text-gray-400 text-sm">Total</span>
               <span className="text-2xl font-serif font-bold text-[#ffe992]">
                 {totalPrice} €
               </span>

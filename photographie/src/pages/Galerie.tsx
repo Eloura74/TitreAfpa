@@ -367,8 +367,8 @@ export default function Galerie() {
         </motion.div>
       </header>
 
-      {/* Navigation des filtres - Style Glassmorphism */}
-      <nav className="sticky top-20 z-40 px-4 py-2 mb-8 mt-0">
+      {/* Navigation des filtres - Style Glassmorphism - Masqué sur mobile */}
+      <nav className="sticky top-20 z-40 px-4 py-2 mb-8 mt-0 hidden md:block">
         <div className="max-w-fit mx-auto flex flex-wrap justify-center items-center gap-2 md:gap-4 bg-white/5 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
           {viewMode === "photos" && selectedAlbum && (
             <button
@@ -539,6 +539,31 @@ export default function Galerie() {
                         <span className="text-[#ffe992] text-sm font-medium tracking-widest">
                           {photo.prix} €
                         </span>
+
+                        {/* Boutons d'action Mobile Uniquement */}
+                        <div className="flex md:hidden w-full gap-2 mt-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const index = filtered.findIndex(
+                                (p) => p._id === photo._id
+                              );
+                              setLightboxIndex(index);
+                            }}
+                            className="flex-1 bg-white/10 text-white text-[10px] uppercase font-bold py-2 rounded border border-white/10 flex items-center justify-center gap-1"
+                          >
+                            <Eye size={12} /> Voir
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAjouterAuPanier(photo);
+                            }}
+                            className="flex-1 bg-[#ffe992] text-black text-[10px] uppercase font-bold py-2 rounded flex items-center justify-center gap-1"
+                          >
+                            Panier
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </motion.div>

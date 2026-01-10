@@ -88,10 +88,10 @@ export default function TarifConfigurator() {
   };
 
   return (
-    <div className="grid grid-cols-12 gap-8 h-[calc(100vh-150px)] min-h-[800px]">
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 h-auto md:h-[calc(100vh-150px)] min-h-[500px] md:min-h-[800px]">
       {/* Tree Navigator */}
-      <div className="col-span-7 bg-[#121218] rounded-2xl border border-white/10 flex flex-col overflow-hidden shadow-xl">
-        <div className="p-6 border-b border-white/10 bg-white/5 flex justify-between items-center">
+      <div className="col-span-1 md:col-span-7 bg-[#121218] rounded-xl md:rounded-2xl border border-white/10 flex flex-col overflow-hidden shadow-xl h-[400px] md:h-auto">
+        <div className="p-4 md:p-6 border-b border-white/10 bg-white/5 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <Settings size={20} className="text-[#ffe992]" />
             <h3 className="text-base font-bold text-white uppercase tracking-wider">
@@ -108,7 +108,7 @@ export default function TarifConfigurator() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-4">
           {config.categories.length === 0 ? (
             <div className="text-center text-gray-500 mt-20 p-4">
               <Folder size={48} className="mx-auto mb-4 opacity-20" />
@@ -136,9 +136,9 @@ export default function TarifConfigurator() {
       </div>
 
       {/* Editor Panel */}
-      <div className="col-span-5 bg-[#121218] rounded-2xl border border-white/10 flex flex-col overflow-hidden shadow-xl relative">
+      <div className="col-span-1 md:col-span-5 bg-[#121218] rounded-xl md:rounded-2xl border border-white/10 flex flex-col overflow-hidden shadow-xl relative h-[400px] md:h-auto">
         {/* Header */}
-        <div className="p-6 border-b border-white/10 bg-white/5 flex justify-between items-center">
+        <div className="p-4 md:p-6 border-b border-white/10 bg-white/5 flex justify-between items-center">
           <div>
             <h3 className="text-lg font-serif text-[#ffe992] mb-1">
               {selectedNode ? "Édition" : "Configuration"}
@@ -159,7 +159,7 @@ export default function TarifConfigurator() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-gradient-to-b from-[#121218] to-[#0a0a10]">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-gradient-to-b from-[#121218] to-[#0a0a10]">
           {selectedNode ? (
             <NodeEditor
               node={selectedNode}

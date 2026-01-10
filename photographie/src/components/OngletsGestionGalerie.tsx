@@ -51,14 +51,14 @@ export default function OngletsGestionGalerie() {
 
   return (
     <div>
-      {/* Navigation des onglets */}
-      <div className="flex flex-wrap gap-2 mb-8 justify-center">
+      {/* Navigation des onglets - Scroll horizontal sur mobile */}
+      <div className="flex gap-2 mb-6 md:mb-8 justify-start md:justify-center overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
         {onglets.map((onglet, i) => (
           <button
             key={onglet.nom}
             onClick={() => setActif(i)}
             className={`
-              relative px-6 py-3 rounded-full text-sm font-medium transition-all duration-300
+              relative px-3 md:px-6 py-2 md:py-3 rounded-full text-xs md:text-sm font-medium transition-all duration-300 whitespace-nowrap flex-shrink-0
               ${
                 actif === i
                   ? "text-black shadow-[0_0_20px_rgba(255,233,146,0.4)]"
@@ -84,7 +84,7 @@ export default function OngletsGestionGalerie() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="bg-[#12121a]/50 backdrop-blur-xl rounded-2xl border border-white/5 p-6 md:p-8 shadow-2xl min-h-[500px]"
+        className="bg-[#12121a]/50 backdrop-blur-xl rounded-xl md:rounded-2xl border border-white/5 p-4 md:p-6 lg:p-8 shadow-2xl min-h-[400px] md:min-h-[500px]"
       >
         {onglets[actif].composant}
       </motion.div>

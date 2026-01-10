@@ -3,7 +3,7 @@
 // =============================================================================
 // Tests des composants UI avec React Testing Library.
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 
@@ -132,7 +132,7 @@ describe("Tests d'état", () => {
   // TEST : État avec données
   // -------------------------------------------------------------------------
   it("devrait afficher le compteur avec des articles", () => {
-    const cartCount = 3;
+    const cartCount: number = 3;
 
     render(
       <span data-testid="cart-count">
