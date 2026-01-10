@@ -1,7 +1,7 @@
 import axios from "axios";
 import { TariffConfigV2, TariffCategoryV2 } from "../types/tarifConfigV2";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+import { API_URL } from "../config/api";
 
 export const tariffServiceV2 = {
   getTariffConfig: async (): Promise<TariffConfigV2> => {
