@@ -7,7 +7,6 @@ import {
   TariffFormatV2,
 } from "../../types/tarifConfigV2";
 import { tariffServiceV2 } from "../../services/tariffServiceV2";
-import { Info, Check } from "lucide-react";
 
 interface ClientTariffSelectorProps {
   onSelect: (tarif: any | null) => void;
@@ -16,7 +15,7 @@ interface ClientTariffSelectorProps {
 
 export const ClientTariffSelector: React.FC<ClientTariffSelectorProps> = ({
   onSelect,
-  selectedTarif,
+  selectedTarif: _selectedTarif,
 }) => {
   const [config, setConfig] = useState<TariffConfigV2 | null>(null);
   const [loading, setLoading] = useState(true);

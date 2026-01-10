@@ -18,6 +18,13 @@ import { ClientTariffSelector } from "../components/galerie/ClientTariffSelector
 
 // Types
 
+interface Tarif {
+  format: string;
+  support: string;
+  prix: number;
+  id?: string;
+}
+
 interface Photo {
   _id: string;
   src: string;
