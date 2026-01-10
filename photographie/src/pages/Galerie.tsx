@@ -77,7 +77,6 @@ export default function Galerie() {
     null
   );
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
 
   const [tariffConfig, setTariffConfig] = useState<TariffConfig | null>(null);
 
