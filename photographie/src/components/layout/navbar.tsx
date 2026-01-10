@@ -2,7 +2,7 @@
 import { useState } from "react"; // Pour gérer l'ouverture/fermeture du menu
 import { Link, useLocation, useNavigate } from "react-router-dom"; // Pour naviguer entre les pages sans recharger
 import { useAuthStore, useAuthSync } from "../../store/authStore"; // Store Zustand pour gérer l'authentification
-import { motion, AnimatePresence } from "framer-motion";
+
 import { Camera, Palette } from "lucide-react";
 import "../../styles/navbar.css"; // Fichier CSS spécifique à la Navbar
 
