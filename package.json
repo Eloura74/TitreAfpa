@@ -4,25 +4,26 @@
     "postinstall": "cd backend && npm install"
   },
   "dependencies": {
-    "dotenv": "^16.5.0",
-    "framer-motion": "^12.10.5",
-    "lucide-react": "^0.487.0",
-    "mongoose": "^8.14.0",
-    "multer": "^1.4.5-lts.2",
-    "react-calendar": "^5.1.0",
-    "zustand": "^5.0.5",
     "@paypal/checkout-server-sdk": "^1.0.3",
+    "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.6.1",
     "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^8.2.1",
     "express-validator": "^7.3.1",
+    "framer-motion": "^12.10.5",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.487.0",
+    "mongoose": "^8.14.0",
+    "multer": "^1.4.5-lts.2",
     "nodemailer": "^7.0.11",
+    "react-calendar": "^5.1.0",
     "stripe": "^18.0.0",
-    "xss-clean": "^0.1.4"
+    "xss-clean": "^0.1.4",
+    "zustand": "^5.0.5"
   }
 }

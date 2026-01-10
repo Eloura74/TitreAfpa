@@ -5,9 +5,9 @@ import galerieData from "../../config/galerie.json";
 import { API_URL as BASE_API_URL } from "../../config/api";
 import { useToast } from "../../components/Toast";
 import { ArrowLeft, Upload } from "lucide-react";
-import { tariffService } from "../../services/tariffService";
-import { TariffConfig } from "../../types/tarifConfig";
-import TariffSelector from "../admin/tarifs/TariffSelector";
+import { tariffServiceV2 } from "../../services/tariffServiceV2";
+import { TariffConfigV2 } from "../../types/tarifConfigV2";
+import TariffSelectorV2 from "../admin/tarifs/TariffSelectorV2";
 import { albumService, Album } from "../../services/albumService";
 
 const API_URL = `${BASE_API_URL}/api/galerie`;
@@ -50,7 +50,7 @@ interface Photo {
 export default function GalerieForm() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [form, setForm] = useState<FormType>(formInitial);
-  const [tariffConfig, setTariffConfig] = useState<TariffConfig>({
+  const [tariffConfig, setTariffConfig] = useState<TariffConfigV2>({
     categories: [],
   });
   const [albums, setAlbums] = useState<Album[]>([]);
@@ -66,7 +66,7 @@ export default function GalerieForm() {
         const dataPhotos = await resPhotos.json();
         setPhotos(dataPhotos);
 
-        const config = await tariffService.getTariffConfig();
+        const config = await tariffServiceV2.getTariffConfig();
         setTariffConfig(config);
 
         const albumsData = await albumService.getAlbums();
@@ -392,7 +392,7 @@ export default function GalerieForm() {
           </div>
 
           <div className="bg-[#0a0a10] rounded-lg md:rounded-xl border border-white/10 overflow-hidden h-[350px] md:h-[600px] overflow-y-auto custom-scrollbar p-3 md:p-4">
-            <TariffSelector
+            <TariffSelectorV2
               config={tariffConfig}
               selectedIds={form.availableTariffIds}
               onToggle={(ids: string[], checked: boolean) => {

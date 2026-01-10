@@ -3,7 +3,6 @@ import GestionGalerieGraphique from "./galerie/GestionGalerieGraphique";
 import GestionEvenements from "./GestionEvenements";
 import GestionPaiements from "./GestionPaiements";
 import GestionPaniers from "./GestionPaniers";
-import GestionTarifs from "./GestionTarifs";
 import GestionAccesPrive from "./GestionAccesPrive";
 import GestionServices from "./GestionServices";
 import { useState } from "react";
@@ -11,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FolderPlus, X } from "lucide-react";
 
 import AlbumManager from "./admin/galerie/AlbumManager";
+import TarifConfiguratorV2 from "./admin/tarifs/TarifConfiguratorV2";
 
 export default function OngletsGestionGalerie() {
   const [actif, setActif] = useState(0);
@@ -44,7 +44,8 @@ export default function OngletsGestionGalerie() {
     { nom: "Événements", composant: <GestionEvenements /> },
     { nom: "Paiements", composant: <GestionPaiements /> },
     { nom: "Paniers", composant: <GestionPaniers /> },
-    { nom: "Tarifs", composant: <GestionTarifs /> },
+    { nom: "Paniers", composant: <GestionPaniers /> },
+    { nom: "Tarifs", composant: <TarifConfiguratorV2 /> },
     { nom: "Accès Privé", composant: <GestionAccesPrive /> },
     { nom: "Services", composant: <GestionServices /> },
   ];

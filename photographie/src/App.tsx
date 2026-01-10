@@ -23,6 +23,7 @@ import GestionGalerie from "./pages/GestionGalerie"; // Page admin gestion galer
 import RouteAdminOnly from "./components/RouteAdminOnly"; // Composant route protégée pour admin uniquement
 import TirageEnLigne from "./pages/TirageEnLigne"; // Page Tirage en ligne
 import GestionTarifs from "./components/GestionTarifs"; // Composant admin gestion tarifs
+import TarifConfiguratorV2 from "./components/admin/tarifs/TarifConfiguratorV2"; // Prototype V2 Configurator
 import MonCompte from "./pages/MonCompte"; // Page Espace Client
 import ClientEvenement from "./pages/ClientEvenement"; // Page Événement Client (Photos)
 import Checkout from "./pages/Checkout"; // Page de paiement
@@ -130,6 +131,16 @@ function App() {
                   // Le composant RouteAdminOnly bloque l'accès si l'utilisateur n'est pas admin
                   <RouteAdminOnly>
                     <GestionTarifs />
+                  </RouteAdminOnly>
+                }
+              />
+
+              {/* Route PROTOTYPE V2 pour la nouvelle structure tarifaire (Picto) */}
+              <Route
+                path="/admin/tarifs-v2"
+                element={
+                  <RouteAdminOnly>
+                    <TarifConfiguratorV2 />
                   </RouteAdminOnly>
                 }
               />

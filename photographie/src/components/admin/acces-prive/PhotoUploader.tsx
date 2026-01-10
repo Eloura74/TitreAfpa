@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import PhotoStagingModal from "./PhotoStagingModal";
+import PhotoStagingModalV2 from "./PhotoStagingModalV2";
 
 // ==========================================
 // 📝 Interface des Props

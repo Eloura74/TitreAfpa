@@ -1,0 +1,216 @@
+[
+  {
+    "name": "Tirage Photo",
+    "slug": "tirage-photo",
+    "products": [
+      {
+        "name": "Argentique sur Lambda",
+        "slug": "argentique-sur-lambda",
+        "description": "Le véritable tirage photo argentique, référence des galeries et musées.",
+        "supports": [
+          {
+            "name": "RC Couleur Satiné Fuji 230g",
+            "description": "Papier photo classique satiné, référence incontournable.",
+            "technicalSpecs": {
+              "weight": "230g",
+              "brand": "Fuji",
+              "dmax": "2.5"
+            },
+            "formats": [
+              { "name": "20x30 cm", "price": 4.5 },
+              { "name": "30x40 cm", "price": 6.66 },
+              { "name": "40x60 cm", "price": 12.5 },
+              { "name": "50x75 cm", "price": 18.9 },
+              { "name": "60x90 cm", "price": 25.0 }
+            ]
+          },
+          {
+            "name": "RC Couleur Brillant Fuji 250g",
+            "description": "Papier photo classique brillant, maximum de nuances.",
+            "technicalSpecs": {
+              "weight": "250g",
+              "brand": "Fuji",
+              "dmax": "2.6"
+            },
+            "formats": [
+              { "name": "20x30 cm", "price": 4.5 },
+              { "name": "30x40 cm", "price": 6.66 },
+              { "name": "40x60 cm", "price": 12.5 }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Jet d'encre Pigmentaire",
+        "slug": "jet-encre-pigmentaire",
+        "description": "Impression haute définition sur papiers Fine Art.",
+        "supports": [
+          {
+            "name": "Hahnemühle Photo Rag 308g",
+            "description": "Papier 100% coton, surface mate et douce.",
+            "technicalSpecs": { "weight": "308g", "brand": "Hahnemühle" },
+            "formats": [
+              { "name": "30x40 cm", "price": 15.0 },
+              { "name": "40x60 cm", "price": 28.0 },
+              { "name": "60x90 cm", "price": 55.0 }
+            ]
+          },
+          {
+            "name": "Canson Infinity Baryta 310g",
+            "description": "Papier baryté, aspect satiné traditionnel.",
+            "technicalSpecs": { "weight": "310g", "brand": "Canson" },
+            "formats": [
+              { "name": "30x40 cm", "price": 16.0 },
+              { "name": "40x60 cm", "price": 30.0 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Photo Encadrée",
+    "slug": "photo-encadree",
+    "products": [
+      {
+        "name": "Caisse Américaine",
+        "slug": "caisse-americaine",
+        "description": "L'encadrement préféré des galeries, sans vitre.",
+        "supports": [
+          {
+            "name": "Bois Noir Satiné",
+            "description": "Profil en L bois noir, élégant et sobre.",
+            "technicalSpecs": { "material": "Bois", "finish": "Satiné" },
+            "formats": [
+              { "name": "30x45 cm", "price": 45.0 },
+              { "name": "40x60 cm", "price": 65.0 },
+              { "name": "60x90 cm", "price": 110.0 }
+            ]
+          },
+          {
+            "name": "Bois Chêne Naturel",
+            "description": "Profil en L bois chêne brut.",
+            "technicalSpecs": { "material": "Bois", "finish": "Naturel" },
+            "formats": [
+              { "name": "30x45 cm", "price": 50.0 },
+              { "name": "40x60 cm", "price": 72.0 }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Cadre Nielsen Alpha",
+        "slug": "cadre-nielsen-alpha",
+        "description": "Cadre aluminium haut de gamme avec vitre.",
+        "supports": [
+          {
+            "name": "Alu Noir Mat",
+            "description": "Profil plat aluminium noir mat.",
+            "technicalSpecs": { "material": "Alu", "brand": "Nielsen" },
+            "formats": [
+              { "name": "30x40 cm", "price": 35.0 },
+              { "name": "50x70 cm", "price": 55.0 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Photo Contrecollée",
+    "slug": "photo-contrecollee",
+    "products": [
+      {
+        "name": "Contrecollage sur Dibond",
+        "slug": "sur-dibond",
+        "description": "Support rigide composite aluminium, léger et résistant.",
+        "supports": [
+          {
+            "name": "Dibond 2mm",
+            "description": "Plaque fine et rigide.",
+            "technicalSpecs": { "thickness": "2mm", "material": "Alu/PE" },
+            "formats": [
+              { "name": "30x45 cm", "price": 25.0 },
+              { "name": "60x90 cm", "price": 60.0 }
+            ]
+          },
+          {
+            "name": "Dibond 3mm",
+            "description": "Standard du marché.",
+            "technicalSpecs": { "thickness": "3mm", "material": "Alu/PE" },
+            "formats": [
+              { "name": "30x45 cm", "price": 28.0 },
+              { "name": "60x90 cm", "price": 65.0 }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Contrecollage sur Aluminium",
+        "slug": "sur-alu",
+        "description": "Plaque aluminium massif.",
+        "supports": [
+          {
+            "name": "Alu 1mm",
+            "description": "Très fin et élégant.",
+            "technicalSpecs": { "thickness": "1mm", "material": "Alu" },
+            "formats": [{ "name": "30x45 cm", "price": 30.0 }]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Photo sous Plexi",
+    "slug": "photo-sous-plexi",
+    "products": [
+      {
+        "name": "Tirage Plexicollé",
+        "slug": "plexicolle",
+        "description": "Tirage photo collé sous une plaque de plexiglas.",
+        "supports": [
+          {
+            "name": "Plexi Brillant 4mm",
+            "description": "Effet de profondeur et brillance intense.",
+            "technicalSpecs": { "thickness": "4mm", "finish": "Brillant" },
+            "formats": [
+              { "name": "30x45 cm", "price": 60.0 },
+              { "name": "60x90 cm", "price": 140.0 }
+            ]
+          },
+          {
+            "name": "Plexi Mat 3mm",
+            "description": "Sans reflets.",
+            "technicalSpecs": { "thickness": "3mm", "finish": "Mat" },
+            "formats": [{ "name": "30x45 cm", "price": 65.0 }]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Impression Rigide",
+    "slug": "impression-rigide",
+    "products": [
+      {
+        "name": "Impression Directe Dibond",
+        "slug": "impression-dibond",
+        "description": "Impression UV directement sur le support.",
+        "supports": [
+          {
+            "name": "Dibond Blanc",
+            "description": "Rendu fidèle des couleurs.",
+            "technicalSpecs": { "thickness": "3mm" },
+            "formats": [{ "name": "40x60 cm", "price": 40.0 }]
+          },
+          {
+            "name": "Dibond Brossé",
+            "description": "Aspect métallique visible dans les blancs.",
+            "technicalSpecs": { "thickness": "3mm", "finish": "Brossé" },
+            "formats": [{ "name": "40x60 cm", "price": 50.0 }]
+          }
+        ]
+      }
+    ]
+  }
+]

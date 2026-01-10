@@ -7,7 +7,7 @@ import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import Skeleton from "../components/Skeleton";
 import { useToast } from "../components/Toast";
-import { SelectionFormatModal } from "../components/galerie/SelectionFormatModal";
+import { SelectionFormatModalV2 } from "../components/galerie/SelectionFormatModalV2";
 
 // Contextes & Types
 import { usePanier } from "../store/panierContext";

@@ -32,6 +32,7 @@ const paypalRoutes = require("./routes/paypal"); // Routes pour PayPal
 const accesPriveRoutes = require("./routes/accesPrive"); // Routes pour les accès privés (Nouvelle collection)
 const servicesRoutes = require("./routes/services"); // Routes pour les services (Prestations)
 const albumsRoutes = require("./routes/albums"); // Routes pour les albums
+const pictoRoutes = require("./routes/picto"); // Routes pour les données Picto (V2)
 
 // Module pour gérer les chemins de fichiers
 const path = require("path");
@@ -317,6 +318,10 @@ console.log("✅ Route /api/services montée");
 // Albums
 app.use("/api/albums", albumsRoutes);
 console.log("✅ Route /api/albums montée");
+
+// Données Picto (V2)
+app.use("/api/picto", pictoRoutes);
+console.log("✅ Route /api/picto montée");
 
 console.log(
   "✅ GET /api/tarifs fonctionne et la grille tarifaire dynamique est accessible côté front"
