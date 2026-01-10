@@ -3,7 +3,7 @@ import { useState } from "react"; // Pour gérer l'ouverture/fermeture du menu
 import { Link, useLocation, useNavigate } from "react-router-dom"; // Pour naviguer entre les pages sans recharger
 import { useAuthStore, useAuthSync } from "../../store/authStore"; // Store Zustand pour gérer l'authentification
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Check, Camera, Palette } from "lucide-react";
+import { Camera, Palette } from "lucide-react";
 import "../../styles/navbar.css"; // Fichier CSS spécifique à la Navbar
 
 // === Composant principal de la barre de navigation ===
@@ -34,7 +34,6 @@ export default function Navbar({ variant }: { variant?: "client" }) {
 
   // État local pour contrôler l'ouverture du menu sur mobile
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Récupération des infos de connexion via Zustand
   const { email, isAdmin, logout } = useAuthStore();
@@ -44,8 +43,12 @@ export default function Navbar({ variant }: { variant?: "client" }) {
     return (
       <nav className="navbar-container">
         <div className="navbar-content justify-between">
-          <Link to="/" className="navbar-brand">
-            Photographe Pro
+          <Link to="/" className="navbar-brand flex items-center">
+            <img
+              src="/images/logoHome.png"
+              alt="Fabien Licata"
+              className="h-12 md:h-42 w-auto object-contain"
+            />
           </Link>
 
           <div className="flex items-center gap-4">
@@ -74,8 +77,12 @@ export default function Navbar({ variant }: { variant?: "client" }) {
     <nav className="navbar-container">
       <div className="navbar-content">
         {/* === Logo / Nom du site à gauche === */}
-        <Link to="/" className="navbar-brand">
-          Photographe Pro
+        <Link to="/" className="navbar-brand flex items-center">
+          <img
+            src="/images/logoHome.png"
+            alt="Fabien Licata"
+            className="h-10 md:h-20 w-auto object-contain"
+          />
         </Link>
 
         {/* === Bouton pour ouvrir/fermer le menu mobile === */}
@@ -87,67 +94,39 @@ export default function Navbar({ variant }: { variant?: "client" }) {
           ☰
         </button>
 
-        {/* === Sélecteur d'univers (photographie/graphisme) === */}
+        {/* === Bouton Switch Univers (Toggle) === */}
         <div className="relative mr-4 hidden md:block">
           <button
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-all duration-300 hover:border-[#ffe992]/30"
+            onClick={() =>
+              handleUniversChange(
+                univers === "photographie" ? "graphisme" : "photographie"
+              )
+            }
+            className="flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-all duration-300 hover:border-[#ffe992]/30 group"
           >
+            <span className="text-gray-400 text-xs mr-1">Aller vers</span>
             {univers === "photographie" ? (
-              <Camera size={16} className="text-[#ffe992]" />
+              <>
+                <Palette
+                  size={16}
+                  className="text-[#ffe992] group-hover:scale-110 transition-transform"
+                />
+                <span className="capitalize tracking-wide group-hover:text-[#ffe992] transition-colors">
+                  Graphisme
+                </span>
+              </>
             ) : (
-              <Palette size={16} className="text-[#ffe992]" />
+              <>
+                <Camera
+                  size={16}
+                  className="text-[#ffe992] group-hover:scale-110 transition-transform"
+                />
+                <span className="capitalize tracking-wide group-hover:text-[#ffe992] transition-colors">
+                  Photographie
+                </span>
+              </>
             )}
-            <span className="capitalize tracking-wide">
-              {univers === "photographie" ? "Photographie" : "Graphisme"}
-            </span>
-            <ChevronDown
-              size={14}
-              className={`text-white/50 transition-transform duration-300 ${
-                isDropdownOpen ? "rotate-180" : ""
-              }`}
-            />
           </button>
-
-          <AnimatePresence>
-            {isDropdownOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-                className="absolute top-full right-0 mt-2 w-48 bg-[#0a0a10]/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] z-50"
-              >
-                <div className="p-1">
-                  {[
-                    { id: "photographie", label: "Photographie", icon: Camera },
-                    { id: "graphisme", label: "Graphisme", icon: Palette },
-                  ].map((option) => (
-                    <button
-                      key={option.id}
-                      onClick={() => {
-                        handleUniversChange(
-                          option.id as "photographie" | "graphisme"
-                        );
-                        setIsDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-2.5 text-sm flex items-center justify-between rounded-lg transition-all duration-200 ${
-                        univers === option.id
-                          ? "bg-white/10 text-[#ffe992]"
-                          : "text-gray-400 hover:text-white hover:bg-white/5"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <option.icon size={16} />
-                        <span className="font-medium">{option.label}</span>
-                      </div>
-                      {univers === option.id && <Check size={14} />}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
 
         {/* Version Mobile du sélecteur (visible uniquement sur mobile) */}
