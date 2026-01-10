@@ -16,7 +16,6 @@ import {
   Folder,
   Image,
   Maximize,
-  FileText,
   Settings,
   Layers,
 } from "lucide-react";

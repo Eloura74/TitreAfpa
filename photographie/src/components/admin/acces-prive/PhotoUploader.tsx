@@ -129,7 +129,7 @@ export default function PhotoUploader({
 
       {/* Modal */}
       {showModal && (
-        <PhotoStagingModal
+        <PhotoStagingModalV2
           files={tempFiles}
           onClose={() => setShowModal(false)}
           onValidate={handleModalValidate}

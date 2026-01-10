@@ -77,9 +77,7 @@ export default function Galerie() {
     null
   );
   const [modalVisible, setModalVisible] = useState(false);
-  const [tarifsPourModale, setTarifsPourModale] = useState<
-    (TarifOeuvre | Tarif)[]
-  >([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const [tariffConfig, setTariffConfig] = useState<TariffConfig | null>(null);
 
@@ -236,7 +234,6 @@ export default function Galerie() {
         });
         addToast(`${photo.titre} ajouté au panier`, "success");
       } else {
-        setTarifsPourModale(tarifsDisponibles);
         setPhotoSelectionnee(photo);
         setModalVisible(true);
       }
@@ -575,9 +572,7 @@ export default function Galerie() {
       {/* Modal - Animée */}
       <AnimatePresence>
         {modalVisible && photoSelectionnee && (
-          <SelectionFormatModal
-            tarifs={tarifsPourModale}
-            config={tariffConfig}
+          <SelectionFormatModalV2
             photo={photoSelectionnee}
             onSelect={handleSelectFormat}
             onClose={() => setModalVisible(false)}
