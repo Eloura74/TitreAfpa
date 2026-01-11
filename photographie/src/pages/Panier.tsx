@@ -7,6 +7,7 @@ import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import { usePanier } from "../store/panierContext";
 import { API_URL } from "../config/api";
+import PageTitle from "../components/ui/PageTitle";
 
 const Panier: React.FC = () => {
   const { articles, total, viderPanier, retirerArticle } = usePanier();
@@ -62,13 +63,7 @@ const Panier: React.FC = () => {
           className="space-y-12"
         >
           {/* Header */}
-          <div className="flex flex-col items-center mb-8">
-            <h1 className="hero-title !mb-0 !ml-0 text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-center">
-              <span className="hero-title-gradient bg-clip-text text-transparent bg-gradient-to-r from-[#d6c487] via-[#ffe992] to-[#c9b36f]">
-                Mon Panier
-              </span>
-            </h1>
-          </div>
+          <PageTitle title="Mon Panier" />
 
           {articles.length === 0 ? (
             <motion.div

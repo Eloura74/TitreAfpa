@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import "../styles/globals.css";
+import PageTitle from "../components/ui/PageTitle";
 
 export default function About() {
   useEffect(() => {
@@ -51,16 +52,7 @@ export default function About() {
           className="space-y-16"
         >
           {/* Header Section */}
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-col items-center mb-8"
-          >
-            <h1 className="hero-title !mb-0 !ml-0 text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-center">
-              <span className="hero-title-gradient bg-clip-text text-transparent bg-gradient-to-r from-[#d6c487] via-[#ffe992] to-[#c9b36f]">
-                À Propos
-              </span>
-            </h1>
-          </motion.div>
+          <PageTitle title="À Propos" />
 
           {/* Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">

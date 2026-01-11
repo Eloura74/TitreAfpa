@@ -12,6 +12,7 @@ import Footer from "../components/layout/Footer";
 import Skeleton from "../components/Skeleton";
 import { useToast } from "../components/Toast";
 import { SelectionFormatModal } from "../components/galerie/SelectionFormatModal";
+import PageTitle from "../components/ui/PageTitle";
 
 // Contextes & Types
 import { usePanier } from "../store/panierContext";
@@ -52,15 +53,6 @@ const cardVariants = {
     transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
   },
   exit: { scale: 0.98, opacity: 0, transition: { duration: 0.3 } },
-};
-
-const revealVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { duration: 1, ease: [0.16, 1, 0.3, 1] },
-  },
 };
 
 export default function GalerieGraphique() {
@@ -192,18 +184,7 @@ export default function GalerieGraphique() {
 
       {/* Header - Style Cinématique */}
       <header className="relative pt-20 pb-12 px-6 overflow-hidden z-10">
-        <motion.div
-          variants={revealVariants}
-          initial="hidden"
-          animate="visible"
-          className="relative z-10 max-w-5xl mx-auto text-center"
-        >
-          <h1 className="hero-title !mb-0 !ml-0 !mt-6 text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight break-words">
-            <span className="hero-title-gradient bg-clip-text text-transparent bg-gradient-to-r from-[#d6c487] via-[#ffe992] to-[#c9b36f]">
-              Galerie Graphique
-            </span>
-          </h1>
-        </motion.div>
+        <PageTitle title="Galerie Graphique" />
       </header>
 
       {/* Grille principale */}

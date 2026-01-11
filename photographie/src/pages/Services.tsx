@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Service } from "../types/service";
 import { ContactModal } from "../components/services/ContactModal";
+import PageTitle from "../components/ui/PageTitle";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import { API_URL as BASE_API_URL } from "../config/api";
@@ -43,19 +44,11 @@ export default function Services() {
 
       <main className="max-w-7xl mx-auto py-20 px-6 pt-32 relative z-10">
         {/* Header Cinematic */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-7xl font-bold mb-4 tracking-tight font-['Cinzel'] !mt-6">
-            <span className="hero-title-gradient bg-clip-text text-transparent bg-gradient-to-r from-[#d6c487] via-[#ffe992] to-[#c9b36f]">
-              Nos Prestations
-            </span>
-          </h1>
-          <div className="h-1 w-24 bg-gradient-to-r from-transparent via-[#ffe992] to-transparent mx-auto mb-6 opacity-50" />
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto font-light leading-relaxed">
-            Découvrez nos services sur mesure pour capturer vos moments les plus
-            précieux. Mariages, shootings, événements... nous sublimons chaque
-            instant.
-          </p>
-        </div>
+        <PageTitle
+          title="Nos Prestations"
+          subtitle="Découvrez nos services sur mesure pour capturer vos moments les plus précieux. Mariages, shootings, événements... nous sublimons chaque instant."
+          showSeparator
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, index) => (

@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 // Type TypeScript pour sécuriser les objets événements
 import type { Evenement } from "../types/evenement";
+import PageTitle from "../components/ui/PageTitle";
 
 // ============================================================================
 // 📄 COMPOSANT PRINCIPAL DE LA PAGE ÉVÉNEMENTS
@@ -123,18 +124,7 @@ export default function Evenements() {
       {/* --- Contenu principal --- */}
       <main className="max-w-[1800px] mx-auto px-6 md:px-8 pb-32 pt-20 relative z-10">
         {/* 🔤 Titre principal + séparateur */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="flex flex-col items-center mb-8"
-        >
-          <h1 className="hero-title !mb-0 !ml-0 !mt-6 text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-center">
-            <span className="hero-title-gradient bg-clip-text text-transparent bg-gradient-to-r from-[#d6c487] via-[#ffe992] to-[#c9b36f]">
-              Événements
-            </span>
-          </h1>
-        </motion.div>
+        <PageTitle title="Événements" />
 
         {/* 🔘 Filtres par type d’événements */}
         <motion.div

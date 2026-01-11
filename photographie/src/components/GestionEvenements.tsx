@@ -50,6 +50,7 @@ export default function GestionEvenements() {
   });
 
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [imageFile, setImageFile] = useState<File | null>(null); // Fichier image à uploader
   const [editId, setEditId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -149,13 +150,15 @@ export default function GestionEvenements() {
     }
   };
 
+  // Gère le changement d'image : stocke le fichier pour un upload ultérieur via Cloudinary
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
+      setImageFile(file); // Stocke le fichier pour l'upload
+      // Affichage d'une preview locale uniquement
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
-        setForm((prev) => ({ ...prev, image: reader.result as string }));
       };
       reader.readAsDataURL(file);
     }
@@ -247,24 +250,43 @@ export default function GestionEvenements() {
     setSuccess(null);
 
     try {
-      const { id, _id, photos, ...dataToSend } = form as any;
+      const { id, _id, photos, image: _, ...dataToSend } = form as any;
+
+      // 1. Si un nouveau fichier image a été sélectionné, l'uploader sur Cloudinary
+      let imageUrl = form.image; // Garde l'ancienne URL si pas de nouveau fichier
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append("image", imageFile);
+        const uploadRes = await axios.post(
+          `${BASE_API_URL}/api/upload-cloudinary`,
+          formData
+        );
+        imageUrl = uploadRes.data.url;
+        if (!imageUrl) throw new Error("Erreur lors de l'upload de l'image.");
+      }
+
+      // 2. Inclure l'URL Cloudinary dans les données
+      const finalData = { ...dataToSend, image: imageUrl };
 
       if (editId) {
-        await axios.put(`${API_URL}/${editId}`, dataToSend, {
+        await axios.put(`${API_URL}/${editId}`, finalData, {
           withCredentials: true,
         });
         setSuccess("Événement modifié avec succès.");
       } else {
-        await axios.post(API_URL, dataToSend, { withCredentials: true });
+        await axios.post(API_URL, finalData, { withCredentials: true });
         setSuccess("Événement créé avec succès.");
       }
 
       loadEvenements();
       resetForm();
+      setImageFile(null); // Reset du fichier après succès
     } catch (e) {
       const err = e as any;
       setError(
-        err?.response?.data?.message || "Erreur lors de l'enregistrement."
+        err?.response?.data?.erreur ||
+          err?.response?.data?.message ||
+          "Erreur lors de l'enregistrement."
       );
     } finally {
       setLoading(false);
