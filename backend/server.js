@@ -328,29 +328,20 @@ console.log(
 );
 
 // ================================
-// GESTION GLOBALE DES ERREURS
+// GESTION GLOBALE DES ERREURS - NOUVEAU MIDDLEWARE PROFESSIONNEL
 // ================================
-app.use((err, req, res, next) => {
-  console.error("🔥 Erreur globale:", err);
+const { globalErrorHandler } = require("./middleware/errorHandler");
 
-  if (err.message === "Not allowed by CORS") {
-    return res.status(403).json({
-      error: "CORS Error",
-      message: "Origin not allowed",
-      origin: req.headers.origin,
-    });
-  }
-
-  if (err.code === "LIMIT_FILE_SIZE") {
-    return res.status(413).json({ error: "Fichier trop volumineux" });
-  }
-
-  res.status(err.status || 500).json({
-    error: "Internal Server Error",
-    message: err.message,
-    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
-  });
+// Middleware pour gérer les routes non trouvées (404)
+app.all("*", (req, res, next) => {
+  const err = new Error(`Route non trouvée : ${req.originalUrl}`);
+  err.status = 404;
+  err.statusCode = 404;
+  next(err);
 });
+
+// Middleware global de gestion d'erreurs (doit être en dernier)
+app.use(globalErrorHandler);
 
 // ================================
 // DÉMARRAGE DU SERVEUR BACKEND

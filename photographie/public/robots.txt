@@ -1,0 +1,75 @@
+# ============================================
+# ROBOTS.TXT - Configuration SEO
+# ============================================
+# Indique aux moteurs de recherche quelles pages crawler
+
+# Règle générale pour tous les robots
+User-agent: *
+
+# Pages autorisées (crawlables)
+Allow: /
+Allow: /photographie
+Allow: /graphisme
+Allow: /galerie
+Allow: /galerie-graphique
+Allow: /services
+Allow: /services/*
+Allow: /evenements
+Allow: /about
+Allow: /panier
+
+# Pages interdites (non crawlables)
+# Administration
+Disallow: /admin/
+Disallow: /admin/*
+
+# Espace client privé
+Disallow: /mon-compte
+Disallow: /client/
+Disallow: /client/*
+
+# Pages techniques
+Disallow: /connexion
+Disallow: /inscription
+Disallow: /verify-email
+Disallow: /checkout
+
+# API (si exposée côté frontend)
+Disallow: /api/
+
+# Fichiers système
+Disallow: /*.json$
+Disallow: /*.env$
+Disallow: /config/
+
+# Éviter la duplication de contenu
+Disallow: /*?*sort=
+Disallow: /*?*filter=
+Disallow: /*?*page=
+
+# Règles spécifiques pour Google
+User-agent: Googlebot
+Allow: /
+
+# Règles spécifiques pour Bing
+User-agent: Bingbot
+Allow: /
+
+# Bloquer les mauvais bots (spam, scraping)
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# Localisation du sitemap
+Sitemap: https://titre-afpa.vercel.app/sitemap.xml
+
+# ============================================
+# NOTES :
+# - Mettre à jour l'URL du sitemap en production
+# - Tester avec : https://www.google.com/webmasters/tools/robots-testing-tool
+# ============================================

@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "name": "faber-backend",
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/server.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "regions": ["cdg1"],
+  "functions": {
+    "server.js": {
+      "maxDuration": 30,
+      "memory": 1024
+    }
+  }
+}

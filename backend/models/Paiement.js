@@ -63,11 +63,43 @@ const paiementSchema = new mongoose.Schema({
     enum: ["en attente", "payé", "annulé"],
     default: "en attente",
   },
+
+  // Méthode de paiement (pour filtres)
+  methode: {
+    type: String,
+    enum: ["paypal", "stripe", "carte", "virement"],
+    required: false,
+  },
 });
 
-// ****************************************
+// ============================================
+// INDEXES POUR OPTIMISER LES PERFORMANCES
+// ============================================
+// Ces indexes accélèrent les requêtes fréquentes sur la collection Paiement
+
+// Index composé : Recherche par utilisateur + tri par date décroissante
+// Utilisé dans : GET /api/paiements/me (historique utilisateur)
+paiementSchema.index({ utilisateur: 1, date: -1 });
+
+// Index simple : Recherche par email (cas PayPal invité)
+// Utilisé dans : GET /api/paiements?email=xxx
+paiementSchema.index({ emailClient: 1 });
+
+// Index simple : Recherche par statut
+// Utilisé dans : GET /api/paiements?statut=payé
+paiementSchema.index({ statut: 1 });
+
+// Index simple : Recherche par transaction ID (vérifications)
+// Utilisé dans : Vérifier si une transaction existe déjà
+paiementSchema.index({ transactionId: 1 });
+
+// Index composé : Filtre statut + date pour statistiques
+// Utilisé dans : Rapports admin, statistiques de ventes
+paiementSchema.index({ statut: 1, date: -1 });
+
+// ============================================
 // Export du modèle basé sur ce schéma
-// ****************************************
-// Ce modèle permet d’effectuer des opérations sur la collection "paiements" dans MongoDB
+// ============================================
+// Ce modèle permet d'effectuer des opérations sur la collection "paiements" dans MongoDB
 // Exemple : Paiement.find(), Paiement.create(), Paiement.findByIdAndUpdate(), etc.
 module.exports = mongoose.model("Paiement", paiementSchema);

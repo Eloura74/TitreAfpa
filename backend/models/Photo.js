@@ -130,8 +130,33 @@ const photoSchema = new mongoose.Schema({
   },
 });
 
-// *************************************
+// ============================================
+// INDEXES POUR OPTIMISER LES PERFORMANCES
+// ============================================
+// Ces indexes accélèrent les requêtes fréquentes sur la collection Photo
+
+// Index composé : Recherche par catégorie + tri par date
+// Utilisé dans : GET /api/galerie?categorie=Nature
+photoSchema.index({ categorie: 1, createdAt: -1 });
+
+// Index composé : Recherche par album + tri par date
+// Utilisé dans : GET /api/galerie?album=xxx
+photoSchema.index({ album: 1, createdAt: -1 });
+
+// Index text pour recherche plein texte (titre, description, alt)
+// Utilisé dans : GET /api/galerie?search=paysage
+photoSchema.index({ titre: 'text', description: 'text', alt: 'text' });
+
+// Index simple : Recherche par utilisateur
+// Utilisé dans : Afficher toutes les photos d'un utilisateur
+photoSchema.index({ utilisateur: 1 });
+
+// Index simple : Recherche par événement
+// Utilisé dans : Afficher toutes les photos d'un événement
+photoSchema.index({ evenement: 1 });
+
+// ============================================
 // Export du modèle basé sur ce schéma
-// *************************************
+// ============================================
 // Ce modèle "Photo" permet de créer, modifier, rechercher et supprimer des documents photo dans MongoDB.
 module.exports = mongoose.model("Photo", photoSchema);

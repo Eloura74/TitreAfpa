@@ -1,0 +1,67 @@
+{
+  "name": "Fabien Licata | Photographe & Graphiste",
+  "short_name": "Fabien Licata",
+  "description": "Portfolio professionnel de photographie et graphisme. Tirages d'art, mariages, événements.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a10",
+  "theme_color": "#0a0a10",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "fr-FR",
+  "dir": "ltr",
+  "categories": ["photography", "art", "portfolio"],
+  "icons": [
+    {
+      "src": "/images/logoHome.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/logoHome.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshot-mobile.jpg",
+      "sizes": "540x720",
+      "type": "image/jpeg",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/images/screenshot-desktop.jpg",
+      "sizes": "1920x1080",
+      "type": "image/jpeg",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Galerie Photo",
+      "short_name": "Galerie",
+      "description": "Voir la galerie de photographies",
+      "url": "/galerie",
+      "icons": [{ "src": "/images/icon-galerie.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Services",
+      "short_name": "Services",
+      "description": "Découvrir nos prestations photo",
+      "url": "/services",
+      "icons": [{ "src": "/images/icon-services.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Panier",
+      "short_name": "Panier",
+      "description": "Voir mon panier",
+      "url": "/panier",
+      "icons": [{ "src": "/images/icon-panier.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

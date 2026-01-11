@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <!-- ============================================ -->
+  <!-- PAGE D'ACCUEIL -->
+  <!-- ============================================ -->
+  <url>
+    <loc>https://titre-afpa.vercel.app/</loc>
+    <lastmod>2026-01-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- ============================================ -->
+  <!-- UNIVERS PHOTOGRAPHIE -->
+  <!-- ============================================ -->
+  <url>
+    <loc>https://titre-afpa.vercel.app/photographie</loc>
+    <lastmod>2026-01-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- ============================================ -->
+  <!-- UNIVERS GRAPHISME -->
+  <!-- ============================================ -->
+  <url>
+    <loc>https://titre-afpa.vercel.app/graphisme</loc>
+    <lastmod>2026-01-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- ============================================ -->
+  <!-- GALERIE PHOTO -->
+  <!-- ============================================ -->
+  <url>
+    <loc>https://titre-afpa.vercel.app/galerie</loc>
+    <lastmod>2026-01-11</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- ============================================ -->
+  <!-- GALERIE GRAPHIQUE -->
+  <!-- ============================================ -->
+  <url>
+    <loc>https://titre-afpa.vercel.app/galerie-graphique</loc>
+    <lastmod>2026-01-11</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- ============================================ -->
+  <!-- SERVICES -->
+  <!-- ============================================ -->
+  <url>
+    <loc>https://titre-afpa.vercel.app/services</loc>
+    <lastmod>2026-01-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- ============================================ -->
+  <!-- ÉVÉNEMENTS -->
+  <!-- ============================================ -->
+  <url>
+    <loc>https://titre-afpa.vercel.app/evenements</loc>
+    <lastmod>2026-01-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- ============================================ -->
+  <!-- À PROPOS -->
+  <!-- ============================================ -->
+  <url>
+    <loc>https://titre-afpa.vercel.app/about</loc>
+    <lastmod>2026-01-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- ============================================ -->
+  <!-- PANIER -->
+  <!-- ============================================ -->
+  <url>
+    <loc>https://titre-afpa.vercel.app/panier</loc>
+    <lastmod>2026-01-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- ============================================ -->
+  <!-- NOTE : -->
+  <!-- Ce sitemap est statique. Pour un sitemap dynamique -->
+  <!-- incluant toutes les photos et services, créer un -->
+  <!-- script de génération automatique. -->
+  <!-- ============================================ -->
+
+</urlset>
