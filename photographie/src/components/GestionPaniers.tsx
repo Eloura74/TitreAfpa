@@ -6,6 +6,7 @@ import {
   ShoppingCart,
   Image as ImageIcon,
   X,
+  Copy,
 } from "lucide-react";
 import { API_URL as BASE_API_URL } from "../config/api";
 import { useToast } from "./Toast";
@@ -80,6 +81,12 @@ export default function GestionPaniers() {
     } catch {
       addToast("Erreur lors de la suppression", "error");
     }
+  };
+
+  const handleCopyEmail = (email: string) => {
+    if (!email) return;
+    navigator.clipboard.writeText(email);
+    addToast("Email copié dans le presse-papier", "success");
   };
 
   const getTotalArticles = (articles: Article[]) => {
@@ -241,12 +248,20 @@ export default function GestionPaniers() {
                   ID: {panier._id.slice(-6)}
                 </span>
                 <div className="flex gap-2">
+                  <button
+                    onClick={() => handleCopyEmail(panier.utilisateur?.email)}
+                    className="p-2 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg transition-colors border border-blue-500/20"
+                    title="Copier l'email"
+                  >
+                    <Copy size={16} />
+                  </button>
                   <a
                     href={`mailto:${panier.utilisateur?.email}`}
-                    className="p-2 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg transition-colors border border-blue-500/20"
+                    className="flex items-center gap-2 px-3 py-2 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg transition-colors border border-blue-500/20"
                     title="Contacter"
                   >
-                    <Mail size={14} />
+                    <Mail size={16} />
+                    <span className="text-xs font-medium">Contacter</span>
                   </a>
                   <button
                     onClick={() => handleDelete(panier._id)}
