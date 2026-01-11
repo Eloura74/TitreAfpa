@@ -43,7 +43,7 @@ export default function About() {
       {/* Geometric Accents */}
       <div className="geometric-accent fixed top-0 left-0 w-full h-full pointer-events-none z-0 opacity-30" />
 
-      <main className="flex-grow pt-20 pb-20 px-6 md:px-12 max-w-7xl mx-auto w-full relative z-10">
+      <main className="flex-grow pt-32 pb-20 px-6 md:px-12 max-w-7xl mx-auto w-full relative z-10">
         <motion.div
           initial="hidden"
           animate="visible"
@@ -55,7 +55,7 @@ export default function About() {
             variants={itemVariants}
             className="flex flex-col items-center mb-8"
           >
-            <h1 className="hero-title !mb-0 !ml-0 !mt-6text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-center">
+            <h1 className="hero-title !mb-0 !ml-0 text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-center">
               <span className="hero-title-gradient bg-clip-text text-transparent bg-gradient-to-r from-[#d6c487] via-[#ffe992] to-[#c9b36f]">
                 À Propos
               </span>

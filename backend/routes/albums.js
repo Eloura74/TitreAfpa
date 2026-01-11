@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Album = require("../models/Album");
 const Photo = require("../models/Photo");
+const { isAdmin } = require("../middleware/auth"); // Middleware de sécurité
 
 // GET /api/albums - Récupérer tous les albums
 router.get("/", async (req, res) => {
@@ -15,7 +16,7 @@ router.get("/", async (req, res) => {
 });
 
 // POST /api/albums - Créer un nouvel album
-router.post("/", async (req, res) => {
+router.post("/", isAdmin, async (req, res) => {
   try {
     const { titre, description, imageCouverture } = req.body;
     if (!titre) {
@@ -37,7 +38,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT /api/albums/:id - Modifier un album
-router.put("/:id", async (req, res) => {
+router.put("/:id", isAdmin, async (req, res) => {
   try {
     const { titre, description, imageCouverture } = req.body;
     const updatedAlbum = await Album.findByIdAndUpdate(
@@ -58,7 +59,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE /api/albums/:id - Supprimer un album
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", isAdmin, async (req, res) => {
   try {
     const album = await Album.findByIdAndDelete(req.params.id);
     if (!album) {

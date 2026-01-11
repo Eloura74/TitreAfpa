@@ -7,6 +7,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const Photo = require("../models/Photo.js"); // Modèle Mongoose "Photo"
+const { isAdmin } = require("../middleware/auth"); // Middleware de sécurité
 
 const router = express.Router(); // Création d’un routeur Express
 
@@ -63,7 +64,7 @@ router.get("/", async (req, res) => {
 // ------------------------------
 // POST /api/galerie/upload
 // ------------------------------
-router.post("/upload", (req, res) => {
+router.post("/upload", isAdmin, (req, res) => {
   return res.status(400).json({
     message: "L'upload local est désactivé. Utilisez /api/upload-cloudinary.",
   });
@@ -73,7 +74,7 @@ router.post("/upload", (req, res) => {
 // POST /api/galerie
 // ------------------------------
 // Création d’une photo depuis des données JSON (sans fichier)
-router.post("/", async (req, res) => {
+router.post("/", isAdmin, async (req, res) => {
   console.log("=== 🖼️ POST /api/galerie ===");
   console.log("📥 Données reçues :", req.body);
 
@@ -156,7 +157,7 @@ router.post("/", async (req, res) => {
 // PUT /api/galerie/:id
 // ------------------------------
 // Modification d’une photo existante via son ID
-router.put("/:id", async (req, res) => {
+router.put("/:id", isAdmin, async (req, res) => {
   try {
     // Recherche de la photo par ID et mise à jour avec les nouvelles données
     const updatedPhoto = await Photo.findByIdAndUpdate(
@@ -182,7 +183,7 @@ router.put("/:id", async (req, res) => {
 // DELETE /api/galerie/:id
 // ------------------------------
 // Suppression d’une photo par son identifiant
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", isAdmin, async (req, res) => {
   try {
     // Supprime le document photo de la base
     await Photo.findByIdAndDelete(req.params.id);

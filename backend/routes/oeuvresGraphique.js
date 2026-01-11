@@ -10,6 +10,7 @@ const OeuvreGraphique = require("../models/OeuvreGraphique.js"); // Import du mo
 const multer = require("multer"); // Multer gère les fichiers envoyés via formulaire
 const path = require("path");
 const fs = require("fs"); // Utilisé ici pour vérifier et créer le dossier de stockage
+const { isAdmin } = require("../middleware/auth"); // Middleware de sécurité
 
 console.log("✅ Route oeuvresGraphique.js bien chargée !");
 
@@ -42,7 +43,7 @@ router.get("/", async (req, res) => {
 // POST /api/oeuvres-graphique/
 // ----------------------------------------------------
 // Créer une nouvelle œuvre graphique à partir de données JSON
-router.post("/", async (req, res) => {
+router.post("/", isAdmin, async (req, res) => {
   try {
     // Récupération des données envoyées par le client
     const { titre, image, prix, description } = req.body;
@@ -78,7 +79,7 @@ router.post("/", async (req, res) => {
 // PUT /api/oeuvres-graphique/:id
 // ----------------------------------------------------
 // Modifier une œuvre graphique en fonction de son ID
-router.put("/:id", async (req, res) => {
+router.put("/:id", isAdmin, async (req, res) => {
   try {
     // Recherche l’œuvre par son ID et applique les modifications
     const updatedOeuvre = await OeuvreGraphique.findByIdAndUpdate(
@@ -101,7 +102,7 @@ router.put("/:id", async (req, res) => {
 // DELETE /api/oeuvres-graphique/:id
 // ----------------------------------------------------
 // Supprimer une œuvre graphique via son identifiant
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", isAdmin, async (req, res) => {
   try {
     // Supprime le document correspondant à l’ID
     await OeuvreGraphique.findByIdAndDelete(req.params.id);
@@ -117,9 +118,9 @@ router.delete("/:id", async (req, res) => {
 // ----------------------------------------------------
 // POST /api/oeuvres-graphique/upload
 // ----------------------------------------------------
-router.post("/upload", (req, res) => {
-  return res.status(400).json({ 
-    message: "L'upload local est désactivé. Utilisez /api/upload-cloudinary." 
+router.post("/upload", isAdmin, (req, res) => {
+  return res.status(400).json({
+    message: "L'upload local est désactivé. Utilisez /api/upload-cloudinary.",
   });
 });
 

@@ -98,8 +98,15 @@ function App() {
               <Route path="/services" element={<Services />} />
               <Route path="/services/:id" element={<ServiceDetail />} />
 
-              {/* Route pour le formulaire de gestion de galerie */}
-              <Route path="/galerie-form" element={<GalerieForm />} />
+              {/* Route pour le formulaire de gestion de galerie - PROTÉGÉE */}
+              <Route
+                path="/galerie-form"
+                element={
+                  <RouteAdminOnly>
+                    <GalerieForm />
+                  </RouteAdminOnly>
+                }
+              />
 
               {/* Route test (commentée pour ne pas être active) */}
               {/* <Route path="/calendar-test" element={<CalendarTest />} /> */}
