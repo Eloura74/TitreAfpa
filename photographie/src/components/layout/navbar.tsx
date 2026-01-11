@@ -12,11 +12,15 @@ export default function Navbar({ variant }: { variant?: "client" }) {
 
   const location = useLocation(); // Donne accès à l'URL actuelle
 
-  // Détecte si on se trouve dans l'univers "graphisme"
-  // On détecte l'univers courant depuis le localStorage (persistant entre les pages)
-  const univers =
-    localStorage.getItem("univers") ||
-    (location.pathname.startsWith("/graphisme") ? "graphisme" : "photographie");
+  // Détection de l'univers basée sur la page actuelle
+  // Si on est sur /graphisme ou /galerie-graphique → univers graphisme
+  // Sinon (/, /photographie, etc.) → univers photographie
+  const isGraphismePage = 
+    location.pathname === "/graphisme" || 
+    location.pathname === "/galerie-graphique" ||
+    location.pathname.startsWith("/graphisme");
+  
+  const univers = isGraphismePage ? "graphisme" : "photographie";
   const isGraphisme = univers === "graphisme";
 
   const navigate = useNavigate();
@@ -95,33 +99,33 @@ export default function Navbar({ variant }: { variant?: "client" }) {
         </button>
 
         {/* === Bouton Switch Univers (Toggle) === */}
-        <div className="relative mr-4 hidden md:block">
+        <div className="relative mr-2 hidden md:block">
           <button
             onClick={() =>
               handleUniversChange(
                 univers === "photographie" ? "graphisme" : "photographie"
               )
             }
-            className="flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-all duration-300 hover:border-[#ffe992]/30 group"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] uppercase tracking-[0.1em] text-gray-400/80 hover:text-[#ffe992] transition-all duration-300 group border-l border-white/10 pl-3"
           >
-            <span className="text-gray-400 text-xs mr-1">Aller vers</span>
+            <span className="font-light">Aller vers</span>
             {univers === "photographie" ? (
               <>
                 <Palette
-                  size={16}
-                  className="text-[#ffe992] group-hover:scale-110 transition-transform"
+                  size={14}
+                  className="text-gray-500 group-hover:text-[#ffe992] transition-colors duration-300"
                 />
-                <span className="capitalize tracking-wide group-hover:text-[#ffe992] transition-colors">
+                <span className="font-medium text-white/90 group-hover:text-[#ffe992] transition-colors">
                   Graphisme
                 </span>
               </>
             ) : (
               <>
                 <Camera
-                  size={16}
-                  className="text-[#ffe992] group-hover:scale-110 transition-transform"
+                  size={14}
+                  className="text-gray-500 group-hover:text-[#ffe992] transition-colors duration-300"
                 />
-                <span className="capitalize tracking-wide group-hover:text-[#ffe992] transition-colors">
+                <span className="font-medium text-white/90 group-hover:text-[#ffe992] transition-colors">
                   Photographie
                 </span>
               </>
@@ -137,12 +141,12 @@ export default function Navbar({ variant }: { variant?: "client" }) {
                 univers === "photographie" ? "graphisme" : "photographie"
               )
             }
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-[#ffe992]"
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 text-[#d6c487] hover:text-[#ffe992] hover:bg-white/10 transition-all duration-300"
           >
             {univers === "photographie" ? (
-              <Camera size={20} />
-            ) : (
               <Palette size={20} />
+            ) : (
+              <Camera size={20} />
             )}
           </button>
         </div>
