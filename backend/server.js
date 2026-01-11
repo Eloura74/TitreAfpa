@@ -384,6 +384,11 @@ console.log("✅ Route /api/albums montée");
 app.use("/api/picto", pictoRoutes);
 console.log("✅ Route /api/picto montée");
 
+// Sitemap dynamique (SEO)
+const sitemapRoutes = require("./routes/sitemap");
+app.use("/api", sitemapRoutes);
+console.log("✅ Route /api/sitemap.xml montée (SEO)");
+
 console.log(
   "✅ GET /api/tarifs fonctionne et la grille tarifaire dynamique est accessible côté front"
 );

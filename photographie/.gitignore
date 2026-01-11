@@ -23,3 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+
+# backend/.gitignore
+.env
+.env.local
+.env.*.local
+*.key
+*.pem

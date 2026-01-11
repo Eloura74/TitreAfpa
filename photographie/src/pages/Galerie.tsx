@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Helmet } from "react-helmet-async";
 
-// Composants Layout & UI
+// Composants SEO & Layout
+import SEO from "../components/SEO";
+import { photographerSchema, createBreadcrumbSchema } from "../utils/schemas";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import Skeleton from "../components/Skeleton";
@@ -318,18 +319,29 @@ export default function Galerie() {
 
   return (
     <div className="min-h-screen bg-[#0a0a10] text-white selection:bg-yellow-500/30 selection:text-white font-sans">
-      <Helmet>
-        <title>Galerie Photo | Fabien Licata</title>
-        <meta
-          name="description"
-          content="Découvrez ma collection de photographies d'art. Paysages, portraits, urbain... Disponibles en tirages limités sur différents supports (Papier, Toile, Alu)."
-        />
-        <meta property="og:title" content="Galerie Photo | Fabien Licata" />
-        <meta
-          property="og:description"
-          content="Découvrez ma collection de photographies d'art. Disponibles en tirages limités."
-        />
-      </Helmet>
+      {/* SEO complet avec Open Graph, Twitter Card et Schema.org */}
+      <SEO
+        title="Galerie Photo - Tirages d'Art"
+        description="Découvrez ma collection de photographies d'art. Paysages, portraits, événements. Tirages limités disponibles sur papier photo, toile canvas, aluminium et plexiglas. Livraison France et international."
+        image="/images/gallery-preview.jpg"
+        type="website"
+        keywords={[
+          'galerie photo',
+          'photographie art',
+          'tirage photo',
+          'impression photo',
+          'toile canvas',
+          'photographe professionnel',
+          'Fabien Licata'
+        ]}
+        schema={{
+          ...photographerSchema,
+          ...createBreadcrumbSchema([
+            { name: 'Accueil', url: 'https://titre-afpa.vercel.app/' },
+            { name: 'Galerie Photo', url: 'https://titre-afpa.vercel.app/galerie' }
+          ])
+        }}
+      />
       <Navbar />
 
       {/* Conteneur de l'image de fond et de la texture */}

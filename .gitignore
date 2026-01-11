@@ -108,3 +108,12 @@ backup/
 *.cert
 .ssh/
 secrets/
+
+
+
+# backend/.gitignore
+.env
+.env.local
+.env.*.local
+*.key
+*.pem

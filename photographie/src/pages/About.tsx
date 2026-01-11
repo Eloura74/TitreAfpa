@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import { motion } from "framer-motion";
-import { Helmet } from "react-helmet-async";
+import { motion, useReducedMotion } from "framer-motion";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
+import SEO from "../components/SEO";
+import { photographerSchema, createBreadcrumbSchema } from "../utils/schemas";
 import "../styles/globals.css";
 import PageTitle from "../components/ui/PageTitle";
 
@@ -31,14 +32,27 @@ export default function About() {
 
   return (
     <div className="min-h-screen bg-[#0a0a10] text-white font-sans selection:bg-[#ffe992]/30 flex flex-col">
-      <Helmet>
-        <title>À Propos | Fabien Licata - Photographe</title>
-        <meta
-          name="description"
-          content="Découvrez le parcours et la philosophie de Fabien Licata, photographe professionnel dans le Var. Portraits, événements, studio mobile."
-        />
-      </Helmet>
-
+      <SEO
+        title="À Propos - Fabien Licata"
+        description="Photographe et graphiste professionnel basé en France. Plus de 10 ans d'expérience dans la photographie de mariage, événementiel et corporate. Découvrez mon parcours et ma vision artistique."
+        image="/images/about-preview.jpg"
+        type="profile"
+        keywords={[
+          'photographe professionnel',
+          'graphiste',
+          'Fabien Licata',
+          'à propos',
+          'parcours photographe',
+          'artiste photographe'
+        ]}
+        schema={{
+          ...photographerSchema,
+          ...createBreadcrumbSchema([
+            { name: 'Accueil', url: 'https://titre-afpa.vercel.app/' },
+            { name: 'À Propos', url: 'https://titre-afpa.vercel.app/about' }
+          ])
+        }}
+      />
       <Navbar />
 
       {/* Geometric Accents */}

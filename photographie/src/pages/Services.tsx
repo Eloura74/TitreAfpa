@@ -9,6 +9,8 @@ import { API_URL as BASE_API_URL } from "../config/api";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import SEO from "../components/SEO";
+import { photographerSchema, createBreadcrumbSchema } from "../utils/schemas";
 
 const API_URL = `${BASE_API_URL}/api/services`;
 
@@ -37,6 +39,28 @@ export default function Services() {
 
   return (
     <div className="min-h-screen bg-[#0a0a10] text-white font-sans selection:bg-[#ffe992]/30">
+      <SEO
+        title="Services Photo - Mariages, Portraits, Événements"
+        description="Photographe professionnel à votre service : mariages, baptêmes, shootings corporate, événements d'entreprise. Prestations sur-mesure partout en France. Devis gratuit."
+        image="/images/services-preview.jpg"
+        type="website"
+        keywords={[
+          'photographe mariage',
+          'photographe événement',
+          'portrait professionnel',
+          'shooting photo',
+          'photographe corporate',
+          'prestation photo',
+          'Fabien Licata'
+        ]}
+        schema={{
+          ...photographerSchema,
+          ...createBreadcrumbSchema([
+            { name: 'Accueil', url: 'https://titre-afpa.vercel.app/' },
+            { name: 'Services', url: 'https://titre-afpa.vercel.app/services' }
+          ])
+        }}
+      />
       <Navbar />
 
       {/* Geometric Accents */}

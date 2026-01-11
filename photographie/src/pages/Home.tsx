@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import homeImages from "../config/images.json";
 import { motion, useReducedMotion } from "framer-motion";
-import { Helmet } from "react-helmet-async";
+import SEO from "../components/SEO";
+import { photographerSchema } from "../utils/schemas";
 import GoldDust from "../components/GoldDust";
 import ContactFooter from "./ContactFooter";
 import CoverflowCarousel from "../components/CoverflowCarousel";
@@ -138,22 +139,24 @@ export default function Home() {
       className="relative min-h-[100dvh] w-full bg-[#080808] overflow-y-auto md:overflow-hidden font-sans text-white"
       onMouseMove={handleMouseMove}
     >
-      <Helmet>
-        <title>Accueil | Fabien Licata</title>
-        <meta
-          name="description"
-          content="Bienvenue sur le portfolio de Fabien Licata. Explorez l'univers de la photographie d'art et du design graphique. Tirages limités et créations sur mesure."
-        />
-        <meta
-          property="og:title"
-          content="Fabien Licata | Photographe & Graphiste"
-        />
-        <meta
-          property="og:description"
-          content="Bienvenue sur le portfolio de Fabien Licata. Explorez l'univers de la photographie d'art et du design graphique."
-        />
-        <meta property="og:image" content={homeImages.hero} />
-      </Helmet>
+      <SEO
+        title="Accueil"
+        description="Bienvenue dans l'univers artistique de Fabien Licata, photographe et graphiste professionnel. Découvrez mes créations photographiques, tirages d'art limités, services sur-mesure pour mariages, événements et identité visuelle graphique."
+        image={homeImages.hero}
+        type="website"
+        keywords={[
+          'photographe professionnel',
+          'graphiste',
+          'photographie art',
+          'tirage photo',
+          'mariage',
+          'événement',
+          'design graphique',
+          'Fabien Licata',
+          'portfolio photo'
+        ]}
+        schema={photographerSchema}
+      />
 
       {/* PARTICULES D'OR */}
       {!shouldReduceMotion && <GoldDust />}

@@ -1,1 +1,6 @@
 .env
+# backend/.gitignore
+.env.local
+.env.*.local
+*.key
+*.pem
