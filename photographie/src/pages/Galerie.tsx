@@ -13,8 +13,8 @@ import { SelectionFormatModalV2 } from "../components/galerie/SelectionFormatMod
 import { usePanier } from "../store/panierContext";
 import { API_URL } from "../config/api";
 import { Tarif, TarifOeuvre } from "../types/tarif";
-import { tariffService } from "../services/tariffService";
-import { TariffConfig } from "../types/tarifConfig";
+import { tariffServiceV2 } from "../services/tariffServiceV2";
+import { TariffConfigV2 } from "../types/tarifConfigV2";
 import { albumService, Album } from "../services/albumService";
 import { Folder, ArrowLeft, Eye, X, ArrowRight } from "lucide-react";
 import {
@@ -78,7 +78,7 @@ export default function Galerie() {
   );
   const [modalVisible, setModalVisible] = useState(false);
 
-  const [tariffConfig, setTariffConfig] = useState<TariffConfig | null>(null);
+  const [tariffConfig, setTariffConfig] = useState<TariffConfigV2 | null>(null);
 
   // Album Logic
   const [albums, setAlbums] = useState<Album[]>([]);
@@ -98,13 +98,13 @@ export default function Galerie() {
         setLoading(true);
         const [resPhotos, config, albumsData] = await Promise.all([
           fetch(`${API_URL}/api/galerie`),
-          tariffService.getTariffConfig(),
+          tariffServiceV2.getTariffConfig(), // Use V2 service
           albumService.getAlbums(),
         ]);
 
         const data: Photo[] = await resPhotos.json();
         setAlbums(albumsData);
-        setTariffConfig(config);
+        setTariffConfig(config); // config is now TariffConfigV2
 
         // If albums exist, start in album mode, otherwise show all photos
         if (albumsData.length > 0) {
@@ -113,37 +113,38 @@ export default function Galerie() {
           setViewMode("photos");
         }
 
-        // Helper to resolve tariffs
+        // Helper to resolve tariffs (V2 Structure)
         const resolveTariffs = (
           availableIds: string[] | undefined,
-          config: TariffConfig
+          config: TariffConfigV2
         ): TarifOeuvre[] => {
           if (!availableIds || availableIds.length === 0 || !config.categories)
             return [];
           const resolved: TarifOeuvre[] = [];
 
           config.categories.forEach((cat) => {
-            cat.finishes.forEach((finish) => {
-              finish.sizes.forEach((size) => {
-                // Check papers
-                size.papers.forEach((paper) => {
-                  if (availableIds.includes(paper.id)) {
+            cat.products.forEach((prod) => {
+              prod.supports.forEach((supp) => {
+                supp.formats.forEach((fmt) => {
+                  // Check if any level ID matches (simplification: usually we select specific combos)
+                  // But here we need to know WHICH combo is available.
+                  // Usually availableIds contains IDs of specific formats or supports.
+                  // Let's assume availableIds contains the FORMAT ID or SUPPORT ID.
+
+                  // Logic: If the format ID is in availableIds, we add it.
+                  if (availableIds.includes(fmt.id)) {
+                    // Calculate total price (sum of all levels)
+                    const totalPrice =
+                      (cat.price || 0) +
+                      (prod.price || 0) +
+                      (supp.price || 0) +
+                      (fmt.price || 0);
+
                     resolved.push({
-                      id: paper.id,
-                      format: size.name,
-                      support: `${paper.name} (${finish.name})`,
-                      prix: size.basePrice + paper.priceModifier,
-                    });
-                  }
-                });
-                // Check frames
-                size.frames.forEach((frame) => {
-                  if (availableIds.includes(frame.id)) {
-                    resolved.push({
-                      id: frame.id,
-                      format: size.name,
-                      support: `${frame.name} (${finish.name})`,
-                      prix: size.basePrice + frame.priceModifier,
+                      id: fmt.id,
+                      format: fmt.name,
+                      support: `${supp.name} (${prod.name})`,
+                      prix: totalPrice,
                     });
                   }
                 });
@@ -160,7 +161,7 @@ export default function Galerie() {
             // Resolve dynamic tariffs if available
             const resolvedTariffs = resolveTariffs(
               p.availableTariffIds,
-              config
+              config as TariffConfigV2
             );
 
             return {

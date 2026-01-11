@@ -3,7 +3,13 @@
 // ==============================
 
 // React : Importation des fonctions nécessaires pour créer un contexte et gérer l'état
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 // Importation du type TypeScript pour définir la structure d'un article dans le panier
 import { ArticlePanierType } from "../types/panier";
@@ -72,7 +78,7 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
   // ==============================
   //   Synchronisation avec la BDD (Utilisateurs connectés)
   // ==============================
-  
+
   // 1. Au chargement ou changement d'utilisateur : on récupère le panier en BDD
   useEffect(() => {
     if (email) {
@@ -107,7 +113,13 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
             saveToDb(articles);
           }
         })
-        .catch((err) => console.error("Erreur chargement panier BDD:", err));
+        .catch((err) => {
+          console.error("Erreur chargement panier BDD:", err);
+          if (axios.isAxiosError(err) && err.response?.status === 401) {
+            // Token expiré ou invalide : on déconnecte proprement
+            useAuthStore.getState().logout();
+          }
+        });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [email]);
@@ -121,7 +133,7 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
     const payload = currentArticles.map((a) => {
       // Vérification basique d'un ObjectId MongoDB (24 char hex)
       const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(a.id);
-      
+
       return {
         photo: isValidObjectId ? a.id : null, // Envoie l'ID seulement s'il est valide
         quantite: a.quantite,
