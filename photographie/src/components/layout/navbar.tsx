@@ -106,26 +106,26 @@ export default function Navbar({ variant }: { variant?: "client" }) {
                 univers === "photographie" ? "graphisme" : "photographie"
               )
             }
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] uppercase tracking-[0.1em] text-gray-400/80 hover:text-[#ffe992] transition-all duration-300 group border-l border-white/10 pl-3"
+            className="flex items-center gap-2 px-3 py-1.5 text-[16px] uppercase tracking-[0.12em] text-gray-500/70 hover:text-[#ffe992]/90 transition-all duration-300 group"
           >
-            <span className="font-light">Aller vers</span>
             {univers === "photographie" ? (
               <>
                 <Palette
-                  size={14}
-                  className="text-gray-500 group-hover:text-[#ffe992] transition-colors duration-300"
+                  // # TODO: Ajouter l'icône graphisme
+                  size={16} 
+                  className="text-gray-600/60 group-hover:text-[#ffe992] transition-colors duration-300"
                 />
-                <span className="font-medium text-white/90 group-hover:text-[#ffe992] transition-colors">
+                <span className="font-normal group-hover:tracking-[0.15em] transition-all duration-300">
                   Graphisme
                 </span>
               </>
             ) : (
               <>
                 <Camera
-                  size={14}
-                  className="text-gray-500 group-hover:text-[#ffe992] transition-colors duration-300"
+                  size={16}
+                  className="text-gray-600/60 group-hover:text-[#ffe992] transition-colors duration-300"
                 />
-                <span className="font-medium text-white/90 group-hover:text-[#ffe992] transition-colors">
+                <span className="font-normal group-hover:tracking-[0.15em] transition-all duration-300">
                   Photographie
                 </span>
               </>

@@ -1,5 +1,5 @@
 // Import des hooks React pour gérer les effets et le cycle de vie du composant
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 // Import des composants Link pour la navigation interne sans rechargement de page
 import { Link } from "react-router-dom";
 // Import d'icônes depuis la bibliothèque lucide-react pour les visuels
@@ -8,6 +8,7 @@ import {
   Camera,
   GalleryHorizontal,
   ShoppingCart,
+  Info,
 } from "lucide-react";
 // Import des composants layout Navbar (barre de navigation) et Footer (pied de page)
 import Navbar from "../components/layout/navbar";
@@ -18,6 +19,8 @@ import homeImages from "../config/images.json";
 import "../styles/home.css";
 
 import { motion } from "framer-motion";
+import { API_URL } from "../config/api";
+import { getWatermarkedImageUrl } from "../utils/cloudinaryUtils";
 
 // Variantes d'animation pour l'apparition en cascade
 const containerVariants = {
@@ -50,10 +53,58 @@ const itemVariants = {
  * une navigation claire et des liens vers les sections importantes.
  */
 export default function Photographie() {
+  // États pour stocker les images dynamiques depuis la BDD
+  const [galerieImage, setGalerieImage] = useState<string>("/images/photo5.jpg");
+  const [eventImage, setEventImage] = useState<string>("/images/event1.jpg");
+  
   // useEffect est utilisé ici pour modifier le titre de l'onglet du navigateur quand la page est chargée
   useEffect(() => {
     document.title = "Fabien Photographie";
   }, []); // Le tableau vide signifie que cet effet ne s'exécute qu'une seule fois, au montage
+  
+  // Récupération d'une image aléatoire depuis la base de données
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        // Récupérer une image aléatoire de la galerie photo
+        const resGalerie = await fetch(`${API_URL}/api/galerie`);
+        if (resGalerie.ok) {
+          const dataGalerie = await resGalerie.json();
+          const publicPhotos = dataGalerie.filter((p: any) => p.categorie !== "EvenementPrive");
+          if (publicPhotos.length > 0) {
+            const randomPhoto = publicPhotos[Math.floor(Math.random() * publicPhotos.length)];
+            let imageUrl = "/images/photo5.jpg";
+            if (randomPhoto.src?.startsWith("http")) imageUrl = randomPhoto.src;
+            else if (randomPhoto.src?.startsWith("/uploads/")) imageUrl = `${API_URL}${randomPhoto.src}`;
+            else if (randomPhoto.src?.startsWith("/images/")) imageUrl = randomPhoto.src;
+            else imageUrl = getWatermarkedImageUrl(`/images/${randomPhoto.src}`);
+            setGalerieImage(imageUrl);
+          }
+        }
+        
+        // Récupérer une image aléatoire des événements si disponible
+        const resEvents = await fetch(`${API_URL}/api/evenements`);
+        if (resEvents.ok) {
+          const dataEvents = await resEvents.json();
+          if (dataEvents.length > 0) {
+            const randomEvent = dataEvents[Math.floor(Math.random() * dataEvents.length)];
+            if (randomEvent.image) {
+              let imageUrl = "/images/event1.jpg";
+              if (randomEvent.image?.startsWith("http")) imageUrl = randomEvent.image;
+              else if (randomEvent.image?.startsWith("/uploads/")) imageUrl = `${API_URL}${randomEvent.image}`;
+              else if (randomEvent.image?.startsWith("/images/")) imageUrl = randomEvent.image;
+              else imageUrl = `/images/${randomEvent.image}`;
+              setEventImage(imageUrl);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des images:", error);
+      }
+    };
+    
+    fetchImages();
+  }, []);
 
   return (
     // Conteneur principal avec une mise en page en colonne et une hauteur minimale sur tout l'écran
@@ -100,47 +151,43 @@ export default function Photographie() {
           </span>
         </motion.div>
 
-        {/* Barre de navigation sous forme de grille avec cartes améliorées */}
+        {/* Barre de navigation sous forme de cartes sur une ligne */}
         <motion.nav
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl px-4"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 w-full max-w-7xl px-4"
           variants={containerVariants}
         >
-          {/* Carte Événements */}
+          {/* Carte Galerie Photo */}
           <motion.div
             variants={itemVariants}
-            whileHover={{
-              y: -12,
-              scale: 1.02,
-              transition: { type: "spring", stiffness: 300, damping: 20 },
-            }}
-            whileTap={{ scale: 0.98 }}
-            className="h-full"
+            whileHover={{ scale: 1.03, y: -6 }}
+            whileTap={{ scale: 0.97 }}
+            className="h-56"
           >
             <Link
-              to="/evenements"
-              className="group h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/40 hover:shadow-[0_0_40px_rgba(255,233,146,0.15)]"
+              to="/galerie"
+              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.4),inset_0_0_20px_rgba(255,233,146,0.1)]"
             >
-              {/* Gradient animé au survol */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#ffe992]/5 via-transparent to-[#d6c487]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              {/* Image de fond */}
+              <div className="absolute inset-0">
+                <img 
+                  src={galerieImage} 
+                  alt="Galerie Photo" 
+                  className="w-full h-full object-cover opacity-50 group-hover:opacity-65 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
+              </div>
               
-              {/* Shimmer effect */}
-              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[linear-gradient(110deg,transparent,rgba(255,235,160,0.15),transparent)] translate-x-[-60%] group-hover:translate-x-[60%] duration-[900ms] ease-out pointer-events-none" />
-              
-              {/* Contenu de la carte */}
-              <div className="relative z-10 flex flex-col items-center text-center gap-5">
-                {/* Icône avec glow effect */}
-                <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#ffe992]/20 transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(255,233,146,0.3)]">
-                  <CalendarDays className="w-8 h-8 text-[#d6c487] group-hover:text-[#ffe992] transition-colors duration-300" />
+              {/* Contenu */}
+              <div className="relative h-full flex flex-col justify-end p-5">
+                <div className="p-2.5 rounded-full bg-[#ffe992]/10 backdrop-blur-sm w-fit mb-3 group-hover:bg-[#ffe992]/25 transition-all duration-500 group-hover:shadow-[0_0_15px_rgba(255,233,146,0.5)]">
+                  <GalleryHorizontal className="w-5 h-5 text-[#ffe992]" />
                 </div>
-                {/* Texte */}
-                <div>
-                  <h3 className="text-xl font-serif font-bold text-[#ffe992] mb-2 tracking-wide group-hover:tracking-wider transition-all duration-300">
-                    Événements
-                  </h3>
-                  <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300 leading-relaxed">
-                    Tous les événements photo à venir et passés.
-                  </p>
-                </div>
+                <h3 className="text-xl font-playfair-sc uppercase tracking-wider text-[#ffe992] mb-1 drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] font-bold">
+                  Galerie Photo
+                </h3>
+                <p className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  Œuvres photographiques.
+                </p>
               </div>
             </Link>
           </motion.div>
@@ -148,73 +195,102 @@ export default function Photographie() {
           {/* Carte Services */}
           <motion.div
             variants={itemVariants}
-            whileHover={{
-              y: -12,
-              scale: 1.02,
-              transition: { type: "spring", stiffness: 300, damping: 20 },
-            }}
-            whileTap={{ scale: 0.98 }}
-            className="h-full"
+            whileHover={{ scale: 1.03, y: -6 }}
+            whileTap={{ scale: 0.97 }}
+            className="h-56"
           >
             <Link
               to="/services"
-              className="group h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/40 hover:shadow-[0_0_40px_rgba(255,233,146,0.15)]"
+              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.4),inset_0_0_20px_rgba(255,233,146,0.1)]"
             >
-              {/* Gradient animé au survol */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#ffe992]/5 via-transparent to-[#d6c487]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              {/* Image de fond */}
+              <div className="absolute inset-0">
+                <img 
+                  src="/images/shooting.jpg" 
+                  alt="Services" 
+                  className="w-full h-full object-cover opacity-50 group-hover:opacity-65 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
+              </div>
               
-              {/* Shimmer effect */}
-              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[linear-gradient(110deg,transparent,rgba(255,235,160,0.15),transparent)] translate-x-[-60%] group-hover:translate-x-[60%] duration-[900ms] ease-out pointer-events-none" />
-              
-              <div className="relative z-10 flex flex-col items-center text-center gap-5">
-                <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#ffe992]/20 transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(255,233,146,0.3)]">
-                  <Camera className="w-8 h-8 text-[#d6c487] group-hover:text-[#ffe992] transition-colors duration-300" />
+              {/* Contenu */}
+              <div className="relative h-full flex flex-col justify-end p-5">
+                <div className="p-2.5 rounded-full bg-[#ffe992]/10 backdrop-blur-sm w-fit mb-3 group-hover:bg-[#ffe992]/25 transition-all duration-500 group-hover:shadow-[0_0_15px_rgba(255,233,146,0.5)]">
+                  <Camera className="w-5 h-5 text-[#ffe992]" />
                 </div>
-                <div>
-                  <h3 className="text-xl font-serif font-bold text-[#ffe992] mb-2 tracking-wide group-hover:tracking-wider transition-all duration-300">
-                    Services
-                  </h3>
-                  <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300 leading-relaxed">
-                    Mariages, shootings, événements...
-                  </p>
-                </div>
+                <h3 className="text-xl font-playfair-sc uppercase tracking-wider text-[#ffe992] mb-1 drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] font-bold">
+                  Services
+                </h3>
+                <p className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  Mariages, shootings...
+                </p>
               </div>
             </Link>
           </motion.div>
 
-          {/* Carte Galerie Photo */}
+
+          {/* Carte Événements */}
           <motion.div
             variants={itemVariants}
-            whileHover={{
-              y: -12,
-              scale: 1.02,
-              transition: { type: "spring", stiffness: 300, damping: 20 },
-            }}
-            whileTap={{ scale: 0.98 }}
-            className="h-full"
+            whileHover={{ scale: 1.03, y: -6 }}
+            whileTap={{ scale: 0.97 }}
+            className="h-56"
           >
             <Link
-              to="/galerie"
-              className="group h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/40 hover:shadow-[0_0_40px_rgba(255,233,146,0.15)]"
+              to="/evenements"
+              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.4),inset_0_0_20px_rgba(255,233,146,0.1)]"
             >
-              {/* Gradient animé au survol */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#ffe992]/5 via-transparent to-[#d6c487]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              {/* Shimmer effect */}
-              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[linear-gradient(110deg,transparent,rgba(255,235,160,0.15),transparent)] translate-x-[-60%] group-hover:translate-x-[60%] duration-[900ms] ease-out pointer-events-none" />
-              
-              <div className="relative z-10 flex flex-col items-center text-center gap-5">
-                <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#ffe992]/20 transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(255,233,146,0.3)]">
-                  <GalleryHorizontal className="w-8 h-8 text-[#d6c487] group-hover:text-[#ffe992] transition-colors duration-300" />
+              <div className="absolute inset-0">
+                <img 
+                  src={eventImage} 
+                  alt="Événements" 
+                  className="w-full h-full object-cover opacity-50 group-hover:opacity-65 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
+              </div>
+              <div className="relative h-full flex flex-col justify-end p-5">
+                <div className="p-2.5 rounded-full bg-[#ffe992]/10 backdrop-blur-sm w-fit mb-3 group-hover:bg-[#ffe992]/25 transition-all duration-500 group-hover:shadow-[0_0_15px_rgba(255,233,146,0.5)]">
+                  <CalendarDays className="w-5 h-5 text-[#ffe992]" />
                 </div>
-                <div>
-                  <h3 className="text-xl font-serif font-bold text-[#ffe992] mb-2 tracking-wide group-hover:tracking-wider transition-all duration-300">
-                    Galerie Photo
-                  </h3>
-                  <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300 leading-relaxed">
-                    Découvrez et achetez les œuvres photographiques.
-                  </p>
+                <h3 className="text-xl font-playfair-sc uppercase tracking-wider text-[#ffe992] mb-1 drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] font-bold">
+                  Événements
+                </h3>
+                <p className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  Tous les événements photo.
+                </p>
+              </div>
+            </Link>
+          </motion.div>
+
+          {/* Carte À Propos */}
+          <motion.div
+            variants={itemVariants}
+            whileHover={{ scale: 1.03, y: -6 }}
+            whileTap={{ scale: 0.97 }}
+            className="h-56"
+          >
+            <Link
+              to="/about"
+              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.4),inset_0_0_20px_rgba(255,233,146,0.1)]"
+            >
+              <div className="absolute inset-0">
+                <img 
+                  src="/images/about.jpg" 
+                  alt="À Propos" 
+                  className="w-full h-full object-cover opacity-50 group-hover:opacity-65 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
+              </div>
+              <div className="relative h-full flex flex-col justify-end p-5">
+                <div className="p-2.5 rounded-full bg-[#ffe992]/10 backdrop-blur-sm w-fit mb-3 group-hover:bg-[#ffe992]/25 transition-all duration-500 group-hover:shadow-[0_0_15px_rgba(255,233,146,0.5)]">
+                  <Info className="w-5 h-5 text-[#ffe992]" />
                 </div>
+                <h3 className="text-xl font-playfair-sc uppercase tracking-wider text-[#ffe992] mb-1 drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] font-bold">
+                  À Propos
+                </h3>
+                <p className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  En savoir plus.
+                </p>
               </div>
             </Link>
           </motion.div>
@@ -222,36 +298,32 @@ export default function Photographie() {
           {/* Carte Panier */}
           <motion.div
             variants={itemVariants}
-            whileHover={{
-              y: -12,
-              scale: 1.02,
-              transition: { type: "spring", stiffness: 300, damping: 20 },
-            }}
-            whileTap={{ scale: 0.98 }}
-            className="h-full"
+            whileHover={{ scale: 1.03, y: -6 }}
+            whileTap={{ scale: 0.97 }}
+            className="h-56"
           >
             <Link
               to="/panier"
-              className="group h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/40 hover:shadow-[0_0_40px_rgba(255,233,146,0.15)]"
+              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.4),inset_0_0_20px_rgba(255,233,146,0.1)]"
             >
-              {/* Gradient animé au survol */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#ffe992]/5 via-transparent to-[#d6c487]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              {/* Shimmer effect */}
-              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[linear-gradient(110deg,transparent,rgba(255,235,160,0.15),transparent)] translate-x-[-60%] group-hover:translate-x-[60%] duration-[900ms] ease-out pointer-events-none" />
-              
-              <div className="relative z-10 flex flex-col items-center text-center gap-5">
-                <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#ffe992]/20 transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(255,233,146,0.3)]">
-                  <ShoppingCart className="w-8 h-8 text-[#d6c487] group-hover:text-[#ffe992] transition-colors duration-300" />
+              <div className="absolute inset-0">
+                <img 
+                  src="/images/pannier.jpg" 
+                  alt="Panier" 
+                  className="w-full h-full object-cover opacity-50 group-hover:opacity-65 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
+              </div>
+              <div className="relative h-full flex flex-col justify-end p-5">
+                <div className="p-2.5 rounded-full bg-[#ffe992]/10 backdrop-blur-sm w-fit mb-3 group-hover:bg-[#ffe992]/25 transition-all duration-500 group-hover:shadow-[0_0_15px_rgba(255,233,146,0.5)]">
+                  <ShoppingCart className="w-5 h-5 text-[#ffe992]" />
                 </div>
-                <div>
-                  <h3 className="text-xl font-serif font-bold text-[#ffe992] mb-2 tracking-wide group-hover:tracking-wider transition-all duration-300">
-                    Panier
-                  </h3>
-                  <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300 leading-relaxed">
-                    Gérez vos achats et commandes photo.
-                  </p>
-                </div>
+                <h3 className="text-xl font-playfair-sc uppercase tracking-wider text-[#ffe992] mb-1 drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] font-bold">
+                  Panier
+                </h3>
+                <p className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  Vos achats photo.
+                </p>
               </div>
             </Link>
           </motion.div>
