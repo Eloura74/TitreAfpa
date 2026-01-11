@@ -170,7 +170,7 @@ const Auth: React.FC = () => {
 
       <Navbar />
 
-      <div className="flex-1 flex flex-col items-center justify-center p-4 mt-16 relative z-10">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 mt-24 relative z-10">
         <div className="w-full max-w-2xl bg-[#12121a]/80 backdrop-blur-xl p-8 md:p-10 rounded-2xl shadow-2xl border border-white/5">
           {/* En-tête avec dégradé doré */}
           <div className="text-center mb-8">

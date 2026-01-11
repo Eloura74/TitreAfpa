@@ -44,7 +44,7 @@ const Panier: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a10] text-white font-sans selection:bg-[#ffe992]/30 flex flex-col">
+    <div className="min-h-screen !mt-6 bg-[#0a0a10] text-white font-sans selection:bg-[#ffe992]/30 flex flex-col">
       <Helmet>
         <title>Mon Panier | Fabien Licata</title>
       </Helmet>

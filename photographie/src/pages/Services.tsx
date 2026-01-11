@@ -44,7 +44,7 @@ export default function Services() {
       <main className="max-w-7xl mx-auto py-20 px-6 pt-32 relative z-10">
         {/* Header Cinematic */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-7xl font-bold mb-4 tracking-tight font-['Cinzel']">
+          <h1 className="text-5xl md:text-7xl font-bold mb-4 tracking-tight font-['Cinzel'] !mt-6">
             <span className="hero-title-gradient bg-clip-text text-transparent bg-gradient-to-r from-[#d6c487] via-[#ffe992] to-[#c9b36f]">
               Nos Prestations
             </span>

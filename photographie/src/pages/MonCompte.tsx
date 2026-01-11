@@ -99,7 +99,7 @@ export default function MonCompte() {
     <div className="min-h-screen bg-[#0a0a10] text-white flex flex-col">
       <Navbar />
 
-      <main className="flex-1 container mx-auto px-4 py-12 md:py-20 max-w-6xl">
+      <main className="flex-1 container mx-auto px-4 pt-32 pb-12 md:pb-20 max-w-6xl">
         {/* En-tête de l'espace client */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 border-b border-white/10 pb-8 gap-6">
           <div>

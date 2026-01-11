@@ -129,7 +129,7 @@ export default function Evenements() {
           transition={{ duration: 0.8 }}
           className="flex flex-col items-center mb-8"
         >
-          <h1 className="hero-title !mb-0 !ml-0 text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-center">
+          <h1 className="hero-title !mb-0 !ml-0 !mt-6 text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-center">
             <span className="hero-title-gradient bg-clip-text text-transparent bg-gradient-to-r from-[#d6c487] via-[#ffe992] to-[#c9b36f]">
               Événements
             </span>
