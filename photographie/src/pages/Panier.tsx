@@ -55,7 +55,7 @@ const Panier: React.FC = () => {
       {/* Geometric Accents */}
       <div className="geometric-accent fixed top-0 left-0 w-full h-full pointer-events-none z-0 opacity-30" />
 
-      <main className="flex-grow pt-20 pb-20 px-4 md:px-8 max-w-7xl mx-auto w-full relative z-10">
+      <main className="flex-grow pt-32 pb-20 px-4 md:px-8 max-w-7xl mx-auto w-full relative z-10">
         <motion.div
           initial="hidden"
           animate="visible"

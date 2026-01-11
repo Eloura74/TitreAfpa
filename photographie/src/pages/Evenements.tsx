@@ -122,7 +122,7 @@ export default function Evenements() {
       <div className="geometric-accent fixed top-0 left-0 w-full h-full pointer-events-none z-0 opacity-30" />
 
       {/* --- Contenu principal --- */}
-      <main className="max-w-[1800px] mx-auto px-6 md:px-8 pb-32 pt-20 relative z-10">
+      <main className="max-w-[1800px] mx-auto px-6 md:px-8 pb-32 pt-32 relative z-10">
         {/* 🔤 Titre principal + séparateur */}
         <PageTitle title="Événements" />
 

@@ -109,23 +109,33 @@ export default function Graphisme() {
           {/* Bouton vers la page des événements graphiques */}
           <motion.div
             variants={itemVariants}
-            whileHover={{ y: -10 }}
+            whileHover={{
+              y: -12,
+              scale: 1.02,
+              transition: { type: "spring", stiffness: 300, damping: 20 },
+            }}
+            whileTap={{ scale: 0.98 }}
             className="h-full"
           >
             <Link
               to="/evenements"
-              className="group h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/30 hover:shadow-[0_0_30px_rgba(255,233,146,0.1)]"
+              className="group h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/40 hover:shadow-[0_0_40px_rgba(255,233,146,0.15)]"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-[#ffe992]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative z-10 flex flex-col items-center text-center gap-4">
-                <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#ffe992]/20 transition-colors duration-500">
-                  <CalendarDays className="w-8 h-8 text-[#d6c487] group-hover:text-[#ffe992] transition-colors" />
+              {/* Gradient animé au survol */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#ffe992]/5 via-transparent to-[#d6c487]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              {/* Shimmer effect */}
+              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[linear-gradient(110deg,transparent,rgba(255,235,160,0.15),transparent)] translate-x-[-60%] group-hover:translate-x-[60%] duration-[900ms] ease-out pointer-events-none" />
+              
+              <div className="relative z-10 flex flex-col items-center text-center gap-5">
+                <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#ffe992]/20 transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(255,233,146,0.3)]">
+                  <CalendarDays className="w-8 h-8 text-[#d6c487] group-hover:text-[#ffe992] transition-colors duration-300" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-serif font-bold text-[#ffe992] mb-2 tracking-wide">
+                  <h3 className="text-xl font-serif font-bold text-[#ffe992] mb-2 tracking-wide group-hover:tracking-wider transition-all duration-300">
                     Événements
                   </h3>
-                  <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
+                  <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300 leading-relaxed">
                     Ateliers et événements graphiques à venir.
                   </p>
                 </div>
@@ -136,23 +146,33 @@ export default function Graphisme() {
           {/* Bouton vers la galerie graphique */}
           <motion.div
             variants={itemVariants}
-            whileHover={{ y: -10 }}
+            whileHover={{
+              y: -12,
+              scale: 1.02,
+              transition: { type: "spring", stiffness: 300, damping: 20 },
+            }}
+            whileTap={{ scale: 0.98 }}
             className="h-full"
           >
             <Link
               to="/galerie-graphique"
-              className="group h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/30 hover:shadow-[0_0_30px_rgba(255,233,146,0.1)]"
+              className="group h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/40 hover:shadow-[0_0_40px_rgba(255,233,146,0.15)]"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-[#ffe992]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative z-10 flex flex-col items-center text-center gap-4">
-                <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#ffe992]/20 transition-colors duration-500">
-                  <GalleryHorizontal className="w-8 h-8 text-[#d6c487] group-hover:text-[#ffe992] transition-colors" />
+              {/* Gradient animé au survol */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#ffe992]/5 via-transparent to-[#d6c487]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              {/* Shimmer effect */}
+              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[linear-gradient(110deg,transparent,rgba(255,235,160,0.15),transparent)] translate-x-[-60%] group-hover:translate-x-[60%] duration-[900ms] ease-out pointer-events-none" />
+              
+              <div className="relative z-10 flex flex-col items-center text-center gap-5">
+                <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#ffe992]/20 transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(255,233,146,0.3)]">
+                  <GalleryHorizontal className="w-8 h-8 text-[#d6c487] group-hover:text-[#ffe992] transition-colors duration-300" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-serif font-bold text-[#ffe992] mb-2 tracking-wide">
+                  <h3 className="text-xl font-serif font-bold text-[#ffe992] mb-2 tracking-wide group-hover:tracking-wider transition-all duration-300">
                     Galerie graphique
                   </h3>
-                  <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
+                  <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300 leading-relaxed">
                     Œuvres uniques, prix individuel pour chaque création.
                   </p>
                 </div>
@@ -163,23 +183,33 @@ export default function Graphisme() {
           {/* Bouton vers le panier */}
           <motion.div
             variants={itemVariants}
-            whileHover={{ y: -10 }}
+            whileHover={{
+              y: -12,
+              scale: 1.02,
+              transition: { type: "spring", stiffness: 300, damping: 20 },
+            }}
+            whileTap={{ scale: 0.98 }}
             className="h-full"
           >
             <Link
               to="/panier"
-              className="group h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/30 hover:shadow-[0_0_30px_rgba(255,233,146,0.1)]"
+              className="group h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/40 hover:shadow-[0_0_40px_rgba(255,233,146,0.15)]"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-[#ffe992]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative z-10 flex flex-col items-center text-center gap-4">
-                <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#ffe992]/20 transition-colors duration-500">
-                  <ShoppingCart className="w-8 h-8 text-[#d6c487] group-hover:text-[#ffe992] transition-colors" />
+              {/* Gradient animé au survol */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#ffe992]/5 via-transparent to-[#d6c487]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              {/* Shimmer effect */}
+              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[linear-gradient(110deg,transparent,rgba(255,235,160,0.15),transparent)] translate-x-[-60%] group-hover:translate-x-[60%] duration-[900ms] ease-out pointer-events-none" />
+              
+              <div className="relative z-10 flex flex-col items-center text-center gap-5">
+                <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#ffe992]/20 transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(255,233,146,0.3)]">
+                  <ShoppingCart className="w-8 h-8 text-[#d6c487] group-hover:text-[#ffe992] transition-colors duration-300" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-serif font-bold text-[#ffe992] mb-2 tracking-wide">
+                  <h3 className="text-xl font-serif font-bold text-[#ffe992] mb-2 tracking-wide group-hover:tracking-wider transition-all duration-300">
                     Panier
                   </h3>
-                  <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
+                  <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300 leading-relaxed">
                     Gérez vos achats graphiques.
                   </p>
                 </div>
@@ -190,24 +220,34 @@ export default function Graphisme() {
           {/* Bouton vers la page "À propos" */}
           <motion.div
             variants={itemVariants}
-            whileHover={{ y: -10 }}
+            whileHover={{
+              y: -12,
+              scale: 1.02,
+              transition: { type: "spring", stiffness: 300, damping: 20 },
+            }}
+            whileTap={{ scale: 0.98 }}
             className="h-full"
           >
             <Link
               to="/about"
-              className="group h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/30 hover:shadow-[0_0_30px_rgba(255,233,146,0.1)]"
+              className="group h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/40 hover:shadow-[0_0_40px_rgba(255,233,146,0.15)]"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-[#ffe992]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative z-10 flex flex-col items-center text-center gap-4">
-                <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#ffe992]/20 transition-colors duration-500">
-                  <Info className="w-8 h-8 text-[#d6c487] group-hover:text-[#ffe992] transition-colors" />
+              {/* Gradient animé au survol */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#ffe992]/5 via-transparent to-[#d6c487]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              {/* Shimmer effect */}
+              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[linear-gradient(110deg,transparent,rgba(255,235,160,0.15),transparent)] translate-x-[-60%] group-hover:translate-x-[60%] duration-[900ms] ease-out pointer-events-none" />
+              
+              <div className="relative z-10 flex flex-col items-center text-center gap-5">
+                <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#ffe992]/20 transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(255,233,146,0.3)]">
+                  <Info className="w-8 h-8 text-[#d6c487] group-hover:text-[#ffe992] transition-colors duration-300" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-serif font-bold text-[#ffe992] mb-2 tracking-wide">
+                  <h3 className="text-xl font-serif font-bold text-[#ffe992] mb-2 tracking-wide group-hover:tracking-wider transition-all duration-300">
                     A propos
                   </h3>
-                  <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
-                    Plus d’informations sur moi.
+                  <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300 leading-relaxed">
+                    Plus d'informations sur moi.
                   </p>
                 </div>
               </div>

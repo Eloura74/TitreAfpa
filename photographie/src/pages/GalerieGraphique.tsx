@@ -183,7 +183,7 @@ export default function GalerieGraphique() {
       <div className="geometric-accent fixed top-0 left-0 w-full h-full pointer-events-none z-0 opacity-30" />
 
       {/* Header - Style Cinématique */}
-      <header className="relative pt-20 pb-12 px-6 overflow-hidden z-10">
+      <header className="relative pt-32 pb-12 px-6 overflow-hidden z-10">
         <PageTitle title="Galerie Graphique" />
       </header>
 
