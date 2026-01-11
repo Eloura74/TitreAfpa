@@ -358,7 +358,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className={`pointer-events-auto text-3xl md:text-2xl lg:text-6xl font-normal uppercase font-playfair
+                className={`pointer-events-auto text-3xl md:text-2xl lg:text-6xl font-normal uppercase font-playfair-sc
                   transition-all duration-700
                   ${
                     hoveredSide === "photo"
@@ -468,7 +468,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className={`pointer-events-auto text-3xl md:text-4xl lg:text-6xl font-normal uppercase font-playfair
+                className={`pointer-events-auto text-3xl md:text-4xl lg:text-6xl font-normal uppercase font-playfair-sc
                   transition-all duration-700
                   ${
                     hoveredSide === "graph"
@@ -555,7 +555,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className={`pointer-events-auto text-3xl md:text-4xl lg:text-6xl font-normal uppercase font-playfair
+                className={`pointer-events-auto text-3xl md:text-4xl lg:text-6xl font-normal uppercase font-playfair-sc
                   transition-all duration-700
                   ${
                     hoveredSide === "ecrin"

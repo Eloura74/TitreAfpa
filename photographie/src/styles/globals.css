@@ -12,6 +12,9 @@
   line-height: 1.5;
   font-weight: 400;
 
+  /* Polices personnalisées */
+  --font-playfair-sc: "Playfair Display SC", serif;
+
   /* Couleurs de base */
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
@@ -155,6 +158,16 @@ body {
   line-height: 1.7;
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
   font-family: "Syncopate", sans-serif;
+}
+
+/* Utilitaire police script */
+.font-script {
+  font-family: var(--font-script);
+}
+
+/* Utilitaire police Playfair Display SC */
+.font-playfair-sc {
+  font-family: var(--font-playfair-sc);
 }
 
 /* ********************************************** */
