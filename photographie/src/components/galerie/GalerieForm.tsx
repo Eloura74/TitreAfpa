@@ -1,6 +1,6 @@
 // Importations des modules nécessaires
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import galerieData from "../../config/galerie.json";
 import { API_URL as BASE_API_URL } from "../../config/api";
 import { useToast } from "../../components/Toast";
@@ -47,7 +47,10 @@ interface Photo {
   album?: string;
 }
 
+import { useUser } from "../../context/UserContext";
+
 export default function GalerieForm() {
+  const { user, isLoading: userLoading } = useUser();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [form, setForm] = useState<FormType>(formInitial);
   const [tariffConfig, setTariffConfig] = useState<TariffConfigV2>({
@@ -58,6 +61,11 @@ export default function GalerieForm() {
   const { addToast } = useToast();
   const [editId, setEditId] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // Protection interne (Double sécurité)
+  if (!userLoading && (!user.isAuthenticated || !user.isAdmin)) {
+    return <Navigate to="/inscription" replace />;
+  }
 
   useEffect(() => {
     const fetchData = async () => {
