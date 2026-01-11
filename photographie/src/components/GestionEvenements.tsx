@@ -252,17 +252,40 @@ export default function GestionEvenements() {
     try {
       const { id, _id, photos, image: _, ...dataToSend } = form as any;
 
-      // 1. Si un nouveau fichier image a été sélectionné, l'uploader sur Cloudinary
+      // 1. Si un nouveau fichier image a été sélectionné, l'uploader sur Cloudinary (méthode signée)
       let imageUrl = form.image; // Garde l'ancienne URL si pas de nouveau fichier
       if (imageFile) {
-        const formData = new FormData();
-        formData.append("image", imageFile);
-        const uploadRes = await axios.post(
-          `${BASE_API_URL}/api/upload-cloudinary`,
-          formData
+        // Étape 1: Obtenir la signature du backend
+        const signRes = await fetch(
+          `${BASE_API_URL}/api/upload-cloudinary/sign`,
+          { method: "GET", credentials: "include" }
         );
-        imageUrl = uploadRes.data.url;
-        if (!imageUrl) throw new Error("Erreur lors de l'upload de l'image.");
+
+        if (!signRes.ok)
+          throw new Error("Erreur lors de la signature de l'upload.");
+
+        const signData = await signRes.json();
+        const { signature, timestamp, cloud_name, api_key, folder } = signData;
+
+        // Étape 2: Upload direct vers Cloudinary avec la signature
+        const formData = new FormData();
+        formData.append("file", imageFile);
+        formData.append("signature", signature);
+        formData.append("timestamp", timestamp.toString());
+        formData.append("api_key", api_key);
+        formData.append("folder", folder);
+
+        const uploadRes = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
+          { method: "POST", body: formData }
+        );
+
+        const uploadData = await uploadRes.json();
+        imageUrl = uploadData.secure_url;
+        if (!imageUrl)
+          throw new Error(
+            "Erreur lors de l'upload de l'image vers Cloudinary."
+          );
       }
 
       // 2. Inclure l'URL Cloudinary dans les données

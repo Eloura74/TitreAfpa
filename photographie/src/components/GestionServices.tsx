@@ -65,15 +65,34 @@ export default function GestionServices() {
 
     try {
       for (let i = 0; i < files.length; i++) {
-        const formData = new FormData();
-        formData.append("image", files[i]);
-
-        const res = await axios.post(
-          `${BASE_API_URL}/api/upload-cloudinary`,
-          formData
+        // Étape 1: Obtenir la signature du backend
+        const signRes = await fetch(
+          `${BASE_API_URL}/api/upload-cloudinary/sign`,
+          { method: "GET", credentials: "include" }
         );
-        if (res.data.url) {
-          newImages.push(res.data.url);
+
+        if (!signRes.ok)
+          throw new Error("Erreur lors de la signature de l'upload.");
+
+        const signData = await signRes.json();
+        const { signature, timestamp, cloud_name, api_key, folder } = signData;
+
+        // Étape 2: Upload direct vers Cloudinary avec la signature
+        const formData = new FormData();
+        formData.append("file", files[i]);
+        formData.append("signature", signature);
+        formData.append("timestamp", timestamp.toString());
+        formData.append("api_key", api_key);
+        formData.append("folder", folder);
+
+        const uploadRes = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
+          { method: "POST", body: formData }
+        );
+
+        const uploadData = await uploadRes.json();
+        if (uploadData.secure_url) {
+          newImages.push(uploadData.secure_url);
         }
       }
 
