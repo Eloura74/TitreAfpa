@@ -10,7 +10,29 @@ const Header: React.FC = () => {
   const { email, logout } = useAuthStore();
 
   return (
-    <header className="flex justify-between items-center p-4 border-b border-yellow-900 bg-[#0a0a10]">
+    <header
+      className="
+    relative
+    flex justify-between items-center pt-4
+    border-b border-yellow-900
+    bg-[#0a0a10]
+
+    after:content-['']
+    after:absolute
+    after:left-0
+    after:bottom-0
+    after:w-full
+    after:h-6
+    after:pointer-events-none
+
+    after:bg-gradient-to-b
+    after:from-[rgba(212,175,55,0.55)]
+    after:via-[rgba(212,175,55,0.25)]
+    after:to-transparent
+
+    after:blur-md
+  "
+    >
       <span className="font-bold text-yellow-400 text-lg">Photographe Pro</span>
       <nav className="flex gap-6 items-center">
         <Link to="/" className="hover:text-yellow-400">

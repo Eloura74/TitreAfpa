@@ -2,8 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import homeImages from "../config/images.json";
-// import { photoImages, graphismeImages } from "../config/carouselImages"; // REMOVED: Using dynamic data
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import GoldDust from "../components/GoldDust";
 import ContactFooter from "./ContactFooter";
@@ -31,6 +30,7 @@ export default function Home() {
     "photo" | "graph" | "ecrin" | null
   >(null);
   const [isPC, setIsPC] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   // États pour les images dynamiques
   const [dynamicPhotoImages, setDynamicPhotoImages] = useState<string[]>([]);
@@ -64,6 +64,9 @@ export default function Home() {
 
   // --- RÉCUPÉRATION DES IMAGES DYNAMIQUES ---
   useEffect(() => {
+    // Optimisation : ne charger les images du carrousel que sur PC
+    if (!isPC && window.innerWidth < 1024) return;
+
     const fetchImages = async () => {
       try {
         // 1. Photographie
@@ -73,10 +76,8 @@ export default function Home() {
           const images = dataPhoto
             .filter((p: any) => p.categorie !== "EvenementPrive")
             .map((p: any) => {
-              // Logique de sanitization identique à Galerie.tsx
               if (p.src?.startsWith("http")) return p.src;
               if (p.src?.startsWith("/uploads/")) return `${API_URL}${p.src}`;
-              if (p.src?.startsWith("/images/")) return p.src;
               if (p.src?.startsWith("/images/")) return p.src;
               return getWatermarkedImageUrl(`/images/${p.src}`);
             });
@@ -88,11 +89,9 @@ export default function Home() {
         if (resGraph.ok) {
           const dataGraph = await resGraph.json();
           const images = dataGraph.map((oeuvre: any) => {
-            // Logique de sanitization identique à GalerieGraphique.tsx
             if (oeuvre.image?.startsWith("http")) return oeuvre.image;
             if (oeuvre.image?.startsWith("/uploads/"))
               return `${API_URL}${oeuvre.image}`;
-            if (oeuvre.image?.startsWith("/images/")) return oeuvre.image;
             if (oeuvre.image?.startsWith("/images/")) return oeuvre.image;
             return getWatermarkedImageUrl(
               `/images/${oeuvre.image || "/placeholder.jpg"}`
@@ -105,14 +104,14 @@ export default function Home() {
           "Erreur lors du chargement des images pour le carrousel:",
           error
         );
-        // Fallback optionnel si besoin, ou laisser vide
       }
     };
 
     fetchImages();
-  }, []);
+  }, [isPC]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (shouldReduceMotion) return;
     const { clientX, clientY } = e;
     const { w, h } = windowSize.current;
     // Normaliser entre -1 et 1
@@ -122,10 +121,8 @@ export default function Home() {
   };
 
   // Valeurs de parallaxe (inversées pour la profondeur)
-  const parallaxX = mousePosition.x * -15; // Déplacement max 15px
-  const parallaxY = mousePosition.y * -15;
-  // const textParallaxX = mousePosition.x * -25; // REMOVED: Parallax on text sections caused issues
-  // const textParallaxY = mousePosition.y * -25; // REMOVED
+  const parallaxX = shouldReduceMotion ? 0 : mousePosition.x * -15;
+  const parallaxY = shouldReduceMotion ? 0 : mousePosition.y * -15;
 
   useEffect(() => {
     document.title = "Fabien Licata | Photographe & Graphiste";
@@ -159,7 +156,7 @@ export default function Home() {
       </Helmet>
 
       {/* PARTICULES D'OR */}
-      <GoldDust />
+      {!shouldReduceMotion && <GoldDust />}
 
       {/* ARRIÈRE-PLAN : Luminosité ajustée + PARALLAXE */}
       <motion.div
@@ -173,7 +170,7 @@ export default function Home() {
         transition={{
           scale: { duration: 2.5, ease: "easeOut" },
           opacity: { duration: 2.5, ease: "easeOut" },
-          x: { type: "spring", stiffness: 50, damping: 20 }, // Mouvement fluide
+          x: { type: "spring", stiffness: 50, damping: 20 },
           y: { type: "spring", stiffness: 50, damping: 20 },
         }}
         className="fixed inset-0 z-0 pointer-events-none"
@@ -187,6 +184,31 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60" />
         <div className="absolute inset-0 bg-black/10" />
       </motion.div>
+
+      {/* OVERLAY SPOTLIGHT (au-dessus du background, sous le contenu) */}
+      <div className="fixed inset-0 z-[5] pointer-events-none">
+        <div
+          className={`
+            absolute inset-0 transition-opacity duration-700
+            ${hoveredSide ? "opacity-100" : "opacity-0"}
+          `}
+        />
+        <div
+          className={`
+            absolute inset-0
+            ${
+              hoveredSide === "photo"
+                ? "bg-[radial-gradient(60%_40%_at_25%_30%,rgba(212,175,55,0.18),transparent_60%)]"
+                : hoveredSide === "graph"
+                ? "bg-[radial-gradient(60%_40%_at_75%_30%,rgba(212,175,55,0.18),transparent_60%)]"
+                : hoveredSide === "ecrin"
+                ? "bg-[radial-gradient(60%_45%_at_50%_78%,rgba(212,175,55,0.18),transparent_60%)]"
+                : ""
+            }
+            transition-all duration-700
+          `}
+        />
+      </div>
 
       {/* EN-TÊTE : Signature Fabien Licata */}
       <header className="absolute top-2 md:top-2 left-0 w-full z-40 flex justify-center items-center pointer-events-none px-6">
@@ -203,7 +225,13 @@ export default function Home() {
       <div className="absolute left-1/2 top-0 bottom-[40vh] -translate-x-1/2 z-20 pointer-events-none hidden md:block">
         <motion.div
           initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "100%", opacity: 0.4 }}
+          animate={{
+            height: "100%",
+            opacity: hoveredSide ? 0.65 : 0.35,
+            filter: hoveredSide
+              ? "drop-shadow(0 0 10px rgba(212,175,55,0.35))"
+              : "none",
+          }}
           transition={{ delay: 0.5, duration: 1.5, ease: "easeInOut" }}
           className="w-[1px] h-full bg-gradient-to-b from-transparent via-yellow-500/50 to-yellow-500/80"
         />
@@ -238,14 +266,32 @@ export default function Home() {
         {/* Point central */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.8, ease: "backOut" }}
-          className="relative w-1.5 h-1.5 bg-yellow-500 rotate-45 shadow-[0_0_15px_rgba(234,179,8,1)] z-10"
+          animate={{
+            scale: hoveredSide ? 1.15 : 1,
+            boxShadow: hoveredSide
+              ? "0 0 22px rgba(212,175,55,0.75)"
+              : "0 0 12px rgba(212,175,55,0.45)",
+            opacity: 1,
+          }}
+          transition={{
+            delay: 1.2,
+            duration: 0.8,
+            ease: "backOut",
+            type: "spring",
+            stiffness: 120,
+            damping: 18,
+          }}
+          className="relative w-1.5 h-1.5 bg-yellow-500 rotate-45 z-10"
         />
       </div>
 
       {/* CONTENU PRINCIPAL */}
-      <div className="relative z-10 flex flex-col md:flex-row md:flex-wrap min-h-[100dvh] md:h-[100dvh] pt-40 pb-24 md:pt-0 md:pb-0">
+      <motion.div
+        initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 flex flex-col md:flex-row md:flex-wrap min-h-[100dvh] md:h-[100dvh] pt-40 pb-24 md:pt-0 md:pb-0"
+      >
         {/* SECTION PHOTOGRAPHIE (Haut Gauche) */}
         <motion.section
           onMouseEnter={() => setHoveredSide("photo")}
@@ -253,21 +299,45 @@ export default function Home() {
           onClick={() => handleChoix("photographie")}
           className="relative flex flex-1 cursor-pointer flex-col items-center justify-center md:justify-start md:pt-[20vh] py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
         >
-          {/* CARROUSEL PHOTOGRAPHIE */}
-          <CoverflowCarousel
-            images={dynamicPhotoImages}
-            isVisible={
-              isPC && hoveredSide === "photo" && dynamicPhotoImages.length > 0
-            }
-            className="top-[63%]"
+          {/* Overlay d'assombrissement si non survolé */}
+          <div
+            className={`
+              absolute inset-0 pointer-events-none transition-opacity duration-700
+              ${
+                hoveredSide && hoveredSide !== "photo"
+                  ? "opacity-35"
+                  : "opacity-0"
+              }
+              bg-black
+            `}
           />
+
+          {/* CARROUSEL PHOTOGRAPHIE */}
+          <motion.div
+            initial={{ opacity: 0, y: 12, scale: 0.98, filter: "blur(8px)" }}
+            animate={
+              isPC && hoveredSide === "photo" && dynamicPhotoImages.length > 0
+                ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }
+                : { opacity: 0, y: 12, scale: 0.98, filter: "blur(8px)" }
+            }
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute left-1/2 -translate-x-1/2 top-[80%] z-10"
+          >
+            <CoverflowCarousel
+              images={dynamicPhotoImages}
+              isVisible={true} // Géré par le motion.div parent
+              className="" // Position gérée par le parent
+            />
+            {/* Halo discret derrière le carrousel */}
+            <div className="absolute inset-0 -z-10 bg-[radial-gradient(closest-side,rgba(212,175,55,0.14),transparent)] blur-xl" />
+          </motion.div>
 
           <div
             className={`relative z-20 pointer-events-none transition-all duration-1000 ease-in-out text-center px-4
             ${
               hoveredSide === "graph" || hoveredSide === "ecrin"
-                ? "md:opacity-25 md:scale-[0.98] md:blur-[1px]"
-                : "opacity-100 scale-100 blur-0"
+                ? "md:scale-[0.98]" // Plus de blur, juste scale
+                : "scale-100"
             }`}
           >
             <div className="overflow-hidden mb-2">
@@ -288,9 +358,15 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="pointer-events-auto text-3xl md:text-2xl lg:text-6xl font-normal tracking-[0.2em] uppercase 
-                           bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
-                           drop-shadow-[0_0_8px_rgba(234,179,8,0.1)] font-playfair"
+                className={`pointer-events-auto text-3xl md:text-2xl lg:text-6xl font-normal uppercase font-playfair
+                  transition-all duration-700
+                  ${
+                    hoveredSide === "photo"
+                      ? "tracking-[0.26em] drop-shadow-[0_0_14px_rgba(212,175,55,0.18)]"
+                      : "tracking-[0.2em] drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
+                  }
+                  bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
+                `}
               >
                 Photographie
               </motion.h1>
@@ -331,23 +407,47 @@ export default function Home() {
           onClick={() => handleChoix("photo-graphiste")}
           className="relative flex flex-1 cursor-pointer flex-col items-center justify-center md:justify-start md:pt-[20vh] py-10 md:py-0 w-full md:w-1/2 md:h-[60vh]"
         >
+          {/* Overlay d'assombrissement si non survolé */}
+          <div
+            className={`
+              absolute inset-0 pointer-events-none transition-opacity duration-700
+              ${
+                hoveredSide && hoveredSide !== "graph"
+                  ? "opacity-35"
+                  : "opacity-0"
+              }
+              bg-black
+            `}
+          />
+
           {/* CARROUSEL GRAPHISME */}
-          <CoverflowCarousel
-            images={dynamicGraphismeImages}
-            isVisible={
+          <motion.div
+            initial={{ opacity: 0, y: 12, scale: 0.98, filter: "blur(8px)" }}
+            animate={
               isPC &&
               hoveredSide === "graph" &&
               dynamicGraphismeImages.length > 0
+                ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }
+                : { opacity: 0, y: 12, scale: 0.98, filter: "blur(8px)" }
             }
-            className="top-[63%]"
-          />
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute left-1/2 -translate-x-1/2 top-[80%] z-10"
+          >
+            <CoverflowCarousel
+              images={dynamicGraphismeImages}
+              isVisible={true}
+              className=""
+            />
+            {/* Halo discret derrière le carrousel */}
+            <div className="absolute inset-0 -z-10 bg-[radial-gradient(closest-side,rgba(212,175,55,0.14),transparent)] blur-xl" />
+          </motion.div>
 
           <div
             className={`relative z-20 pointer-events-none transition-all duration-1000 ease-in-out text-center px-4
             ${
               hoveredSide === "photo" || hoveredSide === "ecrin"
-                ? "md:opacity-25 md:scale-[0.98] md:blur-[1px]"
-                : "opacity-100 scale-100 blur-0"
+                ? "md:scale-[0.98]"
+                : "scale-100"
             }`}
           >
             <div className="overflow-hidden mb-2">
@@ -368,9 +468,15 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="pointer-events-auto text-3xl md:text-4xl lg:text-6xl font-normal tracking-[0.2em] uppercase 
-                           bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
-                           drop-shadow-[0_0_8px_rgba(234,179,8,0.1)] font-playfair"
+                className={`pointer-events-auto text-3xl md:text-4xl lg:text-6xl font-normal uppercase font-playfair
+                  transition-all duration-700
+                  ${
+                    hoveredSide === "graph"
+                      ? "tracking-[0.26em] drop-shadow-[0_0_14px_rgba(212,175,55,0.18)]"
+                      : "tracking-[0.2em] drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
+                  }
+                  bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
+                `}
               >
                 PHOTO-GRAPHISME
               </motion.h1>
@@ -410,12 +516,25 @@ export default function Home() {
           onMouseLeave={() => setHoveredSide(null)}
           className="relative flex w-full md:w-full cursor-default flex-col items-center justify-start md:justify-center transition-all duration-700 py-10 md:py-0 md:h-[40vh]"
         >
+          {/* Overlay d'assombrissement si non survolé */}
+          <div
+            className={`
+              absolute inset-0 pointer-events-none transition-opacity duration-700
+              ${
+                hoveredSide && hoveredSide !== "ecrin"
+                  ? "opacity-35"
+                  : "opacity-0"
+              }
+              bg-black
+            `}
+          />
+
           <div
             className={`transition-all duration-1000 ease-in-out text-center px-4
             ${
               hoveredSide === "photo" || hoveredSide === "graph"
-                ? "md:opacity-25 md:scale-[0.98] md:blur-[1px]"
-                : "opacity-100 scale-100 blur-0"
+                ? "md:scale-[0.98]"
+                : "scale-100"
             }`}
           >
             <div className="overflow-hidden mb-2">
@@ -436,9 +555,15 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="pointer-events-auto text-3xl md:text-4xl lg:text-6xl font-normal tracking-[0.2em] uppercase 
-                           bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
-                           drop-shadow-[0_0_8px_rgba(234,179,8,0.1)] font-playfair"
+                className={`pointer-events-auto text-3xl md:text-4xl lg:text-6xl font-normal uppercase font-playfair
+                  transition-all duration-700
+                  ${
+                    hoveredSide === "ecrin"
+                      ? "tracking-[0.26em] drop-shadow-[0_0_14px_rgba(212,175,55,0.18)]"
+                      : "tracking-[0.2em] drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
+                  }
+                  bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
+                `}
               >
                 L'Écrin Privé
               </motion.h1>
@@ -468,7 +593,13 @@ export default function Home() {
                 onClick={() => navigate("/connexion")}
                 className="group relative px-8 py-3 overflow-hidden rounded-xl transition-all duration-500"
               >
-                <div className="absolute inset-0 border border-yellow-500/30 group-hover:border-yellow-500/80 transition-colors duration-500" />
+                {/* Sheen effect */}
+                <span
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity
+                  bg-[linear-gradient(110deg,transparent,rgba(255,235,160,0.18),transparent)] translate-x-[-60%] group-hover:translate-x-[60%]
+                  duration-[900ms] ease-out pointer-events-none"
+                />
+                <div className="absolute inset-0 border border-yellow-500/30 group-hover:border-yellow-500/70 transition-colors duration-500" />
                 <div className="absolute inset-0 bg-yellow-500/0 group-hover:bg-yellow-500/10 transition-colors duration-500" />
                 <span
                   className="relative text-[10px] md:text-xs uppercase tracking-[0.2em] group-hover:tracking-[0.3em] transition-all duration-500
@@ -480,11 +611,17 @@ export default function Home() {
             </motion.div>
           </div>
         </motion.section>
-      </div>
+      </motion.div>
 
       {/* FOOTER */}
-
       <ContactFooter />
+
+      {/* INDICATEUR MOBILE (3 points) */}
+      <div className="md:hidden fixed right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-50 pointer-events-none">
+        <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/50" />
+        <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/50" />
+        <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/50" />
+      </div>
     </div>
   );
 }
