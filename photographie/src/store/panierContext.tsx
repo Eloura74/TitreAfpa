@@ -75,6 +75,9 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("panier", JSON.stringify(articles));
   }, [articles]);
 
+  // State pour suivre si le panier a été restauré depuis la BDD
+  const [isRestored, setIsRestored] = useState(false);
+
   // ==============================
   //   Synchronisation avec la BDD (Utilisateurs connectés)
   // ==============================
@@ -82,60 +85,88 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
   // 1. Au chargement ou changement d'utilisateur : on récupère le panier en BDD
   useEffect(() => {
     if (email) {
-      // const token = localStorage.getItem("token"); // Plus nécessaire avec HttpOnly
-      // if (!token) return;
+      setIsRestored(false); // On bloque la sauvegarde tant que la restauration n'est pas finie
 
       axios
         .get(`${API_URL}/api/paniers/me`, {
-          withCredentials: true, // Utilisation du cookie HttpOnly
+          withCredentials: true,
         })
         .then((res) => {
-          const dbArticles = res.data.articles;
-          // Si le panier BDD n'est pas vide, on l'utilise (source de vérité)
-          if (dbArticles && dbArticles.length > 0) {
-            // On mappe pour s'assurer du format (notamment si 'photo' est peuplé)
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const formatted = dbArticles
+          const dbArticles = res.data.articles || [];
+
+          setArticles((prevArticles) => {
+            // Logique de fusion : on prend les articles de la BDD et on fusionne avec le local
+            // Si un article existe en local ET en BDD, on additionne les quantités ?
+            // Ou on priorise la BDD ? Ici on va fusionner intelligemment.
+
+            const merged = [...prevArticles];
+            const dbFormatted = dbArticles
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              .filter((item: any) => item && item.photo) // Filtre robuste
+              .filter((item: any) => item && item.photo)
               .map((item: any) => ({
-                id: item.photo?._id || item.photo, // Utilisation de l'optional chaining
-                nom: item.photo?.nom || item.photo?.titre || "Photo", // Fallback sur titre si nom absent
+                id: item.photo?._id || item.photo,
+                nom: item.photo?.nom || item.photo?.titre || "Photo",
                 prix: item.photo?.prix || 0,
-                image: item.photo?.image || item.photo?.src || "", // Fallback sur src
-                format: item.format || "Standard", // Correction: format est sur l'item, pas la photo
+                image: item.photo?.image || item.photo?.src || "",
+                format: item.format || "Standard",
                 quantite: item.quantite || 1,
                 photoId: item.photo?._id || item.photo,
+                support: item.support || "Papier", // Ajout du support
               }));
-            setArticles(formatted);
-          } else if (articles.length > 0) {
-            // Si BDD vide mais local non vide, on envoie le local vers la BDD
-            saveToDb(articles);
-          }
+
+            dbFormatted.forEach((dbItem: ArticlePanierType) => {
+              const existingIndex = merged.findIndex(
+                (a) =>
+                  a.id === dbItem.id &&
+                  a.format === dbItem.format &&
+                  a.support === dbItem.support
+              );
+
+              if (existingIndex >= 0) {
+                // Si l'article existe déjà, on prend la version BDD ou on additionne ?
+                // Pour éviter les doublons fantômes, on peut dire que la BDD gagne
+                // ou on additionne si on veut être gentil.
+                // Ici : on remplace par la version BDD (source de vérité) + local si on veut
+                // Mais pour simplifier et éviter des quantités énormes : BDD + Local
+                // Attention : si le local était vide, c'est juste BDD.
+                // Si le local avait des items "guest", ils sont ajoutés.
+                // Si le local avait le MÊME item que BDD (cas rare si on vient de se loguer),
+                // on peut additionner.
+                merged[existingIndex].quantite = Math.max(
+                  merged[existingIndex].quantite,
+                  dbItem.quantite
+                );
+              } else {
+                merged.push(dbItem);
+              }
+            });
+
+            return merged;
+          });
+
+          setIsRestored(true); // Restauration terminée, on autorise les sauvegardes
         })
         .catch((err) => {
           console.error("Erreur chargement panier BDD:", err);
+          setIsRestored(true); // En cas d'erreur, on débloque quand même pour ne pas figer le panier
           if (axios.isAxiosError(err) && err.response?.status === 401) {
-            // Token expiré ou invalide : on déconnecte proprement
             useAuthStore.getState().logout();
           }
         });
+    } else {
+      setIsRestored(true); // Si pas connecté, on est "restauré" (mode local)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [email]);
 
   // 2. Fonction pour sauvegarder en BDD
   const saveToDb = (currentArticles: ArticlePanierType[]) => {
-    // const token = localStorage.getItem("token");
     if (!email) return;
 
-    // On garde les infos complètes pour l'envoi
     const payload = currentArticles.map((a) => {
-      // Vérification basique d'un ObjectId MongoDB (24 char hex)
       const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(a.id);
-
       return {
-        photo: isValidObjectId ? a.id : null, // Envoie l'ID seulement s'il est valide
+        photo: isValidObjectId ? a.id : null,
         quantite: a.quantite,
         format: a.format,
         support: a.support,
@@ -149,24 +180,20 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
       .post(
         `${API_URL}/api/paniers/me`,
         { articles: payload },
-        { withCredentials: true } // Utilisation du cookie HttpOnly
+        { withCredentials: true }
       )
       .catch((err) => {
         console.error("Erreur sauvegarde panier BDD:", err);
-        if (axios.isAxiosError(err) && err.response) {
-          console.error("Détails erreur 400:", err.response.data);
-        }
       });
   };
 
-  // 3. À chaque changement du panier local, on sauvegarde en BDD si connecté
+  // 3. À chaque changement du panier local, on sauvegarde en BDD si connecté ET restauré
   useEffect(() => {
-    if (email) {
-      // Debounce ou sauvegarde directe ? Directe pour l'instant (attention au trafic)
+    if (email && isRestored) {
       saveToDb(articles);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [articles, email]);
+  }, [articles, email, isRestored]);
 
   // ==============================
   //   Calcul dynamique du total du panier
