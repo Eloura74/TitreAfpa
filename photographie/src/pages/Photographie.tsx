@@ -80,8 +80,11 @@ export default function Photographie() {
       >
         {/* Titre principal avec dégradé de couleurs et style responsive */}
         <motion.div variants={itemVariants} className="text-center mb-12">
-          <h1 className="hero-title mb-6 text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight break-words">
-            <span className="hero-title-gradient bg-clip-text text-transparent bg-gradient-to-r from-[#d6c487] via-[#ffe992] to-[#c9b36f]">
+          <h1
+            className="mb-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal uppercase font-playfair-sc
+                       tracking-[0.2em] drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
+          >
+            <span className="bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent">
               Photographe
             </span>
           </h1>
