@@ -345,3 +345,26 @@ a:hover {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 233, 146, 0.5);
 }
+
+/* ********************************************** */
+/* ANIMATIONS SKELETON LOADERS                   */
+/* ********************************************** */
+/* Animation shimmer pour effet de chargement */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Animation pulse améliorée pour skeletons */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

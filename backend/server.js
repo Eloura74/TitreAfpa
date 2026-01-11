@@ -171,17 +171,78 @@ const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 
-// 1. Helmet : Définit divers en-têtes HTTP sécurisés
+// 1. Helmet : Définit divers en-têtes HTTP sécurisés (VERSION RENFORCÉE)
 app.use(
   helmet({
+    // Politique de ressources cross-origin
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    
+    // Content Security Policy stricte
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https://res.cloudinary.com"], // Autorise Cloudinary
-        scriptSrc: ["'self'", "'unsafe-inline'"], // Autorise les scripts inline (si besoin)
+        scriptSrc: [
+          "'self'", 
+          "'unsafe-inline'", // React nécessite inline scripts
+          "https://www.paypal.com",
+          "https://js.stripe.com"
+        ],
+        styleSrc: [
+          "'self'", 
+          "'unsafe-inline'", // Tailwind nécessite inline styles
+          "https://fonts.googleapis.com"
+        ],
+        imgSrc: [
+          "'self'", 
+          "data:", 
+          "blob:",
+          "https://res.cloudinary.com", // Cloudinary images
+          "https://www.paypalobjects.com" // PayPal logos
+        ],
+        fontSrc: [
+          "'self'", 
+          "https://fonts.gstatic.com"
+        ],
+        connectSrc: [
+          "'self'",
+          "https://api.stripe.com",
+          "https://api.paypal.com",
+          "https://api.cloudinary.com",
+          process.env.NODE_ENV === 'development' ? "http://localhost:5173" : "https://titre-afpa.vercel.app"
+        ],
+        frameSrc: [
+          "https://www.paypal.com",
+          "https://js.stripe.com"
+        ],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
       },
     },
+    
+    // HTTP Strict Transport Security (HSTS)
+    hsts: {
+      maxAge: 31536000, // 1 an
+      includeSubDomains: true,
+      preload: true
+    },
+    
+    // Protection contre le clickjacking
+    frameguard: {
+      action: 'deny'
+    },
+    
+    // Empêche le navigateur de deviner le MIME type
+    noSniff: true,
+    
+    // Désactive le cache DNS prefetch pour plus de confidentialité
+    dnsPrefetchControl: {
+      allow: false
+    },
+    
+    // Politique de référent stricte
+    referrerPolicy: {
+      policy: 'strict-origin-when-cross-origin'
+    }
   })
 );
 
