@@ -44,7 +44,7 @@ export default function OngletsGestionGalerie() {
     { nom: "Événements", composant: <GestionEvenements /> },
     { nom: "Paiements", composant: <GestionPaiements /> },
     { nom: "Paniers", composant: <GestionPaniers /> },
-    { nom: "Paniers", composant: <GestionPaniers /> },
+
     { nom: "Tarifs", composant: <TarifConfiguratorV2 /> },
     { nom: "Accès Privé", composant: <GestionAccesPrive /> },
     { nom: "Services", composant: <GestionServices /> },
