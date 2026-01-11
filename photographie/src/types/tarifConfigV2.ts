@@ -16,6 +16,7 @@ export interface TariffSupportV2 {
     dmax?: string;
     [key: string]: any;
   };
+  price?: number; // Prix optionnel au niveau support
   formats: TariffFormatV2[];
 }
 
@@ -23,12 +24,14 @@ export interface TariffProductV2 {
   id: string;
   name: string; // ex: "Argentique sur Lambda"
   description?: string;
+  price?: number; // Prix optionnel au niveau produit
   supports: TariffSupportV2[];
 }
 
 export interface TariffCategoryV2 {
   id: string;
   name: string; // ex: "Tirage Photo"
+  price?: number; // Prix optionnel au niveau catégorie
   products: TariffProductV2[];
 }
 

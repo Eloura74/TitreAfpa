@@ -259,6 +259,11 @@ function CategoryNode({
             >
               {category.name}
             </span>
+            {category.price && category.price > 0 && (
+              <span className="text-xs text-[#ffe992] font-mono bg-[#ffe992]/10 px-2 py-0.5 rounded">
+                {category.price} €
+              </span>
+            )}
           </div>
         </div>
 
@@ -395,6 +400,11 @@ function ProductNode({
           >
             {product.name}
           </span>
+          {product.price && product.price > 0 && (
+            <span className="text-xs text-[#ffe992] font-mono bg-[#ffe992]/10 px-2 py-0.5 rounded">
+              {product.price} €
+            </span>
+          )}
         </div>
         <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
           <button
@@ -549,6 +559,11 @@ function SupportNode({
           >
             {support.name}
           </span>
+          {support.price && support.price > 0 && (
+            <span className="text-xs text-[#ffe992] font-mono bg-[#ffe992]/10 px-2 py-0.5 rounded">
+              {support.price} €
+            </span>
+          )}
         </div>
         <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
           <button
@@ -710,16 +725,19 @@ function NodeEditor({ node, config, updateTree }: any) {
 
     if (type === "category") {
       cat.name = formData.name;
+      cat.price = formData.price;
     } else {
       const prod = cat.products.find((p: any) => p.id === path[1]);
       if (type === "product") {
         prod.name = formData.name;
         prod.description = formData.description;
+        prod.price = formData.price;
       } else {
         const supp = prod.supports.find((s: any) => s.id === path[2]);
         if (type === "support") {
           supp.name = formData.name;
           supp.description = formData.description;
+          supp.price = formData.price;
           // TODO: Technical specs
         } else {
           const fmt = supp.formats.find((f: any) => f.id === path[3]);
@@ -762,20 +780,24 @@ function NodeEditor({ node, config, updateTree }: any) {
           </div>
         )}
 
-        {type === "format" && (
-          <div>
-            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
-              Prix (€)
-            </label>
-            <input
-              type="number"
-              name="price"
-              value={formData.price || 0}
-              onChange={handleChange}
-              className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white focus:border-[#ffe992] focus:outline-none transition-colors"
-            />
-          </div>
-        )}
+        <div>
+          <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
+            Prix (€) {type !== "format" && "(Optionnel)"}
+          </label>
+          <input
+            type="number"
+            name="price"
+            value={formData.price || 0}
+            onChange={handleChange}
+            className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white focus:border-[#ffe992] focus:outline-none transition-colors"
+          />
+          {type !== "format" && (
+            <p className="text-[10px] text-gray-500 mt-1">
+              Ce prix s'appliquera par défaut ou en supplément selon votre
+              logique métier.
+            </p>
+          )}
+        </div>
 
         <button
           onClick={handleSave}

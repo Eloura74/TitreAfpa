@@ -6,12 +6,23 @@ import { API_URL } from "../config/api";
 export const tariffServiceV2 = {
   getTariffConfig: async (): Promise<TariffConfigV2> => {
     try {
-      const res = await axios.get(`${API_URL}/api/picto/categories`, {
+      // 1. Tenter de charger depuis la config sauvegardée en BDD
+      const res = await axios.get(`${API_URL}/api/tarifs/config`, {
         withCredentials: true,
       });
 
-      // Mapper les données de la BD (MongoDB _id) vers le format attendu par le front (id string)
-      const categories: TariffCategoryV2[] = res.data.map((cat: any) => ({
+      if (res.data && res.data.categories && res.data.categories.length > 0) {
+        return res.data;
+      }
+
+      // 2. Si vide, fallback sur le seed Picto (lecture seule)
+      console.log("Config DB vide, chargement du seed Picto...");
+      const seedRes = await axios.get(`${API_URL}/api/picto/categories`, {
+        withCredentials: true,
+      });
+
+      // Mapper les données du seed
+      const categories: TariffCategoryV2[] = seedRes.data.map((cat: any) => ({
         id: cat._id,
         name: cat.name,
         products: cat.products.map((prod: any) => ({
@@ -36,19 +47,24 @@ export const tariffServiceV2 = {
 
       return { categories };
     } catch (error) {
-      console.error("Error fetching V2 tariff config from API:", error);
+      console.error("Error fetching V2 tariff config:", error);
       return { categories: [] };
     }
   },
 
-  // Note: Pour l'instant, on ne sauvegarde pas vers l'API Picto (lecture seule depuis le seed)
-  // Si on veut éditer, il faudra implémenter les routes PUT/POST côté backend
   saveTariffConfig: async (config: TariffConfigV2): Promise<TariffConfigV2> => {
-    console.warn("Save not implemented for Picto V2 API yet (Read-only)");
-    return config;
+    try {
+      const res = await axios.post(`${API_URL}/api/tarifs/config`, config, {
+        withCredentials: true,
+      });
+      return res.data;
+    } catch (error) {
+      console.error("Error saving V2 tariff config:", error);
+      throw error;
+    }
   },
 
   clearConfig: () => {
-    console.warn("Clear not implemented for Picto V2 API");
+    console.warn("Clear not implemented for V2 API");
   },
 };
