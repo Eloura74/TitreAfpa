@@ -64,7 +64,8 @@ const NavigationCard: React.FC<NavigationCardProps> = ({ to, image, alt, icon, t
     variants={itemVariants}
     whileHover={{ scale: 1.03, y: -6 }}
     whileTap={{ scale: 0.97 }}
-    className="h-48 sm:h-56 lg:h-64 relative"
+    //ombre sur le bas de la carte
+    className="h-48 sm:h-56 lg:h-64 relative drop-shadow-[2px_4px_8px_rgba(255,233,146,0.6)]"
   >
     {/* Effet de rayonnement élégant sous la carte */}
     <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-[#ffe992]/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -175,17 +176,17 @@ export default function Graphisme() {
       
       {/* Effet de scintillement/éblouissement dans le coin supérieur gauche */}
       <motion.div
-        className="fixed top-0 left-0 w-96 h-96 pointer-events-none z-[5]"
-        initial={{ opacity: 0.3 }}
-        animate={{ 
-          opacity: [0.6, 0.9, 0.6],
-          scale: [1, 1.6, 1]
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
+        // className="fixed top-0 left-0 w-96 h-96 pointer-events-none z-[5]"
+        // initial={{ opacity: 0.3 }}
+        // animate={{ 
+        //   opacity: [0.6, 0.9, 0.6],
+        //   scale: [1, 1.6, 1]
+        // }}
+        // transition={{
+        //   duration: 8,
+        //   repeat: Infinity,
+        //   ease: "easeInOut"
+        // }}
       >
         <div 
           className="absolute top-0 left-0 w-full h-full blur-3xl"
@@ -206,7 +207,7 @@ export default function Graphisme() {
         <img
           src={homeImages.hero} // Source de l'image issue du JSON
           alt="Fabien graphiste" // Texte alternatif pour accessibilité
-          className="hero-image w-full h-full object-cover opacity-40" // Classe CSS pour styliser l'image
+          className="hero-image w-full h-full object-cover opacity-60" // Classe CSS pour styliser l'image
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a10]/80 via-transparent to-[#0a0a10]" />
       </div>
@@ -227,7 +228,7 @@ export default function Graphisme() {
             className="mb-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal uppercase font-playfair-sc
                        tracking-[0.2em] drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]"
           >
-            <span className="bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(255,233,146,0.6)]">
               Le Photo-Graphisme
             </span>
           </h1>
@@ -239,7 +240,7 @@ export default function Graphisme() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
           >
-            <div className="relative backdrop-blur-sm bg-black/20 border border-[#ffe992]/15 rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.2)] overflow-hidden">
+            <div className="relative backdrop-blur-sm bg-black/20 border border-[#ffe992]/15 rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.2)] overflow-hidden drop-shadow-[0_0_6px_rgba(255,233,146,0.3)]">
               {/* Effet de brillance animée */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe992]/10 to-transparent"
@@ -252,8 +253,11 @@ export default function Graphisme() {
                   ease: "easeInOut" 
                 }}
               />
+              {/* Effet de rayonnement élégant sous la carte */}
+              <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe992]/10 to-transparent " />
+              <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe992]/05 to-transparent" />
               <motion.p 
-                className="text-lg md:text-xl text-white/90 font-light leading-relaxed relative z-10"
+                className="text-lg md:text-xl text-white/90 font-light leading-relaxed relative z-10  "
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7, duration: 1 }}
@@ -270,8 +274,9 @@ export default function Graphisme() {
         </motion.div>
 
         {/* Navigation principale sous forme de cartes sur une ligne */}
+        {/* ecart de 4 entre les cartes */}
         <motion.nav
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 w-full max-w-7xl px-4"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 w-full max-w-7xl px-4"
           variants={containerVariants}
         >
           <NavigationCard
