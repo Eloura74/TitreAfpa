@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import { useToast } from "../Toast";
+import PaymentLoader from "./PaymentLoader";
 
 interface PayPalButtonProps {
   articles: Array<{
@@ -16,13 +17,31 @@ interface PayPalButtonProps {
 
 const PayPalButton: React.FC<PayPalButtonProps> = ({ articles, total: _total }) => {
   const { addToast } = useToast();
+  
+  // 🔒 État pour gérer le loader et empêcher les doubles clics
+  const [paymentStage, setPaymentStage] = useState<'creating' | 'verifying' | 'finalizing' | 'complete' | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   return (
-    <PayPalButtons
-      style={{ layout: "vertical", color: "gold", shape: "rect", label: "paypal", height: 45, tagline: false }}
-      createOrder={async () => {
-        try {
-          const response = await fetch("/api/paypal/create-order", {
+    <>
+      {/* 🔄 Loader de paiement affiché pendant le traitement */}
+      {paymentStage && <PaymentLoader stage={paymentStage} />}
+      
+      <PayPalButtons
+        style={{ layout: "vertical", color: "gold", shape: "rect", label: "paypal", height: 45, tagline: false }}
+        // 🔒 Désactive le bouton pendant le traitement
+        disabled={isProcessing}
+        createOrder={async () => {
+          try {
+            // 🔒 Empêche les doubles clics
+            if (isProcessing) {
+              throw new Error("Paiement déjà en cours");
+            }
+            
+            setIsProcessing(true);
+            setPaymentStage('creating');
+            
+            const response = await fetch("/api/paypal/create-order", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -35,6 +54,7 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({ articles, total: _total }) 
           const orderData = await response.json();
 
           if (orderData.id) {
+            setPaymentStage('verifying'); // Passe à l'étape suivante
             return orderData.id;
           } else {
             const errorDetail = orderData?.details?.[0];
@@ -45,12 +65,16 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({ articles, total: _total }) 
             throw new Error(errorMessage);
           }
         } catch (error) {
-          console.error(error);
+          setIsProcessing(false);
+          setPaymentStage(null);
+          addToast("Erreur lors de la création de la commande", "error");
           throw error;
         }
       }}
       onApprove={async (data, actions) => {
         try {
+          setPaymentStage('finalizing'); // Étape de finalisation
+          
           const response = await fetch(
             `/api/paypal/capture-order/${data.orderID}`,
             {
@@ -80,15 +104,32 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({ articles, total: _total }) 
             );
           } else {
             // (3) Successful transaction -> Show confirmation or thank you message
-            // Or go to a success page
-            window.location.href = "/checkout?success=true";
+            setPaymentStage('complete');
+            
+            // Petit délai pour montrer le succès
+            setTimeout(() => {
+              window.location.href = "/checkout?success=true";
+            }, 1000);
           }
         } catch (error) {
-          console.error(error);
+          setIsProcessing(false);
+          setPaymentStage(null);
           addToast("La transaction a échoué. Veuillez réessayer.", "error");
         }
       }}
+      onCancel={() => {
+        // Réinitialise si l'utilisateur annule
+        setIsProcessing(false);
+        setPaymentStage(null);
+        addToast("Paiement annulé", "info");
+      }}
+      onError={() => {
+        setIsProcessing(false);
+        setPaymentStage(null);
+        addToast("Erreur lors du paiement PayPal", "error");
+      }}
     />
+    </>
   );
 };
 

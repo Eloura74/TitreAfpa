@@ -15,6 +15,7 @@ const crypto = require("crypto");
 
 // Importation du modèle User pour interagir avec la collection des utilisateurs dans MongoDB
 const User = require("../models/User.js");
+const RefreshToken = require("../models/RefreshToken");
 
 // Importation du service d'email
 const {
@@ -27,6 +28,9 @@ const { authenticate } = require("../middleware/auth");
 
 // Importation de express-validator pour la validation des entrées
 const { body, validationResult } = require("express-validator");
+
+// Importation du logger
+const logger = require("../utils/logger");
 
 // ==========================
 // Route POST : Inscription
@@ -280,22 +284,45 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    console.log(`[AUTH] Login success for ${email}`);
+    logger.info("Login réussi", { email, userId: user._id });
 
-    const token = jwt.sign(
+    // ✅ Génération de l'access token (courte durée : 15min)
+    const accessToken = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "2h" }
+      { expiresIn: "15m" }
     );
 
-    const cookieOptions = {
+    // ✅ Génération du refresh token (longue durée : 7 jours)
+    const refreshTokenValue = crypto.randomBytes(64).toString("hex");
+    const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 jours
+
+    // Enregistrement du refresh token en base de données
+    await RefreshToken.create({
+      token: refreshTokenValue,
+      userId: user._id,
+      expiresAt: refreshTokenExpiry,
+      ipAddress: req.ip,
+      userAgent: req.get("user-agent"),
+    });
+
+    // ✅ Envoi des cookies sécurisés
+    const accessCookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 2 * 60 * 60 * 1000,
+      maxAge: 15 * 60 * 1000, // 15 minutes
     };
 
-    res.cookie("token", token, cookieOptions);
+    const refreshCookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
+    };
+
+    res.cookie("token", accessToken, accessCookieOptions);
+    res.cookie("refreshToken", refreshTokenValue, refreshCookieOptions);
 
     res.json({
       message: "Connexion réussie",
@@ -317,15 +344,93 @@ router.get("/me", authenticate, (req, res) => {
 });
 
 // ==========================
+// Route POST : Refresh Token
+// ==========================
+/**
+ * Permet de renouveler l'access token avec un refresh token valide
+ * Appelé automatiquement quand l'access token expire (15min)
+ */
+router.post("/refresh", async (req, res) => {
+  try {
+    const { refreshToken } = req.cookies;
+
+    if (!refreshToken) {
+      return res.status(401).json({ error: "Refresh token manquant" });
+    }
+
+    // Vérification du refresh token en base de données
+    const storedToken = await RefreshToken.findOne({ token: refreshToken });
+
+    if (!storedToken) {
+      return res.status(401).json({ error: "Refresh token invalide" });
+    }
+
+    // Vérification de l'expiration
+    if (storedToken.expiresAt < new Date()) {
+      await RefreshToken.deleteOne({ _id: storedToken._id });
+      return res.status(401).json({ error: "Refresh token expiré" });
+    }
+
+    // Récupération de l'utilisateur
+    const user = await User.findById(storedToken.userId);
+    if (!user) {
+      return res.status(401).json({ error: "Utilisateur introuvable" });
+    }
+
+    // ✅ Génération d'un nouvel access token
+    const newAccessToken = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    // Envoi du nouveau cookie access token
+    res.cookie("token", newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    logger.info("Access token renouvelé", { userId: user._id });
+
+    res.json({ message: "Token renouvelé avec succès" });
+  } catch (err) {
+    logger.error("Erreur refresh token", { error: err.message });
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+// ==========================
 // Route POST : Déconnexion
 // ==========================
-router.post("/logout", (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-  });
-  res.json({ message: "Déconnexion réussie" });
+router.post("/logout", async (req, res) => {
+  try {
+    const { refreshToken } = req.cookies;
+
+    // Suppression du refresh token de la base de données
+    if (refreshToken) {
+      await RefreshToken.deleteOne({ token: refreshToken });
+    }
+
+    // Suppression des cookies
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    });
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    });
+
+    res.json({ message: "Déconnexion réussie" });
+  } catch (err) {
+    logger.error("Erreur logout", { error: err.message });
+    res.status(500).json({ error: "Erreur serveur" });
+  }
 });
 
 module.exports = router;

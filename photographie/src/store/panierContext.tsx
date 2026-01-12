@@ -147,7 +147,7 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
           setIsRestored(true); // Restauration terminée, on autorise les sauvegardes
         })
         .catch((err) => {
-          console.error("Erreur chargement panier BDD:", err);
+          // Erreur chargement panier BDD (logging silencieux, pas bloquant)
           setIsRestored(true); // En cas d'erreur, on débloque quand même pour ne pas figer le panier
           if (axios.isAxiosError(err) && err.response?.status === 401) {
             useAuthStore.getState().logout();
@@ -183,7 +183,7 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
         { withCredentials: true }
       )
       .catch((err) => {
-        console.error("Erreur sauvegarde panier BDD:", err);
+        // Erreur sauvegarde panier BDD (logging silencieux, pas critique)
       });
   };
 

@@ -118,6 +118,17 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
     }
   };
 
+  // Gestion de la touche Escape pour fermer le modal (accessibilité)
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
+
   if (loading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black/90 z-[100]">
@@ -127,12 +138,20 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
   }
 
   return (
-    <div className="fixed inset-0 flex items-end md:items-center justify-center bg-black/90 backdrop-blur-md z-[100] p-0 md:p-8">
+    <div 
+      className="fixed inset-0 flex items-end md:items-center justify-center bg-black/90 backdrop-blur-md z-[100] p-0 md:p-8"
+      onClick={onClose}
+      role="presentation"
+    >
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
         className="bg-[#121218] w-full max-w-6xl h-[90dvh] md:h-[85vh] rounded-t-3xl md:rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row border border-white/10"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
       >
         {/* Mobile Header */}
         <div className="md:hidden relative w-full h-32 bg-black/50 flex-shrink-0">
@@ -143,7 +162,7 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
           />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#121218] flex items-end p-4">
             <div>
-              <h2 className="text-lg font-serif font-bold text-white">
+              <h2 id="modal-title" className="text-lg font-serif font-bold text-white">
                 {photo.titre}
               </h2>
               <p className="text-gray-400 text-xs">{photo.categorie}</p>
@@ -152,8 +171,9 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
           <button
             onClick={onClose}
             className="absolute top-3 right-3 p-2 text-white bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+            aria-label="Fermer la fenêtre de sélection"
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
 
@@ -161,7 +181,7 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
         <div className="hidden md:flex w-full md:w-2/3 bg-black/50 relative flex-col flex-1">
           <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start z-10 bg-gradient-to-b from-black/60 to-transparent">
             <div>
-              <h2 className="text-2xl font-serif font-bold text-white mb-1">
+              <h2 id="modal-title" className="text-2xl font-serif font-bold text-white mb-1">
                 {photo.titre}
               </h2>
               <p className="text-gray-300 text-sm">{photo.categorie}</p>
@@ -190,8 +210,9 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
             <button
               onClick={onClose}
               className="p-2 text-gray-400 hover:text-white transition-colors rounded-full hover:bg-white/5"
+              aria-label="Fermer la fenêtre de sélection"
             >
-              <X size={24} />
+              <X size={24} aria-hidden="true" />
             </button>
           </div>
 

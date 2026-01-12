@@ -7,7 +7,7 @@ import "../../styles/footer.css";
 export default function Footer() {
   return (
     // Balise <footer> = élément HTML sémantique pour un pied de page
-    <footer className="footer">
+    <footer className="footer" role="contentinfo">
       
       {/* --- Élément de décoration (accent visuel) --- */}
       <div className="footer-accent"></div>

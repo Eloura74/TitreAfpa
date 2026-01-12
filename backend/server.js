@@ -21,11 +21,10 @@ const cookieParser = require("cookie-parser");
 // Import des différentes routes de l’application
 const galerieRoutes = require("./routes/galerie.js");
 const oeuvresGraphiqueRoutes = require("./routes/oeuvresGraphique.js"); // Routes pour les œuvres graphiques uniques
-const stripeRoutes = require("./routes/stripe.js"); // Routes pour les paiements Stripe
 const authRoutes = require("./routes/auth.js"); // Routes pour l’authentification JWT
 const evenementRoutes = require("./routes/evenement"); // Routes CRUD pour les événements
 const paiementRoutes = require("./routes/paiement"); // Routes CRUD pour les paiements
-const panierRoutes = require("./routes/panier"); // Routes CRUD pour les paniers
+const authRoutes = require("./routes/auth");
 const tarifsRoutes = require("./routes/tarifs"); // Routes CRUD pour la grille tarifaire
 const uploadCloudinaryRoutes = require("./routes/upload"); // Routes d’upload vers Cloudinary
 const paypalRoutes = require("./routes/paypal"); // Routes pour PayPal
@@ -73,10 +72,14 @@ const allowedOrigins = [
 
 // Fonction dynamique pour CORS
 function checkOrigin(origin, callback) {
-  // Autorise prod et local
-  if (!origin) return callback(null, true); // <--- AJOUT : accepte les accès directs sans Origin (navigateurs)
+  // 🔒 SÉCURITÉ : Ne plus accepter les requêtes sans Origin
+  // Les navigateurs envoient toujours un Origin, si absent = requête curl/script
+  if (!origin) {
+    logger.warn('CORS: Request without Origin header blocked', { ip: 'unknown' });
+    return callback(new Error("Not allowed by CORS"));
+  }
 
-  console.log(`[CORS] Checking origin: ${origin}`);
+  logger.debug(`[CORS] Checking origin: ${origin}`);
 
   if (allowedOrigins.includes(origin)) return callback(null, true);
 
@@ -89,7 +92,7 @@ function checkOrigin(origin, callback) {
     return callback(null, true);
   }
 
-  console.error(`[CORS] Blocked origin: ${origin}`);
+  logger.error(`[CORS] Blocked origin: ${origin}`);
   // Sinon, refuse
   return callback(new Error("Not allowed by CORS"));
 }
@@ -127,7 +130,7 @@ app.options("*", cors());
 // MIDDLEWARE GLOBAL DE LOG (pour debug)
 // ================================
 app.use((req, res, next) => {
-  console.log(`[${req.method}] ${req.path}`); // Affiche chaque requête reçue
+  logger.debug(`[${req.method}] ${req.path}`, { ip: req.ip }); // Log structuré des requêtes
   next(); // Passe au middleware suivant
 });
 
@@ -251,7 +254,20 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 1000, // Limite chaque IP à 1000 requêtes par fenêtre (augmenté pour dev/admin)
   message: "Trop de requêtes depuis cette IP, veuillez réessayer plus tard.",
+  standardHeaders: true, // Retourne les headers rate limit
+  legacyHeaders: false, // Désactive les headers X-RateLimit-*
 });
+
+// Rate limiter spécifique pour les paiements (protection anti-spam/fraude)
+const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Max 5 tentatives de paiement par IP (évite spam PayPal)
+  message: "Trop de tentatives de paiement. Veuillez réessayer dans 15 minutes.",
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: false, // Compte même les paiements réussis
+});
+
 app.use("/api", limiter); // Applique le rate limiting à toutes les routes API
 
 // 3. Mongo Sanitize : Empêche l'injection NoSQL
@@ -280,13 +296,13 @@ let cachedPromise = null;
 const connectDB = async () => {
   // Si déjà connecté, on ne fait rien
   if (mongoose.connection.readyState === 1) {
-    console.log("🟢 MongoDB déjà connecté (Cache)");
+    logger.info("MongoDB déjà connecté (Cache)");
     return;
   }
 
   // Si une connexion est en cours, on l'attend
   if (cachedPromise) {
-    console.log("🟡 Connexion MongoDB en cours (Attente du cache)...");
+    logger.info("Connexion MongoDB en cours (Attente du cache)...");
     await cachedPromise;
     return;
   }
@@ -299,18 +315,18 @@ const connectDB = async () => {
 
     // Masquer le mot de passe pour les logs
     const maskedURI = uri.replace(/:([^:@]+)@/, ":****@");
-    console.log(`🔌 Tentative de connexion à MongoDB... (${maskedURI})`);
+    logger.info("Tentative de connexion à MongoDB", { uri: maskedURI });
 
     // On stocke la promesse pour les appels concurrents
     cachedPromise = mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
     });
 
     await cachedPromise;
-    console.log("🟢 MongoDB connecté avec succès !");
+    logger.info("MongoDB connecté avec succès");
   } catch (err) {
-    console.error("🔴 Erreur CRITIQUE de connexion MongoDB:", err.message);
+    logger.error("Erreur CRITIQUE de connexion MongoDB", { error: err.message });
     cachedPromise = null; // Reset du cache en cas d'erreur
     throw err;
   }
@@ -337,61 +353,57 @@ app.get("/", (req, res) => {
 // ROUTES MONTÉES (api/xxx)
 // ================================
 
+// ================================
+// MONTAGE DES ROUTES API
+// ================================
+
 // Route principale pour la galerie (photos + upload local)
 app.use("/api/galerie", galerieRoutes);
-console.log("✅ Routes /api/galerie montées");
 
 // Route des œuvres graphiques uniques
 app.use("/api/oeuvres-graphique", oeuvresGraphiqueRoutes);
-console.log("✅ Route /api/oeuvres-graphique montée");
 
 // Routes événements, paiements, paniers
 app.use("/api/evenements", evenementRoutes);
 app.use("/api/paiements", paiementRoutes);
 app.use("/api/paniers", panierRoutes);
-console.log("✅ Routes /api/evenements, /api/paiements, /api/paniers montées");
 
 // Authentification des utilisateurs (login, register, JWT)
 app.use("/api/auth", authRoutes);
-console.log("✅ Route /api/auth montée");
 
-// Paiement Stripe
-app.use("/api/stripe", stripeRoutes);
-console.log("✅ Route /api/stripe montée");
+// ❌ Paiement Stripe SUPPRIMÉ (seul PayPal utilisé)
+// app.use("/api/stripe", stripeRoutes);
 
 // Grille tarifaire dynamique
 app.use("/api/tarifs", tarifsRoutes);
-console.log("✅ Route /api/tarifs montée");
 
-// Paiement PayPal
-// Paiement PayPal
-app.use("/api/paypal", paypalRoutes);
-console.log("✅ Route /api/paypal montée");
+// Paiement PayPal (avec rate limiter spécifique anti-spam)
+app.use("/api/paypal", paymentLimiter, paypalRoutes);
 
 // Accès Privé (Nouvelle Collection)
 app.use("/api/acces-prive", accesPriveRoutes);
-console.log("✅ Route /api/acces-prive montée");
 
 // Services (Prestations)
 app.use("/api/services", servicesRoutes);
-console.log("✅ Route /api/services montée");
 
 // Albums
 app.use("/api/albums", albumsRoutes);
-console.log("✅ Route /api/albums montée");
 
 // Données Picto (V2)
 app.use("/api/picto", pictoRoutes);
-console.log("✅ Route /api/picto montée");
 
 // Sitemap dynamique (SEO)
 const sitemapRoutes = require("./routes/sitemap");
 app.use("/api", sitemapRoutes);
-console.log("✅ Route /api/sitemap.xml montée (SEO)");
 
-console.log(
-  "✅ GET /api/tarifs fonctionne et la grille tarifaire dynamique est accessible côté front"
-);
+logger.info("Routes API montées avec succès", {
+  routes: [
+    '/api/galerie', '/api/oeuvres-graphique', '/api/evenements', 
+    '/api/paiements', '/api/paniers', '/api/auth',
+    '/api/tarifs', '/api/paypal', '/api/acces-prive', '/api/services',
+    '/api/albums', '/api/picto', '/api/sitemap.xml'
+  ]
+});
 
 // ================================
 // GESTION GLOBALE DES ERREURS - NOUVEAU MIDDLEWARE PROFESSIONNEL
@@ -418,7 +430,7 @@ if (require.main === module) {
   // On attend la connexion à la DB avant de lancer le serveur
   connectDB().then(() => {
     app.listen(PORT, () => {
-      console.log(`🚀 Serveur démarré sur le port ${PORT}`);
+      logger.info("Serveur démarré avec succès", { port: PORT, env: process.env.NODE_ENV || 'development' });
     });
   });
 }

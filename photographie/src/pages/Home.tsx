@@ -136,6 +136,7 @@ export default function Home() {
 
   return (
     <div
+      role="main"
       className="relative min-h-[100dvh] w-full bg-[#080808] overflow-y-auto md:overflow-hidden font-sans text-white"
       onMouseMove={handleMouseMove}
     >

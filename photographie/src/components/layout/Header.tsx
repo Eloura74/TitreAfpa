@@ -11,6 +11,7 @@ const Header: React.FC = () => {
 
   return (
     <header
+      role="banner"
       className="
     relative
     flex justify-between items-center pt-4
@@ -34,7 +35,7 @@ const Header: React.FC = () => {
   "
     >
       <span className="font-bold text-yellow-400 text-lg">Photographe Pro</span>
-      <nav className="flex gap-6 items-center">
+      <nav aria-label="Navigation principale" className="flex gap-6 items-center">
         <Link to="/" className="hover:text-yellow-400">
           Accueil
         </Link>

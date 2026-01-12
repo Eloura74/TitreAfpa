@@ -38,7 +38,7 @@ export default function Services() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a10] text-white font-sans selection:bg-[#ffe992]/30">
+    <div role="main" className="min-h-screen bg-[#0a0a10] text-white font-sans selection:bg-[#ffe992]/30">
       <SEO
         title="Services Photo - Mariages, Portraits, Événements"
         description="Photographe professionnel à votre service : mariages, baptêmes, shootings corporate, événements d'entreprise. Prestations sur-mesure partout en France. Devis gratuit."

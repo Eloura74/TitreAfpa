@@ -1,6 +1,8 @@
 const paypal = require("@paypal/checkout-server-sdk");
 const Photo = require("../models/Photo");
 const OeuvreGraphique = require("../models/OeuvreGraphique");
+const TarifConfig = require("../models/TarifConfig");
+const logger = require("../utils/logger");
 
 // Configuration de l'environnement PayPal
 // En production, utilisez LiveEnvironment au lieu de SandboxEnvironment
@@ -18,109 +20,110 @@ if (process.env.NODE_ENV === "production") {
 }
 const client = new paypal.core.PayPalHttpClient(environment);
 
+/**
+ * 🔒 FONCTION DE VALIDATION STRICTE DES PRIX
+ * Récupère le prix RÉEL depuis la base de données TarifConfig
+ * NE FAIT JAMAIS CONFIANCE AU PRIX ENVOYÉ PAR LE CLIENT
+ */
+async function getValidatedPrice(article) {
+  // 1. Cas spécial HD (prix fixe)
+  if (article.id && article.id.includes("-HD-")) {
+    const photoId = article.id.split("-HD-")[0];
+    if (!photoId || !photoId.match(/^[0-9a-fA-F]{24}$/)) {
+      throw new Error(`ID Photo invalide pour HD: ${article.id}`);
+    }
+    
+    const photo = await Photo.findById(photoId);
+    if (!photo) {
+      throw new Error(`Photo introuvable pour HD: ${photoId}`);
+    }
+    
+    return {
+      nomArticle: `${photo.titre || "Photo"} (Fichier Numérique HD)`,
+      prixUnitaire: 25.0 // Prix fixe HD
+    };
+  }
+
+  // 2. Récupérer la configuration des tarifs V2
+  const tarifConfig = await TarifConfig.findOne();
+  if (!tarifConfig || !tarifConfig.categories) {
+    throw new Error("Configuration des tarifs introuvable");
+  }
+
+  // 3. Chercher le tarif correspondant dans la config
+  let prixValidé = null;
+  let nomArticle = article.nom || "Article";
+
+  for (const category of tarifConfig.categories) {
+    if (!category.formats) continue;
+    
+    for (const format of category.formats) {
+      if (format.nom === article.format) {
+        // Si c'est un tirage avec supports
+        if (format.supports && Array.isArray(format.supports)) {
+          const support = format.supports.find(s => s.nom === article.support);
+          if (support) {
+            prixValidé = support.prix;
+            break;
+          }
+        }
+        // Si c'est un format simple sans supports
+        else if (format.prix !== undefined) {
+          prixValidé = format.prix;
+          break;
+        }
+      }
+    }
+    if (prixValidé !== null) break;
+  }
+
+  // 4. Si prix non trouvé dans config, vérifier DB photo (fallback)
+  const possiblePhotoId = article.id ? article.id.split("-")[0] : "";
+  if (possiblePhotoId && possiblePhotoId.match(/^[0-9a-fA-F]{24}$/)) {
+    const photo = await Photo.findById(possiblePhotoId);
+    if (photo) {
+      nomArticle = photo.titre || article.nom;
+      
+      // Si prix non validé par config, chercher dans photo.tarifs
+      if (prixValidé === null && photo.tarifs && photo.tarifs.length > 0) {
+        const tarif = photo.tarifs.find(
+          t => t.format === article.format && t.support === article.support
+        );
+        if (tarif) {
+          prixValidé = tarif.prix;
+        }
+      }
+    }
+  }
+
+  // 5. Si toujours aucun prix validé, REJETER la commande
+  if (prixValidé === null || prixValidé === undefined) {
+    logger.error("Prix non validable", { 
+      article: article.nom, 
+      format: article.format, 
+      support: article.support,
+      prixClient: article.prix
+    });
+    throw new Error(`Prix non validable pour: ${article.nom} (${article.format})`);
+  }
+
+  return {
+    nomArticle,
+    prixUnitaire: prixValidé
+  };
+}
+
 exports.createOrder = async (req, res) => {
   const { articles } = req.body;
 
   try {
-    // Calcul du total côté serveur pour éviter la fraude
+    // 🔒 Calcul du total côté serveur avec validation STRICTE des prix
     let total = 0;
     const verifiedItems = [];
 
     for (const article of articles) {
-      let prixUnitaire = 0;
-      let nomArticle = article.nom || "Article";
-
-      // 1. Vérification si c'est un article HD (Format spécial)
-      if (article.id && article.id.includes("-HD-")) {
-        // Extraction de l'ID photo (format: photoId-HD-timestamp)
-        const photoId = article.id.split("-HD-")[0];
-
-        if (photoId && photoId.match(/^[0-9a-fA-F]{24}$/)) {
-          const photo = await Photo.findById(photoId);
-          if (photo) {
-            nomArticle = `${photo.titre || "Photo"} (Fichier Numérique HD)`;
-            prixUnitaire = 25.0; // Prix fixe pour HD
-          } else {
-            throw new Error(`Photo introuvable pour l'option HD: ${photoId}`);
-          }
-        } else {
-          throw new Error(`ID Photo invalide pour l'option HD: ${article.id}`);
-        }
-      }
-      // 2. Essayer de trouver une Photo (Cas standard)
-      else if (article.id && article.id.match(/^[0-9a-fA-F]{24}$/)) {
-        const photo = await Photo.findById(article.id);
-
-        if (photo) {
-          nomArticle = photo.titre || article.nom;
-          // Chercher le tarif correspondant au format/support
-          if (photo.tarifs && photo.tarifs.length > 0) {
-            const tarif = photo.tarifs.find(
-              (t) =>
-                t.format === article.format && t.support === article.support
-            );
-            if (tarif) {
-              prixUnitaire = tarif.prix;
-            } else {
-              // Fallback si format non trouvé (ne devrait pas arriver si synchro)
-              console.warn(
-                `Tarif non trouvé pour photo ${article.id} format ${article.format}`
-              );
-              prixUnitaire = photo.prix || 0;
-            }
-          } else {
-            prixUnitaire = photo.prix || 0;
-          }
-        } else {
-          // 3. Essayer de trouver une OeuvreGraphique
-          const oeuvre = await OeuvreGraphique.findById(article.id);
-          if (oeuvre) {
-            nomArticle = oeuvre.titre || article.nom;
-            prixUnitaire = oeuvre.prix;
-          } else {
-            // Si l'article n'est pas trouvé en base, on vérifie si c'est un ID composite (ex: photoId-tarifId-timestamp)
-            // C'est souvent le cas avec le nouveau système de panier
-            const possiblePhotoId = article.id.split("-")[0];
-            if (possiblePhotoId && possiblePhotoId.match(/^[0-9a-fA-F]{24}$/)) {
-              const photo = await Photo.findById(possiblePhotoId);
-              if (photo) {
-                // On fait confiance au prix envoyé SI on retrouve la photo,
-                // MAIS idéalement il faudrait retrouver le tarif exact dans la config V2.
-                // Pour l'instant, on accepte le prix si la photo existe, pour ne pas bloquer.
-                // TODO: Implémenter la vérification stricte des tarifs V2 côté back.
-                nomArticle = photo.titre || article.nom;
-                prixUnitaire = article.prix;
-              } else {
-                throw new Error(
-                  `Article non trouvé ou indisponible: ${article.nom}`
-                );
-              }
-            } else {
-              console.warn(`Article non trouvé en base: ${article.id}`);
-              throw new Error(
-                `Article non trouvé ou indisponible: ${article.nom}`
-              );
-            }
-          }
-        }
-      } else {
-        // ID invalide ou manquant
-        // Vérifier si c'est un ID composite généré par le front
-        const possiblePhotoId = article.id ? article.id.split("-")[0] : "";
-        if (possiblePhotoId && possiblePhotoId.match(/^[0-9a-fA-F]{24}$/)) {
-          // Même logique de fallback que ci-dessus
-          const photo = await Photo.findById(possiblePhotoId);
-          if (photo) {
-            nomArticle = photo.titre || article.nom;
-            prixUnitaire = article.prix;
-          } else {
-            throw new Error(`Article invalide: ${article.nom}`);
-          }
-        } else {
-          console.warn(`ID article invalide: ${article.id}`);
-          throw new Error(`Article invalide: ${article.nom}`);
-        }
-      }
+      // ✅ Validation stricte : récupère le prix depuis la DB
+      const { nomArticle, prixUnitaire } = await getValidatedPrice(article);
 
       total += prixUnitaire * article.quantite;
 
@@ -156,9 +159,10 @@ exports.createOrder = async (req, res) => {
     });
 
     const order = await client.execute(request);
+    logger.info("Commande PayPal créée", { orderId: order.result.id, total: total.toFixed(2) });
     res.json({ id: order.result.id });
   } catch (err) {
-    console.error("Erreur création commande PayPal:", err);
+    logger.error("Erreur création commande PayPal", { error: err.message });
     res.status(500).json({ error: err.message });
   }
 };
@@ -199,7 +203,10 @@ exports.captureOrder = async (req, res) => {
       // utilisateur: req.user ? req.user._id : undefined // Si on avait l'user connecté
     });
 
-    console.log("✅ Paiement PayPal enregistré :", nouveauPaiement);
+    logger.info("Paiement PayPal enregistré", { 
+      montant: nouveauPaiement.montant, 
+      transactionId: nouveauPaiement.transactionId 
+    });
 
     // Import des services d'email
     const {
@@ -210,18 +217,18 @@ exports.captureOrder = async (req, res) => {
     // 1. Email Client
     if (payer.email_address) {
       sendOrderConfirmation(payer.email_address, nouveauPaiement).catch((err) =>
-        console.error("Erreur envoi email confirmation:", err)
+        logger.error("Erreur envoi email confirmation", { error: err.message })
       );
     }
 
     // 2. Email Admin
     sendAdminNotification(nouveauPaiement, items).catch((err) =>
-      console.error("Erreur envoi email admin:", err)
+      logger.error("Erreur envoi email admin", { error: err.message })
     );
 
     res.json(result);
   } catch (err) {
-    console.error("Erreur capture commande PayPal:", err);
+    logger.error("Erreur capture commande PayPal", { error: err.message });
     res.status(500).json({ error: err.message });
   }
 };

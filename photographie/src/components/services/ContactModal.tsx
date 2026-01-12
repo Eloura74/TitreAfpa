@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Service } from "../../types/service";
 
 interface ContactModalProps {
@@ -42,17 +42,39 @@ export const ContactModal: React.FC<ContactModalProps> = ({
     }, 1000);
   };
 
+  // Gestion de la touche Escape pour fermer le modal (accessibilité)
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 backdrop-blur-sm">
-      <div className="bg-[#181824] border border-[#ffe992]/20 rounded-lg shadow-2xl p-6 w-full max-w-md relative">
+    <div 
+      className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 backdrop-blur-sm"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div 
+        className="bg-[#181824] border border-[#ffe992]/20 rounded-lg shadow-2xl p-6 w-full max-w-md relative"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="contact-modal-title"
+      >
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-400 hover:text-white transition"
+          aria-label="Fermer la fenêtre de contact"
         >
           ✕
         </button>
 
-        <h3 className="text-xl font-bold mb-4 text-[#ffe992] text-center">
+        <h3 id="contact-modal-title" className="text-xl font-bold mb-4 text-[#ffe992] text-center">
           Contacter pour "{service.titre}"
         </h3>
 

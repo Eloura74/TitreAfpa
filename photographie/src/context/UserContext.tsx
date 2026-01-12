@@ -68,11 +68,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
     })
         .then((res) => {
           if (res.ok) return res.json();
-          console.error("[UserContext] /api/auth/me failed:", res.status, res.statusText);
+          // Session invalide ou expirée
           throw new Error("Token invalide");
         })
         .then((data) => {
-          console.log("[UserContext] Session restored for:", data.user.email);
+          // Session restaurée avec succès
           // data.user contient les infos de l'utilisateur
           setUser({
             isAuthenticated: true,
@@ -84,8 +84,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             adresse: data.user.adresse,
           });
         })
-        .catch((err) => {
-          console.error("[UserContext] Session check error:", err);
+        .catch(() => {
           // Si erreur (session expirée), on nettoie l'état
           setUser({
             isAuthenticated: false,

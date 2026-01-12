@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const logger = require("../utils/logger");
 
 // Configuration du transporteur (Gmail)
 // Nécessite EMAIL_USER et EMAIL_PASS dans le .env
@@ -41,9 +42,9 @@ const sendVerificationEmail = async (to, token) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`[EMAIL] Verification email sent to ${to}`);
+    logger.info('Email de vérification envoyé', { to });
   } catch (error) {
-    console.error("[EMAIL] Error sending verification email:", error);
+    logger.error('Erreur envoi email de vérification', { to, error: error.message });
     throw error; // Propager l'erreur pour la gérer dans le contrôleur
   }
 };
@@ -70,9 +71,9 @@ const sendWelcomeEmail = async (to, prenom) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`[EMAIL] Welcome email sent to ${to}`);
+    logger.info('Email de bienvenue envoyé', { to });
   } catch (error) {
-    console.error("[EMAIL] Error sending welcome email:", error);
+    logger.error('Erreur envoi email de bienvenue', { to, error: error.message });
   }
 };
 
@@ -100,9 +101,9 @@ const sendOrderConfirmation = async (to, commande) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`[EMAIL] Order confirmation sent to ${to}`);
+    logger.info('Email confirmation commande envoyé', { to });
   } catch (error) {
-    console.error("[EMAIL] Error sending order confirmation:", error);
+    logger.error('Erreur envoi email confirmation commande', { to, error: error.message });
   }
 };
 
@@ -148,9 +149,9 @@ const sendAdminNotification = async (commande, articles) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`[EMAIL] Admin notification sent`);
+    logger.info('Email notification admin envoyé');
   } catch (error) {
-    console.error("[EMAIL] Error sending admin notification:", error);
+    logger.error('Erreur envoi email notification admin', { error: error.message });
   }
 };
 

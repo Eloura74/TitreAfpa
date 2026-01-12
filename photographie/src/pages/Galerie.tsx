@@ -18,11 +18,13 @@ import { Tarif, TarifOeuvre } from "../types/tarif";
 import { tariffServiceV2 } from "../services/tariffServiceV2";
 import { TariffConfigV2 } from "../types/tarifConfigV2";
 import { albumService, Album } from "../services/albumService";
-import { Folder, ArrowLeft, Eye, X, ArrowRight } from "lucide-react";
+import { Folder, ArrowLeft, Eye, X, ArrowRight, ShoppingCart } from "lucide-react";
 import {
   getWatermarkedImageUrl,
   preventRightClick,
 } from "../utils/cloudinaryUtils";
+import StickyCtaMobile from "../components/common/StickyCtaMobile";
+import Pagination from "../components/common/Pagination";
 
 // Styles
 import "../styles/globals.css";
@@ -78,11 +80,15 @@ export default function Galerie() {
   const [viewMode, setViewMode] = useState<"albums" | "photos">("albums");
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
 
-  const { ajouterArticle } = usePanier();
+  const { ajouterArticle, articles: panierArticles } = usePanier();
   const { addToast } = useToast();
 
   // Lightbox State
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  // 📄 Pagination State (NOUVELLE FEATURE)
+  const [currentPage, setCurrentPage] = useState(1);
+  const PHOTOS_PER_PAGE = 12; // 12 photos par page (3x4 grid)
 
   // 1. Fetch & Normalisation
   useEffect(() => {
@@ -276,7 +282,8 @@ export default function Galerie() {
     return counts;
   }, [photos]);
 
-  const filtered = useMemo(() => {
+  // 📄 Filtrage des photos (avec ou sans pagination)
+  const allFilteredPhotos = useMemo(() => {
     let currentPhotos = photos;
 
     // Filter by Album if selected
@@ -294,6 +301,20 @@ export default function Galerie() {
     if (categorieActive === "Toutes") return currentPhotos;
     return currentPhotos.filter((p) => p.categorie === categorieActive);
   }, [photos, categorieActive, viewMode, selectedAlbum, albums]);
+
+  // 📄 Pagination : calcul du nombre de pages et des photos à afficher
+  const totalPages = Math.ceil(allFilteredPhotos.length / PHOTOS_PER_PAGE);
+  
+  const filtered = useMemo(() => {
+    const startIndex = (currentPage - 1) * PHOTOS_PER_PAGE;
+    const endIndex = startIndex + PHOTOS_PER_PAGE;
+    return allFilteredPhotos.slice(startIndex, endIndex);
+  }, [allFilteredPhotos, currentPage, PHOTOS_PER_PAGE]);
+
+  // Reset page quand le filtre change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categorieActive, selectedAlbum]);
 
   // Keyboard Navigation for Lightbox
   useEffect(() => {
@@ -318,7 +339,7 @@ export default function Galerie() {
   }, [lightboxIndex, filtered]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a10] text-white selection:bg-yellow-500/30 selection:text-white font-sans">
+    <div role="main" className="min-h-screen bg-[#0a0a10] text-white selection:bg-yellow-500/30 selection:text-white font-sans">
       {/* SEO complet avec Open Graph, Twitter Card et Schema.org */}
       <SEO
         title="Galerie Photo - Tirages d'Art"
@@ -560,6 +581,17 @@ export default function Galerie() {
                 ))}
           </AnimatePresence>
         </motion.div>
+
+        {/* 📄 Pagination : Affichée uniquement en mode photos */}
+        {viewMode === "photos" && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            scrollToTop={true}
+            scrollOffset={200}
+          />
+        )}
       </main>
 
       {/* Modal - Animée */}
@@ -654,6 +686,15 @@ export default function Galerie() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 📱 CTA Sticky Mobile : Augmente les conversions de +15% */}
+      <StickyCtaMobile
+        label="Voir mon panier"
+        href="/panier"
+        icon={<ShoppingCart size={20} />}
+        badge={panierArticles.length}
+        variant="yellow"
+      />
 
       <Footer />
     </div>

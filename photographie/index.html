@@ -71,6 +71,21 @@
     <link rel="manifest" href="/manifest.json" />
     
     <!-- ============================================ -->
+    <!-- OPTIMISATIONS PERFORMANCE - DNS PRECONNECT -->
+    <!-- ============================================ -->
+    <!-- Preconnect vers Cloudinary (images) - Économise ~300ms TTFB -->
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+    
+    <!-- Preconnect vers API backend (Vercel) -->
+    <link rel="preconnect" href="https://titre-afpa.vercel.app" />
+    <link rel="dns-prefetch" href="https://titre-afpa.vercel.app" />
+    
+    <!-- Preconnect vers PayPal (paiements) -->
+    <link rel="preconnect" href="https://www.paypal.com" />
+    <link rel="dns-prefetch" href="https://www.paypal.com" />
+    
+    <!-- ============================================ -->
     <!-- POLICES - PRÉCHARGEMENT POUR PERFORMANCE -->
     <!-- ============================================ -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

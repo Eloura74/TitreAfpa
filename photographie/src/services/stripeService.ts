@@ -1,14 +1,11 @@
+// ❌ FICHIER DÉSACTIVÉ : Stripe retiré du projet, seul PayPal est utilisé
 // ==============================
-//  Service pour communiquer avec l'API Stripe côté backend
+//  Service pour communiquer avec l'API Stripe côté backend (OBSOLÈTE)
 // ==============================
+/*
 import { ArticlePanierType } from "../types/panier";
 import { API_URL } from "../config/api";
 
-/**
- * Fonction qui crée une session de paiement Stripe avec les articles du panier.
- * @param articles - liste des articles présents dans le panier
- * @returns la réponse JSON contenant l'URL de redirection vers Stripe
- */
 export async function createCheckoutSession(articles: ArticlePanierType[]) {
   // On adapte les données des articles pour correspondre au format attendu par Stripe
   const articlesStripe = articles.map((article) => ({
@@ -35,4 +32,10 @@ export async function createCheckoutSession(articles: ArticlePanierType[]) {
 
   // On retourne la réponse convertie en JSON (typiquement contient l'URL de paiement)
   return response.json();
+}
+*/
+
+// Fonction vide pour éviter les erreurs d'import
+export async function createCheckoutSession() {
+  throw new Error("Stripe désactivé - Utiliser PayPal uniquement");
 }

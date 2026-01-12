@@ -6,6 +6,10 @@ import { HelmetProvider } from "react-helmet-async"; // Gestion du SEO dynamique
 import "./index.css"; // Styles globaux CSS du projet
 import "./styles/globals.css"; // Styles additionnels globaux
 import App from "./App.tsx"; // Composant principal de l'application
+import { setupAxiosInterceptor } from "./services/axiosInterceptor"; // ✅ Interceptor refresh token
+
+// ✅ Configuration de l'interceptor axios pour le refresh token automatique
+setupAxiosInterceptor();
 
 // Création d'une instance de QueryClient qui gère le cache, les requêtes et mutations React Query
 const queryClient = new QueryClient();
