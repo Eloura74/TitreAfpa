@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Service } from "../types/service";
 import { ContactModal } from "../components/services/ContactModal";
@@ -6,13 +6,184 @@ import PageTitle from "../components/ui/PageTitle";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import { API_URL as BASE_API_URL } from "../config/api";
-import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { Sparkles, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import SEO from "../components/SEO";
 import { photographerSchema, createBreadcrumbSchema } from "../utils/schemas";
 
 const API_URL = `${BASE_API_URL}/api/services`;
+
+// Composant ServiceCard avec effet flip
+interface ServiceCardProps {
+  service: Service;
+  index: number;
+  onReserve: () => void;
+}
+
+const ServiceCard: React.FC<ServiceCardProps> = ({ service, index, onReserve }) => {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Fermer le flip au clic extérieur
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isFlipped && cardRef.current && !cardRef.current.contains(event.target as Node)) {
+        setIsFlipped(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isFlipped]);
+
+  return (
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.1 }}
+      className="relative"
+      style={{ perspective: '1200px' }}
+    >
+      <motion.div
+        className="relative w-full h-[550px]"
+        initial={false}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{
+          type: 'spring',
+          stiffness: 100,
+          damping: 45,
+        }}
+        style={{ transformStyle: 'preserve-3d' }}
+      >
+        {/* FACE AVANT */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'translateZ(1px)',
+          }}
+        >
+          <div className="group h-full flex flex-col relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.6)]">
+            {/* Image */}
+            <div className="relative w-full h-64 overflow-hidden bg-black/20">
+              <img
+                src={service.images[0] || "/placeholder-service.jpg"}
+                alt={service.titre}
+                className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+            </div>
+
+            {/* Contenu */}
+            <div className="relative flex flex-col px-4 py-3 bg-gradient-to-b from-black/30 to-black/40 flex-1">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#ffe992]/5 via-transparent to-black opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+
+              <div className="relative z-10 flex flex-col gap-2 h-full">
+                {/* Titre */}
+                <h3 className="text-lg font-playfair-sc uppercase tracking-wider text-[#ffe992] font-bold leading-tight text-center drop-shadow-[0_0_20px_rgba(255,233,146,0.8)] animate-pulse-subtle">
+                  {service.titre}
+                </h3>
+
+                {/* Prix */}
+                <div className="text-center mb-2">
+                  <span className="text-xs text-gray-400 uppercase tracking-wider block mb-1">
+                    À partir de
+                  </span>
+                  <span className="text-xl text-[#ffe992] font-bold">
+                    {service.prix > 0 ? `${service.prix}€` : "Sur devis"}
+                  </span>
+                </div>
+
+                {/* Description courte */}
+                <p className="text-[10px] text-gray-300 leading-relaxed line-clamp-3 mb-auto">
+                  {service.description}
+                </p>
+
+                {/* Boutons */}
+                <div className="flex flex-col gap-2 mt-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsFlipped(true);
+                    }}
+                    className="w-full bg-gradient-to-r from-[#ffe992]/20 to-[#ffe992]/30 hover:from-[#ffe992]/30 hover:to-[#ffe992]/40 text-[#ffe992] text-xs font-bold uppercase tracking-wider py-2 rounded-lg border border-[#ffe992]/40 hover:border-[#ffe992]/70 transition-all duration-300 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Voir plus</span>
+                  </button>
+                  <button
+                    onClick={onReserve}
+                    className="w-full bg-gradient-to-r from-[#ffe992] to-[#f4d677] text-black text-xs font-bold uppercase tracking-wider py-2.5 rounded-lg hover:from-[#f4d677] hover:to-[#ffe992] transition-all duration-300 shadow-[0_4px_12px_rgba(255,233,146,0.4)] hover:shadow-[0_6px_16px_rgba(255,233,146,0.6)] hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    Réserver
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* FACE ARRIÈRE - Description complète */}
+        <div
+          className="absolute inset-0 overflow-hidden rounded-xl bg-gradient-to-br from-[#1a1a20] via-black/95 to-[#0f0f14] border-2 border-[#ffe992]/60 shadow-[0_0_40px_rgba(255,233,146,0.6),inset_0_0_30px_rgba(255,233,146,0.1)]"
+          style={{
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg) translateZ(1px)',
+          }}
+        >
+          {/* Effets lumineux */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#ffe992]/15 via-[#ffe992]/5 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#ffe992] to-transparent" />
+
+          <div className="relative h-full flex flex-col p-5">
+            {/* Titre avec séparateur */}
+            <div className="mb-4 pb-3 border-b border-[#ffe992]/30">
+              <h3 className="text-xl font-playfair-sc font-bold text-[#ffe992] drop-shadow-[0_0_15px_rgba(255,233,146,0.8)] text-center uppercase tracking-wider">
+                {service.titre}
+              </h3>
+              <p className="text-center text-[#ffe992] text-sm font-bold mt-2">
+                {service.prix > 0 ? `À partir de ${service.prix}€` : "Sur devis"}
+              </p>
+            </div>
+
+            {/* Description complète avec scroll */}
+            <div className="flex-1 overflow-y-auto mb-4 pr-2 scrollbar-thin scrollbar-thumb-[#ffe992]/40 scrollbar-track-[#ffe992]/10 hover:scrollbar-thumb-[#ffe992]/60">
+              <p className="text-sm text-gray-200 leading-relaxed text-justify whitespace-pre-line">
+                {service.description || "Aucune description disponible."}
+              </p>
+            </div>
+
+            {/* Boutons d'action */}
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={onReserve}
+                className="w-full bg-gradient-to-r from-[#ffe992] to-[#f4d677] text-black text-xs font-bold uppercase tracking-wider py-3 rounded-lg hover:from-[#f4d677] hover:to-[#ffe992] transition-all duration-300 shadow-[0_6px_20px_rgba(255,233,146,0.5)] hover:shadow-[0_8px_28px_rgba(255,233,146,0.7)] hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Réserver maintenant
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsFlipped(false);
+                }}
+                className="w-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider py-2.5 rounded-lg border border-white/20 hover:border-white/30 transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <ArrowLeft size={16} className="flex-shrink-0" />
+                <span>Retour</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
 
 export default function Services() {
   const [services, setServices] = useState<Service[]>([]);
@@ -70,76 +241,45 @@ export default function Services() {
         {/* Header Cinematic */}
         <PageTitle
           title="Nos Prestations"
-          subtitle="Découvrez nos services sur mesure pour capturer vos moments les plus précieux. Mariages, shootings, événements... nous sublimons chaque instant."
-          showSeparator
+          showSeparator={false}
         />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service, index) => (
+        
+        {/* Description animée style Photographie/Graphisme */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.8 }}
+          className="max-w-2xl mx-auto mb-12 text-center"
+        >
+          <div className="relative backdrop-blur-sm bg-black/20 border border-[#ffe992]/15 rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden drop-shadow-[0_0_6px_rgba(255,233,146,0.3)]">
+            {/* Effet de brillance animée */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              key={service._id || service.id}
-              className="group relative bg-[#12121a]/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/5 hover:border-[#ffe992]/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.1)] flex flex-col"
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe992]/10 to-transparent"
+              initial={{ x: '-100%' }}
+              animate={{ x: '200%' }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                repeatDelay: 5,
+                ease: "easeInOut"
+              }}
+            />
+            <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe992]/10 to-transparent" />
+            <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe992]/05 to-transparent" />
+            <motion.p 
+              className="text-lg md:text-xl text-white/90 font-light leading-relaxed relative z-10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7, duration: 1 }}
             >
-              {/* Badge Catégorie */}
-              <div className="absolute top-4 right-4 z-20">
-                <span className="bg-black/60 backdrop-blur-md text-[#ffe992] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-widest border border-[#ffe992]/20 shadow-lg">
-                  {service.categorie}
-                </span>
-              </div>
+              Découvrez nos <span className="font-semibold text-[#ffe992] drop-shadow-[0_0_8px_rgba(255,233,146,0.6)]">services sur mesure</span> pour capturer vos moments les plus précieux. Mariages, shootings, événements... nous sublimons chaque instant.
+            </motion.p>
+          </div>
+        </motion.div>
 
-              {/* Image principale */}
-              <div className="h-72 overflow-hidden relative">
-                <img
-                  src={service.images[0] || "/placeholder-service.jpg"}
-                  alt={service.titre}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a10] via-transparent to-transparent opacity-80"></div>
-              </div>
-
-              <div className="p-8 flex-1 flex flex-col -mt-12 relative z-10">
-                <h3 className="text-2xl font-serif italic text-white mb-3 group-hover:text-[#ffe992] transition-colors">
-                  {service.titre}
-                </h3>
-                <p className="text-gray-400 text-sm mb-6 flex-1 line-clamp-3 font-light leading-relaxed">
-                  {service.description}
-                </p>
-
-                <div className="flex items-center justify-between pt-6 border-t border-white/5 mt-auto">
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 uppercase tracking-wider">
-                      À partir de
-                    </span>
-                    <span className="text-xl font-bold text-[#ffe992]">
-                      {service.prix > 0 ? `${service.prix}€` : "Sur devis"}
-                    </span>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <Link
-                      to={`/services/${service._id || service.id}`}
-                      className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors border border-white/5"
-                      title="Voir détails"
-                    >
-                      <ArrowRight
-                        size={18}
-                        className="-rotate-45 group-hover:rotate-0 transition-transform duration-300"
-                      />
-                    </Link>
-                    <button
-                      onClick={() => setSelectedService(service)}
-                      className="px-5 py-2 bg-[#ffe992] text-black rounded-full font-bold text-xs uppercase tracking-wider hover:bg-white transition-colors shadow-[0_0_15px_rgba(255,233,146,0.2)]"
-                    >
-                      Réserver
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {services.map((service, index) => (
+            <ServiceCard key={service._id || service.id} service={service} index={index} onReserve={() => setSelectedService(service)} />
           ))}
         </div>
 

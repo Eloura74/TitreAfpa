@@ -302,8 +302,8 @@ const PhotoCard: React.FC<PhotoCardProps> = ({ photo, onView, onAddToCart }) => 
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                 
-                {/* Overlay au survol */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6 gap-3">
+                {/* Overlay au survol - Desktop uniquement */}
+                <div className="hidden md:flex absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex-col justify-end p-6 gap-3">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -327,12 +327,36 @@ const PhotoCard: React.FC<PhotoCardProps> = ({ photo, onView, onAddToCart }) => 
                     <span>Voir plus</span>
                   </button>
                 </div>
+
+                {/* Boutons fixes - Mobile uniquement */}
+                <div className="md:hidden absolute bottom-3 left-3 right-3 flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onView();
+                    }}
+                    className="flex-1 bg-white/20 backdrop-blur-md text-white font-bold text-[10px] uppercase tracking-wider py-2 rounded hover:bg-white/30 transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Eye size={14} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsFlipped(true);
+                    }}
+                    className="flex-1 bg-[#ffe992] text-black font-bold text-[10px] uppercase tracking-wider py-2 rounded hover:bg-[#d6c487] transition-colors flex items-center justify-center gap-1"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
               
               {/* Contenu - Ultra compact */}
               <div className="relative flex flex-col px-3 py-2 bg-gradient-to-b from-black/30 to-black/40">
                 {/* Effet de lueur subtile en fond */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#ffe992]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#ffe992]/5 via-transparent to-black opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                 
                 <div className="relative z-10 flex flex-col gap-3.5">
                   {/* Titre centré avec effet glow */}
