@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import SEO from "../components/SEO";
