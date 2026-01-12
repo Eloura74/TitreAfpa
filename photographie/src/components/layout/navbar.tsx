@@ -51,7 +51,7 @@ export default function Navbar({ variant }: { variant?: "client" }) {
             <img
               src="/images/logoHome.png"
               alt="Fabien Licata"
-              className="h-12 md:h-42 w-auto object-contain"
+              className="h-16 md:h-20 w-auto object-contain"
             />
           </Link>
 
@@ -85,7 +85,7 @@ export default function Navbar({ variant }: { variant?: "client" }) {
           <img
             src="/images/logoHome.png"
             alt="Fabien Licata"
-            className="h-10 md:h-20 w-auto object-contain"
+            className="h-16 md:h-20 w-auto object-contain"
           />
         </Link>
 
