@@ -97,7 +97,12 @@ function sendErrorProd(err, res) {
   } 
   // Erreur de programmation (bug) : on cache les détails
   else {
-    // Log de l'erreur pour les développeurs
+    // Log de l'erreur pour les développeurs (avec console.error pour Vercel)
+    console.error('[ERROR HANDLER] ERREUR INTERNE NON GÉRÉE');
+    console.error('[ERROR HANDLER] Message:', err.message);
+    console.error('[ERROR HANDLER] Stack:', err.stack);
+    console.error('[ERROR HANDLER] Full error:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+    
     logger.error('ERREUR INTERNE NON GÉRÉE', {
       error: err.message,
       stack: err.stack,
@@ -122,7 +127,16 @@ function globalErrorHandler(err, req, res, next) {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
-  // Log de l'erreur
+  // Log console pour Vercel (visible dans les logs Functions)
+  console.error('═══════════════════════════════════════');
+  console.error('[GLOBAL ERROR HANDLER] Erreur capturée');
+  console.error('[GLOBAL ERROR HANDLER] Route:', req.method, req.path);
+  console.error('[GLOBAL ERROR HANDLER] Message:', err.message);
+  console.error('[GLOBAL ERROR HANDLER] Status:', err.statusCode);
+  console.error('[GLOBAL ERROR HANDLER] Stack:', err.stack);
+  console.error('═══════════════════════════════════════');
+
+  // Log de l'erreur (fichier)
   logger.error(`[${req.method}] ${req.path}`, {
     error: err.message,
     statusCode: err.statusCode,
