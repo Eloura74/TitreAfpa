@@ -75,11 +75,14 @@ const allowedOrigins = [
 
 // Fonction dynamique pour CORS
 function checkOrigin(origin, callback) {
-  // 🔒 SÉCURITÉ : Ne plus accepter les requêtes sans Origin
-  // Les navigateurs envoient toujours un Origin, si absent = requête curl/script
+  // ✅ Autorise les requêtes sans Origin (curl, requêtes serveur, same-origin)
+  // Les requêtes sans Origin sont légitimes dans ces cas :
+  // - curl/Postman (pour tests)
+  // - Requêtes serveur-to-serveur
+  // - Requêtes same-origin (même domaine)
   if (!origin) {
-    logger.warn('CORS: Request without Origin header blocked', { ip: 'unknown' });
-    return callback(new Error("Not allowed by CORS"));
+    logger.debug('[CORS] Request without Origin header (allowed)');
+    return callback(null, true);
   }
 
   logger.debug(`[CORS] Checking origin: ${origin}`);
