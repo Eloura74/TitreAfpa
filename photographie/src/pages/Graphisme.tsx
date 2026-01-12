@@ -165,13 +165,13 @@ export default function Graphisme() {
           >
             <Link
               to="/galerie-graphique"
-              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.4),inset_0_0_20px_rgba(255,233,146,0.1)]"
+              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.9),inset_0_0_20px_rgba(255,233,146,0.9)]"
             >
               <div className="absolute inset-0">
                 <img 
                   src={galerieGraphImage} 
                   alt="Galerie Graphique" 
-                  className="w-full h-full object-cover opacity-50 group-hover:opacity-65 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
+                  className="w-full h-full object-cover opacity-70 group-hover:opacity-95 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
               </div>
@@ -198,13 +198,13 @@ export default function Graphisme() {
           >
             <Link
               to="/services"
-              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.4),inset_0_0_20px_rgba(255,233,146,0.1)]"
+              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.9),inset_0_0_20px_rgba(255,233,146,0.9)]"
             >
               <div className="absolute inset-0">
                 <img 
                   src="/images/shooting.jpg" 
                   alt="Services" 
-                  className="w-full h-full object-cover opacity-50 group-hover:opacity-65 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
+                  className="w-full h-full object-cover opacity-70 group-hover:opacity-95 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
               </div>
@@ -216,7 +216,7 @@ export default function Graphisme() {
                   Services
                 </h3>
                 <p className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  Création, design...
+                  Mariage, shootings...
                 </p>
               </div>
             </Link>
@@ -231,14 +231,14 @@ export default function Graphisme() {
           >
             <Link
               to="/evenements"
-              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.4),inset_0_0_20px_rgba(255,233,146,0.1)]"
+              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.9),inset_0_0_20px_rgba(255,233,146,0.9)]"
             >
               {/* Image de fond */}
               <div className="absolute inset-0">
                 <img 
                   src={eventImage} 
                   alt="Événements" 
-                  className="w-full h-full object-cover opacity-50 group-hover:opacity-65 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
+                  className="w-full h-full object-cover opacity-70 group-hover:opacity-95 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
               </div>
@@ -252,7 +252,7 @@ export default function Graphisme() {
                   Événements
                 </h3>
                 <p className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  Ateliers graphiques.
+                  Tous les événements photo.
                 </p>
               </div>
             </Link>
@@ -267,13 +267,13 @@ export default function Graphisme() {
           >
             <Link
               to="/about"
-              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.4),inset_0_0_20px_rgba(255,233,146,0.1)]"
+              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.9),inset_0_0_20px_rgba(255,233,146,0.9)]"
             >
               <div className="absolute inset-0">
                 <img 
                   src="/images/about.jpg" 
                   alt="À Propos" 
-                  className="w-full h-full object-cover opacity-50 group-hover:opacity-65 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
+                  className="w-full h-full object-cover opacity-70 group-hover:opacity-95 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
               </div>
@@ -300,14 +300,14 @@ export default function Graphisme() {
           >
             <Link
               to="/panier"
-              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.4),inset_0_0_20px_rgba(255,233,146,0.1)]"
+              className="group h-full block relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.9),inset_0_0_20px_rgba(255,233,146,0.9)]"
             >
               {/* Image de fond */}
               <div className="absolute inset-0">
                 <img 
                   src="/images/pannier.jpg" 
                   alt="Panier" 
-                  className="w-full h-full object-cover opacity-50 group-hover:opacity-65 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
+                  className="w-full h-full object-cover opacity-70 group-hover:opacity-95 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
               </div>

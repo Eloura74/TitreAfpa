@@ -132,18 +132,13 @@ export default function Galerie() {
 
                   // Logic: If the format ID is in availableIds, we add it.
                   if (availableIds.includes(fmt.id)) {
-                    // Calculate total price (sum of all levels)
-                    const totalPrice =
-                      (cat.price || 0) +
-                      (prod.price || 0) +
-                      (supp.price || 0) +
-                      (fmt.price || 0);
-
+                    // Le prix final est uniquement celui du format (comme dans SelectionFormatModalV2)
+                    // Les prix des niveaux parents (catégorie, produit, support) sont informatifs uniquement
                     resolved.push({
                       id: fmt.id,
                       format: fmt.name,
                       support: `${supp.name} (${prod.name})`,
-                      prix: totalPrice,
+                      prix: fmt.price,
                     });
                   }
                 });
@@ -548,7 +543,14 @@ export default function Galerie() {
                         <div className="w-full h-[1px] bg-white/10 group-hover:bg-[#ffe992]/30 transition-colors duration-500" />
 
                         <span className="text-[#ffe992] text-sm font-medium tracking-widest">
-                          {photo.prix} €
+                          {/* Calcul du prix minimum parmi les tarifs disponibles */}
+                          {photo.tarifs && photo.tarifs.length > 0
+                            ? `À partir de ${Math.min(
+                                ...photo.tarifs.map((t) => t.prix)
+                              ).toFixed(2)} €`
+                            : photo.prix > 0
+                            ? `${photo.prix.toFixed(2)} €`
+                            : "Prix sur demande"}
                         </span>
 
                         {/* Boutons d'action Mobile Uniquement */}
