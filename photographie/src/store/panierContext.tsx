@@ -182,7 +182,7 @@ export const PanierProvider = ({ children }: { children: ReactNode }) => {
         { articles: payload },
         { withCredentials: true }
       )
-      .catch((err) => {
+      .catch(() => {
         // Erreur sauvegarde panier BDD (logging silencieux, pas critique)
       });
   };
