@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Composants SEO & Layout
@@ -9,7 +9,6 @@ import Footer from "../components/layout/Footer";
 import Skeleton from "../components/Skeleton";
 import { useToast } from "../components/Toast";
 import { SelectionFormatModalV2 } from "../components/galerie/SelectionFormatModalV2";
-import PageTitle from "../components/ui/PageTitle";
 
 // Contextes & Types
 import { usePanier } from "../store/panierContext";
@@ -25,6 +24,7 @@ import {
 } from "../utils/cloudinaryUtils";
 import StickyCtaMobile from "../components/common/StickyCtaMobile";
 import Pagination from "../components/common/Pagination";
+import homeImages from "../config/images.json";
 
 // Styles
 import "../styles/globals.css";
@@ -62,6 +62,360 @@ const cardVariants = {
     transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
   },
   exit: { scale: 0.98, opacity: 0, transition: { duration: 0.3 } },
+};
+
+// Composant AlbumCard avec effet flip 3D
+interface AlbumCardProps {
+  album: Album;
+  photoCounts: Record<string, number>;
+  albumImages: Photo[];
+  onSelect: () => void;
+}
+
+const AlbumCard: React.FC<AlbumCardProps> = ({ album, photoCounts, albumImages, onSelect }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // OPTIMISATION : Le carrousel ne tourne QUE si la carte est retournée
+  useEffect(() => {
+    if (!isFlipped || albumImages.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % albumImages.length);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isFlipped, albumImages.length]); // Dépendance à isFlipped ajoutée
+
+  // Gestion du survol avec délai pour éviter les flips accidentels
+  const handleMouseEnter = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsFlipped(true);
+    }, 300);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setIsFlipped(false);
+  };
+
+  return (
+    <div
+      className="group relative cursor-pointer h-full"
+      style={{ perspective: '1200px' }} // Perspective augmentée pour moins de distorsion
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={onSelect}
+    >
+      {/* Effet de rayonnement élégant sous la carte */}
+      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-[#ffe992]/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-4 bg-[#ffe992]/30 blur-lg rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+
+      {/* Container animé avec Framer Motion - Animation adoucie */}
+      <motion.div
+        className="relative w-full aspect-square"
+        initial={false}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{
+          type: 'spring',
+          stiffness: 100, // Stiffness plus faible pour une animation plus douce
+          damping: 45, // Damping plus élevé pour une animation plus douce et moins brutale
+        }}
+        style={{
+          transformStyle: 'preserve-3d',
+        }}
+      >
+        {/* --- FACE AVANT --- */}
+        <div
+          className="absolute inset-0 overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 drop-shadow-[2px_4px_12px_rgba(255,233,146,0.4)]"
+          style={{
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'translateZ(1px)', // Fix Safari pour éviter le clipping
+          }}
+        >
+          {/* Effet Glow au survol */}
+          <div className="absolute inset-0 transition-opacity duration-500 opacity-0 group-hover:opacity-100 shadow-[0_0_35px_rgba(255,233,146,0.3),inset_0_0_20px_rgba(255,233,146,0.05)] pointer-events-none" />
+
+          <div className="relative w-full h-full">
+            {album.imageCouverture ? (
+              <img
+                src={getWatermarkedImageUrl(album.imageCouverture)}
+                alt={album.titre}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100"
+                onContextMenu={preventRightClick}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-white/5">
+                <Folder size={64} className="text-gray-600 group-hover:text-[#ffe992] transition-colors" />
+              </div>
+            )}
+
+            {/* Overlay gradient renforcé */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+
+            {/* Effet glassmorphism au bas */}
+            <div className="absolute bottom-0 left-0 right-0 h-20 bg-black/10 backdrop-blur-sm" />
+
+            {/* Contenu */}
+            <div className="absolute inset-0 flex flex-col justify-end p-6 z-10">
+              <h3 className="text-2xl font-playfair-sc font-bold text-white tracking-wide mb-2 group-hover:text-[#ffe992] transition-colors duration-300 drop-shadow-[0_4px_12px_rgba(0,0,0,1)]">
+                {album.titre}
+              </h3>
+              <p className="text-sm text-gray-300 line-clamp-2 mb-3 drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">
+                {album.description}
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#ffe992]/20 backdrop-blur-sm border border-[#ffe992]/30 text-[11px] font-bold uppercase tracking-wider text-[#ffe992] group-hover:bg-[#ffe992]/30 group-hover:scale-105 transition-all duration-300">
+                  <Eye size={13} />
+                  {photoCounts[album._id] || 0} Photos
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* --- FACE ARRIÈRE --- */}
+        <div
+          className="absolute inset-0 overflow-hidden rounded-2xl bg-[#1a1a20] border border-[#ffe992]/50 shadow-[0_0_35px_rgba(255,233,146,0.5)]"
+          style={{
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg) translateZ(1px)', // Fix Safari
+          }}
+        >
+          {/* Images défilantes - Qualité améliorée */}
+          {albumImages.length > 0 ? (
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={currentImageIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                src={getWatermarkedImageUrl(albumImages[currentImageIndex].src)}
+                alt="Aperçu"
+                className="w-full h-full object-cover opacity-90 transition-opacity"
+                onContextMenu={preventRightClick}
+                loading="eager"
+                decoding="async"
+              />
+            </AnimatePresence>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-white/5">
+              <Folder size={64} className="text-[#ffe992]/50" />
+            </div>
+          )}
+
+          {/* Overlay gradient léger pour la lisibilité du badge */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+
+          {/* Badge central */}
+          <div className="absolute inset-0 flex items-end  pb-2 justify-center">
+            <div className="px-6 py-3 rounded-full border border-[#ffe992] bg-black/60 shadow-[0_0_15px_rgba(255,233,146,0.4)]">
+              <p className="text-[#ffe992] text-sm font-bold uppercase tracking-widest opacity-40 ">
+                Ouvrir
+              </p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+// Composant PhotoCard avec effet flip pour afficher la description
+interface PhotoCardProps {
+  photo: Photo;
+  onView: () => void;
+  onAddToCart: () => void;
+}
+
+const PhotoCard: React.FC<PhotoCardProps> = ({ photo, onView, onAddToCart }) => {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Fermer le flip au clic extérieur
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isFlipped && cardRef.current && !cardRef.current.contains(event.target as Node)) {
+        setIsFlipped(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isFlipped]);
+
+  return (
+    <div
+      ref={cardRef}
+      className="relative"
+      style={{ perspective: '1200px' }}
+    >
+      {/* Effet de rayonnement sous la carte */}
+      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-[#ffe992]/20 blur-xl rounded-full opacity-0 hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-4 bg-[#ffe992]/30 blur-lg rounded-full opacity-60 hover:opacity-100 transition-opacity duration-500" />
+
+      {/* Carte avec effet de flip */}
+      <motion.div
+        variants={cardVariants}
+        layout
+        whileHover={{ scale: 1.03, y: -6 }}
+        whileTap={{ scale: 0.97 }}
+        className="relative h-[500px] drop-shadow-[2px_4px_8px_rgba(255,233,146,0.6)]"
+      >
+        {/* Effet de rayonnement sous la carte */}
+        
+        <motion.div
+          className="relative w-full h-full"
+          initial={false}
+          animate={{ rotateY: isFlipped ? 180 : 0 }}
+          transition={{
+            type: 'spring',
+            stiffness: 100,
+            damping: 45,
+          }}
+          style={{ transformStyle: 'preserve-3d' }}
+        >
+          {/* FACE AVANT */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+              transform: 'translateZ(1px)',
+            }}
+          >
+            <div className="group h-full flex flex-col relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.9),inset_0_0_20px_rgba(255,233,146,0.6)]">
+              {/* Image - Maximisée */}
+              <div className="relative w-full h-96 overflow-hidden bg-black/20">
+                <img 
+                  src={getWatermarkedImageUrl(photo.src)}
+                  alt={photo.alt}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700"
+                  onContextMenu={preventRightClick}
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                
+                {/* Overlay au survol */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6 gap-3">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onView();
+                    }}
+                    className="w-full bg-white/10 backdrop-blur-md text-white font-bold text-xs uppercase tracking-widest py-3 rounded hover:bg-white/20 transition-colors transform translate-y-4 group-hover:translate-y-0 duration-500 delay-75 flex items-center justify-center gap-2"
+                  >
+                    {/* Icône et texte */}
+                    <Eye size={16} /> Voir en grand
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsFlipped(true);
+                    }}
+                    className="w-full bg-[#ffe992] text-black font-bold text-xs uppercase tracking-widest py-3 rounded hover:bg-[#d6c487] transition-colors transform translate-y-4 group-hover:translate-y-0 duration-500 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Voir plus</span>
+                  </button>
+                </div>
+              </div>
+              
+              {/* Contenu - Ultra compact */}
+              <div className="relative flex flex-col px-3 py-2 bg-gradient-to-b from-black/30 to-black/40">
+                {/* Effet de lueur subtile en fond */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#ffe992]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                
+                <div className="relative z-10 flex flex-col gap-3.5">
+                  {/* Titre centré avec effet glow */}
+                  <h3 className="text-lg font-playfair-sc uppercase tracking-wider text-[#ffe992] font-bold leading-tight text-center drop-shadow-[0_0_20px_rgba(255,233,146,0.8)] animate-pulse-subtle">
+                    {photo.titre}
+                  </h3>
+                  
+                  {/* Prix et Catégorie sur même ligne */}
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xl text-[#ffe992] font-bold">
+                      {photo.tarifs && photo.tarifs.length > 0
+                        ? `À partir de ${Math.min(...photo.tarifs.map((t) => t.prix)).toFixed(2)} €`
+                        : photo.prix > 0
+                        ? `${photo.prix.toFixed(2)} €`
+                        : "Prix sur demande"}
+                    </p>
+                    
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[#ffe992]/10 border border-[#ffe992]/20 text-[8px] text-gray-300 uppercase tracking-widest font-medium group-hover:bg-[#ffe992]/20 group-hover:border-[#ffe992]/30 group-hover:text-[#ffe992] transition-all duration-300 whitespace-nowrap">
+                      {photo.categorie}
+                    </span>
+                  </div>
+                  
+                  {/* Bouton Ajouter au panier */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddToCart();
+                    }}
+                    className="w-full bg-gradient-to-r from-[#ffe992]/20 to-[#ffe992]/30 hover:from-[#ffe992]/30 hover:to-[#ffe992]/40 text-[#ffe992] text-xs font-bold uppercase tracking-wider py-2.5 rounded-lg border border-[#ffe992]/40 hover:border-[#ffe992]/70 transition-all duration-300 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] shadow-[0_4px_12px_rgba(255,233,146,0.2)] hover:shadow-[0_6px_20px_rgba(255,233,146,0.4)]"
+                  >
+                    <ShoppingCart size={16} className="flex-shrink-0" />
+                    <span>Ajouter au panier</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* FACE ARRIÈRE - Description complète avec design amélioré */}
+          <div
+            className="absolute inset-0 overflow-hidden rounded-xl bg-gradient-to-br from-[#1a1a20] via-black/95 to-[#0f0f14] border-2 border-[#ffe992]/60 shadow-[0_0_40px_rgba(255,233,146,0.6),inset_0_0_30px_rgba(255,233,146,0.1)]"
+            style={{
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg) translateZ(1px)',
+            }}
+          >
+            {/* Effet de lumière en arrière-plan */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#ffe992]/15 via-[#ffe992]/5 to-transparent" />
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#ffe992] to-transparent" />
+            
+            <div className="relative h-full flex flex-col p-5">
+              {/* Titre avec séparateur */}
+              <div className="mb-4 pb-3 border-b border-[#ffe992]/30">
+                <h3 className="text-xl font-playfair-sc font-bold text-[#ffe992] drop-shadow-[0_0_15px_rgba(255,233,146,0.8)] text-center uppercase tracking-wider">
+                  {photo.titre}
+                </h3>
+              </div>
+              
+              {/* Description avec scroll personnalisé */}
+              <div className="flex-1 overflow-y-auto mb-4 pr-2 scrollbar-thin scrollbar-thumb-[#ffe992]/40 scrollbar-track-[#ffe992]/10 hover:scrollbar-thumb-[#ffe992]/60">
+                <p className="text-sm text-gray-200 leading-relaxed text-justify">
+                  {photo.description || "Aucune description disponible."}
+                </p>
+              </div>
+              
+              {/* Bouton retour amélioré */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsFlipped(false);
+                }}
+                className="w-full bg-gradient-to-r from-[#ffe992] to-[#f4d677] text-black text-xs font-bold uppercase tracking-wider py-3 rounded-lg hover:from-[#f4d677] hover:to-[#ffe992] transition-all duration-300 shadow-[0_6px_20px_rgba(255,233,146,0.5)] hover:shadow-[0_8px_28px_rgba(255,233,146,0.7)] hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+              >
+                <ArrowLeft size={16} className="flex-shrink-0" />
+                <span>Retour</span>
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
 };
 
 export default function Galerie() {
@@ -264,7 +618,7 @@ export default function Galerie() {
     [photos]
   );
 
-  // Calcul du nombre de photos par album
+  // Calcul du nombre de photos par album et récupération des photos de chaque album
   const photoCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     photos.forEach((p) => {
@@ -275,6 +629,21 @@ export default function Galerie() {
       }
     });
     return counts;
+  }, [photos]);
+
+  // Récupération des photos pour chaque album (pour l'effet flip)
+  const albumPhotos = useMemo(() => {
+    const photosByAlbum: Record<string, Photo[]> = {};
+    photos.forEach((p) => {
+      const albumId = (p as any).album;
+      if (albumId) {
+        if (!photosByAlbum[albumId]) {
+          photosByAlbum[albumId] = [];
+        }
+        photosByAlbum[albumId].push(p);
+      }
+    });
+    return photosByAlbum;
   }, [photos]);
 
   // 📄 Filtrage des photos (avec ou sans pagination)
@@ -362,15 +731,90 @@ export default function Galerie() {
 
       {/* Conteneur de l'image de fond et de la texture */}
       <div className="hero-image-container fixed inset-0 z-0">
+        <img
+          src={homeImages.hero}
+          alt="Galerie d'art"
+          className="hero-image w-full h-full object-cover opacity-60"
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a10]/80 via-transparent to-[#0a0a10]" />
       </div>
 
       {/* Accent géométrique décoratif */}
       <div className="geometric-accent fixed top-0 left-0 w-full h-full pointer-events-none z-0 opacity-30" />
 
-      {/* Header - Style Cinématique */}
-      <header className="relative pt-32 pb-0 px-6 overflow-hidden z-10">
-        <PageTitle title="Galerie d'Art" />
+      {/* Header - Style Premium avec titre et description */}
+      <header className="relative pt-32 px-6 overflow-hidden z-10 transition-all duration-700 ease-in-out" style={{ paddingBottom: viewMode === "albums" ? '3rem' : '1rem' }}>
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Titre avec album à côté */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal uppercase font-playfair-sc tracking-[0.2em] drop-shadow-[0_0_8px_rgba(234,179,8,0.1)]">
+              <span className="bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(255,233,146,0.6)]">
+                Galerie d'Art
+              </span>
+            </h1>
+            
+            {/* Nom de l'album à côté du titre */}
+            <AnimatePresence mode="wait">
+              {viewMode === "photos" && selectedAlbum && (
+                <motion.span
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.4 }}
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#ffe992]/20 to-[#ffe992]/10 border border-[#ffe992]/30 backdrop-blur-sm whitespace-nowrap"
+                >
+                  <Folder size={14} className="text-[#ffe992]" />
+                  <span className="text-[#ffe992] text-xs font-bold uppercase tracking-wider">
+                    {selectedAlbum.titre}
+                  </span>
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Texte explicatif avec glassmorphism - Visible uniquement en mode albums */}
+          <AnimatePresence mode="wait">
+            {viewMode === "albums" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: "auto" }}
+                exit={{ opacity: 0, y: -30, height: 0 }}
+                transition={{ 
+                  opacity: { duration: 0.5 },
+                  y: { duration: 0.6, ease: "easeInOut" },
+                  height: { duration: 0.7, ease: [0.4, 0, 0.2, 1] }
+                }}
+                className="max-w-2xl mx-auto mb-6 overflow-hidden"
+              >
+                <div className="relative backdrop-blur-sm bg-black/20 border border-[#ffe992]/15 rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)] overflow-hidden drop-shadow-[0_0_6px_rgba(255,233,146,0.3)]">
+                  {/* Effet de brillance animée */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe992]/10 to-transparent"
+                    initial={{ x: '-100%' }}
+                    animate={{ x: '200%' }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      repeatDelay: 5,
+                      ease: "easeInOut"
+                    }}
+                  />
+                  {/* Effet de rayonnement élégant */}
+                  <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe992]/10 to-transparent " />
+                  <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe992]/05 to-transparent" />
+                  <motion.p
+                    className="text-lg md:text-xl text-white/90 font-light leading-relaxed relative z-10"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.7, duration: 1 }}
+                  >
+                    Découvrez ma collection de <span className="font-semibold text-[#ffe992] drop-shadow-[0_0_8px_rgba(255,233,146,0.6)]">photographies d'art</span>. Chaque œuvre est disponible en tirages limités sur différents supports : papier photo, toile canvas, aluminium et plexiglas. Livraison France et international.
+                  </motion.p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </header>
 
       {/* Navigation des filtres - Style Glassmorphism - Masqué sur mobile */}
@@ -434,152 +878,28 @@ export default function Galerie() {
               : viewMode === "albums"
               ? // ALBUM GRID
                 albums.map((album) => (
-                  <motion.div
+                  <AlbumCard
                     key={album._id}
-                    variants={cardVariants}
-                    layout
-                    onClick={() => {
+                    album={album}
+                    photoCounts={photoCounts}
+                    albumImages={albumPhotos[album._id] || []}
+                    onSelect={() => {
                       setSelectedAlbum(album);
                       setViewMode("photos");
                     }}
-                    className="group relative cursor-pointer"
-                  >
-                    <div className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/30 hover:shadow-[0_0_30px_rgba(255,233,146,0.1)] hover:-translate-y-2 aspect-square flex flex-col">
-                      {/* Cover Image */}
-                      <div className="relative w-full h-full overflow-hidden">
-                        {album.imageCouverture ? (
-                          <motion.img
-                            whileHover={{ scale: 1.05 }}
-                            transition={{ duration: 0.8, ease: "easeOut" }}
-                            src={getWatermarkedImageUrl(album.imageCouverture)}
-                            alt={album.titre}
-                            className="w-full h-full object-cover transition-opacity duration-700 opacity-80 group-hover:opacity-100"
-                            onContextMenu={preventRightClick}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-white/5 text-gray-600">
-                            <Folder size={64} />
-                          </div>
-                        )}
-                        {/* Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-6">
-                          <h3 className="text-2xl font-serif font-bold text-white tracking-wide mb-1 group-hover:text-[#ffe992] transition-colors duration-300">
-                            {album.titre}
-                          </h3>
-                          <p className="text-sm text-gray-400 line-clamp-2">
-                            {album.description}
-                          </p>
-                          <div className="mt-3 flex items-center gap-2">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-[10px] font-medium uppercase tracking-wider text-[#ffe992]">
-                              <Eye size={12} />
-                              {photoCounts[album._id] || 0} Photos
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
+                  />
                 ))
               : // PHOTO GRID
                 filtered.map((photo) => (
-                  <motion.div
+                  <PhotoCard
                     key={photo._id || photo.id}
-                    variants={cardVariants}
-                    layout
-                    className="group relative flex flex-col h-full"
-                  >
-                    {/* Carte Glassmorphism */}
-                    <div className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/30 hover:shadow-[0_0_30px_rgba(255,233,146,0.1)] hover:-translate-y-2 h-full flex flex-col">
-                      {/* Image Section */}
-                      <div className="relative aspect-[3/4] overflow-hidden">
-                        <motion.img
-                          whileHover={{ scale: 1.05 }}
-                          transition={{ duration: 0.8, ease: "easeOut" }}
-                          src={getWatermarkedImageUrl(photo.src)}
-                          alt={photo.alt}
-                          loading="lazy"
-                          decoding="async"
-                          className="w-full h-full object-cover transition-opacity duration-700"
-                          onContextMenu={preventRightClick}
-                        />
-
-                        {/* Overlay au survol */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6 gap-3">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const index = filtered.findIndex(
-                                (p) => p._id === photo._id
-                              );
-                              setLightboxIndex(index);
-                            }}
-                            className="w-full bg-white/10 backdrop-blur-md text-white font-bold text-xs uppercase tracking-widest py-3 rounded hover:bg-white/20 transition-colors transform translate-y-4 group-hover:translate-y-0 duration-500 delay-75 flex items-center justify-center gap-2"
-                          >
-                            <Eye size={16} /> Voir en grand
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAjouterAuPanier(photo);
-                            }}
-                            className="w-full bg-[#ffe992] text-black font-bold text-xs uppercase tracking-widest py-3 rounded hover:bg-[#d6c487] transition-colors transform translate-y-4 group-hover:translate-y-0 duration-500"
-                          >
-                            Ajouter au panier
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Content Section */}
-                      <div className="p-5 flex flex-col items-center text-center flex-1 justify-between gap-4">
-                        <div>
-                          <h3 className="text-lg font-serif font-bold text-white tracking-wide mb-1 group-hover:text-[#ffe992] transition-colors duration-300">
-                            {photo.titre}
-                          </h3>
-                          <span className="text-xs text-gray-400 uppercase tracking-widest">
-                            {photo.categorie}
-                          </span>
-                        </div>
-
-                        <div className="w-full h-[1px] bg-white/10 group-hover:bg-[#ffe992]/30 transition-colors duration-500" />
-
-                        <span className="text-[#ffe992] text-sm font-medium tracking-widest">
-                          {/* Calcul du prix minimum parmi les tarifs disponibles */}
-                          {photo.tarifs && photo.tarifs.length > 0
-                            ? `À partir de ${Math.min(
-                                ...photo.tarifs.map((t) => t.prix)
-                              ).toFixed(2)} €`
-                            : photo.prix > 0
-                            ? `${photo.prix.toFixed(2)} €`
-                            : "Prix sur demande"}
-                        </span>
-
-                        {/* Boutons d'action Mobile Uniquement */}
-                        <div className="flex md:hidden w-full gap-2 mt-3">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const index = filtered.findIndex(
-                                (p) => p._id === photo._id
-                              );
-                              setLightboxIndex(index);
-                            }}
-                            className="flex-1 bg-white/10 text-white text-[10px] uppercase font-bold py-2 rounded border border-white/10 flex items-center justify-center gap-1"
-                          >
-                            <Eye size={12} /> Voir
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAjouterAuPanier(photo);
-                            }}
-                            className="flex-1 bg-[#ffe992] text-black text-[10px] uppercase font-bold py-2 rounded flex items-center justify-center gap-1"
-                          >
-                            Panier
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
+                    photo={photo}
+                    onView={() => {
+                      const index = filtered.findIndex((p) => p._id === photo._id);
+                      setLightboxIndex(index);
+                    }}
+                    onAddToCart={() => handleAjouterAuPanier(photo)}
+                  />
                 ))}
           </AnimatePresence>
         </motion.div>
@@ -675,15 +995,29 @@ export default function Galerie() {
                   {lightboxIndex + 1} / {filtered.length}
                 </p>
               </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setLightboxIndex(null);
-                }}
-                className="pointer-events-auto px-6 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full text-white text-sm font-medium transition-all uppercase tracking-widest mb-4"
-              >
-                Fermer
-              </button>
+              
+              {/* Boutons actions */}
+              <div className="flex items-center gap-3 pointer-events-auto">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAjouterAuPanier(filtered[lightboxIndex]);
+                  }}
+                  className="px-6 py-2.5 bg-[#ffe992] hover:bg-[#f4d677] text-black text-sm font-bold transition-all uppercase tracking-widest rounded-full shadow-[0_4px_12px_rgba(255,233,146,0.4)] hover:shadow-[0_6px_16px_rgba(255,233,146,0.6)] flex items-center gap-2"
+                >
+                  <ShoppingCart size={16} />
+                  Ajouter au panier
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxIndex(null);
+                  }}
+                  className="px-6 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full text-white text-sm font-medium transition-all uppercase tracking-widest"
+                >
+                  Fermer
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
