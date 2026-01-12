@@ -46,23 +46,28 @@ export default function MonCompte() {
       setLoading(true);
 
       // Chargement parallèle des événements et de l'historique
+      // Les deux APIs retournent maintenant un objet { status, results, data }
       Promise.all([
         axios
           .get(`${API_URL}/api/acces-prive`, { withCredentials: true })
           .catch((err) => {
             console.error("Erreur chargement événements:", err);
-            return { data: [] };
+            // Retour par défaut en cas d'erreur : objet vide avec data vide
+            return { data: { data: [] } };
           }),
         axios
           .get(`${API_URL}/api/paiements/me`, { withCredentials: true })
           .catch((err) => {
             console.error("Erreur chargement historique:", err);
-            return { data: [] };
+            // Retour par défaut en cas d'erreur : objet vide avec data vide
+            return { data: { data: [] } };
           }),
       ])
         .then(([resEvents, resPaiements]) => {
-          setEvenements(resEvents.data);
-          setPaiements(resPaiements.data);
+          // Extraction des tableaux depuis le champ "data" de chaque réponse
+          // Sécurité : si data n'existe pas ou n'est pas un tableau, on met un tableau vide
+          setEvenements(Array.isArray(resEvents.data?.data) ? resEvents.data.data : []);
+          setPaiements(Array.isArray(resPaiements.data?.data) ? resPaiements.data.data : []);
         })
         .finally(() => {
           setLoading(false);

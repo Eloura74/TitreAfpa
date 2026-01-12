@@ -55,8 +55,13 @@ export default function GestionAccesPrive() {
     axios
       .get(API_URL, { withCredentials: true })
       .then((r) => {
-        if (Array.isArray(r.data)) setEvenements(r.data);
-        else setEvenements([]);
+        // L'API retourne maintenant { status, results, data }
+        // On extrait le tableau depuis le champ "data"
+        if (r.data?.data && Array.isArray(r.data.data)) {
+          setEvenements(r.data.data);
+        } else {
+          setEvenements([]);
+        }
       })
       .catch((e) => {
         setError(e?.response?.data?.message || "Erreur lors du chargement.");

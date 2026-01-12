@@ -2,6 +2,7 @@ const AccesPrive = require("../models/AccesPrive");
 const User = require("../models/User");
 
 // GET ALL (Admin voit tout, Client voit les siens)
+// Retourne un format standardisé cohérent avec les autres contrôleurs
 exports.getAll = async (req, res) => {
   try {
     const filter = {};
@@ -12,7 +13,13 @@ exports.getAll = async (req, res) => {
     const items = await AccesPrive.find(filter)
       .populate("photos")
       .populate("client", "email nom prenom");
-    res.json(items);
+    
+    // Format de réponse standardisé pour cohérence avec paiementController
+    res.json({
+      status: "success",
+      results: items.length,
+      data: items,
+    });
   } catch (err) {
     res.status(500).json({ erreur: err.message });
   }
