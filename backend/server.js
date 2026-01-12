@@ -24,7 +24,7 @@ const oeuvresGraphiqueRoutes = require("./routes/oeuvresGraphique.js"); // Route
 const authRoutes = require("./routes/auth.js"); // Routes pour l’authentification JWT
 const evenementRoutes = require("./routes/evenement"); // Routes CRUD pour les événements
 const paiementRoutes = require("./routes/paiement"); // Routes CRUD pour les paiements
-const authRoutes = require("./routes/auth");
+const panierRoutes = require("./routes/panier"); // Routes CRUD pour les paniers
 const tarifsRoutes = require("./routes/tarifs"); // Routes CRUD pour la grille tarifaire
 const uploadCloudinaryRoutes = require("./routes/upload"); // Routes d’upload vers Cloudinary
 const paypalRoutes = require("./routes/paypal"); // Routes pour PayPal
@@ -35,6 +35,9 @@ const pictoRoutes = require("./routes/picto"); // Routes pour les données Picto
 
 // Module pour gérer les chemins de fichiers
 const path = require("path");
+
+// Import du logger centralisé
+const logger = require("./utils/logger");
 
 // Création de l’application Express
 const app = express();
