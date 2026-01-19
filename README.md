@@ -1,4 +1,9 @@
 <div align="center">
+  <img src="./Notes/TitreAfpa_header.png" alt="Bannière Portfolio Informatique" width="100%">
+</div>
+<br>
+
+<div align="center">
 
 # 📸 FABER - Plateforme de Photographie & Graphisme
 
