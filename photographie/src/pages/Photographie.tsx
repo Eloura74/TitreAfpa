@@ -51,19 +51,26 @@ const itemVariants = {
  * Interface définissant les propriétés d'une carte de navigation
  */
 interface NavigationCardProps {
-  to: string;           // URL de destination du lien
-  image: string;        // URL de l'image de fond
-  alt: string;          // Texte alternatif pour l'image
+  to: string; // URL de destination du lien
+  image: string; // URL de l'image de fond
+  alt: string; // Texte alternatif pour l'image
   icon: React.ReactNode; // Icône à afficher (composant React)
-  title: string;        // Titre de la carte
-  description: string;  // Description courte au survol
+  title: string; // Titre de la carte
+  description: string; // Description courte au survol
 }
 
 /**
  * Composant NavigationCard : carte de navigation réutilisable avec animation
  * Affiche une image de fond, une icône, un titre et une description au survol
  */
-const NavigationCard: React.FC<NavigationCardProps> = ({ to, image, alt, icon, title, description }) => (
+const NavigationCard: React.FC<NavigationCardProps> = ({
+  to,
+  image,
+  alt,
+  icon,
+  title,
+  description,
+}) => (
   <motion.div
     variants={itemVariants}
     whileHover={{ scale: 1.03, y: -6 }}
@@ -80,14 +87,14 @@ const NavigationCard: React.FC<NavigationCardProps> = ({ to, image, alt, icon, t
     >
       {/* Image de fond avec overlay gradient renforcé */}
       <div className="absolute inset-0">
-        <img 
-          src={image} 
-          alt={alt} 
+        <img
+          src={image}
+          alt={alt}
           className="w-full h-full object-cover opacity-70 group-hover:opacity-95 group-hover:scale-110 transition-all duration-700 group-hover:brightness-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
       </div>
-      
+
       {/* Contenu de la carte avec effet glassmorphism */}
       <div className="relative h-full flex flex-col justify-end p-5">
         {/* Fond glassmorphism pour la zone de texte - version très transparente */}
@@ -115,7 +122,10 @@ const NavigationCard: React.FC<NavigationCardProps> = ({ to, image, alt, icon, t
  * @param fallback - URL de secours si aucune transformation ne s'applique
  * @returns URL transformée prête à être utilisée
  */
-const transformImageUrl = (src: string | undefined, fallback: string): string => {
+const transformImageUrl = (
+  src: string | undefined,
+  fallback: string,
+): string => {
   if (!src) return fallback;
   if (src.startsWith("http")) return src;
   if (src.startsWith("/uploads/")) return `${API_URL}${src}`;
@@ -130,14 +140,15 @@ const transformImageUrl = (src: string | undefined, fallback: string): string =>
  */
 export default function Photographie() {
   // États pour stocker les images dynamiques depuis la BDD
-  const [galerieImage, setGalerieImage] = useState<string>("/images/photo5.jpg");
+  const [galerieImage, setGalerieImage] =
+    useState<string>("/images/photo5.jpg");
   const [eventImage, setEventImage] = useState<string>("/images/event1.jpg");
-  
+
   // useEffect est utilisé ici pour modifier le titre de l'onglet du navigateur quand la page est chargée
   useEffect(() => {
     document.title = "Fabien Photographie";
   }, []); // Le tableau vide signifie que cet effet ne s'exécute qu'une seule fois, au montage
-  
+
   // Récupération d'images aléatoires depuis la base de données (galerie et événements)
   useEffect(() => {
     const fetchImages = async () => {
@@ -146,21 +157,29 @@ export default function Photographie() {
         const resGalerie = await fetch(`${API_URL}/api/galerie`);
         if (resGalerie.ok) {
           const dataGalerie = await resGalerie.json();
-          const publicPhotos = dataGalerie.filter((p: any) => p.categorie !== "EvenementPrive");
+          const publicPhotos = dataGalerie.filter(
+            (p: any) => p.categorie !== "EvenementPrive",
+          );
           if (publicPhotos.length > 0) {
-            const randomPhoto = publicPhotos[Math.floor(Math.random() * publicPhotos.length)];
-            setGalerieImage(transformImageUrl(randomPhoto.src, "/images/photo5.jpg"));
+            const randomPhoto =
+              publicPhotos[Math.floor(Math.random() * publicPhotos.length)];
+            setGalerieImage(
+              transformImageUrl(randomPhoto.src, "/images/photo5.jpg"),
+            );
           }
         }
-        
+
         // Récupérer une image aléatoire des événements si disponible
         const resEvents = await fetch(`${API_URL}/api/evenements`);
         if (resEvents.ok) {
           const dataEvents = await resEvents.json();
           if (dataEvents.length > 0) {
-            const randomEvent = dataEvents[Math.floor(Math.random() * dataEvents.length)];
+            const randomEvent =
+              dataEvents[Math.floor(Math.random() * dataEvents.length)];
             if (randomEvent.image) {
-              setEventImage(transformImageUrl(randomEvent.image, "/images/event1.jpg"));
+              setEventImage(
+                transformImageUrl(randomEvent.image, "/images/event1.jpg"),
+              );
             }
           }
         }
@@ -168,7 +187,7 @@ export default function Photographie() {
         console.error("Erreur lors du chargement des images:", error);
       }
     };
-    
+
     fetchImages();
   }, []);
 
@@ -177,31 +196,32 @@ export default function Photographie() {
     <div className="home-page min-h-screen flex flex-col bg-[#0a0a10]">
       {/* La Navbar détecte automatiquement l'univers courant (photographie/graphisme) et adapte les liens */}
       <Navbar />
-      
       {/* Effet de scintillement/éblouissement dans le coin supérieur gauche */}
       <motion.div
-        // className="fixed top-0 left-0 w-96 h-96 pointer-events-none z-[5]"
-        // initial={{ opacity: 0.3 }}
-        // animate={{ 
-        //   opacity: [0.6, 0.9, 0.6],
-        //   scale: [1, 1.6, 1]
-        // }}
-        // transition={{
-        //   duration: 8,
-        //   repeat: Infinity,
-        //   ease: "easeInOut"
-        // }}
+      // className="fixed top-0 left-0 w-96 h-96 pointer-events-none z-[5]"
+      // initial={{ opacity: 0.3 }}
+      // animate={{
+      //   opacity: [0.6, 0.9, 0.6],
+      //   scale: [1, 1.6, 1]
+      // }}
+      // transition={{
+      //   duration: 8,
+      //   repeat: Infinity,
+      //   ease: "easeInOut"
+      // }}
       >
-        <div 
+        <div
           className="absolute top-0 left-0 w-full h-full blur-3xl"
           style={{
-            background: 'radial-gradient(circle at top left, rgba(255, 233, 146, 0.2), rgba(255, 233, 146, 0.05), transparent)'
+            background:
+              "radial-gradient(circle at top left, rgba(255, 233, 146, 0.2), rgba(255, 233, 146, 0.05), transparent)",
           }}
         />
-        <div 
+        <div
           className="absolute top-0 left-0 w-3/4 h-3/4 blur-2xl"
           style={{
-            background: 'radial-gradient(circle at top left, rgba(255, 255, 255, 0.1), transparent)'
+            background:
+              "radial-gradient(circle at top left, rgba(255, 255, 255, 0.1), transparent)",
           }}
         />
       </motion.div>
@@ -235,7 +255,7 @@ export default function Photographie() {
           </h1>
 
           {/* Paragraphe d'introduction avec animation dynamique */}
-          <motion.div 
+          <motion.div
             className="max-w-2xl mx-auto mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -245,27 +265,31 @@ export default function Photographie() {
               {/* Effet de brillance animée */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe992]/10 to-transparent"
-                initial={{ x: '-100%' }}
-                animate={{ x: '200%' }}
-                transition={{ 
-                  duration: 3, 
-                  repeat: Infinity, 
+                initial={{ x: "-100%" }}
+                animate={{ x: "200%" }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
                   repeatDelay: 5,
-                  ease: "easeInOut" 
+                  ease: "easeInOut",
                 }}
               />
               {/* Effet de rayonnement élégant sous la carte */}
               <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe992]/10 to-transparent " />
               <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe992]/05 to-transparent" />
-              <motion.p 
+              <motion.p
                 className="text-lg md:text-xl text-white/90 font-light leading-relaxed relative z-10  "
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7, duration: 1 }}
               >
-                Bienvenue dans l'univers <span className="font-semibold text-[#ffe992] drop-shadow-[0_0_8px_rgba(255,233,146,0.6)]">Photographie</span> de Fabien. Retrouvez
-                ici l'ensemble des services liés à la photo : événements, tirage en
-                ligne, galerie artistique et plus encore.
+                Bienvenue dans l'univers{" "}
+                <span className="font-semibold text-[#ffe992] drop-shadow-[0_0_8px_rgba(255,233,146,0.6)]">
+                  Photographique
+                </span>{" "}
+                de Fabien. Retrouvez ici l'ensemble des services liés à la photo
+                : événements, tirage en ligne, galerie artistique et plus
+                encore.
               </motion.p>
             </div>
           </motion.div>
@@ -288,7 +312,7 @@ export default function Photographie() {
             title="Galerie Photo"
             description="Œuvres photographiques."
           />
-          
+
           <NavigationCard
             to="/services"
             image="/images/shooting.jpg"
@@ -297,7 +321,7 @@ export default function Photographie() {
             title="Services"
             description="Mariages, shootings..."
           />
-          
+
           <NavigationCard
             to="/evenements"
             image={eventImage}
@@ -306,7 +330,7 @@ export default function Photographie() {
             title="Événements"
             description="Tous les événements photo."
           />
-          
+
           <NavigationCard
             to="/about"
             image="/images/about.jpg"
@@ -315,7 +339,7 @@ export default function Photographie() {
             title="À Propos"
             description="En savoir plus."
           />
-          
+
           <NavigationCard
             to="/panier"
             image="/images/pannier.jpg"

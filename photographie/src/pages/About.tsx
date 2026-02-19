@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
@@ -6,11 +6,27 @@ import SEO from "../components/SEO";
 import { photographerSchema, createBreadcrumbSchema } from "../utils/schemas";
 import "../styles/globals.css";
 import PageTitle from "../components/ui/PageTitle";
+import { getAboutData } from "../services/aboutService";
 
 export default function About() {
+  const [aboutData, setAboutData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      const data = await getAboutData();
+      setAboutData(data);
+    } catch (error) {
+      console.error("Erreur chargement about data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Animation variants
   const containerVariants = {
@@ -30,27 +46,39 @@ export default function About() {
     },
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a10] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#ffe992] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!aboutData) return null;
+
   return (
     <div className="min-h-screen bg-[#0a0a10] text-white font-sans selection:bg-[#ffe992]/30 flex flex-col">
       <SEO
         title="À Propos - Fabien Licata"
-        description="Photographe et graphiste professionnel basé en France. Plus de 10 ans d'expérience dans la photographie de mariage, événementiel et corporate. Découvrez mon parcours et ma vision artistique."
-        image="/images/about-preview.jpg"
+        description={
+          aboutData.introduction || "Photographe professionnel based in France."
+        }
+        image={aboutData.image || "/images/about-preview.jpg"}
         type="profile"
         keywords={[
-          'photographe professionnel',
-          'graphiste',
-          'Fabien Licata',
-          'à propos',
-          'parcours photographe',
-          'artiste photographe'
+          "photographe professionnel",
+          "graphiste",
+          "Fabien Licata",
+          "à propos",
+          "parcours photographe",
+          "artiste photographe",
         ]}
         schema={{
           ...photographerSchema,
           ...createBreadcrumbSchema([
-            { name: 'Accueil', url: 'https://titre-afpa.vercel.app/' },
-            { name: 'À Propos', url: 'https://titre-afpa.vercel.app/about' }
-          ])
+            { name: "Accueil", url: "https://titre-afpa.vercel.app/" },
+            { name: "À Propos", url: "https://titre-afpa.vercel.app/about" },
+          ]),
         }}
       />
       <Navbar />
@@ -78,18 +106,18 @@ export default function About() {
               <div className="relative overflow-hidden rounded-2xl shadow-2xl shadow-black/50 border border-white/10 group-hover:border-[#ffe992]/30 transition-all duration-500">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
                 <img
-                  src="/images/fabien.jpg"
-                  alt="Fabien Licata"
+                  src={aboutData.image}
+                  alt={aboutData.name}
                   className="w-full h-[600px] object-cover object-top transform transition-transform duration-700 group-hover:scale-105 filter grayscale-[20%] group-hover:grayscale-0"
                 />
 
                 {/* Caption */}
                 <div className="absolute bottom-6 left-6 z-20">
                   <p className="text-[#ffe992] text-xs tracking-[0.2em] uppercase mb-2 font-medium">
-                    Photographe Professionnel
+                    {aboutData.jobTitle}
                   </p>
                   <h3 className="text-3xl font-serif text-white tracking-wide">
-                    Fabien Licata
+                    {aboutData.name}
                   </h3>
                 </div>
               </div>
@@ -106,87 +134,67 @@ export default function About() {
               {/* Introduction Card */}
               <div className="bg-white/5 backdrop-blur-md rounded-2xl p-8 border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
                 <p className="text-xl text-white/90 font-light leading-relaxed">
-                  Photographe professionnel spécialisé dans les événements,
-                  portraits et galeries artistiques. Transformez vos souvenirs
-                  en véritables œuvres d'art.
+                  {aboutData.introduction}
                 </p>
               </div>
 
               {/* Section: Parcours */}
-              <div className="space-y-4 pl-6 border-l-2 border-[#ffe992]/30">
-                <h2 className="text-lg text-[#ffe992] font-medium tracking-[0.15em] uppercase">
-                  Mon Parcours
-                </h2>
-                <p className="text-gray-300 leading-relaxed font-light text-justify">
-                  Plongé dans l'univers captivant de la photographie depuis mon
-                  plus jeune âge, je suis un photographe passionné établi à{" "}
-                  <strong className="text-white font-normal">
-                    Pignans dans le Var
-                  </strong>
-                  . Tantôt reporter-photographe, photographe de mode,
-                  photographe animalier, mon métier recouvre une multitude de
-                  possibilités !
-                </p>
-              </div>
+              {aboutData.parcours && (
+                <div className="space-y-4 pl-6 border-l-2 border-[#ffe992]/30">
+                  <h2 className="text-lg text-[#ffe992] font-medium tracking-[0.15em] uppercase">
+                    {aboutData.parcours.title}
+                  </h2>
+                  <p className="text-gray-300 leading-relaxed font-light text-justify">
+                    {aboutData.parcours.content}
+                    {/* Note: If you stored HTML in DB, use dangerouslySetInnerHTML, but text is safer */}
+                  </p>
+                </div>
+              )}
 
               {/* Section: Expertise */}
-              <div className="space-y-4 pl-6 border-l-2 border-[#ffe992]/30">
-                <h2 className="text-lg text-[#ffe992] font-medium tracking-[0.15em] uppercase">
-                  Polyvalence & Expertise
-                </h2>
-                <p className="text-gray-300 leading-relaxed font-light text-justify">
-                  En tant que professionnel, je maîtrise l’art d’immortaliser un
-                  visage, un sportif en action, une nouvelle marque, un artiste
-                  sur scène, un événement festif ou politique (concerts,
-                  festivals, compétitions sportives), ou la découverte de votre
-                  commune, sans oublier les événements privés (mariage, baptême,
-                  repas de famille, etc.).
-                </p>
-              </div>
+              {aboutData.expertise && (
+                <div className="space-y-4 pl-6 border-l-2 border-[#ffe992]/30">
+                  <h2 className="text-lg text-[#ffe992] font-medium tracking-[0.15em] uppercase">
+                    {aboutData.expertise.title}
+                  </h2>
+                  <p className="text-gray-300 leading-relaxed font-light text-justify">
+                    {aboutData.expertise.content}
+                  </p>
+                </div>
+              )}
 
               {/* Section: Studio */}
-              <div className="space-y-4 pl-6 border-l-2 border-[#ffe992]/30">
-                <h2 className="text-lg text-[#ffe992] font-medium tracking-[0.15em] uppercase">
-                  Studio Mobile
-                </h2>
-                <p className="text-gray-300 leading-relaxed font-light text-justify">
-                  Je pratique également{" "}
-                  <strong className="text-white font-normal">
-                    la photographie de studio
-                  </strong>
-                  , capturant l'essence d'un portrait seul, d'un duo, ou d'une
-                  famille. Mon studio d'art{" "}
-                  <strong className="text-white font-normal">
-                    (celui-ci étant mobile)
-                  </strong>{" "}
-                  est un lieu où la créativité s'épanouit, que ce soit pour des
-                  séances de mode, des compositions artistiques destinées à
-                  l'exposition, des packshots produits et bien d'autres projets.
-                </p>
-              </div>
+              {aboutData.studio && (
+                <div className="space-y-4 pl-6 border-l-2 border-[#ffe992]/30">
+                  <h2 className="text-lg text-[#ffe992] font-medium tracking-[0.15em] uppercase">
+                    {aboutData.studio.title}
+                  </h2>
+                  <p className="text-gray-300 leading-relaxed font-light text-justify">
+                    {aboutData.studio.content}
+                  </p>
+                </div>
+              )}
 
               {/* Quote Block */}
-              <div className="relative py-8 px-8 bg-gradient-to-r from-[#ffe992]/10 to-transparent rounded-r-2xl mt-8 border-l-4 border-[#ffe992]">
-                <p className="text-white italic font-light text-lg leading-relaxed relative z-10">
-                  "Chaque instant capturé est une histoire à raconter, une
-                  émotion à partager. Bienvenue dans mon univers
-                  photographique."
-                </p>
-              </div>
+              {aboutData.quote && (
+                <div className="relative py-8 px-8 bg-gradient-to-r from-[#ffe992]/10 to-transparent rounded-r-2xl mt-8 border-l-4 border-[#ffe992]">
+                  <p className="text-white italic font-light text-lg leading-relaxed relative z-10">
+                    {aboutData.quote}
+                  </p>
+                </div>
+              )}
 
               {/* Section: Prints */}
-              <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 border border-white/10 mt-8">
-                <h2 className="text-sm text-[#ffe992] font-bold tracking-[0.15em] uppercase mb-3">
-                  Tirages d'Art
-                </h2>
-                <p className="text-gray-400 text-sm leading-relaxed font-light">
-                  Offrez-vous des impressions uniques en commandant les tirages
-                  de mes photographies. Le prix englobe non seulement les coûts
-                  de laboratoire, mais également ma contribution d'artiste,
-                  garantissant ainsi une œuvre authentique et exclusive à votre
-                  collection.
-                </p>
-              </div>
+              {aboutData.tirages && (
+                <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 border border-white/10 mt-8">
+                  <h2 className="text-sm text-[#ffe992] font-bold tracking-[0.15em] uppercase mb-3">
+                    {aboutData.tirages.title}
+                  </h2>
+                  <p className="text-gray-400 text-sm leading-relaxed font-light">
+                    {aboutData.tirages.content}
+                  </p>
+                </div>
+              )}
             </motion.div>
           </div>
         </motion.div>

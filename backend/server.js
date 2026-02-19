@@ -32,6 +32,7 @@ const accesPriveRoutes = require("./routes/accesPrive"); // Routes pour les acc�
 const servicesRoutes = require("./routes/services"); // Routes pour les services (Prestations)
 const albumsRoutes = require("./routes/albums"); // Routes pour les albums
 const pictoRoutes = require("./routes/picto"); // Routes pour les données Picto (V2)
+const aboutRoutes = require("./routes/about"); // Routes pour la page À Propos
 
 // Module pour gérer les chemins de fichiers
 const path = require("path");
@@ -81,7 +82,7 @@ function checkOrigin(origin, callback) {
   // - Requêtes serveur-to-serveur
   // - Requêtes same-origin (même domaine)
   if (!origin) {
-    logger.debug('[CORS] Request without Origin header (allowed)');
+    logger.debug("[CORS] Request without Origin header (allowed)");
     return callback(null, true);
   }
 
@@ -112,7 +113,7 @@ app.use(
     methods: ["GET"],
     credentials: false, // Pas de cookies pour les images
   }),
-  express.static(path.join(__dirname, "uploads"))
+  express.static(path.join(__dirname, "uploads")),
 );
 
 // ================================
@@ -126,7 +127,7 @@ app.use(
   cors({
     origin: checkOrigin,
     credentials: true, // Cookies/token autorisés pour les routes API
-  })
+  }),
 );
 
 // Accepte toutes les requêtes OPTIONS pour le prévol (navigateurs)
@@ -163,7 +164,7 @@ app.use(
     methods: ["GET"], // On autorise uniquement la lecture d'images
     credentials: false, // Pas besoin de cookies pour les images
   }),
-  express.static(path.join(__dirname, "uploads"))
+  express.static(path.join(__dirname, "uploads")),
 );
 
 // ================================
@@ -185,74 +186,71 @@ app.use(
   helmet({
     // Politique de ressources cross-origin
     crossOriginResourcePolicy: { policy: "cross-origin" },
-    
+
     // Content Security Policy stricte
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: [
-          "'self'", 
+          "'self'",
           "'unsafe-inline'", // React nécessite inline scripts
           "https://www.paypal.com",
-          "https://js.stripe.com"
+          "https://js.stripe.com",
         ],
         styleSrc: [
-          "'self'", 
+          "'self'",
           "'unsafe-inline'", // Tailwind nécessite inline styles
-          "https://fonts.googleapis.com"
+          "https://fonts.googleapis.com",
         ],
         imgSrc: [
-          "'self'", 
-          "data:", 
+          "'self'",
+          "data:",
           "blob:",
           "https://res.cloudinary.com", // Cloudinary images
-          "https://www.paypalobjects.com" // PayPal logos
+          "https://www.paypalobjects.com", // PayPal logos
         ],
-        fontSrc: [
-          "'self'", 
-          "https://fonts.gstatic.com"
-        ],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
         connectSrc: [
           "'self'",
           "https://api.stripe.com",
           "https://api.paypal.com",
           "https://api.cloudinary.com",
-          process.env.NODE_ENV === 'development' ? "http://localhost:5173" : "https://titre-afpa.vercel.app"
+          process.env.NODE_ENV === "development"
+            ? "http://localhost:5173"
+            : "https://titre-afpa.vercel.app",
         ],
-        frameSrc: [
-          "https://www.paypal.com",
-          "https://js.stripe.com"
-        ],
+        frameSrc: ["https://www.paypal.com", "https://js.stripe.com"],
         objectSrc: ["'none'"],
-        upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
+        upgradeInsecureRequests:
+          process.env.NODE_ENV === "production" ? [] : null,
       },
     },
-    
+
     // HTTP Strict Transport Security (HSTS)
     hsts: {
       maxAge: 31536000, // 1 an
       includeSubDomains: true,
-      preload: true
+      preload: true,
     },
-    
+
     // Protection contre le clickjacking
     frameguard: {
-      action: 'deny'
+      action: "deny",
     },
-    
+
     // Empêche le navigateur de deviner le MIME type
     noSniff: true,
-    
+
     // Désactive le cache DNS prefetch pour plus de confidentialité
     dnsPrefetchControl: {
-      allow: false
+      allow: false,
     },
-    
+
     // Politique de référent stricte
     referrerPolicy: {
-      policy: 'strict-origin-when-cross-origin'
-    }
-  })
+      policy: "strict-origin-when-cross-origin",
+    },
+  }),
 );
 
 // 2. Rate Limiting : Limite le nombre de requêtes pour éviter les attaques par force brute
@@ -268,7 +266,8 @@ const limiter = rateLimit({
 const paymentLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // Max 5 tentatives de paiement par IP (évite spam PayPal)
-  message: "Trop de tentatives de paiement. Veuillez réessayer dans 15 minutes.",
+  message:
+    "Trop de tentatives de paiement. Veuillez réessayer dans 15 minutes.",
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: false, // Compte même les paiements réussis
@@ -332,7 +331,9 @@ const connectDB = async () => {
     await cachedPromise;
     logger.info("MongoDB connecté avec succès");
   } catch (err) {
-    logger.error("Erreur CRITIQUE de connexion MongoDB", { error: err.message });
+    logger.error("Erreur CRITIQUE de connexion MongoDB", {
+      error: err.message,
+    });
     cachedPromise = null; // Reset du cache en cas d'erreur
     throw err;
   }
@@ -398,17 +399,30 @@ app.use("/api/albums", albumsRoutes);
 // Données Picto (V2)
 app.use("/api/picto", pictoRoutes);
 
+// Page À Propos
+app.use("/api/about", aboutRoutes);
+
 // Sitemap dynamique (SEO)
 const sitemapRoutes = require("./routes/sitemap");
 app.use("/api", sitemapRoutes);
 
 logger.info("Routes API montées avec succès", {
   routes: [
-    '/api/galerie', '/api/oeuvres-graphique', '/api/evenements', 
-    '/api/paiements', '/api/paniers', '/api/auth',
-    '/api/tarifs', '/api/paypal', '/api/acces-prive', '/api/services',
-    '/api/albums', '/api/picto', '/api/sitemap.xml'
-  ]
+    "/api/galerie",
+    "/api/oeuvres-graphique",
+    "/api/evenements",
+    "/api/paiements",
+    "/api/paniers",
+    "/api/auth",
+    "/api/tarifs",
+    "/api/paypal",
+    "/api/acces-prive",
+    "/api/services",
+    "/api/albums",
+    "/api/picto",
+    "/api/about",
+    "/api/sitemap.xml",
+  ],
 });
 
 // ================================
@@ -436,7 +450,10 @@ if (require.main === module) {
   // On attend la connexion à la DB avant de lancer le serveur
   connectDB().then(() => {
     app.listen(PORT, () => {
-      logger.info("Serveur démarré avec succès", { port: PORT, env: process.env.NODE_ENV || 'development' });
+      logger.info("Serveur démarré avec succès", {
+        port: PORT,
+        env: process.env.NODE_ENV || "development",
+      });
     });
   });
 }
