@@ -384,6 +384,10 @@ app.use("/api/auth", authRoutes);
 // Grille tarifaire dynamique
 app.use("/api/tarifs", tarifsRoutes);
 
+// Import de tarifs depuis Excel
+const importTarifsRoutes = require("./routes/importTarifs");
+app.use("/api/tarifs", importTarifsRoutes);
+
 // Paiement PayPal (avec rate limiter spécifique anti-spam)
 app.use("/api/paypal", paymentLimiter, paypalRoutes);
 

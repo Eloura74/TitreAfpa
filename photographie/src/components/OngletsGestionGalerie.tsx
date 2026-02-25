@@ -11,6 +11,7 @@ import { FolderPlus, X } from "lucide-react";
 
 import AlbumManager from "./admin/galerie/AlbumManager";
 import TarifConfiguratorV2 from "./admin/tarifs/TarifConfiguratorV2";
+import ImportTarifsExcel from "./admin/tarifs/ImportTarifsExcel";
 import GestionAbout from "./GestionAbout"; // Import du nouveau composant
 
 export default function OngletsGestionGalerie() {
@@ -50,7 +51,15 @@ export default function OngletsGestionGalerie() {
     { nom: "Paiements", composant: <GestionPaiements /> },
     { nom: "Paniers", composant: <GestionPaniers /> },
 
-    { nom: "Tarifs", composant: <TarifConfiguratorV2 /> },
+    {
+      nom: "Tarifs",
+      composant: (
+        <div className="space-y-8">
+          <ImportTarifsExcel />
+          <TarifConfiguratorV2 />
+        </div>
+      ),
+    },
     { nom: "Accès Privé", composant: <GestionAccesPrive /> },
     { nom: "Services", composant: <GestionServices /> },
     { nom: "À Propos", composant: <GestionAbout /> }, // Nouvel onglet
