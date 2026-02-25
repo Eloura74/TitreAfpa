@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import axios from "axios";
-// @ts-expect-error - xlsx types will be resolved at build time
 import * as XLSX from "xlsx";
 import { API_URL } from "../../../config/api";
 
