@@ -8,7 +8,15 @@ export const tariffService = {
       const res = await axios.get(`${API_URL}/api/tarifs/config`, {
         withCredentials: true,
       });
-      return res.data;
+      // Vérification de sécurité : s'assurer que la réponse a la bonne structure
+      if (res.data && typeof res.data === "object") {
+        return {
+          categories: Array.isArray(res.data.categories)
+            ? res.data.categories
+            : [],
+        };
+      }
+      return { categories: [] };
     } catch (error) {
       console.error("Error fetching tariff config:", error);
       return { categories: [] };
@@ -16,10 +24,7 @@ export const tariffService = {
   },
 
   saveTariffConfig: async (config: TariffConfig): Promise<TariffConfig> => {
-    // Strip system fields to avoid duplicate key errors on backend
-    const { _id, createdAt, updatedAt, __v, ...cleanConfig } = config as any;
-
-    const res = await axios.post(`${API_URL}/api/tarifs/config`, cleanConfig, {
+    const res = await axios.post(`${API_URL}/api/tarifs/config`, config, {
       withCredentials: true,
     });
     return res.data;

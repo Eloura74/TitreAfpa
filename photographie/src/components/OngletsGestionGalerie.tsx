@@ -22,6 +22,10 @@ export default function OngletsGestionGalerie() {
     setRefreshKey((prev) => prev + 1);
   };
 
+  const handleGoToTarifs = () => {
+    setActif(5);
+  };
+
   const onglets = [
     {
       nom: "Galerie",
@@ -37,7 +41,7 @@ export default function OngletsGestionGalerie() {
               Gérer les albums
             </button>
           </div>
-          <GalerieForm key={refreshKey} />
+          <GalerieForm key={refreshKey} onGoToTarifs={handleGoToTarifs} />
         </div>
       ),
     },

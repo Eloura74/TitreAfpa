@@ -49,7 +49,7 @@ export default function TarifConfiguratorV2() {
       } catch (err) {
         console.error("Failed to load V2 config", err);
         setError(
-          "Impossible de charger la configuration. Vérifiez que le backend tourne."
+          "Impossible de charger la configuration. Vérifiez que le backend tourne.",
         );
       } finally {
         setLoading(false);
@@ -61,10 +61,15 @@ export default function TarifConfiguratorV2() {
   const saveConfig = async () => {
     try {
       await tariffServiceV2.saveTariffConfig(config);
-      alert("Configuration V2 sauvegardée (LocalStorage) !");
-    } catch (error) {
+      alert("Configuration sauvegardée avec succès !");
+    } catch (error: any) {
       console.error("Failed to save config", error);
-      alert("Erreur lors de la sauvegarde");
+      const errorMsg =
+        error.response?.data?.message || error.message || "Erreur inconnue";
+      const errorDetails = error.response?.data?.error
+        ? JSON.stringify(error.response.data.error)
+        : "";
+      alert(`Erreur lors de la sauvegarde : ${errorMsg}\n${errorDetails}`);
     }
   };
 
@@ -209,7 +214,9 @@ function CategoryNode({
       supports: [],
     };
     const newCats = config.categories.map((c: any) =>
-      c.id === category.id ? { ...c, products: [...c.products, newProduct] } : c
+      c.id === category.id
+        ? { ...c, products: [...c.products, newProduct] }
+        : c,
     );
     updateTree({ ...config, categories: newCats });
     setExpanded(true);
@@ -333,7 +340,7 @@ function ProductNode({
             ...c,
             products: c.products.filter((p: any) => p.id !== product.id),
           }
-        : c
+        : c,
     );
     updateTree({ ...config, categories: newCats });
   };
@@ -352,10 +359,10 @@ function ProductNode({
             products: c.products.map((p: any) =>
               p.id === product.id
                 ? { ...p, supports: [...p.supports, newSupport] }
-                : p
+                : p,
             ),
           }
-        : c
+        : c,
     );
     updateTree({ ...config, categories: newCats });
     setExpanded(true);
@@ -477,13 +484,13 @@ function SupportNode({
                 ? {
                     ...p,
                     supports: p.supports.filter(
-                      (s: any) => s.id !== support.id
+                      (s: any) => s.id !== support.id,
                     ),
                   }
-                : p
+                : p,
             ),
           }
-        : c
+        : c,
     );
     updateTree({ ...config, categories: newCats });
   };
@@ -506,13 +513,13 @@ function SupportNode({
                     supports: p.supports.map((s: any) =>
                       s.id === support.id
                         ? { ...s, formats: [...s.formats, newFormat] }
-                        : s
+                        : s,
                     ),
                   }
-                : p
+                : p,
             ),
           }
-        : c
+        : c,
     );
     updateTree({ ...config, categories: newCats });
     setExpanded(true);
@@ -640,16 +647,16 @@ function FormatNode({
                         ? {
                             ...s,
                             formats: s.formats.filter(
-                              (f: any) => f.id !== format.id
+                              (f: any) => f.id !== format.id,
                             ),
                           }
-                        : s
+                        : s,
                     ),
                   }
-                : p
+                : p,
             ),
           }
-        : c
+        : c,
     );
     updateTree({ ...config, categories: newCats });
   };

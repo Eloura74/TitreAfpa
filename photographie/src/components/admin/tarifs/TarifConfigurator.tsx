@@ -42,9 +42,18 @@ export default function TarifConfigurator() {
     const loadConfig = async () => {
       try {
         const data = await tariffService.getTariffConfig();
-        setConfig(data);
+        // Vérification de sécurité : s'assurer que categories existe
+        if (data && Array.isArray(data.categories)) {
+          setConfig(data);
+        } else {
+          console.warn(
+            "Invalid tariff config received, using default empty config",
+          );
+          setConfig(INITIAL_CONFIG);
+        }
       } catch (error) {
         console.error("Failed to load tariff config", error);
+        setConfig(INITIAL_CONFIG);
       }
     };
     loadConfig();
@@ -200,7 +209,7 @@ function CategoryNode({
       sizes: [],
     };
     const newCats = config.categories.map((c: any) =>
-      c.id === category.id ? { ...c, finishes: [...c.finishes, newFinish] } : c
+      c.id === category.id ? { ...c, finishes: [...c.finishes, newFinish] } : c,
     );
     updateTree({ ...config, categories: newCats });
     setExpanded(true);
@@ -320,7 +329,7 @@ function FinishNode({
     const newCats = config.categories.map((c: any) =>
       c.id === catId
         ? { ...c, finishes: c.finishes.filter((f: any) => f.id !== finish.id) }
-        : c
+        : c,
     );
     updateTree({ ...config, categories: newCats });
   };
@@ -339,10 +348,10 @@ function FinishNode({
         ? {
             ...c,
             finishes: c.finishes.map((f: any) =>
-              f.id === finish.id ? { ...f, sizes: [...f.sizes, newSize] } : f
+              f.id === finish.id ? { ...f, sizes: [...f.sizes, newSize] } : f,
             ),
           }
-        : c
+        : c,
     );
     updateTree({ ...config, categories: newCats });
     setExpanded(true);
@@ -466,10 +475,10 @@ function SizeNode({
             finishes: c.finishes.map((f: any) =>
               f.id === finishId
                 ? { ...f, sizes: f.sizes.filter((s: any) => s.id !== size.id) }
-                : f
+                : f,
             ),
           }
-        : c
+        : c,
     );
     updateTree({ ...config, categories: newCats });
   };
@@ -492,13 +501,13 @@ function SizeNode({
                     sizes: f.sizes.map((s: any) =>
                       s.id === size.id
                         ? { ...s, papers: [...s.papers, newPaper] }
-                        : s
+                        : s,
                     ),
                   }
-                : f
+                : f,
             ),
           }
-        : c
+        : c,
     );
     updateTree({ ...config, categories: newCats });
     setExpanded(true);
@@ -522,13 +531,13 @@ function SizeNode({
                     sizes: f.sizes.map((s: any) =>
                       s.id === size.id
                         ? { ...s, frames: [...s.frames, newFrame] }
-                        : s
+                        : s,
                     ),
                   }
-                : f
+                : f,
             ),
           }
-        : c
+        : c,
     );
     updateTree({ ...config, categories: newCats });
     setExpanded(true);
@@ -636,16 +645,16 @@ function SizeNode({
                                       ? {
                                           ...s,
                                           papers: s.papers.filter(
-                                            (p: any) => p.id !== paper.id
+                                            (p: any) => p.id !== paper.id,
                                           ),
                                         }
-                                      : s
+                                      : s,
                                   ),
                                 }
-                              : f
+                              : f,
                           ),
                         }
-                      : c
+                      : c,
                   );
                   updateTree({ ...config, categories: newCats });
                 }}
@@ -673,16 +682,16 @@ function SizeNode({
                                       ? {
                                           ...s,
                                           frames: s.frames.filter(
-                                            (fr: any) => fr.id !== frame.id
+                                            (fr: any) => fr.id !== frame.id,
                                           ),
                                         }
-                                      : s
+                                      : s,
                                   ),
                                 }
-                              : f
+                              : f,
                           ),
                         }
-                      : c
+                      : c,
                   );
                   updateTree({ ...config, categories: newCats });
                 }}

@@ -1,6 +1,6 @@
 // Importations des modules nécessaires
 import { useEffect, useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import galerieData from "../../config/galerie.json";
 import { API_URL as BASE_API_URL } from "../../config/api";
 import { useToast } from "../../components/Toast";
@@ -47,10 +47,11 @@ interface Photo {
   album?: string;
 }
 
-import { useUser } from "../../context/UserContext";
+interface GalerieFormProps {
+  onGoToTarifs?: () => void;
+}
 
-export default function GalerieForm() {
-  const { user, isLoading: userLoading } = useUser();
+export default function GalerieForm({ onGoToTarifs }: GalerieFormProps) {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [form, setForm] = useState<FormType>(formInitial);
   const [tariffConfig, setTariffConfig] = useState<TariffConfigV2>({
@@ -61,11 +62,6 @@ export default function GalerieForm() {
   const { addToast } = useToast();
   const [editId, setEditId] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  // Protection interne (Double sécurité)
-  if (!userLoading && (!user.isAuthenticated || !user.isAdmin)) {
-    return <Navigate to="/inscription" replace />;
-  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -89,7 +85,7 @@ export default function GalerieForm() {
   }, []);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setForm({
@@ -116,7 +112,7 @@ export default function GalerieForm() {
       if (form.availableTariffIds.length === 0) {
         addToast(
           "Veuillez sélectionner au moins un tarif pour cette photo.",
-          "warning"
+          "warning",
         );
         setIsSubmitting(false);
         return;
@@ -147,7 +143,7 @@ export default function GalerieForm() {
           }
           const updated = await res.json();
           setPhotos(
-            photos.map((photo) => (photo._id === editId ? updated : photo))
+            photos.map((photo) => (photo._id === editId ? updated : photo)),
           );
           setEditId(null);
           addToast("Photo modifiée avec succès !", "success");
@@ -275,7 +271,7 @@ export default function GalerieForm() {
                     try {
                       const signRes = await fetch(
                         `${BASE_API_URL}/api/upload-cloudinary/sign`,
-                        { method: "GET", credentials: "include" }
+                        { method: "GET", credentials: "include" },
                       );
 
                       if (!signRes.ok) throw new Error("Erreur signature");
@@ -298,7 +294,7 @@ export default function GalerieForm() {
 
                       const uploadRes = await fetch(
                         `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
-                        { method: "POST", body: formData }
+                        { method: "POST", body: formData },
                       );
 
                       const uploadData = await uploadRes.json();
@@ -435,14 +431,12 @@ export default function GalerieForm() {
               <label className="text-xs font-bold text-[#ffe992] uppercase tracking-wider">
                 Tarifs Applicables
               </label>
-              <a
-                href="/admin/tarifs"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={onGoToTarifs}
                 className="text-xs text-gray-400 hover:text-white underline decoration-gray-600 hover:decoration-white transition-all"
               >
                 Gérer les tarifs
-              </a>
+              </button>
             </div>
 
             <div className="bg-[#0a0a10] rounded-lg md:rounded-xl border border-white/10 overflow-hidden h-[350px] md:h-[600px] overflow-y-auto custom-scrollbar p-3 md:p-4">
