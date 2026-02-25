@@ -1,0 +1,344 @@
+[
+  {
+    "gamme": "Petits formats",
+    "format": "10×15",
+    "coutFournisseurTTC": 0.54,
+    "coefficient": 2.50,
+    "prixSite": 1.35,
+    "netApresURSSAF": 1.04,
+    "margeNette": 0.50
+  },
+  {
+    "gamme": "Petits formats",
+    "format": "20×30",
+    "coutFournisseurTTC": 1.91,
+    "coefficient": 2.50,
+    "prixSite": 4.78,
+    "netApresURSSAF": 3.67,
+    "margeNette": 1.76
+  },
+  {
+    "gamme": "Petits formats",
+    "format": "30×45",
+    "coutFournisseurTTC": 4.20,
+    "coefficient": 2.50,
+    "prixSite": 10.50,
+    "netApresURSSAF": 8.05,
+    "margeNette": 3.85
+  },
+  {
+    "gamme": "Petits formats",
+    "format": "20×20",
+    "coutFournisseurTTC": 1.30,
+    "coefficient": 2.50,
+    "prixSite": 3.25,
+    "netApresURSSAF": 2.49,
+    "margeNette": 1.19
+  },
+  {
+    "gamme": "Petits formats",
+    "format": "30×30",
+    "coutFournisseurTTC": 2.83,
+    "coefficient": 2.50,
+    "prixSite": 7.08,
+    "netApresURSSAF": 5.43,
+    "margeNette": 2.60
+  },
+  {
+    "gamme": "Lambda",
+    "format": "50×75",
+    "coutFournisseurTTC": 21.08,
+    "coefficient": 2.50,
+    "prixSite": 52.70,
+    "netApresURSSAF": 40.42,
+    "margeNette": 19.34
+  },
+  {
+    "gamme": "Lambda",
+    "format": "60×90",
+    "coutFournisseurTTC": 29.58,
+    "coefficient": 2.50,
+    "prixSite": 73.95,
+    "netApresURSSAF": 56.72,
+    "margeNette": 27.14
+  },
+  {
+    "gamme": "Lambda",
+    "format": "80×120",
+    "coutFournisseurTTC": 51.17,
+    "coefficient": 2.50,
+    "prixSite": 127.93,
+    "netApresURSSAF": 98.12,
+    "margeNette": 46.95
+  },
+  {
+    "gamme": "Lambda",
+    "format": "100×100",
+    "coutFournisseurTTC": 53.22,
+    "coefficient": 2.50,
+    "prixSite": 133.05,
+    "netApresURSSAF": 102.05,
+    "margeNette": 48.83
+  },
+  {
+    "gamme": "Pigmentaire",
+    "format": "10×15",
+    "coutFournisseurTTC": 5.06,
+    "coefficient": 2.50,
+    "prixSite": 12.65,
+    "netApresURSSAF": 9.70,
+    "margeNette": 4.64
+  },
+  {
+    "gamme": "Pigmentaire",
+    "format": "50×75",
+    "coutFournisseurTTC": 38.88,
+    "coefficient": 2.50,
+    "prixSite": 97.20,
+    "netApresURSSAF": 74.55,
+    "margeNette": 35.67
+  },
+  {
+    "gamme": "Pigmentaire",
+    "format": "60×90",
+    "coutFournisseurTTC": 54.37,
+    "coefficient": 2.50,
+    "prixSite": 135.93,
+    "netApresURSSAF": 104.26,
+    "margeNette": 49.89
+  },
+  {
+    "gamme": "Pigmentaire",
+    "format": "80×120",
+    "coutFournisseurTTC": 93.82,
+    "coefficient": 2.50,
+    "prixSite": 234.55,
+    "netApresURSSAF": 179.90,
+    "margeNette": 86.08
+  },
+  {
+    "gamme": "Pigmentaire",
+    "format": "100×100",
+    "coutFournisseurTTC": 97.57,
+    "coefficient": 2.50,
+    "prixSite": 243.93,
+    "netApresURSSAF": 187.09,
+    "margeNette": 89.52
+  },
+  {
+    "gamme": "Dibond",
+    "format": "20×20",
+    "coutFournisseurTTC": 43.55,
+    "coefficient": 2.50,
+    "prixSite": 108.88,
+    "netApresURSSAF": 83.51,
+    "margeNette": 39.96
+  },
+  {
+    "gamme": "Dibond",
+    "format": "50×75",
+    "coutFournisseurTTC": 89.08,
+    "coefficient": 2.50,
+    "prixSite": 222.70,
+    "netApresURSSAF": 170.81,
+    "margeNette": 81.73
+  },
+  {
+    "gamme": "Dibond",
+    "format": "60×90",
+    "coutFournisseurTTC": 111.50,
+    "coefficient": 2.50,
+    "prixSite": 278.75,
+    "netApresURSSAF": 213.80,
+    "margeNette": 102.30
+  },
+  {
+    "gamme": "Dibond",
+    "format": "80×120",
+    "coutFournisseurTTC": 168.59,
+    "coefficient": 2.50,
+    "prixSite": 421.48,
+    "netApresURSSAF": 323.28,
+    "margeNette": 154.69
+  },
+  {
+    "gamme": "Dibond",
+    "format": "100×100",
+    "coutFournisseurTTC": 174.02,
+    "coefficient": 2.50,
+    "prixSite": 435.05,
+    "netApresURSSAF": 333.68,
+    "margeNette": 159.66
+  },
+  {
+    "gamme": "Plexi",
+    "format": "20×20",
+    "coutFournisseurTTC": 64.44,
+    "coefficient": 2.50,
+    "prixSite": 161.10,
+    "netApresURSSAF": 123.56,
+    "margeNette": 59.12
+  },
+  {
+    "gamme": "Plexi",
+    "format": "50×75",
+    "coutFournisseurTTC": 191.40,
+    "coefficient": 2.50,
+    "prixSite": 478.50,
+    "netApresURSSAF": 367.01,
+    "margeNette": 175.61
+  },
+  {
+    "gamme": "Plexi",
+    "format": "60×90",
+    "coutFournisseurTTC": 246.97,
+    "coefficient": 2.50,
+    "prixSite": 617.43,
+    "netApresURSSAF": 473.57,
+    "margeNette": 226.60
+  },
+  {
+    "gamme": "Plexi",
+    "format": "80×120",
+    "coutFournisseurTTC": 388.46,
+    "coefficient": 2.50,
+    "prixSite": 971.15,
+    "netApresURSSAF": 744.87,
+    "margeNette": 356.41
+  },
+  {
+    "gamme": "Plexi",
+    "format": "100×100",
+    "coutFournisseurTTC": 401.94,
+    "coefficient": 2.50,
+    "prixSite": 1004.85,
+    "netApresURSSAF": 770.72,
+    "margeNette": 368.78
+  },
+  {
+    "gamme": "Caisse Américaine",
+    "format": "20×20",
+    "coutFournisseurTTC": 97.51,
+    "coefficient": 2.50,
+    "prixSite": 243.78,
+    "netApresURSSAF": 186.98,
+    "margeNette": 89.47
+  },
+  {
+    "gamme": "Caisse Américaine",
+    "format": "50×75",
+    "coutFournisseurTTC": 251.30,
+    "coefficient": 2.50,
+    "prixSite": 628.25,
+    "netApresURSSAF": 481.87,
+    "margeNette": 230.57
+  },
+  {
+    "gamme": "Caisse Américaine",
+    "format": "60×90",
+    "coutFournisseurTTC": 310.51,
+    "coefficient": 2.50,
+    "prixSite": 776.28,
+    "netApresURSSAF": 595.41,
+    "margeNette": 284.90
+  },
+  {
+    "gamme": "Caisse Américaine",
+    "format": "80×120",
+    "coutFournisseurTTC": 442.25,
+    "coefficient": 2.50,
+    "prixSite": 1105.63,
+    "netApresURSSAF": 848.02,
+    "margeNette": 405.77
+  },
+  {
+    "gamme": "Caisse Américaine",
+    "format": "100×100",
+    "coutFournisseurTTC": 448.19,
+    "coefficient": 2.50,
+    "prixSite": 1120.48,
+    "netApresURSSAF": 859.41,
+    "margeNette": 411.22
+  },
+  {
+    "gamme": "Encadrement d'Art",
+    "format": "20×20",
+    "coutFournisseurTTC": 139.85,
+    "coefficient": 2.50,
+    "prixSite": 349.63,
+    "netApresURSSAF": 268.17,
+    "margeNette": 128.32
+  },
+  {
+    "gamme": "Encadrement d'Art",
+    "format": "50×75",
+    "coutFournisseurTTC": 369.73,
+    "coefficient": 2.50,
+    "prixSite": 924.33,
+    "netApresURSSAF": 708.96,
+    "margeNette": 339.23
+  },
+  {
+    "gamme": "Encadrement d'Art",
+    "format": "60×90",
+    "coutFournisseurTTC": 458.45,
+    "coefficient": 2.50,
+    "prixSite": 1146.13,
+    "netApresURSSAF": 879.08,
+    "margeNette": 420.63
+  },
+  {
+    "gamme": "Encadrement d'Art",
+    "format": "80×120",
+    "coutFournisseurTTC": 657.82,
+    "coefficient": 2.50,
+    "prixSite": 1644.55,
+    "netApresURSSAF": 1261.37,
+    "margeNette": 603.55
+  },
+  {
+    "gamme": "Encadrement d'Art",
+    "format": "100×100",
+    "coutFournisseurTTC": 566.03,
+    "coefficient": 2.50,
+    "prixSite": 1415.08,
+    "netApresURSSAF": 1085.37,
+    "margeNette": 519.34
+  },
+  {
+    "gamme": "Nielsen Sur Mesure",
+    "format": "50×75",
+    "coutFournisseurTTC": 229.98,
+    "coefficient": 2.50,
+    "prixSite": 574.95,
+    "netApresURSSAF": 440.99,
+    "margeNette": 211.01
+  },
+  {
+    "gamme": "Nielsen Sur Mesure",
+    "format": "60×90",
+    "coutFournisseurTTC": 280.34,
+    "coefficient": 2.50,
+    "prixSite": 700.85,
+    "netApresURSSAF": 537.55,
+    "margeNette": 257.21
+  },
+  {
+    "gamme": "Nielsen Sur Mesure",
+    "format": "80×120",
+    "coutFournisseurTTC": 358.30,
+    "coefficient": 2.50,
+    "prixSite": 895.75,
+    "netApresURSSAF": 687.04,
+    "margeNette": 328.74
+  },
+  {
+    "gamme": "Nielsen Sur Mesure",
+    "format": "100×100",
+    "coutFournisseurTTC": 279.22,
+    "coefficient": 2.50,
+    "prixSite": 698.05,
+    "netApresURSSAF": 535.40,
+    "margeNette": 256.18
+  }
+]
