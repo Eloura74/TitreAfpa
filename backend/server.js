@@ -384,10 +384,9 @@ app.use("/api/auth", authRoutes);
 // Grille tarifaire dynamique
 app.use("/api/tarifs", tarifsRoutes);
 
-// Import de tarifs depuis Excel
-// TEMPORAIREMENT DÉSACTIVÉ pour debug Vercel
-// const importTarifsRoutes = require("./routes/importTarifs");
-// app.use("/api/tarifs", importTarifsRoutes);
+// Import de tarifs depuis JSON (parsing Excel fait côté frontend)
+const importTarifsJsonRoutes = require("./routes/importTarifsJson");
+app.use("/api/tarifs", importTarifsJsonRoutes);
 
 // Paiement PayPal (avec rate limiter spécifique anti-spam)
 app.use("/api/paypal", paymentLimiter, paypalRoutes);

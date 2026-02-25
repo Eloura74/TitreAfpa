@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+// @ts-expect-error - xlsx types will be resolved at build time
+import * as XLSX from "xlsx";
 import { API_URL } from "../../../config/api";
 
 interface ImportStats {
@@ -88,42 +90,118 @@ const ImportTarifsExcel: React.FC = () => {
     }
   };
 
-  // Upload du fichier
+  // Parser Excel côté frontend et envoyer JSON au backend
   const handleUpload = async () => {
     if (!selectedFile) return;
 
     setUploading(true);
-    setProgress(0);
+    setProgress(20);
     setError(null);
     setResult(null);
 
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
     try {
+      // Lire le fichier Excel dans le navigateur
+      const arrayBuffer = await selectedFile.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+
+      setProgress(40);
+
+      // Extraire les données (à partir de la ligne 7)
+      const data = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        range: 6,
+      }) as unknown[][];
+
+      // Extraire les paramètres (lignes 2 et 3)
+      const paramsSheet = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        range: 1,
+      }) as unknown[][];
+      const tauxURSSAF = paramsSheet[0]
+        ? parseFloat(String(paramsSheet[0][1]))
+        : 23.3;
+      const coefficientGlobal = paramsSheet[1]
+        ? parseFloat(String(paramsSheet[1][1]))
+        : 2.5;
+
+      setProgress(60);
+
+      // Parser les tarifs
+      const tarifs: Array<{
+        gamme: string;
+        format: string;
+        coutFournisseur: number;
+        coefficient: number;
+        prixSite: number;
+        netApresURSSAF: number;
+        margeNette: number;
+      }> = [];
+      const errors: string[] = [];
+
+      data.forEach((row, index) => {
+        if (!row[0] || row[0] === "Gamme / Finition") return;
+
+        const gamme = String(row[0]).trim();
+        const format = String(row[1]).trim();
+        const coutFournisseur = parseFloat(String(row[2]));
+        const coefficient = parseFloat(String(row[3]));
+        const prixSite = parseFloat(String(row[4]));
+        const netApresURSSAF = parseFloat(String(row[5]));
+        const margeNette = parseFloat(String(row[6]));
+
+        if (!gamme || !format) {
+          errors.push(`Ligne ${index + 7}: Gamme ou Format manquant`);
+          return;
+        }
+
+        if (isNaN(prixSite) || prixSite <= 0) {
+          errors.push(
+            `Ligne ${index + 7}: Prix invalide pour ${gamme} ${format}`,
+          );
+          return;
+        }
+
+        tarifs.push({
+          gamme,
+          format,
+          coutFournisseur: coutFournisseur || 0,
+          coefficient: coefficient || coefficientGlobal,
+          prixSite,
+          netApresURSSAF: netApresURSSAF || 0,
+          margeNette: margeNette || 0,
+        });
+      });
+
+      if (errors.length > 0) {
+        setError(`Erreurs dans le fichier Excel :\n${errors.join("\n")}`);
+        setUploading(false);
+        return;
+      }
+
+      setProgress(80);
+
+      // Envoyer les données JSON au backend
       const response = await axios.post<ImportResponse>(
-        `${API_URL}/api/import-tarifs-excel`,
-        formData,
+        `${API_URL}/api/tarifs/import-json`,
+        {
+          tarifs,
+          params: { tauxURSSAF, coefficientGlobal },
+        },
         {
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
           },
           withCredentials: true,
-          onUploadProgress: (progressEvent) => {
-            if (progressEvent.total) {
-              const percentCompleted = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total,
-              );
-              setProgress(percentCompleted);
-            }
-          },
         },
       );
 
+      setProgress(100);
       setResult(response.data);
       setSelectedFile(null);
     } catch (err) {
-      console.error("Erreur lors de l'upload:", err);
+      console.error("Erreur lors de l'import:", err);
 
       if (axios.isAxiosError(err) && err.response?.data?.errors) {
         setError(
@@ -138,7 +216,7 @@ const ImportTarifsExcel: React.FC = () => {
       }
     } finally {
       setUploading(false);
-      setProgress(0);
+      setTimeout(() => setProgress(0), 500);
     }
   };
 
