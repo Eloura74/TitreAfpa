@@ -103,7 +103,7 @@ const ImportTarifsExcel: React.FC = () => {
 
     try {
       const response = await axios.post<ImportResponse>(
-        `${API_URL}/api/tarifs/import-excel`,
+        `${API_URL}/api/import-tarifs-excel`,
         formData,
         {
           headers: {
