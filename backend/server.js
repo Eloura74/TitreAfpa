@@ -385,8 +385,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tarifs", tarifsRoutes);
 
 // Import de tarifs depuis JSON
-const importTarifsJsonRoutes = require("./routes/importTarifsJson");
-app.use("/api/tarifs", importTarifsJsonRoutes);
+// DÉSACTIVÉ - cause erreur 500 sur Vercel (problème de chargement du modèle)
+// const importTarifsJsonRoutes = require("./routes/importTarifsJson");
+// app.use("/api/tarifs", importTarifsJsonRoutes);
 
 // Paiement PayPal (avec rate limiter spécifique anti-spam)
 app.use("/api/paypal", paymentLimiter, paypalRoutes);
