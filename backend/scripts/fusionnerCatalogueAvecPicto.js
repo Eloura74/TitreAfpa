@@ -114,10 +114,23 @@ async function fusionnerCatalogue() {
     // Lire le catalogue
     const cataloguePath = path.join(
       __dirname,
-      "../../photographie/src/data/catalogue-tarifs.json",
+      "../../CATALOGUE_COMPLET_TIRAGES_ET_FINITIONS.json",
     );
-    const catalogueData = JSON.parse(fs.readFileSync(cataloguePath, "utf8"));
-    console.log(`📋 ${catalogueData.length} tarifs à intégrer`);
+    const catalogueJSON = JSON.parse(fs.readFileSync(cataloguePath, "utf8"));
+    const catalogueData = catalogueJSON["CATALOGUE COMPLET"];
+
+    // Filtrer les lignes de tarifs (ignorer les paramètres et lignes vides)
+    const tarifs = catalogueData.filter(
+      (item) =>
+        item.Paramètres &&
+        item.Paramètres !== "Taux URSSAF" &&
+        item.Paramètres !== "Coefficient global" &&
+        item.Paramètres !== "Gamme / Finition" &&
+        item["Unnamed: 1"] &&
+        item["Unnamed: 4"],
+    );
+
+    console.log(`📋 ${tarifs.length} tarifs à intégrer`);
 
     let formatsAjoutes = 0;
     let supportsAjoutes = 0;
@@ -125,10 +138,16 @@ async function fusionnerCatalogue() {
     let categoriesAjoutees = 0;
 
     // Traiter chaque tarif du catalogue
-    catalogueData.forEach((tarif) => {
-      const mapping = mappingGammes[tarif.gamme];
+    tarifs.forEach((item) => {
+      const gamme = item.Paramètres;
+      const format = item["Unnamed: 1"];
+      const prixSite = parseFloat(item["Unnamed: 4"]);
+      const coefficient = parseFloat(item["Unnamed: 3"]) || 2.5;
+      const coutFournisseur = parseFloat(item["Unnamed: 2"]) || 0;
+
+      const mapping = mappingGammes[gamme];
       if (!mapping) {
-        console.warn(`⚠️  Gamme non mappée: ${tarif.gamme}`);
+        console.warn(`⚠️  Gamme non mappée: ${gamme}`);
         return;
       }
 
@@ -153,7 +172,7 @@ async function fusionnerCatalogue() {
         product = {
           id: uuidv4(),
           name: productName,
-          description: `Tirage ${tarif.gamme}`,
+          description: `Tirage ${gamme}`,
           supports: [],
         };
         category.products.push(product);
@@ -167,11 +186,11 @@ async function fusionnerCatalogue() {
         support = {
           id: uuidv4(),
           name: supportName,
-          description: `Support pour ${tarif.gamme}`,
+          description: `Support pour ${gamme}`,
           technicalSpecs: {
-            gamme: tarif.gamme,
-            coefficient: tarif.coefficient.toString(),
-            coutFournisseur: tarif.coutFournisseurTTC,
+            gamme: gamme,
+            coefficient: coefficient.toString(),
+            coutFournisseur: coutFournisseur,
           },
           formats: [],
         };
@@ -181,20 +200,20 @@ async function fusionnerCatalogue() {
       }
 
       // Vérifier si le format existe déjà
-      const formatExiste = support.formats.find((f) => f.name === tarif.format);
+      const formatExiste = support.formats.find((f) => f.name === format);
       if (!formatExiste) {
         // Ajouter le format
-        const dimensions = tarif.format.split("×");
+        const dimensions = format.split("×");
         support.formats.push({
           id: uuidv4(),
-          name: tarif.format,
+          name: format,
           width: parseInt(dimensions[0]) || 0,
           height: parseInt(dimensions[1]) || 0,
-          price: tarif.prixSite,
+          price: prixSite,
         });
         formatsAjoutes++;
       } else {
-        console.log(`      ⏭️  Format déjà existant: ${tarif.format}`);
+        console.log(`      ⏭️  Format déjà existant: ${format}`);
       }
     });
 

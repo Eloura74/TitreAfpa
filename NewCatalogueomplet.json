@@ -1,0 +1,473 @@
+{
+  "meta": {
+    "source": "CATALOGUE_COMPLET_TIRAGES_ET_FINITIONS.xlsx",
+    "generated_at_utc": "2026-02-26T07:21:43.623235+00:00",
+    "currency": "EUR",
+    "parameters": {
+      "taux_urssaf": 0.233,
+      "coefficient_global": 2.5
+    },
+    "notes": [
+      "Les champs snapshot correspondent aux prix actuels présents dans le fichier.",
+      "Pour gérer des changements de prix, stocker au minimum cout_fournisseur_ttc_eur + coefficient, puis recalculer le snapshot à la volée."
+    ]
+  },
+  "items": [
+    {
+      "gamme_finition": "Petits formats",
+      "format": "10×15",
+      "cout_fournisseur_ttc_eur": 0.54,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 1.35,
+        "net_apres_urssaf_eur": 1.04,
+        "marge_nette_eur": 0.5
+      },
+      "id": "petits-formats__1015"
+    },
+    {
+      "gamme_finition": "Petits formats",
+      "format": "20×30",
+      "cout_fournisseur_ttc_eur": 1.91,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 4.78,
+        "net_apres_urssaf_eur": 3.67,
+        "marge_nette_eur": 1.76
+      },
+      "id": "petits-formats__2030"
+    },
+    {
+      "gamme_finition": "Petits formats",
+      "format": "30×45",
+      "cout_fournisseur_ttc_eur": 4.2,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 10.5,
+        "net_apres_urssaf_eur": 8.05,
+        "marge_nette_eur": 3.85
+      },
+      "id": "petits-formats__3045"
+    },
+    {
+      "gamme_finition": "Petits formats",
+      "format": "20×20",
+      "cout_fournisseur_ttc_eur": 1.3,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 3.25,
+        "net_apres_urssaf_eur": 2.49,
+        "marge_nette_eur": 1.19
+      },
+      "id": "petits-formats__2020"
+    },
+    {
+      "gamme_finition": "Petits formats",
+      "format": "30×30",
+      "cout_fournisseur_ttc_eur": 2.83,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 7.08,
+        "net_apres_urssaf_eur": 5.43,
+        "marge_nette_eur": 2.6
+      },
+      "id": "petits-formats__3030"
+    },
+    {
+      "gamme_finition": "Lambda",
+      "format": "50×75",
+      "cout_fournisseur_ttc_eur": 21.08,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 52.7,
+        "net_apres_urssaf_eur": 40.42,
+        "marge_nette_eur": 19.34
+      },
+      "id": "lambda__5075"
+    },
+    {
+      "gamme_finition": "Lambda",
+      "format": "60×90",
+      "cout_fournisseur_ttc_eur": 29.58,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 73.95,
+        "net_apres_urssaf_eur": 56.72,
+        "marge_nette_eur": 27.14
+      },
+      "id": "lambda__6090"
+    },
+    {
+      "gamme_finition": "Lambda",
+      "format": "80×120",
+      "cout_fournisseur_ttc_eur": 51.17,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 127.93,
+        "net_apres_urssaf_eur": 98.12,
+        "marge_nette_eur": 46.95
+      },
+      "id": "lambda__80120"
+    },
+    {
+      "gamme_finition": "Lambda",
+      "format": "100×100",
+      "cout_fournisseur_ttc_eur": 53.22,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 133.05,
+        "net_apres_urssaf_eur": 102.05,
+        "marge_nette_eur": 48.83
+      },
+      "id": "lambda__100100"
+    },
+    {
+      "gamme_finition": "Pigmentaire",
+      "format": "10×15",
+      "cout_fournisseur_ttc_eur": 5.06,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 12.65,
+        "net_apres_urssaf_eur": 9.7,
+        "marge_nette_eur": 4.64
+      },
+      "id": "pigmentaire__1015"
+    },
+    {
+      "gamme_finition": "Pigmentaire",
+      "format": "50×75",
+      "cout_fournisseur_ttc_eur": 38.88,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 97.2,
+        "net_apres_urssaf_eur": 74.55,
+        "marge_nette_eur": 35.67
+      },
+      "id": "pigmentaire__5075"
+    },
+    {
+      "gamme_finition": "Pigmentaire",
+      "format": "60×90",
+      "cout_fournisseur_ttc_eur": 54.37,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 135.93,
+        "net_apres_urssaf_eur": 104.26,
+        "marge_nette_eur": 49.89
+      },
+      "id": "pigmentaire__6090"
+    },
+    {
+      "gamme_finition": "Pigmentaire",
+      "format": "80×120",
+      "cout_fournisseur_ttc_eur": 93.82,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 234.55,
+        "net_apres_urssaf_eur": 179.9,
+        "marge_nette_eur": 86.08
+      },
+      "id": "pigmentaire__80120"
+    },
+    {
+      "gamme_finition": "Pigmentaire",
+      "format": "100×100",
+      "cout_fournisseur_ttc_eur": 97.57,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 243.93,
+        "net_apres_urssaf_eur": 187.09,
+        "marge_nette_eur": 89.52
+      },
+      "id": "pigmentaire__100100"
+    },
+    {
+      "gamme_finition": "Dibond",
+      "format": "20×20",
+      "cout_fournisseur_ttc_eur": 43.55,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 108.88,
+        "net_apres_urssaf_eur": 83.51,
+        "marge_nette_eur": 39.96
+      },
+      "id": "dibond__2020"
+    },
+    {
+      "gamme_finition": "Dibond",
+      "format": "50×75",
+      "cout_fournisseur_ttc_eur": 89.08,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 222.7,
+        "net_apres_urssaf_eur": 170.81,
+        "marge_nette_eur": 81.73
+      },
+      "id": "dibond__5075"
+    },
+    {
+      "gamme_finition": "Dibond",
+      "format": "60×90",
+      "cout_fournisseur_ttc_eur": 111.5,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 278.75,
+        "net_apres_urssaf_eur": 213.8,
+        "marge_nette_eur": 102.3
+      },
+      "id": "dibond__6090"
+    },
+    {
+      "gamme_finition": "Dibond",
+      "format": "80×120",
+      "cout_fournisseur_ttc_eur": 168.59,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 421.48,
+        "net_apres_urssaf_eur": 323.28,
+        "marge_nette_eur": 154.69
+      },
+      "id": "dibond__80120"
+    },
+    {
+      "gamme_finition": "Dibond",
+      "format": "100×100",
+      "cout_fournisseur_ttc_eur": 174.02,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 435.05,
+        "net_apres_urssaf_eur": 333.68,
+        "marge_nette_eur": 159.66
+      },
+      "id": "dibond__100100"
+    },
+    {
+      "gamme_finition": "Plexi",
+      "format": "20×20",
+      "cout_fournisseur_ttc_eur": 64.44,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 161.1,
+        "net_apres_urssaf_eur": 123.56,
+        "marge_nette_eur": 59.12
+      },
+      "id": "plexi__2020"
+    },
+    {
+      "gamme_finition": "Plexi",
+      "format": "50×75",
+      "cout_fournisseur_ttc_eur": 191.4,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 478.5,
+        "net_apres_urssaf_eur": 367.01,
+        "marge_nette_eur": 175.61
+      },
+      "id": "plexi__5075"
+    },
+    {
+      "gamme_finition": "Plexi",
+      "format": "60×90",
+      "cout_fournisseur_ttc_eur": 246.97,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 617.43,
+        "net_apres_urssaf_eur": 473.57,
+        "marge_nette_eur": 226.6
+      },
+      "id": "plexi__6090"
+    },
+    {
+      "gamme_finition": "Plexi",
+      "format": "80×120",
+      "cout_fournisseur_ttc_eur": 388.46,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 971.15,
+        "net_apres_urssaf_eur": 744.87,
+        "marge_nette_eur": 356.41
+      },
+      "id": "plexi__80120"
+    },
+    {
+      "gamme_finition": "Plexi",
+      "format": "100×100",
+      "cout_fournisseur_ttc_eur": 401.94,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 1004.85,
+        "net_apres_urssaf_eur": 770.72,
+        "marge_nette_eur": 368.78
+      },
+      "id": "plexi__100100"
+    },
+    {
+      "gamme_finition": "Caisse Américaine",
+      "format": "20×20",
+      "cout_fournisseur_ttc_eur": 97.51,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 243.78,
+        "net_apres_urssaf_eur": 186.98,
+        "marge_nette_eur": 89.47
+      },
+      "id": "caisse-americaine__2020"
+    },
+    {
+      "gamme_finition": "Caisse Américaine",
+      "format": "50×75",
+      "cout_fournisseur_ttc_eur": 251.3,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 628.25,
+        "net_apres_urssaf_eur": 481.87,
+        "marge_nette_eur": 230.57
+      },
+      "id": "caisse-americaine__5075"
+    },
+    {
+      "gamme_finition": "Caisse Américaine",
+      "format": "60×90",
+      "cout_fournisseur_ttc_eur": 310.51,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 776.28,
+        "net_apres_urssaf_eur": 595.41,
+        "marge_nette_eur": 284.9
+      },
+      "id": "caisse-americaine__6090"
+    },
+    {
+      "gamme_finition": "Caisse Américaine",
+      "format": "80×120",
+      "cout_fournisseur_ttc_eur": 442.25,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 1105.63,
+        "net_apres_urssaf_eur": 848.02,
+        "marge_nette_eur": 405.77
+      },
+      "id": "caisse-americaine__80120"
+    },
+    {
+      "gamme_finition": "Caisse Américaine",
+      "format": "100×100",
+      "cout_fournisseur_ttc_eur": 448.19,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 1120.48,
+        "net_apres_urssaf_eur": 859.41,
+        "marge_nette_eur": 411.22
+      },
+      "id": "caisse-americaine__100100"
+    },
+    {
+      "gamme_finition": "Encadrement d'Art",
+      "format": "20×20",
+      "cout_fournisseur_ttc_eur": 139.85,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 349.63,
+        "net_apres_urssaf_eur": 268.17,
+        "marge_nette_eur": 128.32
+      },
+      "id": "encadrement-dart__2020"
+    },
+    {
+      "gamme_finition": "Encadrement d'Art",
+      "format": "50×75",
+      "cout_fournisseur_ttc_eur": 369.73,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 924.33,
+        "net_apres_urssaf_eur": 708.96,
+        "marge_nette_eur": 339.23
+      },
+      "id": "encadrement-dart__5075"
+    },
+    {
+      "gamme_finition": "Encadrement d'Art",
+      "format": "60×90",
+      "cout_fournisseur_ttc_eur": 458.45,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 1146.13,
+        "net_apres_urssaf_eur": 879.08,
+        "marge_nette_eur": 420.63
+      },
+      "id": "encadrement-dart__6090"
+    },
+    {
+      "gamme_finition": "Encadrement d'Art",
+      "format": "80×120",
+      "cout_fournisseur_ttc_eur": 657.82,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 1644.55,
+        "net_apres_urssaf_eur": 1261.37,
+        "marge_nette_eur": 603.55
+      },
+      "id": "encadrement-dart__80120"
+    },
+    {
+      "gamme_finition": "Encadrement d'Art",
+      "format": "100×100",
+      "cout_fournisseur_ttc_eur": 566.03,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 1415.08,
+        "net_apres_urssaf_eur": 1085.37,
+        "marge_nette_eur": 519.34
+      },
+      "id": "encadrement-dart__100100"
+    },
+    {
+      "gamme_finition": "Nielsen Sur Mesure",
+      "format": "50×75",
+      "cout_fournisseur_ttc_eur": 229.98,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 574.95,
+        "net_apres_urssaf_eur": 440.99,
+        "marge_nette_eur": 211.01
+      },
+      "id": "nielsen-sur-mesure__5075"
+    },
+    {
+      "gamme_finition": "Nielsen Sur Mesure",
+      "format": "60×90",
+      "cout_fournisseur_ttc_eur": 280.34,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 700.85,
+        "net_apres_urssaf_eur": 537.55,
+        "marge_nette_eur": 257.21
+      },
+      "id": "nielsen-sur-mesure__6090"
+    },
+    {
+      "gamme_finition": "Nielsen Sur Mesure",
+      "format": "80×120",
+      "cout_fournisseur_ttc_eur": 358.3,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 895.75,
+        "net_apres_urssaf_eur": 687.04,
+        "marge_nette_eur": 328.74
+      },
+      "id": "nielsen-sur-mesure__80120"
+    },
+    {
+      "gamme_finition": "Nielsen Sur Mesure",
+      "format": "100×100",
+      "cout_fournisseur_ttc_eur": 279.22,
+      "coefficient": 2.5,
+      "snapshot": {
+        "prix_site_final_eur": 698.05,
+        "net_apres_urssaf_eur": 535.4,
+        "marge_nette_eur": 256.18
+      },
+      "id": "nielsen-sur-mesure__100100"
+    }
+  ]
+}
