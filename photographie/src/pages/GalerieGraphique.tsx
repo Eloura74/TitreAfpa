@@ -345,7 +345,7 @@ export default function GalerieGraphique() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className="flex-shrink-0 max-w-full md:max-w-[65%] max-h-[70vh] md:max-h-[90vh]"
+                className="flex-shrink-0 max-w-full md:max-w-[65%] max-h-[70vh] md:max-h-[90vh] mb-4"
               >
                 <img
                   src={getWatermarkedImageUrl(oeuvres[lightboxIndex].image)}
@@ -376,7 +376,7 @@ export default function GalerieGraphique() {
                   </h3>
 
                   {/* Informations secondaires (format, support) */}
-                  <div className="text-left space-y-1">
+                  <div className="text-center space-y-1">
                     <p className="text-xs text-gray-400 tracking-wide">
                       Format Unique
                     </p>
@@ -390,7 +390,7 @@ export default function GalerieGraphique() {
                 {/* Description avec scroll si nécessaire */}
                 {oeuvres[lightboxIndex].description && (
                   <div className="flex-1 overflow-y-auto min-h-0 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-                    <p className="text-sm md:text-base text-gray-300 leading-relaxed text-center px-2">
+                    <p className="text-sm md:text-base text-gray-300 leading-relaxed text-left px-2">
                       {oeuvres[lightboxIndex].description}
                     </p>
                   </div>
