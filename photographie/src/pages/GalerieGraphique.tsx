@@ -335,7 +335,7 @@ export default function GalerieGraphique() {
 
             {/* Conteneur principal : Image + Panneau latéral */}
             <div
-              className="flex flex-col md:flex-row items-center justify-center gap-4 max-w-[95vw] max-h-[90vh] w-full"
+              className="flex flex-col md:flex-row items-center justify-center gap-4 max-w-[95vw] max-h-[90vh] w-full mb-4"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Image */}
@@ -361,24 +361,31 @@ export default function GalerieGraphique() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 50 }}
                 transition={{ delay: 0.1, duration: 0.4 }}
-                className="flex-shrink-0 w-full md:w-[350px]  rounded-2xl p-6 md:p-8 flex flex-col gap-4 max-h-[90vh]"
+                className="flex-shrink-0 w-full md:w-[350px] rounded-2xl p-6 md:p-8 flex flex-col gap-4 max-h-[90vh]"
               >
-                {/* Numéro de l'œuvre */}
-                <div className="text-center flex-shrink-0">
-                  <p className="text-xs text-gray-500 uppercase tracking-widest">
-                    {lightboxIndex + 1} / {oeuvres.length}
+                {/* En-tête : Numéro + Titre */}
+                <div className="flex-shrink-0 space-y-3">
+                  {/* Numéro discret */}
+                  <p className="text-xs text-gray-500 uppercase tracking-widest text-center">
+                    N° {lightboxIndex + 1} / {oeuvres.length}
                   </p>
+
+                  {/* Titre principal */}
+                  <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#ffe992] text-center leading-tight">
+                    {oeuvres[lightboxIndex].titre || "Sans titre"}
+                  </h3>
+
+                  {/* Informations secondaires (format, support) */}
+                  <div className="text-center space-y-1">
+                    <p className="text-xs text-gray-400 tracking-wide">
+                      Format Unique
+                    </p>
+                    <p className="text-xs text-gray-500">Impression Fine Art</p>
+                  </div>
                 </div>
 
                 {/* Séparateur */}
                 <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-[#ffe992]/30 to-transparent flex-shrink-0" />
-
-                {/* Titre */}
-                <div className="flex-shrink-0">
-                  <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#ffe992] text-center leading-tight">
-                    {oeuvres[lightboxIndex].titre || "Sans titre"}
-                  </h3>
-                </div>
 
                 {/* Description avec scroll si nécessaire */}
                 {oeuvres[lightboxIndex].description && (
