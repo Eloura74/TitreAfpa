@@ -361,7 +361,7 @@ export default function GalerieGraphique() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 50 }}
                 transition={{ delay: 0.1, duration: 0.4 }}
-                className="flex-shrink-0 w-full md:w-[350px] bg-white/5 backdrop-blur-xl rounded-2xl p-6 md:p-8 flex flex-col gap-4 max-h-[90vh]"
+                className="flex-shrink-0 w-full md:w-[350px]  rounded-2xl p-6 md:p-8 flex flex-col gap-4 max-h-[90vh]"
               >
                 {/* Numéro de l'œuvre */}
                 <div className="text-center flex-shrink-0">
