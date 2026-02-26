@@ -361,39 +361,39 @@ export default function GalerieGraphique() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 50 }}
                 transition={{ delay: 0.1, duration: 0.4 }}
-                className="flex-shrink-0 w-full md:w-[350px] bg-white/5 backdrop-blur-xl rounded-2xl p-6 md:p-8 flex flex-col gap-6 max-h-[90vh] overflow-y-auto"
+                className="flex-shrink-0 w-full md:w-[350px] bg-white/5 backdrop-blur-xl rounded-2xl p-6 md:p-8 flex flex-col gap-4 max-h-[90vh]"
               >
                 {/* Numéro de l'œuvre */}
-                <div className="text-center">
+                <div className="text-center flex-shrink-0">
                   <p className="text-xs text-gray-500 uppercase tracking-widest">
                     {lightboxIndex + 1} / {oeuvres.length}
                   </p>
                 </div>
 
                 {/* Séparateur */}
-                <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-[#ffe992]/30 to-transparent" />
+                <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-[#ffe992]/30 to-transparent flex-shrink-0" />
 
                 {/* Titre */}
-                <div>
-                  <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#ffe992] mb-2 text-center">
+                <div className="flex-shrink-0">
+                  <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#ffe992] text-center leading-tight">
                     {oeuvres[lightboxIndex].titre || "Sans titre"}
                   </h3>
                 </div>
 
-                {/* Description */}
+                {/* Description avec scroll si nécessaire */}
                 {oeuvres[lightboxIndex].description && (
-                  <div className="flex-1">
-                    <p className="text-sm md:text-base text-gray-300 leading-relaxed text-center">
+                  <div className="flex-1 overflow-y-auto min-h-0 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+                    <p className="text-sm md:text-base text-gray-300 leading-relaxed text-center px-2">
                       {oeuvres[lightboxIndex].description}
                     </p>
                   </div>
                 )}
 
                 {/* Séparateur */}
-                <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent flex-shrink-0" />
 
                 {/* Prix */}
-                <div className="text-center">
+                <div className="text-center flex-shrink-0">
                   <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">
                     Prix
                   </p>
@@ -402,13 +402,24 @@ export default function GalerieGraphique() {
                   </p>
                 </div>
 
+                {/* Bouton Ajouter au panier */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAjouterAuPanier(oeuvres[lightboxIndex]);
+                  }}
+                  className="w-full px-6 py-3 bg-[#ffe992] hover:bg-[#d6c487] text-black font-bold text-sm uppercase tracking-widest rounded-xl transition-all flex-shrink-0"
+                >
+                  Ajouter au panier
+                </button>
+
                 {/* Bouton Fermer */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setLightboxIndex(null);
                   }}
-                  className="w-full px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-xl text-white text-sm font-medium transition-all uppercase tracking-widest"
+                  className="w-full px-6 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-xl text-white text-sm font-medium transition-all uppercase tracking-widest flex-shrink-0"
                 >
                   Fermer
                 </button>
