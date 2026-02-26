@@ -84,10 +84,10 @@ export default function GalerieGraphique() {
           const imgSrc = oeuvre.image?.startsWith("http")
             ? oeuvre.image
             : oeuvre.image?.startsWith("/uploads/")
-            ? `${API_URL}${oeuvre.image}`
-            : oeuvre.image?.startsWith("/images/")
-            ? oeuvre.image
-            : `/images/${oeuvre.image || "/placeholder.jpg"}`;
+              ? `${API_URL}${oeuvre.image}`
+              : oeuvre.image?.startsWith("/images/")
+                ? oeuvre.image
+                : `/images/${oeuvre.image || "/placeholder.jpg"}`;
 
           return {
             id: oeuvre._id || oeuvre.id,
@@ -156,12 +156,12 @@ export default function GalerieGraphique() {
       if (e.key === "Escape") setLightboxIndex(null);
       if (e.key === "ArrowLeft") {
         setLightboxIndex((prev) =>
-          prev !== null && prev > 0 ? prev - 1 : prev
+          prev !== null && prev > 0 ? prev - 1 : prev,
         );
       }
       if (e.key === "ArrowRight") {
         setLightboxIndex((prev) =>
-          prev !== null && prev < oeuvres.length - 1 ? prev + 1 : prev
+          prev !== null && prev < oeuvres.length - 1 ? prev + 1 : prev,
         );
       }
     };
@@ -296,7 +296,7 @@ export default function GalerieGraphique() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[110] bg-black/95 flex items-center justify-center"
+            className="fixed inset-0 z-[110] bg-black/95 flex items-center justify-center p-4 md:p-8"
             onClick={() => setLightboxIndex(null)}
           >
             {/* Bouton Fermer */}
@@ -320,20 +320,6 @@ export default function GalerieGraphique() {
               </button>
             )}
 
-            {/* Image */}
-            <motion.img
-              key={oeuvres[lightboxIndex].id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              src={getWatermarkedImageUrl(oeuvres[lightboxIndex].image)}
-              alt={oeuvres[lightboxIndex].titre || "Oeuvre"}
-              className="max-w-full max-h-[90vh] object-contain select-none"
-              onClick={(e) => e.stopPropagation()}
-              onContextMenu={preventRightClick}
-            />
-
             {/* Navigation Droite */}
             {lightboxIndex < oeuvres.length - 1 && (
               <button
@@ -347,25 +333,86 @@ export default function GalerieGraphique() {
               </button>
             )}
 
-            {/* Info Photo */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/50 to-transparent text-center pointer-events-none flex flex-col items-center gap-4">
-              <div>
-                <h3 className="text-xl font-serif text-[#ffe992] mb-1">
-                  {oeuvres[lightboxIndex].titre || "Sans titre"}
-                </h3>
-                <p className="text-sm text-gray-400">
-                  {lightboxIndex + 1} / {oeuvres.length}
-                </p>
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setLightboxIndex(null);
-                }}
-                className="pointer-events-auto px-6 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full text-white text-sm font-medium transition-all uppercase tracking-widest mb-4"
+            {/* Conteneur principal : Image + Panneau latéral */}
+            <div
+              className="flex flex-col md:flex-row items-center justify-center gap-6 max-w-[95vw] max-h-[90vh] w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Image */}
+              <motion.div
+                key={oeuvres[lightboxIndex].id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="flex-shrink-0 max-w-full md:max-w-[65%] max-h-[70vh] md:max-h-[90vh]"
               >
-                Fermer
-              </button>
+                <img
+                  src={getWatermarkedImageUrl(oeuvres[lightboxIndex].image)}
+                  alt={oeuvres[lightboxIndex].titre || "Oeuvre"}
+                  className="w-full h-full object-contain select-none"
+                  onContextMenu={preventRightClick}
+                />
+              </motion.div>
+
+              {/* Panneau latéral - Informations */}
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 50 }}
+                transition={{ delay: 0.1, duration: 0.4 }}
+                className="flex-shrink-0 w-full md:w-[350px] bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 md:p-8 flex flex-col gap-6 max-h-[90vh] overflow-y-auto"
+              >
+                {/* Numéro de l'œuvre */}
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 uppercase tracking-widest">
+                    {lightboxIndex + 1} / {oeuvres.length}
+                  </p>
+                </div>
+
+                {/* Séparateur */}
+                <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-[#ffe992]/30 to-transparent" />
+
+                {/* Titre */}
+                <div>
+                  <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#ffe992] mb-2 text-center">
+                    {oeuvres[lightboxIndex].titre || "Sans titre"}
+                  </h3>
+                </div>
+
+                {/* Description */}
+                {oeuvres[lightboxIndex].description && (
+                  <div className="flex-1">
+                    <p className="text-sm md:text-base text-gray-300 leading-relaxed text-center">
+                      {oeuvres[lightboxIndex].description}
+                    </p>
+                  </div>
+                )}
+
+                {/* Séparateur */}
+                <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+                {/* Prix */}
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">
+                    Prix
+                  </p>
+                  <p className="text-2xl font-bold text-[#ffe992]">
+                    {oeuvres[lightboxIndex].prix} €
+                  </p>
+                </div>
+
+                {/* Bouton Fermer */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxIndex(null);
+                  }}
+                  className="w-full px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-xl text-white text-sm font-medium transition-all uppercase tracking-widest"
+                >
+                  Fermer
+                </button>
+              </motion.div>
             </div>
           </motion.div>
         )}
