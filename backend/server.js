@@ -384,9 +384,10 @@ app.use("/api/auth", authRoutes);
 // Grille tarifaire dynamique
 app.use("/api/tarifs", tarifsRoutes);
 
-// Import de tarifs depuis JSON (version simplifiée)
-const importTarifsJsonSimpleRoutes = require("./routes/importTarifsJsonSimple");
-app.use("/api/tarifs", importTarifsJsonSimpleRoutes);
+// Import de tarifs depuis JSON
+// DÉSACTIVÉ TEMPORAIREMENT - cause erreur 500 généralisée sur Vercel
+// const importTarifsJsonSimpleRoutes = require("./routes/importTarifsJsonSimple");
+// app.use("/api/tarifs", importTarifsJsonSimpleRoutes);
 
 // Paiement PayPal (avec rate limiter spécifique anti-spam)
 app.use("/api/paypal", paymentLimiter, paypalRoutes);
