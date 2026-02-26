@@ -376,7 +376,7 @@ export default function GalerieGraphique() {
                   </h3>
 
                   {/* Informations secondaires (format, support) */}
-                  <div className="text-center space-y-1">
+                  <div className="text-left space-y-1">
                     <p className="text-xs text-gray-400 tracking-wide">
                       Format Unique
                     </p>
