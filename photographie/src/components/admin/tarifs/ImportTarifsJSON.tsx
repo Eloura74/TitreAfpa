@@ -94,39 +94,71 @@ const ImportTarifsJSON: React.FC = () => {
 
       setProgress(40);
 
-      const catalogueData = jsonData["CATALOGUE COMPLET"];
-      if (!catalogueData || !Array.isArray(catalogueData)) {
-        throw new Error("Format JSON invalide. La clé 'CATALOGUE COMPLET' est requise.");
-      }
+      let tarifs: any[] = [];
+      let tauxURSSAF = 0.233;
+      let coefficientGlobal = 2.5;
 
-      const tauxURSSAF = catalogueData.find((item) => item.Paramètres === "Taux URSSAF")?.[
-        "Unnamed: 1"
-      ] || 0.233;
-      const coefficientGlobal = catalogueData.find(
-        (item) => item.Paramètres === "Coefficient global"
-      )?.["Unnamed: 1"] || 2.5;
+      // Détecter le format du JSON
+      if (jsonData.meta && jsonData.items) {
+        // Nouveau format avec meta et items
+        tauxURSSAF = jsonData.meta.parameters?.taux_urssaf || 0.233;
+        coefficientGlobal = jsonData.meta.parameters?.coefficient_global || 2.5;
 
-      setProgress(60);
+        setProgress(60);
 
-      const tarifs = catalogueData
-        .filter(
-          (item) =>
-            item.Paramètres &&
-            item.Paramètres !== "Taux URSSAF" &&
-            item.Paramètres !== "Coefficient global" &&
-            item.Paramètres !== "Gamme / Finition" &&
-            item["Unnamed: 1"] &&
-            item["Unnamed: 4"]
-        )
-        .map((item) => ({
-          gamme: item.Paramètres,
-          format: item["Unnamed: 1"],
-          coutFournisseur: parseFloat(item["Unnamed: 2"]) || 0,
-          coefficient: parseFloat(item["Unnamed: 3"]) || coefficientGlobal,
-          prixSite: parseFloat(item["Unnamed: 4"]),
-          netApresURSSAF: parseFloat(item["Unnamed: 5"]) || 0,
-          margeNette: parseFloat(item["Unnamed: 6"]) || 0,
+        tarifs = jsonData.items.map((item: any) => ({
+          gamme: item.gamme_finition,
+          format: item.format,
+          coutFournisseur: item.cout_fournisseur_ttc_eur || 0,
+          coefficient: item.coefficient || coefficientGlobal,
+          prixSite: item.snapshot?.prix_site_final_eur || 0,
+          netApresURSSAF: item.snapshot?.net_apres_urssaf_eur || 0,
+          margeNette: item.snapshot?.marge_nette_eur || 0,
         }));
+      } else if (jsonData["CATALOGUE COMPLET"]) {
+        // Ancien format avec CATALOGUE COMPLET
+        const catalogueData = jsonData["CATALOGUE COMPLET"];
+        if (!Array.isArray(catalogueData)) {
+          throw new Error(
+            "Format JSON invalide. 'CATALOGUE COMPLET' doit être un tableau.",
+          );
+        }
+
+        tauxURSSAF =
+          catalogueData.find((item) => item.Paramètres === "Taux URSSAF")?.[
+            "Unnamed: 1"
+          ] || 0.233;
+        coefficientGlobal =
+          catalogueData.find(
+            (item) => item.Paramètres === "Coefficient global",
+          )?.["Unnamed: 1"] || 2.5;
+
+        setProgress(60);
+
+        tarifs = catalogueData
+          .filter(
+            (item) =>
+              item.Paramètres &&
+              item.Paramètres !== "Taux URSSAF" &&
+              item.Paramètres !== "Coefficient global" &&
+              item.Paramètres !== "Gamme / Finition" &&
+              item["Unnamed: 1"] &&
+              item["Unnamed: 4"],
+          )
+          .map((item) => ({
+            gamme: item.Paramètres,
+            format: item["Unnamed: 1"],
+            coutFournisseur: parseFloat(item["Unnamed: 2"]) || 0,
+            coefficient: parseFloat(item["Unnamed: 3"]) || coefficientGlobal,
+            prixSite: parseFloat(item["Unnamed: 4"]),
+            netApresURSSAF: parseFloat(item["Unnamed: 5"]) || 0,
+            margeNette: parseFloat(item["Unnamed: 6"]) || 0,
+          }));
+      } else {
+        throw new Error(
+          "Format JSON non reconnu. Utilisez soit le format avec 'meta' et 'items', soit avec 'CATALOGUE COMPLET'.",
+        );
+      }
 
       if (tarifs.length === 0) {
         throw new Error("Aucun tarif trouvé dans le fichier JSON");
@@ -145,7 +177,7 @@ const ImportTarifsJSON: React.FC = () => {
             "Content-Type": "application/json",
           },
           withCredentials: true,
-        }
+        },
       );
 
       setProgress(100);
@@ -185,8 +217,8 @@ const ImportTarifsJSON: React.FC = () => {
       </h2>
 
       <p className="text-gray-400 mb-6">
-        Uploadez votre fichier JSON pour mettre à jour automatiquement tous les tarifs.
-        Les tarifs existants seront remplacés.
+        Uploadez votre fichier JSON pour mettre à jour automatiquement tous les
+        tarifs. Les tarifs existants seront remplacés.
       </p>
 
       {!result && (
@@ -285,7 +317,9 @@ const ImportTarifsJSON: React.FC = () => {
             <div className="text-2xl">❌</div>
             <div className="flex-1">
               <p className="text-red-400 font-medium mb-1">Erreur</p>
-              <p className="text-red-300 text-sm whitespace-pre-line">{error}</p>
+              <p className="text-red-300 text-sm whitespace-pre-line">
+                {error}
+              </p>
             </div>
           </div>
           <button
@@ -350,7 +384,7 @@ const ImportTarifsJSON: React.FC = () => {
           📋 Format JSON attendu :
         </p>
         <pre className="text-gray-500 text-xs bg-black/30 p-3 rounded overflow-x-auto">
-{`{
+          {`{
   "CATALOGUE COMPLET": [
     { "Paramètres": "Taux URSSAF", "Unnamed: 1": 0.233 },
     { "Paramètres": "Coefficient global", "Unnamed: 1": 2.5 },
