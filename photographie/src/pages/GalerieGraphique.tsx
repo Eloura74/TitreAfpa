@@ -390,7 +390,7 @@ export default function GalerieGraphique() {
                 {/* Description avec scroll si nécessaire */}
                 {oeuvres[lightboxIndex].description && (
                   <div className="flex-1 overflow-y-auto min-h-0 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-                    <p className="text-sm md:text-base text-gray-300 leading-relaxed text-left px-2">
+                    <p className="text-sm md:text-base text-gray-300 leading-relaxed text-left px-2 whitespace-pre-line">
                       {oeuvres[lightboxIndex].description}
                     </p>
                   </div>
