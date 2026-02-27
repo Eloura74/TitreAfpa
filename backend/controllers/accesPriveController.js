@@ -10,10 +10,11 @@ exports.getAll = async (req, res) => {
     if (req.user.role !== "admin") {
       filter.client = req.user.id;
     }
-    const items = await AccesPrive.find(filter)
-      .populate("photos")
-      .populate("client", "email nom prenom");
-    
+    const items = await AccesPrive.find(filter).populate(
+      "client",
+      "email nom prenom",
+    );
+
     // Format de réponse standardisé pour cohérence avec paiementController
     res.json({
       status: "success",
@@ -28,9 +29,7 @@ exports.getAll = async (req, res) => {
 // GET ONE
 exports.getOne = async (req, res) => {
   try {
-    const item = await AccesPrive.findById(req.params.id)
-      .populate("photos")
-      .populate("client");
+    const item = await AccesPrive.findById(req.params.id).populate("client");
     if (!item)
       return res.status(404).json({ erreur: "Accès privé non trouvé" });
 
@@ -62,11 +61,9 @@ exports.create = async (req, res) => {
 
     const clientUser = await User.findOne({ email: data.clientEmail });
     if (!clientUser) {
-      return res
-        .status(400)
-        .json({
-          erreur: `Client avec l'email ${data.clientEmail} introuvable.`,
-        });
+      return res.status(400).json({
+        erreur: `Client avec l'email ${data.clientEmail} introuvable.`,
+      });
     }
 
     data.client = clientUser._id;
@@ -97,7 +94,7 @@ exports.update = async (req, res) => {
     const updatedItem = await AccesPrive.findByIdAndUpdate(
       req.params.id,
       data,
-      { new: true }
+      { new: true },
     );
     res.json(updatedItem);
   } catch (err) {
@@ -126,7 +123,7 @@ exports.addPhotos = async (req, res) => {
     const updatedItem = await AccesPrive.findByIdAndUpdate(
       req.params.id,
       { $addToSet: { photos: { $each: photoIds } } },
-      { new: true }
+      { new: true },
     ).populate("photos");
 
     if (!updatedItem)
