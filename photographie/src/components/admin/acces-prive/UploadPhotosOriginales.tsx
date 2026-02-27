@@ -62,8 +62,8 @@ export default function UploadPhotosOriginales({
 
       setFiles((prev) =>
         prev.map((f, idx) =>
-          idx === i ? { ...f, status: "uploading", progress: 0 } : f
-        )
+          idx === i ? { ...f, status: "uploading", progress: 0 } : f,
+        ),
       );
 
       const formData = new FormData();
@@ -81,15 +81,15 @@ export default function UploadPhotosOriginales({
               ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
               : 0;
             setFiles((prev) =>
-              prev.map((f, idx) => (idx === i ? { ...f, progress } : f))
+              prev.map((f, idx) => (idx === i ? { ...f, progress } : f)),
             );
           },
         });
 
         setFiles((prev) =>
           prev.map((f, idx) =>
-            idx === i ? { ...f, status: "success", progress: 100 } : f
-          )
+            idx === i ? { ...f, status: "success", progress: 100 } : f,
+          ),
         );
       } catch (error: any) {
         setFiles((prev) =>
@@ -101,8 +101,8 @@ export default function UploadPhotosOriginales({
                   error:
                     error.response?.data?.message || "Erreur lors de l'upload",
                 }
-              : f
-          )
+              : f,
+          ),
         );
       }
     }
@@ -122,6 +122,7 @@ export default function UploadPhotosOriginales({
           Photos Originales (R2)
         </h3>
         <button
+          type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
           className="flex items-center gap-2 px-4 py-2 bg-[#ffe992] hover:bg-[#d6c487] text-black font-bold rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -149,7 +150,9 @@ export default function UploadPhotosOriginales({
               </div>
               <div>
                 <p className="text-gray-400">Taille</p>
-                <p className="text-white font-bold">{formatFileSize(totalSize)}</p>
+                <p className="text-white font-bold">
+                  {formatFileSize(totalSize)}
+                </p>
               </div>
               <div>
                 <p className="text-gray-400">Statut</p>
@@ -227,8 +230,11 @@ export default function UploadPhotosOriginales({
 
           <div className="flex gap-3">
             <button
+              type="button"
               onClick={uploadFiles}
-              disabled={isUploading || files.every((f) => f.status === "success")}
+              disabled={
+                isUploading || files.every((f) => f.status === "success")
+              }
               className="flex-1 bg-[#ffe992] hover:bg-[#d6c487] text-black font-bold py-3 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isUploading ? (
@@ -246,6 +252,7 @@ export default function UploadPhotosOriginales({
 
             {!isUploading && (
               <button
+                type="button"
                 onClick={() => setFiles([])}
                 className="px-6 bg-white/5 hover:bg-white/10 text-white font-bold py-3 rounded transition-all border border-white/10"
               >
@@ -259,9 +266,7 @@ export default function UploadPhotosOriginales({
       {files.length === 0 && (
         <div className="text-center py-12 border-2 border-dashed border-white/10 rounded">
           <Upload className="mx-auto text-gray-600 mb-4" size={48} />
-          <p className="text-gray-400 mb-2">
-            Aucune photo sélectionnée
-          </p>
+          <p className="text-gray-400 mb-2">Aucune photo sélectionnée</p>
           <p className="text-xs text-gray-600">
             Formats acceptés : JPG, PNG, RAW, CR2, NEF, ARW, DNG, TIFF
           </p>
