@@ -278,8 +278,25 @@ router.post("/upload", upload.single("photo"), async (req, res) => {
       nbTelechargements: 0,
     };
 
+    console.log(
+      "[UPLOAD] Avant push - Nombre de photos:",
+      acces.photosOriginales.length,
+    );
     acces.photosOriginales.push(photoData);
-    await acces.save();
+    console.log(
+      "[UPLOAD] Après push - Nombre de photos:",
+      acces.photosOriginales.length,
+    );
+
+    // Forcer Mongoose à détecter la modification du tableau
+    acces.markModified("photosOriginales");
+
+    const savedAcces = await acces.save();
+    console.log(
+      "[UPLOAD] Après save - Nombre de photos:",
+      savedAcces.photosOriginales.length,
+    );
+    console.log("[UPLOAD] Photo enregistrée:", photoData.nom);
 
     res.json({
       success: true,
