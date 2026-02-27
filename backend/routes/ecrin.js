@@ -285,7 +285,17 @@ router.post("/upload", upload.single("photo"), async (req, res) => {
     const updatedAcces = await AccesPrive.findByIdAndUpdate(
       acces._id,
       { $push: { photosOriginales: photoData } },
-      { new: true },
+      {
+        new: true,
+        runValidators: true,
+        writeConcern: { w: "majority", j: true },
+      },
+    );
+
+    console.log("[UPLOAD] ID document mis à jour:", updatedAcces._id);
+    console.log(
+      "[UPLOAD] Vérification - photosOriginales[0]:",
+      updatedAcces.photosOriginales[0]?.nom,
     );
 
     console.log(
