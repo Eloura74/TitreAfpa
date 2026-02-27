@@ -12,6 +12,7 @@ Ce guide explique comment importer les tarifs du catalogue Excel dans la base de
 ## Structure des données
 
 Chaque tarif contient :
+
 - `gamme` : Type de tirage (Petits formats, Lambda, Pigmentaire, Dibond, Plexi, Caisse Américaine, Encadrement d'Art, Nielsen Sur Mesure)
 - `format` : Dimensions (10×15, 20×30, 50×75, etc.)
 - `coutFournisseurTTC` : Coût d'achat TTC
@@ -19,6 +20,7 @@ Chaque tarif contient :
 - `prixSite` : Prix de vente final
 - `netApresURSSAF` : Montant net après charges
 - `margeNette` : Bénéfice net
+-
 
 ## Étapes d'import
 
@@ -39,6 +41,7 @@ node scripts/importCatalogueTarifs.js
 ```
 
 Le script va :
+
 - Se connecter à MongoDB
 - Supprimer les anciennes données (si elles existent)
 - Importer les 38 tarifs du catalogue
@@ -49,10 +52,10 @@ Le script va :
 Ouvre `backend/server.js` (ou `app.js`) et ajoute :
 
 ```javascript
-const catalogueTarifsRoutes = require('./routes/catalogueTarifs');
+const catalogueTarifsRoutes = require("./routes/catalogueTarifs");
 
 // Après les autres routes
-app.use('/api/catalogue-tarifs', catalogueTarifsRoutes);
+app.use("/api/catalogue-tarifs", catalogueTarifsRoutes);
 ```
 
 ### 4. Redémarrer le serveur backend
@@ -64,21 +67,25 @@ npm run dev
 ## Utilisation de l'API
 
 ### Récupérer tous les tarifs
+
 ```
 GET http://localhost:5000/api/catalogue-tarifs
 ```
 
 ### Récupérer les gammes disponibles
+
 ```
 GET http://localhost:5000/api/catalogue-tarifs/gammes
 ```
 
 ### Récupérer les tarifs d'une gamme
+
 ```
 GET http://localhost:5000/api/catalogue-tarifs/gamme/Lambda
 ```
 
 ### Créer un nouveau tarif (admin)
+
 ```
 POST http://localhost:5000/api/catalogue-tarifs
 Content-Type: application/json
@@ -95,11 +102,13 @@ Content-Type: application/json
 ```
 
 ### Mettre à jour un tarif (admin)
+
 ```
 PUT http://localhost:5000/api/catalogue-tarifs/:id
 ```
 
 ### Supprimer un tarif (admin)
+
 ```
 DELETE http://localhost:5000/api/catalogue-tarifs/:id
 ```
