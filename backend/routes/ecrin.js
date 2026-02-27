@@ -278,30 +278,28 @@ router.post("/upload", upload.single("photo"), async (req, res) => {
       nbTelechargements: 0,
     };
 
-    console.log(
-      "[UPLOAD] Avant push - Nombre de photos:",
-      acces.photosOriginales.length,
-    );
-    acces.photosOriginales.push(photoData);
-    console.log(
-      "[UPLOAD] Après push - Nombre de photos:",
-      acces.photosOriginales.length,
+    console.log("[UPLOAD] Avant update - ID accès:", acces._id);
+    console.log("[UPLOAD] Photo à ajouter:", photoData.nom);
+
+    // Utiliser $push pour forcer MongoDB à persister
+    const updatedAcces = await AccesPrive.findByIdAndUpdate(
+      acces._id,
+      { $push: { photosOriginales: photoData } },
+      { new: true },
     );
 
-    // Forcer Mongoose à détecter la modification du tableau
-    acces.markModified("photosOriginales");
-
-    const savedAcces = await acces.save();
     console.log(
-      "[UPLOAD] Après save - Nombre de photos:",
-      savedAcces.photosOriginales.length,
+      "[UPLOAD] Après update - Nombre de photos:",
+      updatedAcces.photosOriginales.length,
     );
-    console.log("[UPLOAD] Photo enregistrée:", photoData.nom);
+    console.log("[UPLOAD] Photo enregistrée avec succès");
 
     res.json({
       success: true,
       message: "Photo uploadée avec succès",
       photo: photoData,
+      version: "v2-findByIdAndUpdate",
+      nbPhotosApresUpdate: updatedAcces.photosOriginales.length,
     });
   } catch (error) {
     console.error("Erreur upload R2:", error);
