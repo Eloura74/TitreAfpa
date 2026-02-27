@@ -281,26 +281,27 @@ router.post("/upload", upload.single("photo"), async (req, res) => {
     console.log("[UPLOAD] Avant update - ID accès:", acces._id);
     console.log("[UPLOAD] Photo à ajouter:", photoData.nom);
 
-    // Utiliser $push pour forcer MongoDB à persister
-    const updatedAcces = await AccesPrive.findByIdAndUpdate(
-      acces._id,
-      { $push: { photosOriginales: photoData } },
-      {
-        new: true,
-        runValidators: true,
-        writeConcern: { w: "majority", j: true },
-      },
+    // Récupérer le document frais depuis MongoDB
+    const accesFromDb = await AccesPrive.findById(acces._id);
+    console.log(
+      "[UPLOAD] Document récupéré - Nombre de photos actuel:",
+      accesFromDb.photosOriginales.length,
     );
 
-    console.log("[UPLOAD] ID document mis à jour:", updatedAcces._id);
+    // Ajouter la photo
+    accesFromDb.photosOriginales.push(photoData);
     console.log(
-      "[UPLOAD] Vérification - photosOriginales[0]:",
-      updatedAcces.photosOriginales[0]?.nom,
+      "[UPLOAD] Après push - Nombre de photos:",
+      accesFromDb.photosOriginales.length,
     );
 
+    // Sauvegarder avec writeConcern
+    const savedAcces = await accesFromDb.save({
+      writeConcern: { w: "majority", j: true },
+    });
     console.log(
-      "[UPLOAD] Après update - Nombre de photos:",
-      updatedAcces.photosOriginales.length,
+      "[UPLOAD] Après save - Nombre de photos:",
+      savedAcces.photosOriginales.length,
     );
     console.log("[UPLOAD] Photo enregistrée avec succès");
 
@@ -308,8 +309,8 @@ router.post("/upload", upload.single("photo"), async (req, res) => {
       success: true,
       message: "Photo uploadée avec succès",
       photo: photoData,
-      version: "v2-findByIdAndUpdate",
-      nbPhotosApresUpdate: updatedAcces.photosOriginales.length,
+      version: "v3-findById-save",
+      nbPhotosApresUpdate: savedAcces.photosOriginales.length,
     });
   } catch (error) {
     console.error("Erreur upload R2:", error);
