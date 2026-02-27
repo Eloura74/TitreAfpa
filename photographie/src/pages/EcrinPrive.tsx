@@ -12,8 +12,6 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { PhotoOriginale } from "../types/evenement";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 
 interface AccesInfo {
   id: string;
@@ -147,7 +145,6 @@ export default function EcrinPrive() {
   if (!isConnected) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#12121a] to-[#1a1a24] flex flex-col">
-        <Navbar />
         <div className="flex-1 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -216,15 +213,12 @@ export default function EcrinPrive() {
             </p>
           </motion.div>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#12121a] to-[#1a1a24]">
-      <Navbar />
-
       <div className="container mx-auto px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -265,7 +259,7 @@ export default function EcrinPrive() {
           </div>
 
           {accesInfo?.typeValidite === "temporaire" &&
-            accesInfo.dateExpiration && (
+            accesInfo?.dateExpiration && (
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-4">
                 <p className="text-yellow-400 text-sm">
                   ⏰ Accès valide jusqu'au{" "}
@@ -277,15 +271,15 @@ export default function EcrinPrive() {
           {accesInfo?.typeLimiteTelechargement !== "illimite" && (
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
               <p className="text-blue-400 text-sm">
-                {accesInfo.typeLimiteTelechargement === "total" && (
+                {accesInfo?.typeLimiteTelechargement === "total" && (
                   <>
-                    📊 Téléchargements : {accesInfo.nbTelechargementTotal} /{" "}
-                    {accesInfo.maxTelechargementTotal}
+                    📊 Téléchargements : {accesInfo?.nbTelechargementTotal} /{" "}
+                    {accesInfo?.maxTelechargementTotal}
                   </>
                 )}
-                {accesInfo.typeLimiteTelechargement === "par_photo" && (
+                {accesInfo?.typeLimiteTelechargement === "par_photo" && (
                   <>
-                    📊 Limite : {accesInfo.maxTelechargementParPhoto}{" "}
+                    📊 Limite : {accesInfo?.maxTelechargementParPhoto}{" "}
                     téléchargements par photo
                   </>
                 )}
@@ -381,8 +375,6 @@ export default function EcrinPrive() {
           </div>
         )}
       </div>
-
-      <Footer />
     </div>
   );
 }
