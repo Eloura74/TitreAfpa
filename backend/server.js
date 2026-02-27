@@ -395,6 +395,10 @@ app.use("/api/paypal", paymentLimiter, paypalRoutes);
 // Accès Privé (Nouvelle Collection)
 app.use("/api/acces-prive", accesPriveRoutes);
 
+// Écrin Privé (Téléchargement originaux R2)
+const ecrinRoutes = require("./routes/ecrin");
+app.use("/api/ecrin", ecrinRoutes);
+
 // Services (Prestations)
 app.use("/api/services", servicesRoutes);
 

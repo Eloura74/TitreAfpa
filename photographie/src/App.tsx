@@ -16,7 +16,9 @@ const LoadingFallback = () => (
   <div className="min-h-screen bg-[#0a0a10] flex items-center justify-center">
     <div className="text-center">
       <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
-      <p className="mt-4 text-gray-400 text-sm uppercase tracking-widest">Chargement...</p>
+      <p className="mt-4 text-gray-400 text-sm uppercase tracking-widest">
+        Chargement...
+      </p>
     </div>
   </div>
 );
@@ -56,10 +58,13 @@ const MonCompte = lazy(() => import("./pages/MonCompte"));
 const GestionGalerie = lazy(() => import("./pages/GestionGalerie"));
 const GalerieForm = lazy(() => import("./components/galerie/GalerieForm"));
 const GestionTarifs = lazy(() => import("./components/GestionTarifs"));
-const TarifConfiguratorV2 = lazy(() => import("./components/admin/tarifs/TarifConfiguratorV2"));
+const TarifConfiguratorV2 = lazy(
+  () => import("./components/admin/tarifs/TarifConfiguratorV2"),
+);
 
 // Pages client spécifiques
 const ClientEvenement = lazy(() => import("./pages/ClientEvenement"));
+const EcrinPrive = lazy(() => import("./pages/EcrinPrive"));
 
 // ==============================
 //  Composant principal App : configuration des routes
@@ -110,101 +115,107 @@ function App() {
             <Suspense fallback={<LoadingFallback />}>
               {/* Définition des différentes routes accessibles dans l'app */}
               <Routes>
-              {/* Route pour la page d'accueil */}
-              <Route path="/" element={<Home />} />
+                {/* Route pour la page d'accueil */}
+                <Route path="/" element={<Home />} />
 
-              {/* Routes pour les univers spécifiques */}
-              <Route path="/photographie" element={<Photographie />} />
-              <Route path="/graphisme" element={<Graphisme />} />
+                {/* Routes pour les univers spécifiques */}
+                <Route path="/photographie" element={<Photographie />} />
+                <Route path="/graphisme" element={<Graphisme />} />
 
-              {/* Route pour la page "À propos" */}
-              <Route path="/about" element={<About />} />
+                {/* Route pour la page "À propos" */}
+                <Route path="/about" element={<About />} />
 
-              {/* Route pour la galerie photo */}
-              <Route path="/galerie" element={<Galerie />} />
+                {/* Route pour la galerie photo */}
+                <Route path="/galerie" element={<Galerie />} />
 
-              {/* Route pour la page des événements */}
-              <Route path="/evenements" element={<Evenements />} />
+                {/* Route pour la page des événements */}
+                <Route path="/evenements" element={<Evenements />} />
 
-              {/* Route pour la page des prestations (services) */}
-              <Route path="/services" element={<Services />} />
-              <Route path="/services/:id" element={<ServiceDetail />} />
+                {/* Route pour la page des prestations (services) */}
+                <Route path="/services" element={<Services />} />
+                <Route path="/services/:id" element={<ServiceDetail />} />
 
-              {/* Route pour le formulaire de gestion de galerie - PROTÉGÉE */}
-              <Route
-                path="/galerie-form"
-                element={
-                  <RouteAdminOnly>
-                    <GalerieForm />
-                  </RouteAdminOnly>
-                }
-              />
+                {/* Route pour le formulaire de gestion de galerie - PROTÉGÉE */}
+                <Route
+                  path="/galerie-form"
+                  element={
+                    <RouteAdminOnly>
+                      <GalerieForm />
+                    </RouteAdminOnly>
+                  }
+                />
 
-              {/* Route test (commentée pour ne pas être active) */}
-              {/* <Route path="/calendar-test" element={<CalendarTest />} /> */}
+                {/* Route test (commentée pour ne pas être active) */}
+                {/* <Route path="/calendar-test" element={<CalendarTest />} /> */}
 
-              {/* Route pour la page panier */}
-              <Route path="/panier" element={<Panier />} />
+                {/* Route pour la page panier */}
+                <Route path="/panier" element={<Panier />} />
 
-              {/* Route pour inscription / connexion */}
-              <Route path="/inscription" element={<Auth />} />
+                {/* Route pour inscription / connexion */}
+                <Route path="/inscription" element={<Auth />} />
 
-              {/* Route pour la vérification d'email */}
-              <Route path="/verify-email" element={<VerifyEmail />} />
+                {/* Route pour la vérification d'email */}
+                <Route path="/verify-email" element={<VerifyEmail />} />
 
-              {/* Route protégée uniquement accessible aux admins pour la gestion galerie */}
-              <Route
-                path="/admin/gestion-galerie"
-                element={
-                  // Le composant RouteAdminOnly bloque l'accès si l'utilisateur n'est pas admin
-                  <RouteAdminOnly>
-                    <GestionGalerie />
-                  </RouteAdminOnly>
-                }
-              />
+                {/* Route protégée uniquement accessible aux admins pour la gestion galerie */}
+                <Route
+                  path="/admin/gestion-galerie"
+                  element={
+                    // Le composant RouteAdminOnly bloque l'accès si l'utilisateur n'est pas admin
+                    <RouteAdminOnly>
+                      <GestionGalerie />
+                    </RouteAdminOnly>
+                  }
+                />
 
-              {/* Route protégée uniquement accessible aux admins pour la gestion des tarifs */}
-              <Route
-                path="/admin/tarifs"
-                element={
-                  // Le composant RouteAdminOnly bloque l'accès si l'utilisateur n'est pas admin
-                  <RouteAdminOnly>
-                    <GestionTarifs />
-                  </RouteAdminOnly>
-                }
-              />
+                {/* Route protégée uniquement accessible aux admins pour la gestion des tarifs */}
+                <Route
+                  path="/admin/tarifs"
+                  element={
+                    // Le composant RouteAdminOnly bloque l'accès si l'utilisateur n'est pas admin
+                    <RouteAdminOnly>
+                      <GestionTarifs />
+                    </RouteAdminOnly>
+                  }
+                />
 
-              {/* Route PROTOTYPE V2 pour la nouvelle structure tarifaire (Picto) */}
-              <Route
-                path="/admin/tarifs-v2"
-                element={
-                  <RouteAdminOnly>
-                    <TarifConfiguratorV2 />
-                  </RouteAdminOnly>
-                }
-              />
+                {/* Route PROTOTYPE V2 pour la nouvelle structure tarifaire (Picto) */}
+                <Route
+                  path="/admin/tarifs-v2"
+                  element={
+                    <RouteAdminOnly>
+                      <TarifConfiguratorV2 />
+                    </RouteAdminOnly>
+                  }
+                />
 
-              {/* Route pour la nouvelle galerie graphique d'œuvres uniques */}
-              <Route path="/galerie-graphique" element={<GalerieGraphique />} />
+                {/* Route pour la nouvelle galerie graphique d'œuvres uniques */}
+                <Route
+                  path="/galerie-graphique"
+                  element={<GalerieGraphique />}
+                />
 
-              {/* Route pour la page Tirage en ligne */}
-              <Route path="/tirage" element={<TirageEnLigne />} />
+                {/* Route pour la page Tirage en ligne */}
+                <Route path="/tirage" element={<TirageEnLigne />} />
 
-              {/* Route pour la page de connexion */}
-              <Route path="/connexion" element={<Auth />} />
+                {/* Route pour la page de connexion */}
+                <Route path="/connexion" element={<Auth />} />
 
-              {/* Route pour l'espace client */}
-              <Route path="/mon-compte" element={<MonCompte />} />
+                {/* Route pour l'espace client */}
+                <Route path="/mon-compte" element={<MonCompte />} />
 
-              {/* Route pour le paiement */}
-              <Route path="/checkout" element={<Checkout />} />
+                {/* Route pour le paiement */}
+                <Route path="/checkout" element={<Checkout />} />
 
-              {/* Route pour l'événement client spécifique */}
-              <Route
-                path="/client/evenement/:id"
-                element={<ClientEvenement />}
-              />
-            </Routes>
+                {/* Route pour l'événement client spécifique */}
+                <Route
+                  path="/client/evenement/:id"
+                  element={<ClientEvenement />}
+                />
+
+                {/* Route pour l'écrin privé (téléchargement originaux R2) */}
+                <Route path="/ecrin-prive" element={<EcrinPrive />} />
+              </Routes>
             </Suspense>
           </Router>
         </ToastProvider>

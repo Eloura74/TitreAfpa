@@ -3,6 +3,7 @@ import { Evenement } from "../../../types/evenement";
 import ClientCreationForm from "./ClientCreationForm";
 import PhotoUploader from "./PhotoUploader";
 import PhotoGallery from "./PhotoGallery";
+import UploadPhotosOriginales from "./UploadPhotosOriginales";
 
 // ==========================================
 // 📝 Interface des Props
@@ -13,7 +14,7 @@ interface PrivateAccessFormProps {
   handleChange: (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => void;
   handleSubmit: (e: React.FormEvent) => void;
   resetForm: () => void;
@@ -40,6 +41,9 @@ interface PrivateAccessFormProps {
   // Gestion Galerie existante
   onEditPhoto: (photo: any) => void;
   onDeletePhoto: (photoId: string) => void;
+
+  // Rafraîchissement après upload R2
+  onRefresh?: () => void;
 }
 
 // ==========================================
@@ -66,6 +70,7 @@ export default function PrivateAccessForm({
   handlePhotosUpload,
   onEditPhoto,
   onDeletePhoto,
+  onRefresh,
 }: PrivateAccessFormProps) {
   return (
     <div>
@@ -144,6 +149,142 @@ export default function PrivateAccessForm({
           required
         />
 
+        {/* Code d'accès unique */}
+        <div className="space-y-1">
+          <label className="text-xs text-gray-400">Code d'accès unique *</label>
+          <input
+            name="codeAcces"
+            placeholder="Ex: SHOOTING-2024-ABC123"
+            value={form.codeAcces || ""}
+            onChange={handleChange}
+            className="w-full bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white uppercase focus:border-[#ffe992] outline-none transition-colors placeholder-gray-500"
+            required
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Le client utilisera ce code pour accéder à ses photos
+          </p>
+        </div>
+
+        {/* Type de validité */}
+        <div className="bg-[#232336] p-4 rounded border border-white/10 space-y-3">
+          <label className="text-sm font-bold text-[#ffe992] block">
+            Validité de l'accès
+          </label>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="typeValidite"
+                value="permanent"
+                checked={form.typeValidite === "permanent"}
+                onChange={handleChange}
+                className="accent-[#ffe992]"
+              />
+              <span className="text-white text-sm">Permanent</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="typeValidite"
+                value="temporaire"
+                checked={form.typeValidite === "temporaire"}
+                onChange={handleChange}
+                className="accent-[#ffe992]"
+              />
+              <span className="text-white text-sm">Temporaire</span>
+            </label>
+          </div>
+
+          {form.typeValidite === "temporaire" && (
+            <div className="space-y-1">
+              <label className="text-xs text-gray-400">Date d'expiration</label>
+              <input
+                name="dateExpiration"
+                type="date"
+                value={form.dateExpiration || ""}
+                onChange={handleChange}
+                className="w-full bg-black/20 border border-white/10 rounded px-4 py-2 text-white focus:border-[#ffe992] outline-none transition-colors"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Limites de téléchargement */}
+        <div className="bg-[#232336] p-4 rounded border border-white/10 space-y-3">
+          <label className="text-sm font-bold text-[#ffe992] block">
+            Limites de téléchargement
+          </label>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="typeLimiteTelechargement"
+                value="illimite"
+                checked={form.typeLimiteTelechargement === "illimite"}
+                onChange={handleChange}
+                className="accent-[#ffe992]"
+              />
+              <span className="text-white text-sm">Illimité</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="typeLimiteTelechargement"
+                value="par_photo"
+                checked={form.typeLimiteTelechargement === "par_photo"}
+                onChange={handleChange}
+                className="accent-[#ffe992]"
+              />
+              <span className="text-white text-sm">Limite par photo</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="typeLimiteTelechargement"
+                value="total"
+                checked={form.typeLimiteTelechargement === "total"}
+                onChange={handleChange}
+                className="accent-[#ffe992]"
+              />
+              <span className="text-white text-sm">Limite totale</span>
+            </label>
+          </div>
+
+          {form.typeLimiteTelechargement === "par_photo" && (
+            <div className="space-y-1">
+              <label className="text-xs text-gray-400">
+                Nombre max de téléchargements par photo
+              </label>
+              <input
+                name="maxTelechargementParPhoto"
+                type="number"
+                min="1"
+                value={form.maxTelechargementParPhoto || ""}
+                onChange={handleChange}
+                className="w-full bg-black/20 border border-white/10 rounded px-4 py-2 text-white focus:border-[#ffe992] outline-none transition-colors"
+                placeholder="Ex: 3"
+              />
+            </div>
+          )}
+
+          {form.typeLimiteTelechargement === "total" && (
+            <div className="space-y-1">
+              <label className="text-xs text-gray-400">
+                Nombre max de téléchargements total
+              </label>
+              <input
+                name="maxTelechargementTotal"
+                type="number"
+                min="1"
+                value={form.maxTelechargementTotal || ""}
+                onChange={handleChange}
+                className="w-full bg-black/20 border border-white/10 rounded px-4 py-2 text-white focus:border-[#ffe992] outline-none transition-colors"
+                placeholder="Ex: 50"
+              />
+            </div>
+          )}
+        </div>
+
         {/* Section Client */}
         <div className="bg-[#232336] p-4 rounded border border-white/10">
           <label className="text-sm font-bold text-[#ffe992] mb-2 block">
@@ -175,6 +316,17 @@ export default function PrivateAccessForm({
           isEditing={!!editId}
         />
 
+        {/* Upload Photos Originales R2 (uniquement en mode édition) */}
+        {editId && form.codeAcces && (
+          <UploadPhotosOriginales
+            accesId={editId}
+            codeAcces={form.codeAcces}
+            onUploadComplete={() => {
+              if (onRefresh) onRefresh();
+            }}
+          />
+        )}
+
         {/* Boutons d'action */}
         <div className="flex gap-2 mt-4 sticky bottom-0 bg-[#181824] py-2 z-10 border-t border-white/5">
           <button
@@ -185,8 +337,8 @@ export default function PrivateAccessForm({
             {loading
               ? "Traitement en cours..."
               : editId
-              ? "Enregistrer les modifications"
-              : "Créer l'accès privé"}
+                ? "Enregistrer les modifications"
+                : "Créer l'accès privé"}
           </button>
           {editId && (
             <button

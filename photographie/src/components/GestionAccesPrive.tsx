@@ -23,6 +23,14 @@ export default function GestionAccesPrive() {
     theme: "",
     visibilite: "prive",
     clientEmail: "",
+    codeAcces: "",
+    typeValidite: "permanent",
+    dateExpiration: "",
+    typeLimiteTelechargement: "illimite",
+    maxTelechargementParPhoto: undefined,
+    maxTelechargementTotal: undefined,
+    photosOriginales: [],
+    statut: "actif",
   });
 
   // const [tarifs, setTarifs] = useState<Tarif[]>([]);
@@ -84,7 +92,7 @@ export default function GestionAccesPrive() {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -106,6 +114,14 @@ export default function GestionAccesPrive() {
       theme: "",
       visibilite: "prive",
       clientEmail: "",
+      codeAcces: "",
+      typeValidite: "permanent",
+      dateExpiration: "",
+      typeLimiteTelechargement: "illimite",
+      maxTelechargementParPhoto: undefined,
+      maxTelechargementTotal: undefined,
+      photosOriginales: [],
+      statut: "actif",
     });
     setImagePreview("");
     setEditId(null);
@@ -126,7 +142,7 @@ export default function GestionAccesPrive() {
         withCredentials: true,
       });
       setSuccess(
-        `Client ${clientForm.prenom} ${clientForm.nom} créé avec succès !`
+        `Client ${clientForm.prenom} ${clientForm.nom} créé avec succès !`,
       );
       setForm((prev) => ({ ...prev, clientEmail: clientForm.email }));
       setShowClientForm(false);
@@ -164,7 +180,7 @@ export default function GestionAccesPrive() {
       `${BASE_API_URL}/api/upload-cloudinary/sign`,
       {
         withCredentials: true,
-      }
+      },
     );
     const { signature, timestamp, cloud_name, api_key, folder } = signRes.data;
 
@@ -179,7 +195,7 @@ export default function GestionAccesPrive() {
     // 3. Envoyer directement à Cloudinary
     const cloudinaryRes = await axios.post(
       `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
-      formData
+      formData,
     );
 
     return cloudinaryRes.data.secure_url;
@@ -241,7 +257,7 @@ export default function GestionAccesPrive() {
             },
             {
               withCredentials: true,
-            }
+            },
           );
 
           const photoId = resPhoto.data._id || resPhoto.data.id;
@@ -259,7 +275,7 @@ export default function GestionAccesPrive() {
           { photoIds: uploadedPhotoIds },
           {
             withCredentials: true,
-          }
+          },
         );
 
         loadEvenements();
@@ -280,7 +296,7 @@ export default function GestionAccesPrive() {
     if (!editId) {
       setPendingPhotos(stagedPhotos);
       setSuccess(
-        `${stagedPhotos.length} photos en attente. Enregistrez l'événement pour valider.`
+        `${stagedPhotos.length} photos en attente. Enregistrez l'événement pour valider.`,
       );
       return;
     }
@@ -322,7 +338,7 @@ export default function GestionAccesPrive() {
       setError(
         err?.response?.data?.erreur ||
           err?.response?.data?.message ||
-          "Erreur lors de l'enregistrement."
+          "Erreur lors de l'enregistrement.",
       );
     } finally {
       setLoading(false);
@@ -364,7 +380,7 @@ export default function GestionAccesPrive() {
     } catch (e) {
       const err = e as any;
       setError(
-        err?.response?.data?.message || "Erreur lors de la suppression."
+        err?.response?.data?.message || "Erreur lors de la suppression.",
       );
     } finally {
       setLoading(false);
@@ -377,7 +393,7 @@ export default function GestionAccesPrive() {
         withCredentials: true,
       });
       const updatedPhotos = form.photos?.filter(
-        (p: any) => (p._id || p.id) !== photoId
+        (p: any) => (p._id || p.id) !== photoId,
       );
       setForm((prev) => ({ ...prev, photos: updatedPhotos }));
       setSuccess("Photo supprimée.");
@@ -432,6 +448,7 @@ export default function GestionAccesPrive() {
             handlePhotosUpload={handlePhotosUpload}
             onEditPhoto={setEditingPhoto}
             onDeletePhoto={handleDeletePhoto}
+            onRefresh={loadEvenements}
           />
         </div>
 
@@ -512,12 +529,12 @@ export default function GestionAccesPrive() {
                       editingPhoto,
                       {
                         withCredentials: true,
-                      }
+                      },
                     );
                     const updatedPhotos = form.photos?.map((p: any) =>
                       (p._id || p.id) === (editingPhoto._id || editingPhoto.id)
                         ? editingPhoto
-                        : p
+                        : p,
                     );
                     setForm((prev) => ({ ...prev, photos: updatedPhotos }));
                     setEditingPhoto(null);
