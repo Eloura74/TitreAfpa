@@ -231,6 +231,10 @@ router.post("/upload", upload.single("photo"), async (req, res) => {
     await s3Client.send(command);
 
     let miniatureUrl = null;
+
+    // Génération miniature temporairement désactivée
+    // TODO: Configurer CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET sur Vercel
+    /*
     try {
       const thumbnailBuffer = await sharp(req.file.buffer)
         .resize(800, 800, {
@@ -262,6 +266,7 @@ router.post("/upload", upload.single("photo"), async (req, res) => {
     } catch (thumbError) {
       console.error("Erreur génération miniature:", thumbError);
     }
+    */
 
     const photoData = {
       nom: fileName,
