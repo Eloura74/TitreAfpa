@@ -303,6 +303,13 @@ router.post("/upload", upload.single("photo"), async (req, res) => {
       "[UPLOAD] Après save - Nombre de photos:",
       savedAcces.photosOriginales.length,
     );
+
+    // Vérification MongoDB native pour confirmer la persistance
+    const verif = await AccesPrive.findById(acces._id).lean();
+    console.log(
+      "[UPLOAD] Vérification MongoDB native - Nombre de photos:",
+      verif.photosOriginales.length,
+    );
     console.log("[UPLOAD] Photo enregistrée avec succès");
 
     res.json({
