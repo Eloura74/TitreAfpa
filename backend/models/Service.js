@@ -23,7 +23,7 @@ const serviceSchema = new mongoose.Schema({
   categorie: {
     type: String,
     required: true,
-    enum: ["Mariage", "Shooting", "Studio", "Evenement", "Autre"],
+    trim: true,
     default: "Autre",
   },
   createdAt: {
