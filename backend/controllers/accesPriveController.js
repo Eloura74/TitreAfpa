@@ -91,6 +91,10 @@ exports.update = async (req, res) => {
       delete data.clientEmail;
     }
 
+    // Protection : Ne jamais écraser photosOriginales via l'update global
+    // L'upload se charge lui-même de mettre à jour ce tableau
+    delete data.photosOriginales;
+
     const updatedItem = await AccesPrive.findByIdAndUpdate(
       req.params.id,
       data,

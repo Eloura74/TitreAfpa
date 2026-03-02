@@ -311,7 +311,7 @@ export default function GestionAccesPrive() {
     setSuccess(null);
 
     try {
-      const { id, _id, photos, ...dataToSend } = form as any;
+      const { id, _id, photos, photosOriginales, ...dataToSend } = form as any;
       let targetId = editId;
 
       if (editId) {
