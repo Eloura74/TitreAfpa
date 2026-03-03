@@ -168,19 +168,14 @@ export default function EcrinPrive() {
       );
 
       if (res.data.success) {
-        // --- Récupérer le blob directement depuis l'URL R2 pour forcer le téléchargement ---
-        const response = await fetch(res.data.url);
-        const blob = await response.blob();
-
         const link = document.createElement("a");
-        const blobUrl = window.URL.createObjectURL(blob);
-        link.href = blobUrl;
-        link.download = photo.nom; // Le nom du fichier qui sera sauvegardé
+        link.href = res.data.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.download = photo.nom; // Tente de forcer le DL direct
+
         document.body.appendChild(link);
         link.click();
-
-        // Nettoyage de l'objet URL
-        window.URL.revokeObjectURL(blobUrl);
         document.body.removeChild(link);
 
         setSuccess(`Le téléchargement de ${photo.nom} est terminé.`);
@@ -219,19 +214,14 @@ export default function EcrinPrive() {
         );
 
         if (res.data.success) {
-          // --- Récupérer le blob directement depuis l'URL R2 pour forcer le téléchargement ---
-          const response = await fetch(res.data.url);
-          const blob = await response.blob();
-
           const link = document.createElement("a");
-          const blobUrl = window.URL.createObjectURL(blob);
-          link.href = blobUrl;
-          link.download = photo.nom; // Le nom du fichier qui sera sauvegardé
+          link.href = res.data.url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.download = photo.nom;
+
           document.body.appendChild(link);
           link.click();
-
-          // Nettoyage de l'objet URL
-          window.URL.revokeObjectURL(blobUrl);
           document.body.removeChild(link);
 
           // Pause de 800ms pour ne pas saturer le navigateur (et Vercel/Cloudflare)
