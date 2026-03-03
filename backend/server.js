@@ -18,9 +18,6 @@ dotenv.config();
 // Middleware pour gérer les cookies
 const cookieParser = require("cookie-parser");
 
-// Middleware pour gérer les sessions
-const session = require("express-session");
-
 // Import des différentes routes de l’application
 const galerieRoutes = require("./routes/galerie.js");
 const oeuvresGraphiqueRoutes = require("./routes/oeuvresGraphique.js"); // Routes pour les œuvres graphiques uniques
@@ -48,23 +45,6 @@ const app = express();
 
 // Configuration pour Vercel (derrière un proxy)
 app.set("trust proxy", 1);
-
-// Configuration des sessions pour l'écrin privé
-app.use(
-  session({
-    secret:
-      process.env.SESSION_SECRET ||
-      "ecrin-prive-secret-key-change-in-production",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 heures
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    },
-  }),
-);
 
 // ================================
 // CONFIGURATION DE CORS (sécurité frontend/backend)

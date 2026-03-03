@@ -11,6 +11,7 @@ const multer = require("multer");
 const path = require("path");
 const sharp = require("sharp");
 const cloudinary = require("cloudinary").v2;
+const jwt = require("jsonwebtoken");
 
 const s3Client = new S3Client({
   region: "auto",
@@ -102,8 +103,22 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    req.session.ecrinAccesId = acces._id.toString();
-    req.session.ecrinCodeAcces = acces.codeAcces;
+    // --- JWT au lieu de express-session ---
+    const ecrinToken = jwt.sign(
+      { accesId: acces._id.toString(), codeAcces: acces.codeAcces },
+      process.env.SESSION_SECRET ||
+        "ecrin-prive-secret-key-change-in-production",
+      { expiresIn: "24h" },
+    );
+
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 24 * 60 * 60 * 1000, // 24 heures
+    };
+
+    res.cookie("ecrinToken", ecrinToken, cookieOptions);
 
     res.json({
       success: true,
@@ -136,19 +151,36 @@ router.post("/login", async (req, res) => {
 
 router.get("/session", async (req, res) => {
   try {
-    if (!req.session.ecrinAccesId) {
+    const ecrinToken = req.cookies?.ecrinToken;
+
+    if (!ecrinToken) {
       return res.status(401).json({
         success: false,
-        message: "Non connecté",
+        message: "Non connecté (Aucun token trouvé)",
       });
     }
 
-    const acces = await AccesPrive.findById(req.session.ecrinAccesId)
+    let decoded;
+    try {
+      decoded = jwt.verify(
+        ecrinToken,
+        process.env.SESSION_SECRET ||
+          "ecrin-prive-secret-key-change-in-production",
+      );
+    } catch (err) {
+      res.clearCookie("ecrinToken");
+      return res.status(401).json({
+        success: false,
+        message: "Session invalide ou expirée",
+      });
+    }
+
+    const acces = await AccesPrive.findById(decoded.accesId)
       .populate("client", "nom prenom email")
       .populate("photos");
 
     if (!acces) {
-      req.session.destroy();
+      res.clearCookie("ecrinToken");
       return res.status(404).json({
         success: false,
         message: "Accès introuvable",
@@ -157,7 +189,7 @@ router.get("/session", async (req, res) => {
 
     if (!acces.verifierValidite()) {
       await acces.save();
-      req.session.destroy();
+      res.clearCookie("ecrinToken");
       return res.status(403).json({
         success: false,
         message: "Accès expiré",
@@ -194,17 +226,14 @@ router.get("/session", async (req, res) => {
 });
 
 router.post("/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({
-        success: false,
-        message: "Erreur déconnexion",
-      });
-    }
-    res.json({
-      success: true,
-      message: "Déconnexion réussie",
-    });
+  res.clearCookie("ecrinToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  });
+  res.json({
+    success: true,
+    message: "Déconnexion réussie",
   });
 });
 
@@ -354,10 +383,25 @@ router.post("/upload", upload.single("photo"), async (req, res) => {
 
 router.post("/generate-download-url", async (req, res) => {
   try {
-    if (!req.session.ecrinAccesId) {
+    const ecrinToken = req.cookies?.ecrinToken;
+    if (!ecrinToken) {
       return res.status(401).json({
         success: false,
-        message: "Non connecté",
+        message: "Non connecté (Aucun token)",
+      });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(
+        ecrinToken,
+        process.env.SESSION_SECRET ||
+          "ecrin-prive-secret-key-change-in-production",
+      );
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        message: "Session invalide ou expirée",
       });
     }
 
@@ -370,7 +414,7 @@ router.post("/generate-download-url", async (req, res) => {
       });
     }
 
-    const acces = await AccesPrive.findById(req.session.ecrinAccesId);
+    const acces = await AccesPrive.findById(decoded.accesId);
 
     if (!acces) {
       return res.status(404).json({
