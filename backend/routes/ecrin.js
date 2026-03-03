@@ -450,6 +450,7 @@ router.post("/generate-download-url", async (req, res) => {
     const command = new GetObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,
       Key: photo.fichierR2,
+      ResponseContentDisposition: `attachment; filename="${encodeURIComponent(photo.nom)}"`,
     });
 
     const url = await getSignedUrl(s3Client, command, { expiresIn: 300 });

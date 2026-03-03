@@ -168,17 +168,22 @@ export default function EcrinPrive() {
       );
 
       if (res.data.success) {
-        // Déclencher le téléchargement via un anchor virtuel pour masquer le nouvel onglet si possible
+        // --- Récupérer le blob directement depuis l'URL R2 pour forcer le téléchargement ---
+        const response = await fetch(res.data.url);
+        const blob = await response.blob();
+
         const link = document.createElement("a");
-        link.href = res.data.url;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        link.download = photo.nom; // Tente de forcer le DL direct
+        const blobUrl = window.URL.createObjectURL(blob);
+        link.href = blobUrl;
+        link.download = photo.nom; // Le nom du fichier qui sera sauvegardé
         document.body.appendChild(link);
         link.click();
+
+        // Nettoyage de l'objet URL
+        window.URL.revokeObjectURL(blobUrl);
         document.body.removeChild(link);
 
-        setSuccess(`Le téléchargement de ${photo.nom} a démarré.`);
+        setSuccess(`Le téléchargement de ${photo.nom} est terminé.`);
         await checkSession(); // Maj des limites et stats
       }
     } catch (err) {
@@ -214,15 +219,22 @@ export default function EcrinPrive() {
         );
 
         if (res.data.success) {
+          // --- Récupérer le blob directement depuis l'URL R2 pour forcer le téléchargement ---
+          const response = await fetch(res.data.url);
+          const blob = await response.blob();
+
           const link = document.createElement("a");
-          link.href = res.data.url;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-          link.download = photo.nom;
+          const blobUrl = window.URL.createObjectURL(blob);
+          link.href = blobUrl;
+          link.download = photo.nom; // Le nom du fichier qui sera sauvegardé
           document.body.appendChild(link);
           link.click();
+
+          // Nettoyage de l'objet URL
+          window.URL.revokeObjectURL(blobUrl);
           document.body.removeChild(link);
-          // Pause de 800ms pour ne pas saturer le navigateur
+
+          // Pause de 800ms pour ne pas saturer le navigateur (et Vercel/Cloudflare)
           await new Promise((r) => setTimeout(r, 800));
         }
       } catch {
@@ -647,7 +659,10 @@ export default function EcrinPrive() {
                         : "Cliquez pour agrandir"
                     }
                   >
-                    {!photo.miniature || imageErrors.has(photo._id!) ? (
+                    {!photo.miniature ||
+                    photo.miniature === "undefined" ||
+                    photo.miniature.trim() === "" ||
+                    imageErrors.has(photo._id!) ? (
                       <div
                         className="w-full flex flex-col items-center justify-center bg-gradient-to-br from-black/80 to-[#12121a] border border-white/5"
                         style={{ minHeight: "250px" }}
