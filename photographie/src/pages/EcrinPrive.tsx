@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { API_URL } from "../config/api";
@@ -14,6 +14,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Square,
+  CheckSquare,
 } from "lucide-react";
 import { PhotoOriginale } from "../types/evenement";
 
@@ -32,7 +34,7 @@ interface AccesInfo {
   dateDebut: string;
   dateFin: string;
   image?: string;
-  photos: any[];
+  photos: unknown[];
   photosOriginales: PhotoOriginale[];
   typeValidite: "permanent" | "temporaire";
   dateExpiration?: string;
@@ -66,6 +68,15 @@ export default function EcrinPrive() {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
+  // --- Nouveaux états Sélection Multiple ---
+  const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
+  const [isDownloadingMultiple, setIsDownloadingMultiple] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState({
+    current: 0,
+    total: 0,
+  });
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
+
   useEffect(() => {
     checkSession();
   }, []);
@@ -80,7 +91,7 @@ export default function EcrinPrive() {
         })
         .catch(() => console.error("Info publique non trouvée"));
     }
-  }, [codeAccesFromUrl, isConnected]);
+  }, [codeAccesFromUrl, isConnected, loading]);
 
   const checkSession = async () => {
     try {
@@ -116,8 +127,12 @@ export default function EcrinPrive() {
         setSuccess("Connexion réussie ! Chargement de vos photos...");
         await checkSession();
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Code d'accès invalide");
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || "Code d'accès invalide");
+      } else {
+        setError("Code d'accès invalide");
+      }
     } finally {
       setLoading(false);
     }
@@ -166,10 +181,76 @@ export default function EcrinPrive() {
         setSuccess(`Le téléchargement de ${photo.nom} a démarré.`);
         await checkSession(); // Maj des limites et stats
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Erreur lors du téléchargement");
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(
+          err.response?.data?.message || "Erreur lors du téléchargement",
+        );
+      } else {
+        setError("Erreur lors du téléchargement");
+      }
     } finally {
       setDownloadingPhotoId(null);
+    }
+  };
+
+  const handleDownloadMultiple = async () => {
+    if (selectedPhotos.size === 0) return;
+    setIsDownloadingMultiple(true);
+    setDownloadProgress({ current: 0, total: selectedPhotos.size });
+    setError(null);
+    setSuccess(null);
+
+    const photosToDownload =
+      accesInfo?.photosOriginales?.filter((p) => selectedPhotos.has(p._id!)) ||
+      [];
+
+    for (const photo of photosToDownload) {
+      try {
+        const res = await axios.post(
+          `${API_URL}/api/ecrin/generate-download-url`,
+          { photoId: photo._id },
+          { withCredentials: true },
+        );
+
+        if (res.data.success) {
+          const link = document.createElement("a");
+          link.href = res.data.url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.download = photo.nom;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          // Pause de 800ms pour ne pas saturer le navigateur
+          await new Promise((r) => setTimeout(r, 800));
+        }
+      } catch {
+        console.error("Échec téléchargement pour", photo.nom);
+      }
+      setDownloadProgress((prev) => ({ ...prev, current: prev.current + 1 }));
+    }
+
+    setIsDownloadingMultiple(false);
+    setSelectedPhotos(new Set());
+    setSuccess(`Téléchargement de ${selectedPhotos.size} photos terminé.`);
+    checkSession();
+  };
+
+  const toggleSelection = (photoId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const next = new Set(selectedPhotos);
+    if (next.has(photoId)) next.delete(photoId);
+    else next.add(photoId);
+    setSelectedPhotos(next);
+  };
+
+  const toggleSelectAll = () => {
+    if (!accesInfo?.photosOriginales) return;
+    if (selectedPhotos.size === accesInfo.photosOriginales.length) {
+      setSelectedPhotos(new Set());
+    } else {
+      setSelectedPhotos(new Set(accesInfo.photosOriginales.map((p) => p._id!)));
     }
   };
 
@@ -179,19 +260,19 @@ export default function EcrinPrive() {
     setIsLightboxOpen(true);
   };
 
-  const nextPhoto = () => {
+  const nextPhoto = useCallback(() => {
     if (!accesInfo?.photosOriginales) return;
     setCurrentPhotoIndex((prevIndex) =>
       prevIndex === accesInfo.photosOriginales.length - 1 ? 0 : prevIndex + 1,
     );
-  };
+  }, [accesInfo?.photosOriginales]);
 
-  const prevPhoto = () => {
+  const prevPhoto = useCallback(() => {
     if (!accesInfo?.photosOriginales) return;
     setCurrentPhotoIndex((prevIndex) =>
       prevIndex === 0 ? accesInfo.photosOriginales.length - 1 : prevIndex - 1,
     );
-  };
+  }, [accesInfo?.photosOriginales]);
 
   // Fermer la lightbox avec la touche Echappement
   useEffect(() => {
@@ -211,7 +292,7 @@ export default function EcrinPrive() {
       window.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "auto";
     };
-  }, [isLightboxOpen]);
+  }, [isLightboxOpen, nextPhoto, prevPhoto]);
 
   const formatFileSize = (bytes: number) => {
     if (!bytes) return "0 B";
@@ -448,6 +529,59 @@ export default function EcrinPrive() {
           )}
         </AnimatePresence>
 
+        {/* Barre d'actions secondaires (Sélection Multiple) */}
+        {accesInfo?.photosOriginales &&
+          accesInfo.photosOriginales.length > 0 && (
+            <div className="flex items-center justify-between bg-[#12121a]/80 backdrop-blur-md border border-[#ffe992]/20 p-4 rounded-2xl mb-6 shadow-lg">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={toggleSelectAll}
+                  className="flex items-center gap-2 text-gray-300 hover:text-[#ffe992] transition-colors"
+                  title={
+                    selectedPhotos.size === accesInfo.photosOriginales.length
+                      ? "Tout désélectionner"
+                      : "Tout sélectionner"
+                  }
+                >
+                  {selectedPhotos.size === accesInfo.photosOriginales.length ? (
+                    <CheckSquare size={20} className="text-[#ffe992]" />
+                  ) : (
+                    <Square size={20} />
+                  )}
+                  <span className="text-sm tracking-wide font-medium">
+                    Tout sélectionner
+                  </span>
+                </button>
+
+                {selectedPhotos.size > 0 && (
+                  <span className="text-sm font-semibold text-[#ffe992] bg-[#ffe992]/10 px-3 py-1 rounded-full">
+                    {selectedPhotos.size} sélectionnée(s)
+                  </span>
+                )}
+              </div>
+
+              {selectedPhotos.size > 0 && (
+                <button
+                  onClick={handleDownloadMultiple}
+                  disabled={isDownloadingMultiple}
+                  className="flex items-center gap-2 px-6 py-2 bg-[#ffe992] hover:bg-white text-black rounded-lg font-bold text-sm tracking-widest uppercase transition-all shadow-[0_0_15px_rgba(255,233,146,0.3)] disabled:opacity-50"
+                >
+                  {isDownloadingMultiple ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                      {downloadProgress.current} / {downloadProgress.total}
+                    </>
+                  ) : (
+                    <>
+                      <Download size={16} />
+                      Télécharger
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          )}
+
         {/* Grille Masonry Tailwind CSS Only */}
         {!accesInfo?.photosOriginales ||
         accesInfo.photosOriginales.length === 0 ? (
@@ -466,66 +600,114 @@ export default function EcrinPrive() {
           </div>
         ) : (
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
-            {accesInfo.photosOriginales.map((photo, index) => (
-              <motion.div
-                key={photo._id || index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05, duration: 0.5 }}
-                className="break-inside-avoid relative group rounded-2xl overflow-hidden bg-black/40 border border-white/5 shadow-lg"
-              >
-                {/* Image miniature avec effet de chargement/skeleton si pas d'image - mais R2/Cloudflare garantit normalement l'img */}
-                <div
-                  className="relative w-full overflow-hidden cursor-zoom-in group-hover:shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] transition-all"
-                  onClick={() => openLightbox(index)}
-                  title="Cliquez pour agrandir"
+            {accesInfo.photosOriginales.map((photo, index) => {
+              const isSelected = selectedPhotos.has(photo._id!);
+              return (
+                <motion.div
+                  key={photo._id || index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.5 }}
+                  className={`break-inside-avoid relative group rounded-2xl overflow-hidden border transition-all duration-300 ${
+                    isSelected
+                      ? "border-[#ffe992] shadow-[0_0_20px_rgba(255,233,146,0.2)]"
+                      : "border-white/5 bg-black/40"
+                  }`}
                 >
-                  <img
-                    src={photo.miniature || photo.fichierR2} // Fallback si Cloudinary echoue
-                    alt={photo.nom}
-                    loading="lazy"
-                    className="w-full h-auto object-cover opacity-80 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-700 ease-in-out"
-                    style={{ minHeight: "200px" }} // Evite un saut visuel
-                    // Si Cloudinary échoue silencieusement
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        "/images/placeholder-image.png";
+                  {/* Case à cocher pour sélection */}
+                  <button
+                    onClick={(e) => toggleSelection(photo._id!, e)}
+                    className={`absolute top-4 left-4 z-20 p-1.5 rounded-md backdrop-blur-md transition-all ${
+                      isSelected
+                        ? "bg-[#ffe992] text-black scale-110 shadow-[0_0_10px_rgba(255,233,146,0.5)]"
+                        : "bg-black/50 text-white/50 opacity-0 group-hover:opacity-100 hover:text-white border border-white/20"
+                    }`}
+                  >
+                    {isSelected ? (
+                      <CheckSquare size={20} />
+                    ) : (
+                      <Square size={20} />
+                    )}
+                  </button>
+
+                  {/* Image miniature avec fallback */}
+                  <div
+                    className="relative w-full overflow-hidden cursor-zoom-in group-hover:shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] transition-all"
+                    onClick={() => {
+                      if (selectedPhotos.size > 0) {
+                        // Mode sélection actif : click = sélectionner
+                        toggleSelection(photo._id!);
+                      } else {
+                        openLightbox(index);
+                      }
                     }}
-                  />
+                    title={
+                      selectedPhotos.size > 0
+                        ? "Ajouter à la sélection"
+                        : "Cliquez pour agrandir"
+                    }
+                  >
+                    {!photo.miniature || imageErrors.has(photo._id!) ? (
+                      <div
+                        className="w-full flex flex-col items-center justify-center bg-gradient-to-br from-black/80 to-[#12121a] border border-white/5"
+                        style={{ minHeight: "250px" }}
+                      >
+                        <ImageIcon size={48} className="text-gray-600 mb-3" />
+                        <span className="text-xs text-gray-400 truncate max-w-[80%] px-4 py-1 bg-black/50 rounded-full border border-gray-800">
+                          {photo.nom}
+                        </span>
+                      </div>
+                    ) : (
+                      <img
+                        src={photo.miniature}
+                        alt={photo.nom}
+                        loading="lazy"
+                        className={`w-full h-auto object-cover transition-all duration-700 ease-in-out ${isSelected ? "opacity-100 scale-[1.03]" : "opacity-80 group-hover:opacity-100 group-hover:scale-[1.03]"}`}
+                        style={{ minHeight: "200px" }}
+                        onError={() =>
+                          setImageErrors((prev) =>
+                            new Set(prev).add(photo._id!),
+                          )
+                        }
+                      />
+                    )}
 
-                  {/* Overlay au survol */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
-                    <h3 className="text-white font-medium truncate mb-1 text-sm">
-                      {photo.nom}
-                    </h3>
-                    <p className="text-xs text-[#ffe992] uppercase tracking-wider mb-4">
-                      {photo.format} • {formatFileSize(photo.taille)}
-                    </p>
+                    {/* Overlay au survol pour DL Simple */}
+                    {!isSelected && (
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
+                        <h3 className="text-white font-medium truncate mb-1 text-sm">
+                          {photo.nom}
+                        </h3>
+                        <p className="text-xs text-[#ffe992] uppercase tracking-wider mb-4">
+                          {photo.format} • {formatFileSize(photo.taille)}
+                        </p>
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation(); // Empeche d'ouvrir la lightbox si on click pour DL
-                        handleDownload(photo);
-                      }}
-                      disabled={downloadingPhotoId === photo._id}
-                      className="w-full relative overflow-hidden bg-white/10 hover:bg-[#ffe992] text-white hover:text-black border border-white/20 hover:border-transparent backdrop-blur-md transition-all duration-300 py-3 rounded-lg flex items-center justify-center gap-2 font-semibold text-sm uppercase tracking-wide disabled:opacity-50"
-                    >
-                      {downloadingPhotoId === photo._id ? (
-                        <>
-                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Génération...
-                        </>
-                      ) : (
-                        <>
-                          <Download size={16} />
-                          Obtenir l'Original
-                        </>
-                      )}
-                    </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownload(photo);
+                          }}
+                          disabled={downloadingPhotoId === photo._id}
+                          className="w-full relative overflow-hidden bg-white/10 hover:bg-[#ffe992] text-white hover:text-black border border-white/20 hover:border-transparent backdrop-blur-md transition-all duration-300 py-3 rounded-lg flex items-center justify-center gap-2 font-semibold text-sm uppercase tracking-wide disabled:opacity-50"
+                        >
+                          {downloadingPhotoId === photo._id ? (
+                            <>
+                              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              Génération...
+                            </>
+                          ) : (
+                            <>
+                              <Download size={16} />
+                              Obtenir l'Original
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </main>
@@ -562,16 +744,35 @@ export default function EcrinPrive() {
 
             {/* Conteneur Image Centrale */}
             <div className="relative w-full max-w-6xl h-full max-h-[85vh] flex flex-col items-center justify-center">
-              <motion.img
-                key={currentPhoto._id || currentPhotoIndex}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                src={currentPhoto.miniature || currentPhoto.fichierR2} // La miniature Cloudinary est souvent de grande taille (~800px) ce qui suffit pour du prev
-                alt={currentPhoto.nom}
-                className="max-w-full max-h-full object-contain rounded-md shadow-2xl"
-              />
+              {/* Image principale dans la Lightbox */}
+              {!currentPhoto.miniature || imageErrors.has(currentPhoto._id!) ? (
+                <div className="flex flex-col items-center justify-center w-full max-w-lg h-[60vh] bg-[#12121a] border border-white/10 rounded-2xl p-10 mt-10 shadow-2xl">
+                  <ImageIcon size={64} className="text-gray-600 mb-6" />
+                  <p className="text-[#ffe992] text-xl font-playfair-sc mb-3 text-center">
+                    {currentPhoto.nom}
+                  </p>
+                  <p className="text-gray-400 text-sm text-center">
+                    Aucun aperçu disponible. Vous devez télécharger la photo
+                    pour la visualiser en taille réelle.
+                  </p>
+                </div>
+              ) : (
+                <motion.img
+                  key={currentPhoto._id || currentPhotoIndex}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                  src={currentPhoto.miniature}
+                  alt={currentPhoto.nom}
+                  className="max-w-full max-h-full object-contain rounded-md shadow-2xl"
+                  onError={() =>
+                    setImageErrors((prev) =>
+                      new Set(prev).add(currentPhoto._id!),
+                    )
+                  }
+                />
+              )}
 
               {/* Informations et bouton DL fixés en bas */}
               <motion.div
