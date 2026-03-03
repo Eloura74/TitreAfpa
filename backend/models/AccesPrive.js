@@ -15,6 +15,7 @@ const PhotoOriginaleSchema = new mongoose.Schema(
 
 const accesPriveSchema = new mongoose.Schema({
   titre: { type: String, required: true },
+  slug: { type: String, unique: true },
   description: { type: String },
   dateDebut: { type: Date, required: true },
   dateFin: { type: Date, required: true },

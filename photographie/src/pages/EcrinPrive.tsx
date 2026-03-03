@@ -78,7 +78,7 @@ export default function EcrinPrive() {
         .then((res) => {
           if (res.data.success) setPublicInfo(res.data.acces);
         })
-        .catch((err) => console.error("Info publique non trouvée"));
+        .catch(() => console.error("Info publique non trouvée"));
     }
   }, [codeAccesFromUrl, isConnected]);
 
@@ -92,7 +92,7 @@ export default function EcrinPrive() {
         setAccesInfo(res.data.acces);
         // Synchroniser l'URL avec le slug actuel si nécessaire
       }
-    } catch (err) {
+    } catch {
       setIsConnected(false);
     }
   };
@@ -135,7 +135,7 @@ export default function EcrinPrive() {
       setCodeAcces("");
       setSuccess("Déconnexion réussie");
       navigate("/ecrin-prive", { replace: true });
-    } catch (err) {
+    } catch {
       setError("Erreur lors de la déconnexion");
     }
   };
@@ -380,8 +380,8 @@ export default function EcrinPrive() {
                   <Download size={18} />
                   <span>
                     {accesInfo?.typeLimiteTelechargement === "total"
-                      ? `${accesInfo.maxTelechargementTotal} downloads restants`
-                      : `${accesInfo.maxTelechargementParPhoto} downloads max / photo`}
+                      ? `${accesInfo?.maxTelechargementTotal} downloads restants`
+                      : `${accesInfo?.maxTelechargementParPhoto} downloads max / photo`}
                   </span>
                 </div>
               )}

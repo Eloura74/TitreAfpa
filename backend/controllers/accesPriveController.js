@@ -47,6 +47,16 @@ exports.getOne = async (req, res) => {
   }
 };
 
+// Utilitaire pour générer le slug
+const generateSlug = (str) => {
+  return str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Supprime les accents
+    .replace(/[^a-z0-9]+/g, "-") // Remplace espaces et caractères spéciaux par des tirets
+    .replace(/(^-|-$)+/g, ""); // Retire les tirets en début et fin
+};
+
 // CREATE (Admin only)
 exports.create = async (req, res) => {
   try {
@@ -68,6 +78,16 @@ exports.create = async (req, res) => {
 
     data.client = clientUser._id;
     delete data.clientEmail;
+
+    // Génération du Slug
+    if (data.titre) {
+      data.slug = generateSlug(data.titre);
+      // Vérification doublon slug
+      let existingSlug = await AccesPrive.findOne({ slug: data.slug });
+      if (existingSlug) {
+        data.slug = `${data.slug}-${Math.floor(Math.random() * 1000)}`;
+      }
+    }
 
     const newItem = new AccesPrive(data);
     await newItem.save();
@@ -92,14 +112,29 @@ exports.update = async (req, res) => {
     }
 
     // Protection : Ne jamais écraser photosOriginales via l'update global
-    // L'upload se charge lui-même de mettre à jour ce tableau
     delete data.photosOriginales;
+
+    // Régénération du Slug si titre modifié
+    if (data.titre) {
+      const currentItem = await AccesPrive.findById(req.params.id);
+      if (currentItem && currentItem.titre !== data.titre) {
+        data.slug = generateSlug(data.titre);
+        let existingSlug = await AccesPrive.findOne({
+          slug: data.slug,
+          _id: { $ne: req.params.id },
+        });
+        if (existingSlug) {
+          data.slug = `${data.slug}-${Math.floor(Math.random() * 1000)}`;
+        }
+      }
+    }
 
     const updatedItem = await AccesPrive.findByIdAndUpdate(
       req.params.id,
       data,
       { new: true },
     );
+
     res.json(updatedItem);
   } catch (err) {
     res.status(400).json({ erreur: err.message });

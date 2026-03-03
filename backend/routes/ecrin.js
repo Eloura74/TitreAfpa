@@ -48,9 +48,29 @@ const upload = multer({
   },
 });
 
+router.get("/info/:slug", async (req, res) => {
+  try {
+    // Rétrocompatibilité : on cherche par slug, ou par codeAcces pour les anciens événements
+    const searchVal = req.params.slug;
+    const acces = await AccesPrive.findOne({
+      $or: [{ slug: searchVal }, { codeAcces: searchVal.toUpperCase().trim() }],
+    }).select("titre image");
+
+    if (!acces) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Album introuvable" });
+    }
+    res.json({ success: true, acces });
+  } catch (error) {
+    console.error("Erreur ecrin info:", error);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
+
 router.post("/login", async (req, res) => {
   try {
-    const { codeAcces } = req.body;
+    const { codeAcces, slug } = req.body;
 
     if (!codeAcces) {
       return res.status(400).json({
@@ -59,9 +79,13 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const acces = await AccesPrive.findOne({
-      codeAcces: codeAcces.toUpperCase().trim(),
-    }).populate("client", "nom prenom email");
+    let query = { codeAcces: codeAcces.toUpperCase().trim() };
+    if (slug) query.slug = slug;
+
+    const acces = await AccesPrive.findOne(query).populate(
+      "client",
+      "nom prenom email",
+    );
 
     if (!acces) {
       return res.status(404).json({
