@@ -213,8 +213,12 @@ function App() {
                   element={<ClientEvenement />}
                 />
 
-                {/* Route pour l'écrin privé (téléchargement originaux R2) */}
+                {/* Routes pour l'écrin privé (téléchargement originaux R2) */}
                 <Route path="/ecrin-prive" element={<EcrinPrive />} />
+                <Route
+                  path="/ecrin-prive/:codeAcces"
+                  element={<EcrinPrive />}
+                />
               </Routes>
             </Suspense>
           </Router>

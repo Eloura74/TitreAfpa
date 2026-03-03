@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { Evenement } from "../../../types/evenement";
-import { ChevronDown, ChevronUp, Image as ImageIcon } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Image as ImageIcon,
+  Link as LinkIcon,
+  CheckCircle2,
+} from "lucide-react";
 
 // ==========================================
 // 📝 Interface des Props
@@ -26,11 +32,23 @@ export default function PrivateAccessList({
   onDelete,
 }: PrivateAccessListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const toggleExpand = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setExpandedId(expandedId === id ? null : id);
   };
+
+  const copyLink = (linkPath: string, id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!linkPath) return;
+
+    const url = `${window.location.origin}/ecrin-prive/${linkPath}`;
+    navigator.clipboard.writeText(url);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   return (
     <div className="border-l border-white/10 pl-8 h-full flex flex-col">
       <h3 className="text-xl font-semibold text-white mb-4 sticky top-0 bg-[#181824] z-10 py-2">
@@ -48,10 +66,11 @@ export default function PrivateAccessList({
       ) : (
         <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-1">
           {evenements.map((event) => {
-            const isSelected = (event.id || event._id) === selectedId;
+            const currentId = event.id || event._id;
+            const isSelected = currentId === selectedId;
             return (
               <div
-                key={event.id || event._id}
+                key={currentId}
                 className={`p-4 rounded border transition-all duration-200 group relative
                   ${
                     isSelected
@@ -63,7 +82,7 @@ export default function PrivateAccessList({
                 {/* En-tête Card */}
                 <div className="flex justify-between items-start mb-2">
                   <h4
-                    className={`font-bold ${
+                    className={`font-bold pr-10 ${
                       isSelected
                         ? "text-[#ffe992]"
                         : "text-gray-200 group-hover:text-[#ffe992]"
@@ -71,25 +90,44 @@ export default function PrivateAccessList({
                   >
                     {event.titre}
                   </h4>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/20">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/20 whitespace-nowrap">
                     Privé
                   </span>
                 </div>
 
-                {/* Bouton Expand */}
-                <span className="absolute top-3 right-28 text-gray-400 hover:text-white transition-colors">
-                  Voir Images
-                </span>
-                <button
-                  onClick={(e) => toggleExpand(event.id || event._id || "", e)}
-                  className="absolute top-3 right-18 text-gray-400 hover:text-white transition-colors"
-                >
-                  {expandedId === (event.id || event._id) ? (
-                    <ChevronUp size={26} />
-                  ) : (
-                    <ChevronDown size={26} />
+                {/* Bouton Expand & Copy Link */}
+                <div className="absolute top-3 right-16 flex items-center gap-2">
+                  {(event.slug || event.codeAcces) && (
+                    <button
+                      onClick={(e) =>
+                        copyLink(
+                          event.slug || event.codeAcces || "",
+                          currentId || "",
+                          e,
+                        )
+                      }
+                      title="Copier le lien d'accès public"
+                      className="text-gray-400 hover:text-[#ffe992] transition-colors p-1"
+                    >
+                      {copiedId === currentId ? (
+                        <CheckCircle2 size={18} className="text-green-400" />
+                      ) : (
+                        <LinkIcon size={18} />
+                      )}
+                    </button>
                   )}
-                </button>
+
+                  <button
+                    onClick={(e) => toggleExpand(currentId || "", e)}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    {expandedId === currentId ? (
+                      <ChevronUp size={24} />
+                    ) : (
+                      <ChevronDown size={24} />
+                    )}
+                  </button>
+                </div>
 
                 {/* Infos Client */}
                 <p className="text-sm text-gray-400 mb-1 flex items-center gap-2">
@@ -99,6 +137,13 @@ export default function PrivateAccessList({
                     : event.clientEmail || "Aucun client assigné"}
                 </p>
 
+                {/* Code Accès (Visible) */}
+                {event.codeAcces && (
+                  <p className="text-xs text-[#ffe992]/80 font-mono mb-1 ml-3.5">
+                    Clé : {event.codeAcces}
+                  </p>
+                )}
+
                 {/* Date */}
                 <p className="text-xs text-gray-500 mb-3 ml-3.5">
                   {new Date(event.dateDebut).toLocaleDateString()}
@@ -107,7 +152,7 @@ export default function PrivateAccessList({
                 </p>
 
                 {/* Thumbnails Grid */}
-                {expandedId === (event.id || event._id) && (
+                {expandedId === currentId && (
                   <div className="mt-3 mb-3 grid grid-cols-4 gap-2 bg-black/20 p-2 rounded">
                     {event.photos && event.photos.length > 0 ? (
                       event.photos.map((photo: any, idx: number) => (

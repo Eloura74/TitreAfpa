@@ -13,6 +13,7 @@ export interface Evenement {
   id: string;
   _id?: string;
   titre: string;
+  slug?: string;
   description?: string;
   dateDebut: string;
   dateFin: string;
