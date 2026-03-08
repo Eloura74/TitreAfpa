@@ -7,6 +7,7 @@ Ce document suit les fichiers actifs, modifiés ou obsolètes lors des intervent
 ### Fichiers Modifiés / Créés
 
 - [x] [ARCHITECTURE.md](file:///a:/01-WORK/Projects/ProjetStage/Documentation/ARCHITECTURE.md) : Création de la doc d'architecture.
+- [x] [RESUME_PROJET.md](file:///a:/01-WORK/Projects/ProjetStage/Documentation/RESUME_PROJET.md) : Guide complet du projet (Fonctions, Design, Routes).
 - [x] [FileUtils.md](file:///a:/01-WORK/Projects/ProjetStage/Documentation/FileUtils.md) : Initialisation de l'inventaire.
 
 ### Fichiers Actifs (Périmètre Master)
