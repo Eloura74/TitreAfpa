@@ -7,7 +7,7 @@ interface PhotoOriginale {
   _id?: string;
   nom: string;
   fichierR2: string;
-  miniature: string | null;
+  miniature?: string | null;
   taille: number;
   format: string;
   dateUpload: string;
