@@ -33,7 +33,14 @@ export default function PhotoOriginalesManager({
   const [loading, setLoading] = useState(false);
 
   // Suppression d'une photo
-  const handleDeletePhoto = async (photoId: string, photoNom: string) => {
+  const handleDeletePhoto = async (
+    e: React.MouseEvent,
+    photoId: string,
+    photoNom: string,
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (!confirm(`Êtes-vous sûr de vouloir supprimer "${photoNom}" ?`)) {
       return;
     }
@@ -49,7 +56,7 @@ export default function PhotoOriginalesManager({
 
       if (response.data.success) {
         alert("Photo supprimée avec succès");
-        onPhotosUpdate();
+        await onPhotosUpdate();
       }
     } catch (error) {
       console.error("Erreur suppression photo:", error);
@@ -61,15 +68,21 @@ export default function PhotoOriginalesManager({
 
   // Ouverture du mode édition de commentaire
   const handleEditComment = (
+    e: React.MouseEvent,
     photoId: string,
     currentComment: string | null | undefined,
   ) => {
+    e.preventDefault();
+    e.stopPropagation();
     setEditingCommentId(photoId);
     setCommentText(currentComment || "");
   };
 
   // Sauvegarde du commentaire
-  const handleSaveComment = async (photoId: string) => {
+  const handleSaveComment = async (e: React.MouseEvent, photoId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     setLoading(true);
     try {
       const response = await axios.patch(
@@ -83,7 +96,7 @@ export default function PhotoOriginalesManager({
       if (response.data.success) {
         setEditingCommentId(null);
         setCommentText("");
-        onPhotosUpdate();
+        await onPhotosUpdate();
       }
     } catch (error) {
       console.error("Erreur mise à jour commentaire:", error);
@@ -94,7 +107,9 @@ export default function PhotoOriginalesManager({
   };
 
   // Annulation de l'édition
-  const handleCancelEdit = () => {
+  const handleCancelEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setEditingCommentId(null);
     setCommentText("");
   };
@@ -182,10 +197,13 @@ export default function PhotoOriginalesManager({
                 {/* Actions */}
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button
-                    onClick={() =>
-                      photo._id &&
-                      handleEditComment(photo._id, photo.commentaire)
-                    }
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (photo._id) {
+                        handleEditComment(e, photo._id, photo.commentaire);
+                      }
+                    }}
                     disabled={loading}
                     className="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white rounded text-xs font-medium transition-all"
                     title="Ajouter/Modifier commentaire"
@@ -194,8 +212,9 @@ export default function PhotoOriginalesManager({
                   </button>
                   <button
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
-                      if (photo._id) handleDeletePhoto(photo._id, photo.nom);
+                      if (photo._id) handleDeletePhoto(e, photo._id, photo.nom);
                     }}
                     disabled={loading}
                     className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white rounded text-xs font-medium transition-all"
@@ -220,7 +239,9 @@ export default function PhotoOriginalesManager({
                   />
                   <div className="flex gap-2 mt-2">
                     <button
-                      onClick={() => photo._id && handleSaveComment(photo._id)}
+                      onClick={(e) =>
+                        photo._id && handleSaveComment(e, photo._id)
+                      }
                       disabled={loading}
                       className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-medium transition-all"
                     >
