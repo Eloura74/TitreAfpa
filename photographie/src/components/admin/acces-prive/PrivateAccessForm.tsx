@@ -1,8 +1,5 @@
 import React from "react";
 import { Evenement } from "../../../types/evenement";
-import ClientCreationForm from "./ClientCreationForm";
-import PhotoUploader from "./PhotoUploader";
-import PhotoGallery from "./PhotoGallery";
 import UploadPhotosOriginales from "./UploadPhotosOriginales";
 import PhotoOriginalesManager from "./PhotoOriginalesManager";
 
@@ -26,23 +23,6 @@ interface PrivateAccessFormProps {
   handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   imagePreview: string;
 
-  // Gestion Client
-  showClientForm: boolean;
-  setShowClientForm: (show: boolean) => void;
-  clientForm: any; // On pourrait typer plus strictement
-  handleClientChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleCreateClient: (e: React.FormEvent) => void;
-
-  // Gestion Photos & Tarifs
-  // tarifs: Tarif[];
-  // filesToUpload: File[]; // REMOVED
-  // setFilesToUpload: (files: File[]) => void; // REMOVED
-  handlePhotosUpload: (photos: any[]) => void;
-
-  // Gestion Galerie existante
-  onEditPhoto: (photo: any) => void;
-  onDeletePhoto: (photoId: string) => void;
-
   // Rafraîchissement après upload R2
   onRefresh?: () => void;
 }
@@ -60,17 +40,6 @@ export default function PrivateAccessForm({
   editId,
   handleImageChange,
   imagePreview,
-  showClientForm,
-  setShowClientForm,
-  clientForm,
-  handleClientChange,
-  handleCreateClient,
-  // tarifs,
-  // filesToUpload,
-  // setFilesToUpload,
-  handlePhotosUpload,
-  onEditPhoto,
-  onDeletePhoto,
   onRefresh,
 }: PrivateAccessFormProps) {
   return (
@@ -286,37 +255,6 @@ export default function PrivateAccessForm({
           )}
         </div>
 
-        {/* Section Client */}
-        <div className="bg-[#232336] p-4 rounded border border-white/10">
-          <label className="text-sm font-bold text-[#ffe992] mb-2 block">
-            Client associé
-          </label>
-          <div className="flex gap-2 mb-2">
-            <input
-              name="clientEmail"
-              placeholder="Email du client existant"
-              value={form.clientEmail}
-              onChange={handleChange}
-              className="bg-black/20 border border-white/10 rounded px-4 py-2 text-white w-full focus:border-blue-500 outline-none transition-colors placeholder-gray-600"
-            />
-          </div>
-
-          {/* Sous-composant Création Client */}
-          <ClientCreationForm
-            showClientForm={showClientForm}
-            setShowClientForm={setShowClientForm}
-            clientForm={clientForm}
-            handleClientChange={handleClientChange}
-            handleCreateClient={handleCreateClient}
-          />
-        </div>
-
-        {/* Sous-composant Upload Photos */}
-        <PhotoUploader
-          handlePhotosUpload={handlePhotosUpload}
-          isEditing={!!editId}
-        />
-
         {/* Upload Photos Originales R2 (uniquement en mode édition) */}
         {editId && form.codeAcces && (
           <UploadPhotosOriginales
@@ -369,15 +307,6 @@ export default function PrivateAccessForm({
           )}
         </div>
       </form>
-
-      {/* Galerie Photos (Mode Édition uniquement) */}
-      {editId && (
-        <PhotoGallery
-          photos={form.photos || []}
-          onEdit={onEditPhoto}
-          onDelete={onDeletePhoto}
-        />
-      )}
     </div>
   );
 }

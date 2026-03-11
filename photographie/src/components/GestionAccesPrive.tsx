@@ -4,8 +4,7 @@ import { Evenement } from "../types/evenement";
 import { API_URL as BASE_API_URL } from "../config/api";
 import PrivateAccessForm from "./admin/acces-prive/PrivateAccessForm";
 import PrivateAccessList from "./admin/acces-prive/PrivateAccessList";
-import { compressImage } from "./admin/acces-prive/PhotoUploader";
-import { Check, X, Edit } from "lucide-react";
+import { Check, X } from "lucide-react";
 
 const API_URL = `${BASE_API_URL}/api/acces-prive`;
 
@@ -32,20 +31,6 @@ export default function GestionAccesPrive() {
     photosOriginales: [],
     statut: "actif",
   });
-
-  // const [tarifs, setTarifs] = useState<Tarif[]>([]);
-  const [showClientForm, setShowClientForm] = useState(false);
-  const [clientForm, setClientForm] = useState({
-    nom: "",
-    prenom: "",
-    email: "",
-    motdepasse: "",
-    telephone: "",
-    adresse: { rue: "", ville: "", codePostal: "", pays: "France" },
-  });
-
-  const [editingPhoto, setEditingPhoto] = useState<any | null>(null);
-  const [pendingPhotos, setPendingPhotos] = useState<any[]>([]);
 
   const [imagePreview, setImagePreview] = useState<string>("");
   const [editId, setEditId] = useState<string | null>(null);
@@ -97,10 +82,6 @@ export default function GestionAccesPrive() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleClientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setClientForm({ ...clientForm, [e.target.name]: e.target.value });
-  };
-
   const resetForm = () => {
     setForm({
       id: "",
@@ -127,50 +108,6 @@ export default function GestionAccesPrive() {
     setEditId(null);
     setError(null);
     setSuccess(null);
-    setShowClientForm(false);
-    setPendingPhotos([]);
-  };
-
-  const handleCreateClient = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      await axios.post(`${BASE_API_URL}/api/auth/create-client`, clientForm, {
-        withCredentials: true,
-      });
-      setSuccess(
-        `Client ${clientForm.prenom} ${clientForm.nom} créé avec succès !`,
-      );
-      setForm((prev) => ({ ...prev, clientEmail: clientForm.email }));
-      setShowClientForm(false);
-      setClientForm({
-        nom: "",
-        prenom: "",
-        email: "",
-        motdepasse: "",
-        telephone: "",
-        adresse: { rue: "", ville: "", codePostal: "", pays: "France" },
-      });
-    } catch (err: any) {
-      console.error("Erreur création client:", err);
-      const resData = err.response?.data;
-      let errorMsg = "Erreur lors de la création du client.";
-
-      if (resData?.errors && Array.isArray(resData.errors)) {
-        // Cas des erreurs de validation (express-validator)
-        errorMsg = resData.errors.map((e: any) => e.msg).join(", ");
-      } else if (resData?.error) {
-        // Cas d'une erreur unique (ex: email existant)
-        errorMsg = resData.error;
-      }
-
-      setError(errorMsg);
-    } finally {
-      setLoading(false);
-    }
   };
 
   // Fonction helper pour l'upload direct vers Cloudinary
@@ -227,83 +164,6 @@ export default function GestionAccesPrive() {
     }
   };
 
-  const processPhotosUpload = async (photos: any[], eventId: string) => {
-    setLoading(true);
-    const uploadedPhotoIds: string[] = [];
-
-    try {
-      for (const photoData of photos) {
-        const { file, title, description, selectedTariffs } = photoData;
-
-        try {
-          const compressedFile = await compressImage(file);
-          const imageUrl = await uploadToCloudinary(compressedFile);
-
-          if (!imageUrl) throw new Error("Erreur upload image");
-
-          // Legacy tariff mapping removed
-          // const tariffsToApply = ...
-
-          const resPhoto = await axios.post(
-            `${BASE_API_URL}/api/galerie`,
-            {
-              src: imageUrl,
-              titre: title || file.name,
-              categorie: "EvenementPrive",
-              // tarifs: tariffsToApply,
-              availableTariffIds: selectedTariffs,
-              alt: `Photo privée ${form.titre}`,
-              description: description || `Photo privée pour ${form.titre}`,
-            },
-            {
-              withCredentials: true,
-            },
-          );
-
-          const photoId = resPhoto.data._id || resPhoto.data.id;
-          if (photoId) {
-            uploadedPhotoIds.push(photoId);
-          }
-        } catch (err) {
-          console.error(`Erreur upload fichier ${file.name}`, err);
-        }
-      }
-
-      if (uploadedPhotoIds.length > 0) {
-        await axios.post(
-          `${API_URL}/${eventId}/photos`,
-          { photoIds: uploadedPhotoIds },
-          {
-            withCredentials: true,
-          },
-        );
-
-        loadEvenements();
-        setSuccess(`${uploadedPhotoIds.length} photos ajoutées avec succès !`);
-        setPendingPhotos([]);
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Erreur lors de l'upload des photos.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePhotosUpload = async (stagedPhotos: any[]) => {
-    if (!stagedPhotos || stagedPhotos.length === 0) return;
-
-    if (!editId) {
-      setPendingPhotos(stagedPhotos);
-      setSuccess(
-        `${stagedPhotos.length} photos en attente. Enregistrez l'événement pour valider.`,
-      );
-      return;
-    }
-
-    await processPhotosUpload(stagedPhotos, editId);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -325,10 +185,6 @@ export default function GestionAccesPrive() {
         });
         targetId = res.data._id || res.data.id;
         setSuccess("Accès privé créé avec succès.");
-      }
-
-      if (pendingPhotos.length > 0 && targetId) {
-        await processPhotosUpload(pendingPhotos, targetId);
       }
 
       loadEvenements();
@@ -439,15 +295,6 @@ export default function GestionAccesPrive() {
             editId={editId}
             handleImageChange={handleImageChange}
             imagePreview={imagePreview}
-            showClientForm={showClientForm}
-            setShowClientForm={setShowClientForm}
-            clientForm={clientForm}
-            handleClientChange={handleClientChange}
-            handleCreateClient={handleCreateClient}
-            // tarifs={tarifs}
-            handlePhotosUpload={handlePhotosUpload}
-            onEditPhoto={setEditingPhoto}
-            onDeletePhoto={handleDeletePhoto}
             onRefresh={loadEvenements}
           />
         </div>
