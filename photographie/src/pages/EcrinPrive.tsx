@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import JSZip from "jszip";
 import { API_URL } from "../config/api";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -205,37 +206,59 @@ export default function EcrinPrive() {
       accesInfo?.photosOriginales?.filter((p) => selectedPhotos.has(p._id!)) ||
       [];
 
-    for (const photo of photosToDownload) {
-      try {
-        const res = await axios.post(
-          `${API_URL}/api/ecrin/generate-download-url`,
-          { photoId: photo._id },
-          { withCredentials: true },
-        );
+    try {
+      const zip = new JSZip();
 
-        if (res.data.success) {
-          const link = document.createElement("a");
-          link.href = res.data.url;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-          link.download = photo.nom;
+      // Télécharger toutes les photos et les ajouter au ZIP
+      for (let i = 0; i < photosToDownload.length; i++) {
+        const photo = photosToDownload[i];
+        try {
+          // Générer l'URL de téléchargement
+          const res = await axios.post(
+            `${API_URL}/api/ecrin/generate-download-url`,
+            { photoId: photo._id },
+            { withCredentials: true },
+          );
 
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          if (res.data.success) {
+            // Télécharger le fichier en tant que blob
+            const response = await fetch(res.data.url);
+            const blob = await response.blob();
 
-          // Pause de 800ms pour ne pas saturer le navigateur (et Vercel/Cloudflare)
-          await new Promise((r) => setTimeout(r, 800));
+            // Ajouter au ZIP avec le nom original
+            zip.file(photo.nom, blob);
+          }
+        } catch (err) {
+          console.error("Échec téléchargement pour", photo.nom, err);
         }
-      } catch {
-        console.error("Échec téléchargement pour", photo.nom);
+        setDownloadProgress((prev) => ({ ...prev, current: i + 1 }));
       }
-      setDownloadProgress((prev) => ({ ...prev, current: prev.current + 1 }));
+
+      // Générer le fichier ZIP
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+
+      // Créer un nom de fichier pour le ZIP
+      const zipFileName = `${accesInfo?.titre || "photos"}_${new Date().toISOString().split("T")[0]}.zip`;
+
+      // Télécharger le ZIP
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(zipBlob);
+      link.download = zipFileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+
+      setSuccess(
+        `${photosToDownload.length} photos téléchargées dans ${zipFileName}`,
+      );
+    } catch (err) {
+      console.error("Erreur création ZIP:", err);
+      setError("Erreur lors de la création du fichier ZIP");
     }
 
     setIsDownloadingMultiple(false);
     setSelectedPhotos(new Set());
-    setSuccess(`Téléchargement de ${selectedPhotos.size} photos terminé.`);
     checkSession();
   };
 
