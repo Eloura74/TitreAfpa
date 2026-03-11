@@ -171,8 +171,13 @@ export default function GestionAccesPrive() {
     setSuccess(null);
 
     try {
-      const { id, _id, photos, photosOriginales, ...dataToSend } = form as any;
-      let targetId = editId;
+      // Exclure les champs techniques avant l'envoi
+      const { id, _id, photos, photosOriginales, ...dataToSend } = form;
+      // Éviter les warnings ESLint sur les variables inutilisées
+      void id;
+      void _id;
+      void photos;
+      void photosOriginales;
 
       if (editId) {
         await axios.put(`${API_URL}/${editId}`, dataToSend, {
@@ -180,10 +185,9 @@ export default function GestionAccesPrive() {
         });
         setSuccess("Accès privé modifié avec succès.");
       } else {
-        const res = await axios.post(API_URL, dataToSend, {
+        await axios.post(API_URL, dataToSend, {
           withCredentials: true,
         });
-        targetId = res.data._id || res.data.id;
         setSuccess("Accès privé créé avec succès.");
       }
 
@@ -243,22 +247,6 @@ export default function GestionAccesPrive() {
     }
   };
 
-  const handleDeletePhoto = async (photoId: string) => {
-    try {
-      await axios.delete(`${BASE_API_URL}/api/galerie/${photoId}`, {
-        withCredentials: true,
-      });
-      const updatedPhotos = form.photos?.filter(
-        (p: any) => (p._id || p.id) !== photoId,
-      );
-      setForm((prev) => ({ ...prev, photos: updatedPhotos }));
-      setSuccess("Photo supprimée.");
-    } catch (err) {
-      console.error(err);
-      setError("Erreur suppression photo.");
-    }
-  };
-
   return (
     <div className="bg-[#12121a]/50 backdrop-blur-md rounded-2xl border border-white/5 shadow-xl p-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/5">
@@ -310,95 +298,6 @@ export default function GestionAccesPrive() {
           />
         </div>
       </div>
-
-      {/* MODAL ÉDITION PHOTO */}
-      {editingPhoto && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200 backdrop-blur-sm">
-          <div className="bg-[#181824] p-6 rounded-xl max-w-2xl w-full border border-[#ffe992]/20 shadow-2xl">
-            <h3 className="text-lg font-bold text-[#ffe992] mb-6 flex items-center gap-2">
-              <Edit size={18} /> Modifier la photo
-            </h3>
-
-            <div className="flex gap-6 mb-6">
-              <img
-                src={editingPhoto.src}
-                alt="Preview"
-                className="w-40 h-40 object-cover rounded-lg border border-white/10 shadow-lg"
-              />
-              <div className="flex-1 space-y-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                    Titre
-                  </label>
-                  <input
-                    value={editingPhoto.titre || ""}
-                    onChange={(e) =>
-                      setEditingPhoto({
-                        ...editingPhoto,
-                        titre: e.target.value,
-                      })
-                    }
-                    className="w-full bg-[#232336] border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:border-[#ffe992] outline-none transition-all"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                    Description
-                  </label>
-                  <textarea
-                    value={editingPhoto.description || ""}
-                    onChange={(e) =>
-                      setEditingPhoto({
-                        ...editingPhoto,
-                        description: e.target.value,
-                      })
-                    }
-                    className="w-full bg-[#232336] border border-white/10 rounded-lg px-4 py-2 text-white text-sm h-24 resize-none focus:border-[#ffe992] outline-none transition-all"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
-              <button
-                onClick={() => setEditingPhoto(null)}
-                className="px-4 py-2 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-colors text-sm font-bold uppercase tracking-wider"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    await axios.put(
-                      `${BASE_API_URL}/api/galerie/${
-                        editingPhoto._id || editingPhoto.id
-                      }`,
-                      editingPhoto,
-                      {
-                        withCredentials: true,
-                      },
-                    );
-                    const updatedPhotos = form.photos?.map((p: any) =>
-                      (p._id || p.id) === (editingPhoto._id || editingPhoto.id)
-                        ? editingPhoto
-                        : p,
-                    );
-                    setForm((prev) => ({ ...prev, photos: updatedPhotos }));
-                    setEditingPhoto(null);
-                    setSuccess("Photo modifiée avec succès.");
-                  } catch (err) {
-                    console.error(err);
-                    setError("Erreur lors de la modification de la photo.");
-                  }
-                }}
-                className="px-6 py-2 bg-[#ffe992] text-black font-bold rounded-lg hover:bg-white transition-colors text-sm uppercase tracking-wider shadow-lg shadow-[#ffe992]/10"
-              >
-                Enregistrer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
