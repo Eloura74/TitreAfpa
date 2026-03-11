@@ -237,6 +237,145 @@ router.post("/logout", (req, res) => {
   });
 });
 
+// =====================================
+// ROUTE : Génération d'URL pré-signée pour upload direct vers R2
+// =====================================
+// Cette route permet au frontend d'uploader directement vers Cloudflare R2
+// sans passer par le backend Vercel (contourne la limite de 4.5MB)
+router.post("/generate-upload-url", async (req, res) => {
+  try {
+    const { accesId, codeAcces, fileName, fileType } = req.body;
+
+    // Validation des paramètres requis
+    if (!accesId || !codeAcces || !fileName) {
+      return res.status(400).json({
+        success: false,
+        message: "Paramètres manquants (accesId, codeAcces, fileName)",
+      });
+    }
+
+    // Vérification de l'accès privé
+    const acces = await AccesPrive.findById(accesId);
+
+    if (!acces) {
+      return res.status(404).json({
+        success: false,
+        message: "Accès introuvable",
+      });
+    }
+
+    // Vérification du code d'accès
+    if (acces.codeAcces !== codeAcces.toUpperCase().trim()) {
+      return res.status(403).json({
+        success: false,
+        message: "Code d'accès invalide",
+      });
+    }
+
+    // Génération de la clé R2 unique
+    const r2Key = `${codeAcces}/${Date.now()}-${fileName}`;
+
+    // Création de la commande PutObject pour générer l'URL pré-signée
+    const command = new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME,
+      Key: r2Key,
+      ContentType: fileType || "application/octet-stream",
+    });
+
+    // Génération de l'URL pré-signée (valide 1 heure)
+    const uploadUrl = await getSignedUrl(s3Client, command, {
+      expiresIn: 3600,
+    });
+
+    // Retour de l'URL et des métadonnées
+    res.json({
+      success: true,
+      uploadUrl,
+      r2Key,
+      expiresIn: 3600,
+    });
+  } catch (error) {
+    console.error("Erreur génération URL upload:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors de la génération de l'URL d'upload",
+    });
+  }
+});
+
+// =====================================
+// ROUTE : Confirmation d'upload et enregistrement en base
+// =====================================
+// Appelée après un upload direct réussi pour enregistrer la photo dans MongoDB
+router.post("/confirm-upload", async (req, res) => {
+  try {
+    const { accesId, codeAcces, r2Key, fileName, fileSize, fileType } =
+      req.body;
+
+    // Validation des paramètres
+    if (!accesId || !codeAcces || !r2Key || !fileName) {
+      return res.status(400).json({
+        success: false,
+        message: "Paramètres manquants",
+      });
+    }
+
+    // Vérification de l'accès
+    const acces = await AccesPrive.findById(accesId);
+
+    if (!acces) {
+      return res.status(404).json({
+        success: false,
+        message: "Accès introuvable",
+      });
+    }
+
+    if (acces.codeAcces !== codeAcces.toUpperCase().trim()) {
+      return res.status(403).json({
+        success: false,
+        message: "Code d'accès invalide",
+      });
+    }
+
+    // Création de l'objet photo
+    const photoData = {
+      nom: fileName,
+      fichierR2: r2Key,
+      miniature: null,
+      taille: fileSize || 0,
+      format: path.extname(fileName).substring(1).toUpperCase(),
+      dateUpload: new Date(),
+      nbTelechargements: 0,
+    };
+
+    // Ajout de la photo dans MongoDB
+    const accesFromDb = await AccesPrive.findById(acces._id);
+    accesFromDb.photosOriginales.push(photoData);
+    const savedAcces = await accesFromDb.save({
+      writeConcern: { w: "majority", j: true },
+    });
+
+    console.log("[CONFIRM-UPLOAD] Photo enregistrée:", photoData.nom);
+
+    res.json({
+      success: true,
+      message: "Photo enregistrée avec succès",
+      photo: photoData,
+      nbPhotosTotal: savedAcces.photosOriginales.length,
+    });
+  } catch (error) {
+    console.error("Erreur confirmation upload:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors de l'enregistrement de la photo",
+    });
+  }
+});
+
+// =====================================
+// ROUTE LEGACY : Upload via backend (DÉCONSEILLÉ pour fichiers > 4.5MB)
+// =====================================
+// Cette route est conservée pour compatibilité mais limitée par Vercel
 router.post("/upload", upload.single("photo"), async (req, res) => {
   try {
     if (!req.file) {
