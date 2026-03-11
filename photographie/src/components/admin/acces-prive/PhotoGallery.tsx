@@ -66,17 +66,17 @@ export default function PhotoGallery({
                   <button
                     type="button"
                     onClick={() => {
-                      console.log("Photo complète:", photo);
-                      const photoId = photo._id || photo.id || photo;
-                      console.log("ID extrait:", photoId);
+                      let photoId: string;
 
-                      if (!photoId || typeof photoId !== "string") {
-                        alert("Impossible de supprimer : ID de photo invalide");
-                        console.error("Photo avec ID invalide:", {
-                          photo,
-                          photoId,
-                          type: typeof photoId,
-                        });
+                      if (typeof photo === "string") {
+                        photoId = photo;
+                      } else if (photo._id) {
+                        photoId = photo._id;
+                      } else if (photo.id) {
+                        photoId = photo.id;
+                      } else {
+                        alert("Impossible de supprimer : ID de photo manquant");
+                        console.error("Photo sans ID:", photo);
                         return;
                       }
 

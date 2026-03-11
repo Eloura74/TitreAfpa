@@ -683,9 +683,18 @@ export default function EcrinPrive() {
                         <h3 className="text-white font-medium truncate mb-1 text-sm">
                           {photo.nom}
                         </h3>
-                        <p className="text-xs text-[#ffe992] uppercase tracking-wider mb-4">
+                        <p className="text-xs text-[#ffe992] uppercase tracking-wider mb-2">
                           {photo.format} • {formatFileSize(photo.taille)}
                         </p>
+
+                        {/* Commentaire admin */}
+                        {photo.commentaire && (
+                          <div className="mb-3 p-2 bg-blue-500/20 border-l-2 border-blue-400 rounded">
+                            <p className="text-xs text-blue-200 italic">
+                              💬 {photo.commentaire}
+                            </p>
+                          </div>
+                        )}
 
                         <button
                           onClick={(e) => {
