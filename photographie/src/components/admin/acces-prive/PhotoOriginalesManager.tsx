@@ -119,14 +119,14 @@ export default function PhotoOriginalesManager({
           Aucune photo originale uploadée
         </p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {validPhotos.map((photo) => (
             <div
               key={photo._id}
-              className="bg-black/40 border border-white/10 rounded-lg overflow-hidden hover:border-yellow-400/50 transition-all"
+              className="bg-black/40 border border-white/10 rounded-lg overflow-hidden hover:border-yellow-400/50 transition-all shadow-lg"
             >
-              {/* Miniature */}
-              <div className="relative aspect-video bg-black/60">
+              {/* Miniature avec bouton supprimer */}
+              <div className="relative aspect-video bg-black/60 group">
                 {photo.miniature ? (
                   <img
                     src={photo.miniature}
@@ -148,34 +148,54 @@ export default function PhotoOriginalesManager({
                     </svg>
                   </div>
                 )}
+
+                {/* Bouton supprimer en haut à droite */}
+                <button
+                  onClick={() =>
+                    photo._id && handleDeletePhoto(photo._id, photo.nom)
+                  }
+                  disabled={loading}
+                  className="absolute top-2 right-2 p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-lg transition-all disabled:opacity-50 opacity-90 hover:opacity-100 hover:scale-110"
+                  title="Supprimer cette photo"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
               </div>
 
               {/* Informations */}
-              <div className="p-4 space-y-3">
-                <div>
+              <div className="p-4 space-y-4">
+                {/* Nom et détails */}
+                <div className="space-y-1">
                   <p
-                    className="text-white font-medium truncate"
+                    className="text-white font-semibold text-base truncate"
                     title={photo.nom}
                   >
                     {photo.nom}
                   </p>
-                  <p className="text-gray-400 text-sm">
-                    {formatFileSize(photo.taille)} • {photo.format}
-                  </p>
+                  <div className="flex items-center gap-3 text-sm">
+                    <span className="text-yellow-400 font-medium">
+                      {formatFileSize(photo.taille)}
+                    </span>
+                    <span className="text-gray-400">•</span>
+                    <span className="text-gray-400">{photo.format}</span>
+                  </div>
                   <p className="text-gray-500 text-xs">
-                    {photo.nbTelechargements} téléchargement(s)
+                    📥 {photo.nbTelechargements || 0} téléchargement(s)
                   </p>
                 </div>
 
                 {/* Commentaire */}
                 <div className="space-y-2">
+                  <p className="text-gray-300 text-xs font-semibold uppercase tracking-wide">
+                    Commentaire client
+                  </p>
                   {editingCommentId === photo._id ? (
                     <div className="space-y-2">
                       <textarea
                         value={commentText}
                         onChange={(e) => setCommentText(e.target.value)}
                         placeholder="Ajouter un commentaire visible par le client..."
-                        className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded text-white text-sm resize-none focus:border-yellow-400/50 focus:outline-none"
+                        className="w-full px-3 py-2 bg-black/40 border border-white/20 rounded-lg text-white text-sm resize-none focus:border-yellow-400/50 focus:ring-2 focus:ring-yellow-400/20 focus:outline-none"
                         rows={3}
                         disabled={loading}
                       />
@@ -185,7 +205,7 @@ export default function PhotoOriginalesManager({
                             photo._id && handleSaveComment(photo._id)
                           }
                           disabled={loading}
-                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm transition-colors disabled:opacity-50"
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 shadow-md"
                         >
                           <Check className="w-4 h-4" />
                           Enregistrer
@@ -193,7 +213,7 @@ export default function PhotoOriginalesManager({
                         <button
                           onClick={handleCancelEdit}
                           disabled={loading}
-                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm transition-colors disabled:opacity-50"
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 shadow-md"
                         >
                           <X className="w-4 h-4" />
                           Annuler
@@ -203,9 +223,9 @@ export default function PhotoOriginalesManager({
                   ) : (
                     <div>
                       {photo.commentaire ? (
-                        <div className="bg-blue-500/10 border border-blue-500/30 rounded p-2">
-                          <p className="text-blue-300 text-sm italic">
-                            "{photo.commentaire}"
+                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                          <p className="text-blue-300 text-sm leading-relaxed">
+                            💬 "{photo.commentaire}"
                           </p>
                         </div>
                       ) : (
@@ -217,29 +237,19 @@ export default function PhotoOriginalesManager({
                   )}
                 </div>
 
-                {/* Actions */}
-                <div className="flex gap-2 pt-2 border-t border-white/10">
-                  <button
-                    onClick={() =>
-                      photo._id &&
-                      handleEditComment(photo._id, photo.commentaire)
-                    }
-                    disabled={loading || editingCommentId === photo._id}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors disabled:opacity-50"
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    {photo.commentaire ? "Modifier" : "Ajouter"} commentaire
-                  </button>
-                  <button
-                    onClick={() =>
-                      photo._id && handleDeletePhoto(photo._id, photo.nom)
-                    }
-                    disabled={loading}
-                    className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm transition-colors disabled:opacity-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                {/* Bouton modifier commentaire */}
+                <button
+                  onClick={() =>
+                    photo._id && handleEditComment(photo._id, photo.commentaire)
+                  }
+                  disabled={loading || editingCommentId === photo._id}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 shadow-md"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  {photo.commentaire
+                    ? "Modifier le commentaire"
+                    : "Ajouter un commentaire"}
+                </button>
               </div>
             </div>
           ))}
