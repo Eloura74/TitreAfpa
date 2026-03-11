@@ -4,6 +4,7 @@ import ClientCreationForm from "./ClientCreationForm";
 import PhotoUploader from "./PhotoUploader";
 import PhotoGallery from "./PhotoGallery";
 import UploadPhotosOriginales from "./UploadPhotosOriginales";
+import PhotoOriginalesManager from "./PhotoOriginalesManager";
 
 // ==========================================
 // 📝 Interface des Props
@@ -326,6 +327,23 @@ export default function PrivateAccessForm({
             }}
           />
         )}
+
+        {/* Gestion des Photos Originales (suppression et commentaires) */}
+        {editId &&
+          form.codeAcces &&
+          form.photosOriginales &&
+          form.photosOriginales.length > 0 && (
+            <div className="mt-6">
+              <PhotoOriginalesManager
+                accesId={editId}
+                codeAcces={form.codeAcces}
+                photos={form.photosOriginales}
+                onPhotosUpdate={() => {
+                  if (onRefresh) onRefresh();
+                }}
+              />
+            </div>
+          )}
 
         {/* Boutons d'action */}
         <div className="flex gap-2 mt-4 sticky bottom-0 bg-[#181824] py-2 z-10 border-t border-white/5">

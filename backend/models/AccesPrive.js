@@ -9,6 +9,7 @@ const PhotoOriginaleSchema = new mongoose.Schema(
     format: { type: String, required: true },
     dateUpload: { type: Date, default: Date.now },
     nbTelechargements: { type: Number, default: 0 },
+    commentaire: { type: String, default: null },
   },
   { _id: true },
 );

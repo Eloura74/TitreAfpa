@@ -5,6 +5,7 @@ const {
   S3Client,
   GetObjectCommand,
   PutObjectCommand,
+  DeleteObjectCommand,
 } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const multer = require("multer");
@@ -684,6 +685,144 @@ router.post("/generate-download-url", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Erreur génération URL de téléchargement",
+    });
+  }
+});
+
+// =====================================
+// ROUTE : Suppression d'une photo originale (ADMIN)
+// =====================================
+router.delete("/photo/:accesId/:photoId", async (req, res) => {
+  try {
+    const { accesId, photoId } = req.params;
+    const { codeAcces } = req.body;
+
+    if (!codeAcces) {
+      return res.status(400).json({
+        success: false,
+        message: "Code d'accès requis",
+      });
+    }
+
+    const acces = await AccesPrive.findById(accesId);
+
+    if (!acces) {
+      return res.status(404).json({
+        success: false,
+        message: "Accès introuvable",
+      });
+    }
+
+    if (acces.codeAcces !== codeAcces.toUpperCase().trim()) {
+      return res.status(403).json({
+        success: false,
+        message: "Code d'accès invalide",
+      });
+    }
+
+    const photo = acces.photosOriginales.id(photoId);
+
+    if (!photo) {
+      return res.status(404).json({
+        success: false,
+        message: "Photo introuvable",
+      });
+    }
+
+    const r2Key = photo.fichierR2;
+
+    // Suppression de la photo dans MongoDB
+    acces.photosOriginales.pull(photoId);
+    await acces.save();
+
+    // Suppression du fichier sur R2 (optionnel, en arrière-plan)
+    try {
+      const deleteCommand = new DeleteObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME,
+        Key: r2Key,
+      });
+      await s3Client.send(deleteCommand);
+      console.log("[DELETE-PHOTO] Fichier R2 supprimé:", r2Key);
+    } catch (r2Error) {
+      console.error(
+        "[DELETE-PHOTO] Erreur suppression R2 (non bloquant):",
+        r2Error,
+      );
+    }
+
+    res.json({
+      success: true,
+      message: "Photo supprimée avec succès",
+      nbPhotosRestantes: acces.photosOriginales.length,
+    });
+  } catch (error) {
+    console.error("Erreur suppression photo:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors de la suppression de la photo",
+    });
+  }
+});
+
+// =====================================
+// ROUTE : Ajout/modification d'un commentaire sur une photo (ADMIN)
+// =====================================
+router.patch("/photo/:accesId/:photoId/commentaire", async (req, res) => {
+  try {
+    const { accesId, photoId } = req.params;
+    const { codeAcces, commentaire } = req.body;
+
+    if (!codeAcces) {
+      return res.status(400).json({
+        success: false,
+        message: "Code d'accès requis",
+      });
+    }
+
+    const acces = await AccesPrive.findById(accesId);
+
+    if (!acces) {
+      return res.status(404).json({
+        success: false,
+        message: "Accès introuvable",
+      });
+    }
+
+    if (acces.codeAcces !== codeAcces.toUpperCase().trim()) {
+      return res.status(403).json({
+        success: false,
+        message: "Code d'accès invalide",
+      });
+    }
+
+    const photo = acces.photosOriginales.id(photoId);
+
+    if (!photo) {
+      return res.status(404).json({
+        success: false,
+        message: "Photo introuvable",
+      });
+    }
+
+    photo.commentaire = commentaire || null;
+    await acces.save();
+
+    console.log("[UPDATE-COMMENTAIRE] Commentaire mis à jour pour:", photo.nom);
+
+    res.json({
+      success: true,
+      message: "Commentaire mis à jour avec succès",
+      photo: {
+        id: photo._id,
+        nom: photo.nom,
+        commentaire: photo.commentaire,
+      },
+    });
+  } catch (error) {
+    console.error("Erreur mise à jour commentaire:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors de la mise à jour du commentaire",
     });
   }
 });
