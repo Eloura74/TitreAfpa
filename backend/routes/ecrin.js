@@ -22,6 +22,27 @@ const s3Client = new S3Client({
   },
 });
 
+const s3ClientPublic = new S3Client({
+  region: "auto",
+  endpoint:
+    process.env.R2_PUBLIC_URL ||
+    `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+  forcePathStyle: true,
+});
+
+// Fonction utilitaire pour convertir un stream en buffer
+const streamToBuffer = async (stream) => {
+  const chunks = [];
+  for await (const chunk of stream) {
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+};
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -282,8 +303,7 @@ router.post("/generate-upload-url", async (req, res) => {
       ContentType: fileType || "application/octet-stream",
     });
 
-    // Génération de l'URL pré-signée (valide 1 heure)
-    const uploadUrl = await getSignedUrl(s3Client, command, {
+    const uploadUrl = await getSignedUrl(s3ClientPublic, command, {
       expiresIn: 3600,
     });
 
@@ -337,11 +357,62 @@ router.post("/confirm-upload", async (req, res) => {
       });
     }
 
-    // Création de l'objet photo
+    let miniatureUrl = null;
+
+    // Génération de la miniature en arrière-plan (ne bloque pas la réponse)
+    // On télécharge l'image depuis R2, génère la miniature, et l'upload vers Cloudinary
+    try {
+      // Téléchargement de l'image depuis R2
+      const getCommand = new GetObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME,
+        Key: r2Key,
+      });
+
+      const r2Response = await s3Client.send(getCommand);
+      const imageBuffer = await streamToBuffer(r2Response.Body);
+
+      // Génération de la miniature avec Sharp (300x300 max)
+      const thumbnailBuffer = await sharp(imageBuffer)
+        .resize(300, 300, {
+          fit: "inside",
+          withoutEnlargement: true,
+        })
+        .jpeg({ quality: 80 })
+        .toBuffer();
+
+      // Upload de la miniature vers Cloudinary
+      const uploadResult = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: `ecrin-prive/${codeAcces}/miniatures`,
+            resource_type: "image",
+            transformation: [
+              { width: 300, height: 300, crop: "limit" },
+              { quality: "auto:low" },
+            ],
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          },
+        );
+        uploadStream.end(thumbnailBuffer);
+      });
+
+      miniatureUrl = uploadResult.secure_url;
+      console.log("[CONFIRM-UPLOAD] Miniature générée:", miniatureUrl);
+    } catch (thumbError) {
+      console.error(
+        "[CONFIRM-UPLOAD] Erreur génération miniature (non bloquant):",
+        thumbError,
+      );
+    }
+
+    // Création de l'objet photo avec miniature
     const photoData = {
       nom: fileName,
       fichierR2: r2Key,
-      miniature: null,
+      miniature: miniatureUrl,
       taille: fileSize || 0,
       format: path.extname(fileName).substring(1).toUpperCase(),
       dateUpload: new Date(),
