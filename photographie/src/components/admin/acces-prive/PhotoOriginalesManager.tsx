@@ -10,8 +10,8 @@ interface PhotoOriginale {
   miniature?: string | null;
   taille: number;
   format: string;
-  dateUpload: string;
-  nbTelechargements: number;
+  dateUpload?: string;
+  nbTelechargements?: number;
   commentaire?: string | null;
 }
 
