@@ -50,7 +50,7 @@ export default function Home() {
       windowSize.current = { w: window.innerWidth, h: window.innerHeight };
       // Vérifier si l'appareil est un PC (a le survol et un grand écran)
       const hasHover = window.matchMedia(
-        "(hover: hover) and (pointer: fine)"
+        "(hover: hover) and (pointer: fine)",
       ).matches;
       const isLargeScreen = window.innerWidth >= 1024;
       setIsPC(hasHover && isLargeScreen);
@@ -95,7 +95,7 @@ export default function Home() {
               return `${API_URL}${oeuvre.image}`;
             if (oeuvre.image?.startsWith("/images/")) return oeuvre.image;
             return getWatermarkedImageUrl(
-              `/images/${oeuvre.image || "/placeholder.jpg"}`
+              `/images/${oeuvre.image || "/placeholder.jpg"}`,
             );
           });
           setDynamicGraphismeImages(images);
@@ -103,7 +103,7 @@ export default function Home() {
       } catch (error) {
         console.error(
           "Erreur lors du chargement des images pour le carrousel:",
-          error
+          error,
         );
       }
     };
@@ -146,15 +146,15 @@ export default function Home() {
         image={homeImages.hero}
         type="website"
         keywords={[
-          'photographe professionnel',
-          'graphiste',
-          'photographie art',
-          'tirage photo',
-          'mariage',
-          'événement',
-          'design graphique',
-          'Fabien Licata',
-          'portfolio photo'
+          "photographe professionnel",
+          "graphiste",
+          "photographie art",
+          "tirage photo",
+          "mariage",
+          "événement",
+          "design graphique",
+          "Fabien Licata",
+          "portfolio photo",
         ]}
         schema={photographerSchema}
       />
@@ -204,10 +204,10 @@ export default function Home() {
               hoveredSide === "photo"
                 ? "bg-[radial-gradient(60%_40%_at_25%_30%,rgba(212,175,55,0.18),transparent_60%)]"
                 : hoveredSide === "graph"
-                ? "bg-[radial-gradient(60%_40%_at_75%_30%,rgba(212,175,55,0.18),transparent_60%)]"
-                : hoveredSide === "ecrin"
-                ? "bg-[radial-gradient(60%_45%_at_50%_78%,rgba(212,175,55,0.18),transparent_60%)]"
-                : ""
+                  ? "bg-[radial-gradient(60%_40%_at_75%_30%,rgba(212,175,55,0.18),transparent_60%)]"
+                  : hoveredSide === "ecrin"
+                    ? "bg-[radial-gradient(60%_45%_at_50%_78%,rgba(212,175,55,0.18),transparent_60%)]"
+                    : ""
             }
             transition-all duration-700
           `}
@@ -594,7 +594,7 @@ export default function Home() {
               className="pointer-events-auto"
             >
               <button
-                onClick={() => navigate("/connexion")}
+                onClick={() => navigate("/ecrin-prive")}
                 className="group relative px-8 py-3 overflow-hidden rounded-xl transition-all duration-500"
               >
                 {/* Sheen effect */}
