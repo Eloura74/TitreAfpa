@@ -1,5 +1,3 @@
-
-
 // ==========================================
 // 📝 Interface des Props
 // ==========================================
@@ -14,7 +12,11 @@ interface PhotoGalleryProps {
 // ==========================================
 // Affiche la grille des photos existantes pour un événement donné.
 // Permet de déclencher l'édition ou la suppression d'une photo.
-export default function PhotoGallery({ photos, onEdit, onDelete }: PhotoGalleryProps) {
+export default function PhotoGallery({
+  photos,
+  onEdit,
+  onDelete,
+}: PhotoGalleryProps) {
   return (
     <div className="mt-8 pt-6 border-t border-white/10">
       <h3 className="text-lg font-semibold text-white mb-4">
@@ -64,8 +66,14 @@ export default function PhotoGallery({ photos, onEdit, onDelete }: PhotoGalleryP
                   <button
                     type="button"
                     onClick={() => {
+                      const photoId = photo._id || photo.id;
+                      if (!photoId) {
+                        alert("Impossible de supprimer : ID de photo manquant");
+                        console.error("Photo sans ID:", photo);
+                        return;
+                      }
                       if (window.confirm("Supprimer cette photo ?")) {
-                        onDelete(photo._id || photo.id);
+                        onDelete(photoId);
                       }
                     }}
                     className="bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-2 rounded transition-colors"
@@ -78,7 +86,8 @@ export default function PhotoGallery({ photos, onEdit, onDelete }: PhotoGalleryP
           </div>
         ) : (
           <p className="text-gray-500 italic text-sm text-center py-8 border border-dashed border-white/10 rounded">
-            Aucune photo pour le moment. Utilisez le formulaire ci-dessus pour en ajouter.
+            Aucune photo pour le moment. Utilisez le formulaire ci-dessus pour
+            en ajouter.
           </p>
         )}
       </div>
