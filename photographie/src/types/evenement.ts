@@ -7,6 +7,7 @@ export interface PhotoOriginale {
   format: string;
   dateUpload?: string;
   nbTelechargements?: number;
+  commentaire?: string | null;
 }
 
 export interface Evenement {
