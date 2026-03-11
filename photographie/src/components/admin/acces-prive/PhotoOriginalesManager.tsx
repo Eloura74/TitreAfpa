@@ -4,7 +4,7 @@ import { Trash2, MessageSquare, X, Check } from "lucide-react";
 import { API_URL } from "../../../config/api";
 
 interface PhotoOriginale {
-  _id: string;
+  _id?: string;
   nom: string;
   fichierR2: string;
   miniature: string | null;
@@ -12,7 +12,7 @@ interface PhotoOriginale {
   format: string;
   dateUpload: string;
   nbTelechargements: number;
-  commentaire: string | null;
+  commentaire?: string | null;
 }
 
 interface PhotoOriginalesManagerProps {
@@ -62,7 +62,7 @@ export default function PhotoOriginalesManager({
   // Ouverture du mode édition de commentaire
   const handleEditComment = (
     photoId: string,
-    currentComment: string | null,
+    currentComment: string | null | undefined,
   ) => {
     setEditingCommentId(photoId);
     setCommentText(currentComment || "");
@@ -106,19 +106,21 @@ export default function PhotoOriginalesManager({
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
+  const validPhotos = photos.filter((p) => p._id);
+
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-semibold text-white mb-4">
-        Photos originales ({photos.length})
+        Photos originales ({validPhotos.length})
       </h3>
 
-      {photos.length === 0 ? (
+      {validPhotos.length === 0 ? (
         <p className="text-gray-400 text-center py-8">
           Aucune photo originale uploadée
         </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {photos.map((photo) => (
+          {validPhotos.map((photo) => (
             <div
               key={photo._id}
               className="bg-black/40 border border-white/10 rounded-lg overflow-hidden hover:border-yellow-400/50 transition-all"
@@ -179,7 +181,9 @@ export default function PhotoOriginalesManager({
                       />
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleSaveComment(photo._id)}
+                          onClick={() =>
+                            photo._id && handleSaveComment(photo._id)
+                          }
                           disabled={loading}
                           className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm transition-colors disabled:opacity-50"
                         >
@@ -217,6 +221,7 @@ export default function PhotoOriginalesManager({
                 <div className="flex gap-2 pt-2 border-t border-white/10">
                   <button
                     onClick={() =>
+                      photo._id &&
                       handleEditComment(photo._id, photo.commentaire)
                     }
                     disabled={loading || editingCommentId === photo._id}
@@ -226,7 +231,9 @@ export default function PhotoOriginalesManager({
                     {photo.commentaire ? "Modifier" : "Ajouter"} commentaire
                   </button>
                   <button
-                    onClick={() => handleDeletePhoto(photo._id, photo.nom)}
+                    onClick={() =>
+                      photo._id && handleDeletePhoto(photo._id, photo.nom)
+                    }
                     disabled={loading}
                     className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm transition-colors disabled:opacity-50"
                   >
