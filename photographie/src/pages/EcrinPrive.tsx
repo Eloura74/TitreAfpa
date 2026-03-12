@@ -781,14 +781,43 @@ export default function EcrinPrive() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 sm:p-8"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl pt-20 pb-4 px-4 sm:px-8"
           >
             {/* Bouton Fermer */}
             <button
               onClick={() => setIsLightboxOpen(false)}
-              className="absolute top-6 right-6 z-[60] p-3 bg-white/10 hover:bg-white/20 hover:scale-110 text-white rounded-full backdrop-blur-md transition-all"
+              className="absolute top-24 right-6 z-[60] p-3 bg-white/10 hover:bg-white/20 hover:scale-110 text-white rounded-full backdrop-blur-md transition-all shadow-xl"
+              title="Fermer (Échap)"
             >
-              <X size={24} />
+              <X size={28} />
+            </button>
+
+            {/* Checkbox Sélection */}
+            <button
+              onClick={() => toggleSelection(currentPhoto._id || "")}
+              className="absolute top-24 left-6 z-[60] px-4 py-3 bg-white/10 hover:bg-white/20 hover:scale-105 text-white rounded-full backdrop-blur-md transition-all flex items-center gap-3 shadow-xl"
+              title={
+                selectedPhotos.has(currentPhoto._id || "")
+                  ? "Désélectionner"
+                  : "Sélectionner pour téléchargement multiple"
+              }
+            >
+              <div
+                className={`w-7 h-7 rounded border-2 flex items-center justify-center transition-all ${
+                  selectedPhotos.has(currentPhoto._id || "")
+                    ? "bg-[#ffe992] border-[#ffe992]"
+                    : "border-white"
+                }`}
+              >
+                {selectedPhotos.has(currentPhoto._id || "") && (
+                  <CheckCircle size={20} className="text-black" />
+                )}
+              </div>
+              <span className="text-sm font-medium hidden sm:inline">
+                {selectedPhotos.has(currentPhoto._id || "")
+                  ? "Sélectionnée"
+                  : "Sélectionner"}
+              </span>
             </button>
 
             {/* Navigation Precedent */}
@@ -803,7 +832,7 @@ export default function EcrinPrive() {
             </button>
 
             {/* Conteneur Image Centrale */}
-            <div className="relative w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 py-20">
+            <div className="relative w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 py-12">
               {/* Image principale dans la Lightbox */}
               {loadingLightboxImage ? (
                 <div className="flex flex-col items-center justify-center">
@@ -823,8 +852,8 @@ export default function EcrinPrive() {
                   alt={currentPhoto.nom}
                   className="rounded-lg shadow-2xl"
                   style={{
-                    width: "90vw",
-                    height: "80vh",
+                    width: "85vw",
+                    height: "calc(100vh - 320px)",
                     objectFit: "contain",
                   }}
                   onError={(e) => {
@@ -842,7 +871,7 @@ export default function EcrinPrive() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="absolute bottom-4 sm:-bottom-12 w-full max-w-2xl px-6 py-4 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4"
+                className="absolute bottom-8 w-full max-w-2xl px-6 py-4 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4"
               >
                 <div className="flex-1 min-w-0 pr-4">
                   <h4 className="text-white font-medium text-lg truncate">
