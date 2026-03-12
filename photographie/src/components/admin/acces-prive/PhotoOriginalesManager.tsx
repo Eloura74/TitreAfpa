@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { Trash2, MessageSquare, X, Check } from "lucide-react";
+import { Trash2, MessageSquare, X, Check, RefreshCw } from "lucide-react";
 import { API_URL } from "../../../config/api";
 
 interface PhotoOriginale {
@@ -114,6 +114,38 @@ export default function PhotoOriginalesManager({
     setCommentText("");
   };
 
+  // Régénération de la miniature en HD
+  const handleRegenerateThumbnail = async (
+    e: React.MouseEvent,
+    photoId: string,
+    photoNom: string,
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!confirm(`Régénérer la miniature HD pour "${photoNom}" ?`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/ecrin/regenerate-thumbnail/${accesId}/${photoId}`,
+        { codeAcces },
+      );
+
+      if (response.data.success) {
+        alert("Miniature HD régénérée avec succès !");
+        await onPhotosUpdate();
+      }
+    } catch (error) {
+      console.error("Erreur régénération miniature:", error);
+      alert("Erreur lors de la régénération de la miniature");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Formatage de la taille de fichier
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
@@ -212,6 +244,20 @@ export default function PhotoOriginalesManager({
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
                     <span>Commentaire</span>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (photo._id)
+                        handleRegenerateThumbnail(e, photo._id, photo.nom);
+                    }}
+                    disabled={loading}
+                    className="flex-1 px-3 py-1.5 bg-green-600/20 hover:bg-green-600 text-green-400 hover:text-white rounded text-xs font-medium transition-all flex items-center justify-center gap-1.5"
+                    title="Régénérer miniature HD (1200x1200)"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>HD</span>
                   </button>
                   <button
                     onClick={(e) => {

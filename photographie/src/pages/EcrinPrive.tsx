@@ -68,6 +68,8 @@ export default function EcrinPrive() {
   // --- Nouveaux états Lightbox ---
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [lightboxImageUrl, setLightboxImageUrl] = useState<string | null>(null);
+  const [loadingLightboxImage, setLoadingLightboxImage] = useState(false);
 
   // --- Nouveaux états Sélection Multiple ---
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
@@ -280,9 +282,18 @@ export default function EcrinPrive() {
   };
 
   // --- Gestion Lightbox ---
-  const openLightbox = (index: number) => {
+  const openLightbox = async (index: number) => {
     setCurrentPhotoIndex(index);
     setIsLightboxOpen(true);
+    setLoadingLightboxImage(false);
+
+    const photo = accesInfo?.photosOriginales?.[index];
+    if (!photo?._id) return;
+
+    // Essayer d'utiliser l'URL proxy backend pour l'image HD
+    // Si ça échoue, la miniature sera affichée via le fallback onError
+    const imageUrl = `${API_URL}/api/ecrin/view-photo/${photo._id}`;
+    setLightboxImageUrl(imageUrl);
   };
 
   const nextPhoto = useCallback(() => {
@@ -298,6 +309,18 @@ export default function EcrinPrive() {
       prevIndex === 0 ? accesInfo.photosOriginales.length - 1 : prevIndex - 1,
     );
   }, [accesInfo?.photosOriginales]);
+
+  // Recharger l'image HD quand l'index change
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+
+    const photo = accesInfo?.photosOriginales?.[currentPhotoIndex];
+    if (!photo?._id) return;
+
+    // Utiliser l'URL proxy backend pour charger l'image
+    const imageUrl = `${API_URL}/api/ecrin/view-photo/${photo._id}`;
+    setLightboxImageUrl(imageUrl);
+  }, [currentPhotoIndex, isLightboxOpen, accesInfo?.photosOriginales]);
 
   // Fermer la lightbox avec la touche Echappement
   useEffect(() => {
@@ -780,17 +803,13 @@ export default function EcrinPrive() {
             </button>
 
             {/* Conteneur Image Centrale */}
-            <div className="relative w-full max-w-6xl h-full max-h-[85vh] flex flex-col items-center justify-center">
+            <div className="relative w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 py-20">
               {/* Image principale dans la Lightbox */}
-              {!currentPhoto.miniature || imageErrors.has(currentPhoto._id!) ? (
-                <div className="flex flex-col items-center justify-center w-full max-w-lg h-[60vh] bg-[#12121a] border border-white/10 rounded-2xl p-10 mt-10 shadow-2xl">
-                  <ImageIcon size={64} className="text-gray-600 mb-6" />
-                  <p className="text-[#ffe992] text-xl font-playfair-sc mb-3 text-center">
-                    {currentPhoto.nom}
-                  </p>
-                  <p className="text-gray-400 text-sm text-center">
-                    Aucun aperçu disponible. Vous devez télécharger la photo
-                    pour la visualiser en taille réelle.
+              {loadingLightboxImage ? (
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 border-4 border-[#ffe992]/20 border-t-[#ffe992] rounded-full animate-spin mb-4" />
+                  <p className="text-white text-lg">
+                    Chargement de l'image HD...
                   </p>
                 </div>
               ) : (
@@ -800,14 +819,17 @@ export default function EcrinPrive() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                  src={currentPhoto.miniature}
+                  src={lightboxImageUrl || currentPhoto.miniature}
                   alt={currentPhoto.nom}
-                  className="max-w-full max-h-full object-contain rounded-md shadow-2xl"
-                  onError={() =>
-                    setImageErrors((prev) =>
-                      new Set(prev).add(currentPhoto._id!),
-                    )
-                  }
+                  className="max-w-[98vw] max-h-[calc(100vh-120px)] w-auto h-auto object-contain rounded-lg shadow-2xl"
+                  style={{ maxWidth: "98vw", maxHeight: "calc(100vh - 120px)" }}
+                  onError={(e) => {
+                    // Si l'image HD échoue, utiliser la miniature
+                    if (lightboxImageUrl && currentPhoto.miniature) {
+                      setLightboxImageUrl(null);
+                      e.currentTarget.src = currentPhoto.miniature;
+                    }
+                  }}
                 />
               )}
 
