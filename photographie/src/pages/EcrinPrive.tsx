@@ -821,8 +821,12 @@ export default function EcrinPrive() {
                   transition={{ type: "spring", damping: 25, stiffness: 200 }}
                   src={lightboxImageUrl || currentPhoto.miniature}
                   alt={currentPhoto.nom}
-                  className="max-w-[98vw] max-h-[calc(100vh-120px)] w-auto h-auto object-contain rounded-lg shadow-2xl"
-                  style={{ maxWidth: "98vw", maxHeight: "calc(100vh - 120px)" }}
+                  className="rounded-lg shadow-2xl"
+                  style={{
+                    width: "90vw",
+                    height: "80vh",
+                    objectFit: "contain",
+                  }}
                   onError={(e) => {
                     // Si l'image HD échoue, utiliser la miniature
                     if (lightboxImageUrl && currentPhoto.miniature) {
