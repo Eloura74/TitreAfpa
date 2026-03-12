@@ -142,60 +142,62 @@ export default function PhotoOriginalesManager({
               key={photo._id}
               className="bg-black/30 border border-white/10 rounded-lg overflow-hidden hover:border-yellow-400/30 transition-all"
             >
-              <div className="flex items-center gap-4 p-4">
-                {/* Miniature */}
-                <div className="w-20 h-20 bg-black/60 rounded flex-shrink-0 overflow-hidden">
-                  {photo.miniature ? (
-                    <img
-                      src={photo.miniature}
-                      alt={photo.nom}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-600">
-                      <svg
-                        className="w-10 h-10"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-
-                {/* Informations */}
-                <div className="flex-1 min-w-0">
-                  <h4
-                    className="text-white font-semibold truncate mb-1"
-                    title={photo.nom}
-                  >
-                    {photo.nom}
-                  </h4>
-                  <div className="flex items-center gap-3 text-xs text-gray-400">
-                    <span className="font-medium text-yellow-400">
-                      {formatFileSize(photo.taille)}
-                    </span>
-                    <span>•</span>
-                    <span>{photo.format}</span>
-                    <span>•</span>
-                    <span>{photo.nbTelechargements || 0} téléchargements</span>
+              <div className="p-3">
+                <div className="flex items-start gap-3">
+                  {/* Miniature */}
+                  <div className="w-16 h-16 bg-black/60 rounded flex-shrink-0 overflow-hidden">
+                    {photo.miniature ? (
+                      <img
+                        src={photo.miniature}
+                        alt={photo.nom}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-600">
+                        <svg
+                          className="w-8 h-8"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Commentaire inline */}
-                  {photo.commentaire && (
-                    <div className="mt-2 text-xs text-blue-300 italic">
-                      💬 {photo.commentaire}
+                  {/* Informations */}
+                  <div className="flex-1 min-w-0">
+                    <h4
+                      className="text-white font-semibold text-sm mb-1.5 break-words leading-tight"
+                      title={photo.nom}
+                    >
+                      {photo.nom}
+                    </h4>
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-gray-400 mb-2">
+                      <span className="font-medium text-yellow-400">
+                        {formatFileSize(photo.taille)}
+                      </span>
+                      <span>•</span>
+                      <span>{photo.format}</span>
+                      <span>•</span>
+                      <span>{photo.nbTelechargements || 0} DL</span>
                     </div>
-                  )}
+
+                    {/* Commentaire inline */}
+                    {photo.commentaire && (
+                      <div className="text-[11px] text-blue-300 italic leading-tight">
+                        💬 {photo.commentaire}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/5">
                   <button
                     onClick={(e) => {
                       e.preventDefault();
@@ -205,10 +207,11 @@ export default function PhotoOriginalesManager({
                       }
                     }}
                     disabled={loading}
-                    className="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white rounded text-xs font-medium transition-all"
+                    className="flex-1 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white rounded text-xs font-medium transition-all flex items-center justify-center gap-1.5"
                     title="Ajouter/Modifier commentaire"
                   >
-                    <MessageSquare className="w-4 h-4" />
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>Commentaire</span>
                   </button>
                   <button
                     onClick={(e) => {
@@ -217,10 +220,11 @@ export default function PhotoOriginalesManager({
                       if (photo._id) handleDeletePhoto(e, photo._id, photo.nom);
                     }}
                     disabled={loading}
-                    className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white rounded text-xs font-medium transition-all"
+                    className="flex-1 px-3 py-1.5 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white rounded text-xs font-medium transition-all flex items-center justify-center gap-1.5"
                     title="Supprimer"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Supprimer</span>
                   </button>
                 </div>
               </div>
