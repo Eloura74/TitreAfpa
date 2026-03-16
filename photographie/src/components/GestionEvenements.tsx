@@ -90,7 +90,7 @@ export default function GestionEvenements() {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -129,7 +129,7 @@ export default function GestionEvenements() {
     try {
       await axios.post(`${BASE_API_URL}/api/auth/register`, clientForm);
       setSuccess(
-        `Client ${clientForm.prenom} ${clientForm.nom} créé avec succès !`
+        `Client ${clientForm.prenom} ${clientForm.nom} créé avec succès !`,
       );
       setForm((prev) => ({ ...prev, clientEmail: clientForm.email }));
       setShowClientForm(false);
@@ -143,7 +143,7 @@ export default function GestionEvenements() {
       });
     } catch (err: any) {
       setError(
-        err.response?.data?.error || "Erreur lors de la création du client."
+        err.response?.data?.error || "Erreur lors de la création du client.",
       );
     } finally {
       setLoading(false);
@@ -195,7 +195,7 @@ export default function GestionEvenements() {
         // Étape 1: Obtenir la signature du backend
         const signRes = await fetch(
           `${BASE_API_URL}/api/upload-cloudinary/sign`,
-          { method: "GET", credentials: "include" }
+          { method: "GET", credentials: "include" },
         );
 
         if (!signRes.ok)
@@ -214,7 +214,7 @@ export default function GestionEvenements() {
 
         const uploadRes = await fetch(
           `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
-          { method: "POST", body: formData }
+          { method: "POST", body: formData },
         );
 
         const uploadData = await uploadRes.json();
@@ -234,7 +234,7 @@ export default function GestionEvenements() {
           },
           {
             withCredentials: true,
-          }
+          },
         );
 
         if (resPhoto.data && resPhoto.data._id) {
@@ -248,7 +248,7 @@ export default function GestionEvenements() {
           { photoIds: uploadedPhotoIds },
           {
             withCredentials: true,
-          }
+          },
         );
 
         loadEvenements();
@@ -277,7 +277,7 @@ export default function GestionEvenements() {
         // Étape 1: Obtenir la signature du backend
         const signRes = await fetch(
           `${BASE_API_URL}/api/upload-cloudinary/sign`,
-          { method: "GET", credentials: "include" }
+          { method: "GET", credentials: "include" },
         );
 
         if (!signRes.ok)
@@ -296,14 +296,14 @@ export default function GestionEvenements() {
 
         const uploadRes = await fetch(
           `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
-          { method: "POST", body: formData }
+          { method: "POST", body: formData },
         );
 
         const uploadData = await uploadRes.json();
         imageUrl = uploadData.secure_url;
         if (!imageUrl)
           throw new Error(
-            "Erreur lors de l'upload de l'image vers Cloudinary."
+            "Erreur lors de l'upload de l'image vers Cloudinary.",
           );
       }
 
@@ -328,7 +328,7 @@ export default function GestionEvenements() {
       setError(
         err?.response?.data?.erreur ||
           err?.response?.data?.message ||
-          "Erreur lors de l'enregistrement."
+          "Erreur lors de l'enregistrement.",
       );
     } finally {
       setLoading(false);
@@ -363,13 +363,13 @@ export default function GestionEvenements() {
     setError(null);
     try {
       await axios.delete(`${API_URL}/${id}`, { withCredentials: true });
-      setEvenements(evenements.filter((e) => e.id !== id));
+      setEvenements(evenements.filter((e) => (e.id || e._id) !== id));
       resetForm();
       setSuccess("Événement supprimé.");
     } catch (e) {
       const err = e as any;
       setError(
-        err?.response?.data?.message || "Erreur lors de la suppression."
+        err?.response?.data?.message || "Erreur lors de la suppression.",
       );
     } finally {
       setLoading(false);
@@ -646,7 +646,7 @@ export default function GestionEvenements() {
                         <input
                           type="checkbox"
                           checked={selectedTariffs.includes(
-                            t.id || t._id || ""
+                            t.id || t._id || "",
                           )}
                           onChange={(e) => {
                             const id = t.id || t._id || "";
@@ -654,7 +654,7 @@ export default function GestionEvenements() {
                               setSelectedTariffs([...selectedTariffs, id]);
                             else
                               setSelectedTariffs(
-                                selectedTariffs.filter((tid) => tid !== id)
+                                selectedTariffs.filter((tid) => tid !== id),
                               );
                           }}
                           className="rounded border-gray-600 bg-black/50 text-[#ffe992] focus:ring-[#ffe992]"
@@ -771,7 +771,10 @@ export default function GestionEvenements() {
                       </button>
                       <button
                         className="flex items-center gap-1.5 bg-white/5 hover:bg-red-500 hover:text-white text-gray-300 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded transition-all"
-                        onClick={() => event.id && handleDelete(event.id)}
+                        onClick={() => {
+                          const eventId = event.id || event._id;
+                          if (eventId) handleDelete(eventId);
+                        }}
                       >
                         <Trash2 size={12} /> Supprimer
                       </button>

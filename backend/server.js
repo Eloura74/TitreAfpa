@@ -121,9 +121,6 @@ app.use(
 // ================================
 // 2. CORS GLOBAL POUR LES ROUTES API UNIQUEMENT
 // ================================
-// ================================
-// 2. CORS GLOBAL POUR LES ROUTES API UNIQUEMENT
-// ================================
 app.use(
   "/api",
   cors({
@@ -455,7 +452,6 @@ app.use(globalErrorHandler);
 // ================================
 // DÉMARRAGE DU SERVEUR BACKEND
 // ================================
-// Si le fichier est exécuté directement (node server.js), on lance le serveur
 // Si le fichier est exécuté directement (node server.js), on lance le serveur
 if (require.main === module) {
   // On attend la connexion à la DB avant de lancer le serveur
