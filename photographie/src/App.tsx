@@ -66,6 +66,9 @@ const TarifConfiguratorV2 = lazy(
 const ClientEvenement = lazy(() => import("./pages/ClientEvenement"));
 const EcrinPrive = lazy(() => import("./pages/EcrinPrive"));
 
+// Pages légales
+const MentionsLegales = lazy(() => import("./pages/MentionsLegales"));
+
 // ==============================
 //  Composant principal App : configuration des routes
 // ==============================
@@ -219,6 +222,9 @@ function App() {
                   path="/ecrin-prive/:codeAcces"
                   element={<EcrinPrive />}
                 />
+
+                {/* Route pour les mentions légales */}
+                <Route path="/mentions-legales" element={<MentionsLegales />} />
               </Routes>
             </Suspense>
           </Router>
