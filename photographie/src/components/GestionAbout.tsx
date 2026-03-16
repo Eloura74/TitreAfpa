@@ -109,19 +109,29 @@ export default function GestionAbout() {
   };
 
   const handleImageUpload = async () => {
-    if (!imageFile) return;
+    if (!imageFile) {
+      console.error("[UPLOAD IMAGE] Aucun fichier sélectionné");
+      return;
+    }
 
+    console.log("[UPLOAD IMAGE] Début de l'upload...");
     setUploading(true);
     try {
+      console.log("[UPLOAD IMAGE] Demande de signature...");
       const signRes = await fetch(`${API_URL}/api/upload-cloudinary/sign`, {
         method: "GET",
         credentials: "include",
       });
 
-      if (!signRes.ok)
+      console.log("[UPLOAD IMAGE] Réponse signature:", signRes.status);
+      if (!signRes.ok) {
+        const errorText = await signRes.text();
+        console.error("[UPLOAD IMAGE] Erreur signature:", errorText);
         throw new Error("Erreur lors de la signature de l'upload.");
+      }
 
       const signData = await signRes.json();
+      console.log("[UPLOAD IMAGE] Données signature reçues");
       const { signature, timestamp, cloud_name, api_key, folder } = signData;
 
       const formDataUpload = new FormData();
