@@ -141,14 +141,20 @@ export default function GestionAbout() {
 
       if (!imageUrl) throw new Error("Erreur upload image");
 
-      setFormData((prev: any) => ({ ...prev, image: imageUrl }));
+      // Mettre à jour formData avec la nouvelle URL
+      const updatedFormData = { ...formData, image: imageUrl };
+      setFormData(updatedFormData);
+
+      // Sauvegarder automatiquement dans la base de données
+      await updateAboutData(updatedFormData);
+
       setImagePreview("");
       setImageFile(null);
       setMessage({
         type: "success",
-        text: "Image uploadée avec succès !",
+        text: "Image uploadée et sauvegardée avec succès ! La page À Propos a été mise à jour.",
       });
-      setTimeout(() => setMessage(null), 3000);
+      setTimeout(() => setMessage(null), 5000);
     } catch (error) {
       console.error("Erreur upload:", error);
       setMessage({
