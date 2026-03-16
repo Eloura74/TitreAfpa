@@ -71,6 +71,8 @@ app.set("trust proxy", 1);
 // Liste blanche pour la prod et le local
 const allowedOrigins = [
   "https://titre-afpa.vercel.app", // domaine principal prod
+  "https://www.fabien-licata.com", // domaine personnalisé
+  "https://fabien-licata.com", // domaine personnalisé sans www
   "http://localhost:5173", // dev local
 ];
 
