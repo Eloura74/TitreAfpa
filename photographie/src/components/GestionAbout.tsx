@@ -1,13 +1,23 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Save, Loader2, RefreshCw } from "lucide-react";
+import {
+  Save,
+  Loader2,
+  RefreshCw,
+  Upload,
+  Image as ImageIcon,
+} from "lucide-react";
 import { getAboutData, updateAboutData } from "../services/aboutService";
 import { useUser } from "../context/UserContext";
+import { API_URL } from "../config/api";
 
 export default function GestionAbout() {
   const { user } = useUser();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
   const [formData, setFormData] = useState<any>({
     image: "",
     jobTitle: "",
@@ -83,6 +93,70 @@ export default function GestionAbout() {
         ...prev,
         [e.target.name]: e.target.value,
       }));
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!imageFile) return;
+
+    setUploading(true);
+    try {
+      const signRes = await fetch(`${API_URL}/api/upload-cloudinary/sign`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!signRes.ok)
+        throw new Error("Erreur lors de la signature de l'upload.");
+
+      const signData = await signRes.json();
+      const { signature, timestamp, cloud_name, api_key, folder } = signData;
+
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", imageFile);
+      formDataUpload.append("signature", signature);
+      formDataUpload.append("timestamp", timestamp.toString());
+      formDataUpload.append("api_key", api_key);
+      formDataUpload.append("folder", folder);
+
+      const uploadRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
+        { method: "POST", body: formDataUpload },
+      );
+
+      const uploadData = await uploadRes.json();
+      const imageUrl = uploadData.secure_url;
+
+      if (!imageUrl) throw new Error("Erreur upload image");
+
+      setFormData((prev: any) => ({ ...prev, image: imageUrl }));
+      setImagePreview("");
+      setImageFile(null);
+      setMessage({
+        type: "success",
+        text: "Image uploadée avec succès !",
+      });
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error) {
+      console.error("Erreur upload:", error);
+      setMessage({
+        type: "error",
+        text: "Erreur lors de l'upload de l'image.",
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -180,27 +254,90 @@ export default function GestionAbout() {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">
-              URL de l'image (ex: /images/fabien.jpg)
+            <label className="block text-sm text-gray-400 mb-2">
+              Photo de profil
             </label>
-            <input
-              type="text"
-              name="image"
-              value={formData.image}
-              onChange={handleChange}
-              className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-white focus:border-[#ffe992] transition-colors outline-none font-mono text-sm"
-            />
-            {formData.image && (
-              <div className="mt-2 text-xs text-gray-500">
-                Aperçu :{" "}
-                <img
-                  src={formData.image}
-                  alt="Preview"
-                  className="h-20 w-auto inline-block rounded border border-white/10 ml-2"
-                  onError={(e) => (e.currentTarget.style.display = "none")}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Zone d'upload */}
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
+                <div className="border-2 border-dashed border-white/20 rounded-lg p-6 bg-black/20 hover:bg-black/30 hover:border-[#ffe992]/50 transition-all cursor-pointer">
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    {imagePreview ? (
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-32 h-32 object-cover rounded-full border-2 border-[#ffe992]"
+                      />
+                    ) : formData.image ? (
+                      <img
+                        src={formData.image}
+                        alt="Current"
+                        className="w-32 h-32 object-cover rounded-full border-2 border-white/20"
+                      />
+                    ) : (
+                      <ImageIcon size={48} className="text-gray-500" />
+                    )}
+                    <div className="text-center">
+                      <p className="text-sm text-gray-400">
+                        {imagePreview
+                          ? "Nouvelle image sélectionnée"
+                          : "Cliquer pour choisir une image"}
+                      </p>
+                      <p className="text-xs text-gray-600 mt-1">
+                        JPG, PNG, WebP (max 5MB)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {imageFile && (
+                  <button
+                    type="button"
+                    onClick={handleImageUpload}
+                    disabled={uploading}
+                    className="mt-3 w-full bg-[#ffe992] hover:bg-[#ffe992]/90 text-black font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2 className="animate-spin" size={16} />
+                        Upload en cours...
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={16} />
+                        Uploader l'image
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
-            )}
+
+              {/* URL manuelle (optionnel) */}
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">
+                  Ou entrer une URL manuellement
+                </label>
+                <input
+                  type="text"
+                  name="image"
+                  value={formData.image}
+                  onChange={handleChange}
+                  placeholder="https://..."
+                  className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-white focus:border-[#ffe992] transition-colors outline-none font-mono text-sm"
+                />
+                <p className="text-xs text-gray-600 mt-2">
+                  L'image actuelle sera utilisée si aucune nouvelle image n'est
+                  uploadée.
+                </p>
+              </div>
+            </div>
           </div>
 
           <div>
