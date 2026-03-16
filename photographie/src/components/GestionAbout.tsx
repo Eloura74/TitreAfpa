@@ -114,7 +114,17 @@ export default function GestionAbout() {
       return;
     }
 
+    // Vérifier que l'utilisateur est admin
+    if (!user || !user.isAdmin) {
+      setMessage({
+        type: "error",
+        text: "Vous devez être connecté en tant qu'administrateur pour uploader une image.",
+      });
+      return;
+    }
+
     console.log("[UPLOAD IMAGE] Début de l'upload...");
+    console.log("[UPLOAD IMAGE] Utilisateur:", user);
     setUploading(true);
     try {
       console.log("[UPLOAD IMAGE] Demande de signature...");
