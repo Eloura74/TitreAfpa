@@ -145,8 +145,12 @@ export default function GestionAbout() {
       const updatedFormData = { ...formData, image: imageUrl };
       setFormData(updatedFormData);
 
+      console.log("[UPLOAD IMAGE] Nouvelle URL:", imageUrl);
+      console.log("[UPLOAD IMAGE] Données à sauvegarder:", updatedFormData);
+
       // Sauvegarder automatiquement dans la base de données
-      await updateAboutData(updatedFormData);
+      const saveResult = await updateAboutData(updatedFormData);
+      console.log("[UPLOAD IMAGE] Résultat sauvegarde:", saveResult);
 
       setImagePreview("");
       setImageFile(null);
@@ -154,6 +158,10 @@ export default function GestionAbout() {
         type: "success",
         text: "Image uploadée et sauvegardée avec succès ! La page À Propos a été mise à jour.",
       });
+
+      // Recharger les données pour confirmer la sauvegarde
+      await fetchData();
+
       setTimeout(() => setMessage(null), 5000);
     } catch (error) {
       console.error("Erreur upload:", error);
