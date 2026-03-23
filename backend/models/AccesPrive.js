@@ -28,7 +28,7 @@ const accesPriveSchema = new mongoose.Schema({
   client: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
+    required: false,
   },
 
   codeAcces: {

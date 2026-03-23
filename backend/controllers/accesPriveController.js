@@ -62,22 +62,17 @@ exports.create = async (req, res) => {
   try {
     const data = { ...req.body };
 
-    // Validation du client
-    if (!data.clientEmail) {
-      return res
-        .status(400)
-        .json({ erreur: "L'email du client est obligatoire." });
+    // Validation du client (optionnel)
+    if (data.clientEmail) {
+      const clientUser = await User.findOne({ email: data.clientEmail });
+      if (!clientUser) {
+        return res.status(400).json({
+          erreur: `Client avec l'email ${data.clientEmail} introuvable.`,
+        });
+      }
+      data.client = clientUser._id;
+      delete data.clientEmail;
     }
-
-    const clientUser = await User.findOne({ email: data.clientEmail });
-    if (!clientUser) {
-      return res.status(400).json({
-        erreur: `Client avec l'email ${data.clientEmail} introuvable.`,
-      });
-    }
-
-    data.client = clientUser._id;
-    delete data.clientEmail;
 
     // Génération du Slug
     if (data.titre) {
