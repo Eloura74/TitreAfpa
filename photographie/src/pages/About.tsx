@@ -11,6 +11,7 @@ import { getAboutData } from "../services/aboutService";
 export default function About() {
   const [aboutData, setAboutData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [imageVersion, setImageVersion] = useState(Date.now());
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -21,6 +22,8 @@ export default function About() {
     try {
       const data = await getAboutData();
       setAboutData(data);
+      // Mettre à jour la version de l'image uniquement si l'URL a changé
+      setImageVersion(Date.now());
     } catch (error) {
       console.error("Erreur chargement about data:", error);
     } finally {
@@ -106,7 +109,7 @@ export default function About() {
               <div className="relative overflow-hidden rounded-2xl shadow-2xl shadow-black/50 border border-white/10 group-hover:border-[#ffe992]/30 transition-all duration-500">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
                 <img
-                  src={aboutData.image}
+                  src={`${aboutData.image}${aboutData.image.includes("?") ? "&" : "?"}v=${imageVersion}`}
                   alt={aboutData.name}
                   className="w-full h-[600px] object-cover object-top transform transition-transform duration-700 group-hover:scale-105 filter grayscale-[20%] group-hover:grayscale-0"
                 />

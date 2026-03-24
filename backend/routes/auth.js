@@ -116,7 +116,7 @@ router.post(
     } catch (err) {
       res.status(400).json({ error: err.message });
     }
-  }
+  },
 );
 
 // ==========================
@@ -187,7 +187,7 @@ router.post(
     } catch (err) {
       res.status(400).json({ error: err.message });
     }
-  }
+  },
 );
 
 // ==========================
@@ -213,7 +213,7 @@ router.get("/verify-email/:token", async (req, res) => {
 
     // Envoyer email de bienvenue
     sendWelcomeEmail(user.email, user.prenom).catch((err) =>
-      console.error(err)
+      console.error(err),
     );
 
     // --- AUTO-LOGIN ---
@@ -221,7 +221,7 @@ router.get("/verify-email/:token", async (req, res) => {
     const jwtToken = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "2h" }
+      { expiresIn: "2h" },
     );
 
     // Configuration du cookie
@@ -290,7 +290,7 @@ router.post("/login", async (req, res) => {
     const accessToken = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "15m" }
+      { expiresIn: "15m" },
     );
 
     // ✅ Génération du refresh token (longue durée : 7 jours)
@@ -311,6 +311,7 @@ router.post("/login", async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      domain: process.env.NODE_ENV === "production" ? undefined : "localhost",
       maxAge: 15 * 60 * 1000, // 15 minutes
     };
 
@@ -318,6 +319,7 @@ router.post("/login", async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      domain: process.env.NODE_ENV === "production" ? undefined : "localhost",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
     };
 
@@ -381,7 +383,7 @@ router.post("/refresh", async (req, res) => {
     const newAccessToken = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "15m" }
+      { expiresIn: "15m" },
     );
 
     // Envoi du nouveau cookie access token

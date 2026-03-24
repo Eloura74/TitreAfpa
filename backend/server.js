@@ -148,11 +148,6 @@ app.get("/api/cors-test", (req, res) => {
 });
 
 // ================================
-// ROUTE CLOUDINARY POUR UPLOAD D'IMAGES EN LIGNE
-// ================================
-app.use("/api/upload-cloudinary", uploadCloudinaryRoutes);
-
-// ================================
 // SERVIR LES FICHIERS STATIQUES : les images uploadées avec CORS sécurisé
 // ================================
 // On autorise explicitement CORS sur /uploads pour permettre l'affichage des images depuis le front (Vercel/local)
@@ -409,6 +404,9 @@ app.use("/api/picto", pictoRoutes);
 
 // Page À Propos
 app.use("/api/about", aboutRoutes);
+
+// Upload Cloudinary (signature pour upload direct)
+app.use("/api/upload-cloudinary", uploadCloudinaryRoutes);
 
 // Sitemap dynamique (SEO)
 const sitemapRoutes = require("./routes/sitemap");

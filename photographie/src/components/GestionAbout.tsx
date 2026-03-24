@@ -10,6 +10,7 @@ import {
 import { getAboutData, updateAboutData } from "../services/aboutService";
 import { useUser } from "../context/UserContext";
 import { API_URL } from "../config/api";
+import axios from "axios";
 
 export default function GestionAbout() {
   const { user } = useUser();
@@ -125,22 +126,20 @@ export default function GestionAbout() {
 
     console.log("[UPLOAD IMAGE] Début de l'upload...");
     console.log("[UPLOAD IMAGE] Utilisateur:", user);
+    console.log("[UPLOAD IMAGE] Cookies disponibles:", document.cookie);
     setUploading(true);
     try {
       console.log("[UPLOAD IMAGE] Demande de signature...");
-      const signRes = await fetch(`${API_URL}/api/upload-cloudinary/sign`, {
-        method: "GET",
-        credentials: "include",
+      console.log(
+        "[UPLOAD IMAGE] URL:",
+        `${API_URL}/api/upload-cloudinary/sign`,
+      );
+      const signRes = await axios.get(`${API_URL}/api/upload-cloudinary/sign`, {
+        withCredentials: true,
       });
 
       console.log("[UPLOAD IMAGE] Réponse signature:", signRes.status);
-      if (!signRes.ok) {
-        const errorText = await signRes.text();
-        console.error("[UPLOAD IMAGE] Erreur signature:", errorText);
-        throw new Error("Erreur lors de la signature de l'upload.");
-      }
-
-      const signData = await signRes.json();
+      const signData = signRes.data;
       console.log("[UPLOAD IMAGE] Données signature reçues");
       const { signature, timestamp, cloud_name, api_key, folder } = signData;
 
@@ -156,10 +155,22 @@ export default function GestionAbout() {
         { method: "POST", body: formDataUpload },
       );
 
+      if (!uploadRes.ok) {
+        const errorData = await uploadRes.json();
+        console.error("[UPLOAD IMAGE] Erreur Cloudinary:", errorData);
+        throw new Error(
+          `Erreur Cloudinary: ${errorData.error?.message || uploadRes.statusText}`,
+        );
+      }
+
       const uploadData = await uploadRes.json();
+      console.log("[UPLOAD IMAGE] Réponse Cloudinary:", uploadData);
       const imageUrl = uploadData.secure_url;
 
-      if (!imageUrl) throw new Error("Erreur upload image");
+      if (!imageUrl) {
+        console.error("[UPLOAD IMAGE] Pas d'URL dans la réponse:", uploadData);
+        throw new Error("Erreur upload image: aucune URL retournée");
+      }
 
       // Mettre à jour formData avec la nouvelle URL
       const updatedFormData = { ...formData, image: imageUrl };
@@ -294,39 +305,41 @@ export default function GestionAbout() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Zone d'upload */}
-              <div className="relative">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                />
-                <div className="border-2 border-dashed border-white/20 rounded-lg p-6 bg-black/20 hover:bg-black/30 hover:border-[#ffe992]/50 transition-all cursor-pointer">
-                  <div className="flex flex-col items-center justify-center gap-3">
-                    {imagePreview ? (
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-32 h-32 object-cover rounded-full border-2 border-[#ffe992]"
-                      />
-                    ) : formData.image ? (
-                      <img
-                        src={formData.image}
-                        alt="Current"
-                        className="w-32 h-32 object-cover rounded-full border-2 border-white/20"
-                      />
-                    ) : (
-                      <ImageIcon size={48} className="text-gray-500" />
-                    )}
-                    <div className="text-center">
-                      <p className="text-sm text-gray-400">
-                        {imagePreview
-                          ? "Nouvelle image sélectionnée"
-                          : "Cliquer pour choisir une image"}
-                      </p>
-                      <p className="text-xs text-gray-600 mt-1">
-                        JPG, PNG, WebP (max 5MB)
-                      </p>
+              <div>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                  <div className="border-2 border-dashed border-white/20 rounded-lg p-6 bg-black/20 hover:bg-black/30 hover:border-[#ffe992]/50 transition-all cursor-pointer">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      {imagePreview ? (
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="w-32 h-32 object-cover rounded-full border-2 border-[#ffe992]"
+                        />
+                      ) : formData.image ? (
+                        <img
+                          src={formData.image}
+                          alt="Current"
+                          className="w-32 h-32 object-cover rounded-full border-2 border-white/20"
+                        />
+                      ) : (
+                        <ImageIcon size={48} className="text-gray-500" />
+                      )}
+                      <div className="text-center">
+                        <p className="text-sm text-gray-400">
+                          {imagePreview
+                            ? "Nouvelle image sélectionnée"
+                            : "Cliquer pour choisir une image"}
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          JPG, PNG, WebP (max 5MB)
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

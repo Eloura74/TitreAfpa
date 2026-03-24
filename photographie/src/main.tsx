@@ -7,6 +7,10 @@ import "./index.css"; // Styles globaux CSS du projet
 import "./styles/globals.css"; // Styles additionnels globaux
 import App from "./App.tsx"; // Composant principal de l'application
 import { setupAxiosInterceptor } from "./services/axiosInterceptor"; // ✅ Interceptor refresh token
+import axios from "axios"; // Import axios pour configuration globale
+
+// ✅ Configuration globale d'axios pour envoyer les cookies avec toutes les requêtes
+axios.defaults.withCredentials = true;
 
 // ✅ Configuration de l'interceptor axios pour le refresh token automatique
 setupAxiosInterceptor();
@@ -26,5 +30,5 @@ createRoot(document.getElementById("root")!).render(
         <App />
       </QueryClientProvider>
     </HelmetProvider>
-  </StrictMode>
+  </StrictMode>,
 );

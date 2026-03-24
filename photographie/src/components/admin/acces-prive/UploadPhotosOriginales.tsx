@@ -67,86 +67,36 @@ export default function UploadPhotosOriginales({
       );
 
       try {
-        const fileName = fileData.file.name;
-        const fileType = fileData.file.type;
-        const fileSize = fileData.file.size;
+        const formData = new FormData();
+        formData.append("photo", fileData.file);
+        formData.append("accesId", accesId);
+        formData.append("codeAcces", codeAcces);
 
-        setFiles((prev) =>
-          prev.map((f, idx) => (idx === i ? { ...f, progress: 10 } : f)),
-        );
-
-        const urlResponse = await axios.post(
-          `${API_URL}/api/ecrin/generate-upload-url`,
+        const uploadResponse = await axios.post(
+          `${API_URL}/api/ecrin/upload`,
+          formData,
           {
-            accesId,
-            codeAcces,
-            fileName,
-            fileType,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            onUploadProgress: (progressEvent) => {
+              if (progressEvent.total) {
+                const percentComplete = Math.round(
+                  (progressEvent.loaded / progressEvent.total) * 100,
+                );
+                setFiles((prev) =>
+                  prev.map((f, idx) =>
+                    idx === i ? { ...f, progress: percentComplete } : f,
+                  ),
+                );
+              }
+            },
           },
         );
 
-        if (!urlResponse.data.success) {
-          throw new Error(urlResponse.data.message || "Erreur génération URL");
-        }
-
-        const { uploadUrl, r2Key } = urlResponse.data;
-
-        setFiles((prev) =>
-          prev.map((f, idx) => (idx === i ? { ...f, progress: 20 } : f)),
-        );
-
-        const xhr = new XMLHttpRequest();
-
-        xhr.upload.addEventListener("progress", (e) => {
-          if (e.lengthComputable) {
-            const percentComplete = Math.round(20 + (e.loaded / e.total) * 70);
-            setFiles((prev) =>
-              prev.map((f, idx) =>
-                idx === i ? { ...f, progress: percentComplete } : f,
-              ),
-            );
-          }
-        });
-
-        await new Promise<void>((resolve, reject) => {
-          xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              resolve();
-            } else {
-              reject(
-                new Error(`Erreur upload R2: ${xhr.status} ${xhr.statusText}`),
-              );
-            }
-          };
-          xhr.onerror = () =>
-            reject(new Error("Erreur réseau lors de l'upload"));
-          xhr.open("PUT", uploadUrl);
-          xhr.setRequestHeader(
-            "Content-Type",
-            fileType || "application/octet-stream",
-          );
-          xhr.send(fileData.file);
-        });
-
-        setFiles((prev) =>
-          prev.map((f, idx) => (idx === i ? { ...f, progress: 90 } : f)),
-        );
-
-        const confirmResponse = await axios.post(
-          `${API_URL}/api/ecrin/confirm-upload`,
-          {
-            accesId,
-            codeAcces,
-            r2Key,
-            fileName,
-            fileSize,
-            fileType,
-          },
-        );
-
-        if (!confirmResponse.data.success) {
+        if (!uploadResponse.data.success) {
           throw new Error(
-            confirmResponse.data.message || "Erreur confirmation upload",
+            uploadResponse.data.message || "Erreur lors de l'upload",
           );
         }
 
