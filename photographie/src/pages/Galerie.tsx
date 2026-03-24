@@ -17,7 +17,18 @@ import { Tarif, TarifOeuvre } from "../types/tarif";
 import { tariffServiceV2 } from "../services/tariffServiceV2";
 import { TariffConfigV2 } from "../types/tarifConfigV2";
 import { albumService, Album } from "../services/albumService";
-import { Folder, ArrowLeft, Eye, X, ArrowRight, ShoppingCart } from "lucide-react";
+import {
+  Folder,
+  ArrowLeft,
+  Eye,
+  X,
+  ArrowRight,
+  ShoppingCart,
+} from "lucide-react";
+import PhotoSortControls, {
+  SortOption,
+  ViewMode,
+} from "../components/common/PhotoSortControls";
 import {
   getWatermarkedImageUrl,
   preventRightClick,
@@ -72,7 +83,12 @@ interface AlbumCardProps {
   onSelect: () => void;
 }
 
-const AlbumCard: React.FC<AlbumCardProps> = ({ album, photoCounts, albumImages, onSelect }) => {
+const AlbumCard: React.FC<AlbumCardProps> = ({
+  album,
+  photoCounts,
+  albumImages,
+  onSelect,
+}) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -105,7 +121,7 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, photoCounts, albumImages, 
   return (
     <div
       className="group relative cursor-pointer h-full"
-      style={{ perspective: '1200px' }} // Perspective augmentée pour moins de distorsion
+      style={{ perspective: "1200px" }} // Perspective augmentée pour moins de distorsion
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={onSelect}
@@ -120,21 +136,21 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, photoCounts, albumImages, 
         initial={false}
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{
-          type: 'spring',
+          type: "spring",
           stiffness: 100, // Stiffness plus faible pour une animation plus douce
           damping: 45, // Damping plus élevé pour une animation plus douce et moins brutale
         }}
         style={{
-          transformStyle: 'preserve-3d',
+          transformStyle: "preserve-3d",
         }}
       >
         {/* --- FACE AVANT --- */}
         <div
           className="absolute inset-0 overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 drop-shadow-[2px_4px_12px_rgba(255,233,146,0.4)]"
           style={{
-            backfaceVisibility: 'hidden',
-            WebkitBackfaceVisibility: 'hidden',
-            transform: 'translateZ(1px)', // Fix Safari pour éviter le clipping
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+            transform: "translateZ(1px)", // Fix Safari pour éviter le clipping
           }}
         >
           {/* Effet Glow au survol */}
@@ -150,7 +166,10 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, photoCounts, albumImages, 
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-white/5">
-                <Folder size={64} className="text-gray-600 group-hover:text-[#ffe992] transition-colors" />
+                <Folder
+                  size={64}
+                  className="text-gray-600 group-hover:text-[#ffe992] transition-colors"
+                />
               </div>
             )}
 
@@ -182,9 +201,9 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, photoCounts, albumImages, 
         <div
           className="absolute inset-0 overflow-hidden rounded-2xl bg-[#1a1a20] border border-[#ffe992]/50 shadow-[0_0_35px_rgba(255,233,146,0.5)]"
           style={{
-            backfaceVisibility: 'hidden',
-            WebkitBackfaceVisibility: 'hidden',
-            transform: 'rotateY(180deg) translateZ(1px)', // Fix Safari
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+            transform: "rotateY(180deg) translateZ(1px)", // Fix Safari
           }}
         >
           {/* Images défilantes - Qualité améliorée */}
@@ -234,28 +253,32 @@ interface PhotoCardProps {
   onAddToCart: () => void;
 }
 
-const PhotoCard: React.FC<PhotoCardProps> = ({ photo, onView, onAddToCart }) => {
+const PhotoCard: React.FC<PhotoCardProps> = ({
+  photo,
+  onView,
+  onAddToCart,
+}) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Fermer le flip au clic extérieur
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isFlipped && cardRef.current && !cardRef.current.contains(event.target as Node)) {
+      if (
+        isFlipped &&
+        cardRef.current &&
+        !cardRef.current.contains(event.target as Node)
+      ) {
         setIsFlipped(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isFlipped]);
 
   return (
-    <div
-      ref={cardRef}
-      className="relative"
-      style={{ perspective: '1200px' }}
-    >
+    <div ref={cardRef} className="relative" style={{ perspective: "1200px" }}>
       {/* Effet de rayonnement sous la carte */}
       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-[#ffe992]/20 blur-xl rounded-full opacity-0 hover:opacity-100 transition-opacity duration-500" />
       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-4 bg-[#ffe992]/30 blur-lg rounded-full opacity-60 hover:opacity-100 transition-opacity duration-500" />
@@ -269,31 +292,31 @@ const PhotoCard: React.FC<PhotoCardProps> = ({ photo, onView, onAddToCart }) => 
         className="relative h-[500px] drop-shadow-[2px_4px_8px_rgba(255,233,146,0.6)]"
       >
         {/* Effet de rayonnement sous la carte */}
-        
+
         <motion.div
           className="relative w-full h-full"
           initial={false}
           animate={{ rotateY: isFlipped ? 180 : 0 }}
           transition={{
-            type: 'spring',
+            type: "spring",
             stiffness: 100,
             damping: 45,
           }}
-          style={{ transformStyle: 'preserve-3d' }}
+          style={{ transformStyle: "preserve-3d" }}
         >
           {/* FACE AVANT */}
           <div
             className="absolute inset-0"
             style={{
-              backfaceVisibility: 'hidden',
-              WebkitBackfaceVisibility: 'hidden',
-              transform: 'translateZ(1px)',
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+              transform: "translateZ(1px)",
             }}
           >
             <div className="group h-full flex flex-col relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.9),inset_0_0_20px_rgba(255,233,146,0.6)]">
               {/* Image - Maximisée */}
               <div className="relative w-full h-96 overflow-hidden bg-black/20">
-                <img 
+                <img
                   src={getWatermarkedImageUrl(photo.src)}
                   alt={photo.alt}
                   className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700"
@@ -301,7 +324,7 @@ const PhotoCard: React.FC<PhotoCardProps> = ({ photo, onView, onAddToCart }) => 
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                
+
                 {/* Overlay au survol - Desktop uniquement */}
                 <div className="hidden md:flex absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex-col justify-end p-6 gap-3">
                   <button
@@ -321,8 +344,18 @@ const PhotoCard: React.FC<PhotoCardProps> = ({ photo, onView, onAddToCart }) => 
                     }}
                     className="w-full bg-[#ffe992] text-black font-bold text-xs uppercase tracking-widest py-3 rounded hover:bg-[#d6c487] transition-colors transform translate-y-4 group-hover:translate-y-0 duration-500 flex items-center justify-center gap-2"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                     <span>Voir plus</span>
                   </button>
@@ -346,39 +379,49 @@ const PhotoCard: React.FC<PhotoCardProps> = ({ photo, onView, onAddToCart }) => 
                     }}
                     className="flex-1 bg-[#ffe992] text-black font-bold text-[10px] uppercase tracking-wider py-2 rounded hover:bg-[#d6c487] transition-colors flex items-center justify-center gap-1"
                   >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                   </button>
                 </div>
               </div>
-              
+
               {/* Contenu - Ultra compact */}
               <div className="relative flex flex-col px-3 py-2 bg-gradient-to-b from-black/30 to-black/40">
                 {/* Effet de lueur subtile en fond */}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#ffe992]/5 via-transparent to-black opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-                
+
                 <div className="relative z-10 flex flex-col gap-3.5">
                   {/* Titre centré avec effet glow */}
                   <h3 className="text-lg font-playfair-sc uppercase tracking-wider text-[#ffe992] font-bold leading-tight text-center drop-shadow-[0_0_20px_rgba(255,233,146,0.8)] animate-pulse-subtle">
                     {photo.titre}
                   </h3>
-                  
+
                   {/* Prix et Catégorie sur même ligne */}
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xl text-[#ffe992] font-bold">
                       {photo.tarifs && photo.tarifs.length > 0
                         ? `À partir de ${Math.min(...photo.tarifs.map((t) => t.prix)).toFixed(2)} €`
                         : photo.prix > 0
-                        ? `${photo.prix.toFixed(2)} €`
-                        : "Prix sur demande"}
+                          ? `${photo.prix.toFixed(2)} €`
+                          : "Prix sur demande"}
                     </p>
-                    
+
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[#ffe992]/10 border border-[#ffe992]/20 text-[8px] text-gray-300 uppercase tracking-widest font-medium group-hover:bg-[#ffe992]/20 group-hover:border-[#ffe992]/30 group-hover:text-[#ffe992] transition-all duration-300 whitespace-nowrap">
                       {photo.categorie}
                     </span>
                   </div>
-                  
+
                   {/* Bouton Ajouter au panier */}
                   <button
                     onClick={(e) => {
@@ -399,15 +442,15 @@ const PhotoCard: React.FC<PhotoCardProps> = ({ photo, onView, onAddToCart }) => 
           <div
             className="absolute inset-0 overflow-hidden rounded-xl bg-gradient-to-br from-[#1a1a20] via-black/95 to-[#0f0f14] border-2 border-[#ffe992]/60 shadow-[0_0_40px_rgba(255,233,146,0.6),inset_0_0_30px_rgba(255,233,146,0.1)]"
             style={{
-              backfaceVisibility: 'hidden',
-              WebkitBackfaceVisibility: 'hidden',
-              transform: 'rotateY(180deg) translateZ(1px)',
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+              transform: "rotateY(180deg) translateZ(1px)",
             }}
           >
             {/* Effet de lumière en arrière-plan */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#ffe992]/15 via-[#ffe992]/5 to-transparent" />
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#ffe992] to-transparent" />
-            
+
             <div className="relative h-full flex flex-col p-5">
               {/* Titre avec séparateur */}
               <div className="mb-4 pb-3 border-b border-[#ffe992]/30">
@@ -415,14 +458,14 @@ const PhotoCard: React.FC<PhotoCardProps> = ({ photo, onView, onAddToCart }) => 
                   {photo.titre}
                 </h3>
               </div>
-              
+
               {/* Description avec scroll personnalisé */}
               <div className="flex-1 overflow-y-auto mb-4 pr-2 scrollbar-thin scrollbar-thumb-[#ffe992]/40 scrollbar-track-[#ffe992]/10 hover:scrollbar-thumb-[#ffe992]/60">
                 <p className="text-sm text-gray-200 leading-relaxed text-justify">
                   {photo.description || "Aucune description disponible."}
                 </p>
               </div>
-              
+
               {/* Bouton retour amélioré */}
               <button
                 onClick={(e) => {
@@ -447,7 +490,7 @@ export default function Galerie() {
   const [loading, setLoading] = useState(true);
   const [categorieActive, setCategorieActive] = useState<string>("Toutes");
   const [photoSelectionnee, setPhotoSelectionnee] = useState<Photo | null>(
-    null
+    null,
   );
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -457,6 +500,10 @@ export default function Galerie() {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [viewMode, setViewMode] = useState<"albums" | "photos">("albums");
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+
+  // Sort & Display Options
+  const [sortBy, setSortBy] = useState<SortOption>("date-desc");
+  const [displayMode, setDisplayMode] = useState<ViewMode>("grid");
 
   const { ajouterArticle, articles: panierArticles } = usePanier();
   const { addToast } = useToast();
@@ -493,7 +540,7 @@ export default function Galerie() {
         // Helper to resolve tariffs (V2 Structure)
         const resolveTariffs = (
           availableIds: string[] | undefined,
-          config: TariffConfigV2
+          config: TariffConfigV2,
         ): TarifOeuvre[] => {
           if (!availableIds || availableIds.length === 0 || !config.categories)
             return [];
@@ -533,7 +580,7 @@ export default function Galerie() {
             // Resolve dynamic tariffs if available
             const resolvedTariffs = resolveTariffs(
               p.availableTariffIds,
-              config as TariffConfigV2
+              config as TariffConfigV2,
             );
 
             return {
@@ -541,16 +588,16 @@ export default function Galerie() {
               src: p.src?.startsWith("http")
                 ? p.src
                 : p.src?.startsWith("/uploads/")
-                ? `${API_URL}${p.src}`
-                : p.src?.startsWith("/images/")
-                ? p.src
-                : `/images/${p.src}`,
+                  ? `${API_URL}${p.src}`
+                  : p.src?.startsWith("/images/")
+                    ? p.src
+                    : `/images/${p.src}`,
               tarifs:
                 resolvedTariffs.length > 0
                   ? resolvedTariffs
                   : Array.isArray(p.tarifs)
-                  ? p.tarifs
-                  : [],
+                    ? p.tarifs
+                    : [],
             };
           });
 
@@ -610,7 +657,7 @@ export default function Galerie() {
         setModalVisible(true);
       }
     },
-    [ajouterArticle, addToast, tariffConfig]
+    [ajouterArticle, addToast, tariffConfig],
   );
 
   // 3. Gestion de la sélection de format via la modale
@@ -630,7 +677,7 @@ export default function Galerie() {
 
     addToast(
       `${photoSelectionnee.titre} (${tarif.format}) ajouté au panier`,
-      "success"
+      "success",
     );
     setModalVisible(false);
     setPhotoSelectionnee(null);
@@ -639,8 +686,26 @@ export default function Galerie() {
   // 4. Mémorisation
   const categories = useMemo(
     () => ["Toutes", ...Array.from(new Set(photos.map((p) => p.categorie)))],
-    [photos]
+    [photos],
   );
+
+  // Tri des albums
+  const sortedAlbums = useMemo(() => {
+    return [...albums].sort((a, b) => {
+      switch (sortBy) {
+        case "date-desc":
+          return (b._id || "").localeCompare(a._id || "");
+        case "date-asc":
+          return (a._id || "").localeCompare(b._id || "");
+        case "name-asc":
+          return (a.titre || "").localeCompare(b.titre || "");
+        case "name-desc":
+          return (b.titre || "").localeCompare(a.titre || "");
+        default:
+          return 0;
+      }
+    });
+  }, [albums, sortBy]);
 
   // Calcul du nombre de photos par album et récupération des photos de chaque album
   const photoCounts = useMemo(() => {
@@ -670,14 +735,14 @@ export default function Galerie() {
     return photosByAlbum;
   }, [photos]);
 
-  // 📄 Filtrage des photos (avec ou sans pagination)
+  // 📄 Filtrage et tri des photos
   const allFilteredPhotos = useMemo(() => {
     let currentPhotos = photos;
 
     // Filter by Album if selected
     if (viewMode === "photos" && selectedAlbum) {
       currentPhotos = currentPhotos.filter(
-        (p) => (p as any).album === selectedAlbum._id
+        (p) => (p as any).album === selectedAlbum._id,
       );
     } else if (viewMode === "photos" && !selectedAlbum && albums.length > 0) {
       // If in photo mode but no album selected (and albums exist), show nothing or all?
@@ -686,13 +751,36 @@ export default function Galerie() {
       // For now, if no album selected, show all (legacy behavior)
     }
 
-    if (categorieActive === "Toutes") return currentPhotos;
-    return currentPhotos.filter((p) => p.categorie === categorieActive);
-  }, [photos, categorieActive, viewMode, selectedAlbum, albums]);
+    // Filter by category
+    if (categorieActive !== "Toutes") {
+      currentPhotos = currentPhotos.filter(
+        (p) => p.categorie === categorieActive,
+      );
+    }
+
+    // Sort photos
+    const sorted = [...currentPhotos].sort((a, b) => {
+      switch (sortBy) {
+        case "date-desc":
+          // Assume photos have a createdAt or similar field, fallback to _id
+          return (b._id || "").localeCompare(a._id || "");
+        case "date-asc":
+          return (a._id || "").localeCompare(b._id || "");
+        case "name-asc":
+          return (a.titre || "").localeCompare(b.titre || "");
+        case "name-desc":
+          return (b.titre || "").localeCompare(a.titre || "");
+        default:
+          return 0;
+      }
+    });
+
+    return sorted;
+  }, [photos, categorieActive, viewMode, selectedAlbum, albums, sortBy]);
 
   // 📄 Pagination : calcul du nombre de pages et des photos à afficher
   const totalPages = Math.ceil(allFilteredPhotos.length / PHOTOS_PER_PAGE);
-  
+
   const filtered = useMemo(() => {
     const startIndex = (currentPage - 1) * PHOTOS_PER_PAGE;
     const endIndex = startIndex + PHOTOS_PER_PAGE;
@@ -712,12 +800,12 @@ export default function Galerie() {
       if (e.key === "Escape") setLightboxIndex(null);
       if (e.key === "ArrowLeft") {
         setLightboxIndex((prev) =>
-          prev !== null && prev > 0 ? prev - 1 : prev
+          prev !== null && prev > 0 ? prev - 1 : prev,
         );
       }
       if (e.key === "ArrowRight") {
         setLightboxIndex((prev) =>
-          prev !== null && prev < filtered.length - 1 ? prev + 1 : prev
+          prev !== null && prev < filtered.length - 1 ? prev + 1 : prev,
         );
       }
     };
@@ -727,7 +815,10 @@ export default function Galerie() {
   }, [lightboxIndex, filtered]);
 
   return (
-    <div role="main" className="min-h-screen bg-[#0a0a10] text-white selection:bg-yellow-500/30 selection:text-white font-sans">
+    <div
+      role="main"
+      className="min-h-screen bg-[#0a0a10] text-white selection:bg-yellow-500/30 selection:text-white font-sans"
+    >
       {/* SEO complet avec Open Graph, Twitter Card et Schema.org */}
       <SEO
         title="Galerie Photo - Tirages d'Art"
@@ -735,20 +826,23 @@ export default function Galerie() {
         image="/images/gallery-preview.jpg"
         type="website"
         keywords={[
-          'galerie photo',
-          'photographie art',
-          'tirage photo',
-          'impression photo',
-          'toile canvas',
-          'photographe professionnel',
-          'Fabien Licata'
+          "galerie photo",
+          "photographie art",
+          "tirage photo",
+          "impression photo",
+          "toile canvas",
+          "photographe professionnel",
+          "Fabien Licata",
         ]}
         schema={{
           ...photographerSchema,
           ...createBreadcrumbSchema([
-            { name: 'Accueil', url: 'https://titre-afpa.vercel.app/' },
-            { name: 'Galerie Photo', url: 'https://titre-afpa.vercel.app/galerie' }
-          ])
+            { name: "Accueil", url: "https://titre-afpa.vercel.app/" },
+            {
+              name: "Galerie Photo",
+              url: "https://titre-afpa.vercel.app/galerie",
+            },
+          ]),
         }}
       />
       <Navbar />
@@ -767,7 +861,10 @@ export default function Galerie() {
       <div className="geometric-accent fixed top-0 left-0 w-full h-full pointer-events-none z-0 opacity-30" />
 
       {/* Header - Style Premium avec titre et description */}
-      <header className="relative pt-32 px-6 overflow-hidden z-10 transition-all duration-700 ease-in-out" style={{ paddingBottom: viewMode === "albums" ? '3rem' : '1rem' }}>
+      <header
+        className="relative pt-32 px-6 overflow-hidden z-10 transition-all duration-700 ease-in-out"
+        style={{ paddingBottom: viewMode === "albums" ? "3rem" : "1rem" }}
+      >
         <div className="max-w-4xl mx-auto text-center">
           {/* Titre avec album à côté */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6">
@@ -776,7 +873,7 @@ export default function Galerie() {
                 Galerie d'Art
               </span>
             </h1>
-            
+
             {/* Nom de l'album à côté du titre */}
             <AnimatePresence mode="wait">
               {viewMode === "photos" && selectedAlbum && (
@@ -803,10 +900,10 @@ export default function Galerie() {
                 initial={{ opacity: 0, y: 20, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: "auto" }}
                 exit={{ opacity: 0, y: -30, height: 0 }}
-                transition={{ 
+                transition={{
                   opacity: { duration: 0.5 },
                   y: { duration: 0.6, ease: "easeInOut" },
-                  height: { duration: 0.7, ease: [0.4, 0, 0.2, 1] }
+                  height: { duration: 0.7, ease: [0.4, 0, 0.2, 1] },
                 }}
                 className="max-w-2xl mx-auto mb-6 overflow-hidden"
               >
@@ -814,13 +911,13 @@ export default function Galerie() {
                   {/* Effet de brillance animée */}
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-[#ffe992]/10 to-transparent"
-                    initial={{ x: '-100%' }}
-                    animate={{ x: '200%' }}
+                    initial={{ x: "-100%" }}
+                    animate={{ x: "200%" }}
                     transition={{
                       duration: 3,
                       repeat: Infinity,
                       repeatDelay: 5,
-                      ease: "easeInOut"
+                      ease: "easeInOut",
                     }}
                   />
                   {/* Effet de rayonnement élégant */}
@@ -832,7 +929,13 @@ export default function Galerie() {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.7, duration: 1 }}
                   >
-                    Découvrez ma collection de <span className="font-semibold text-[#ffe992] drop-shadow-[0_0_8px_rgba(255,233,146,0.6)]">photographies d'art</span>. Chaque œuvre est disponible en tirages limités sur différents supports : papier photo, toile canvas, aluminium et plexiglas. Livraison France et international.
+                    Découvrez ma collection de{" "}
+                    <span className="font-semibold text-[#ffe992] drop-shadow-[0_0_8px_rgba(255,233,146,0.6)]">
+                      photographies d'art
+                    </span>
+                    . Chaque œuvre est disponible en tirages limités sur
+                    différents supports : papier photo, toile canvas, aluminium
+                    et plexiglas. Livraison France et international.
                   </motion.p>
                 </div>
               </motion.div>
@@ -841,45 +944,71 @@ export default function Galerie() {
         </div>
       </header>
 
-      {/* Navigation des filtres - Style Glassmorphism - Masqué sur mobile */}
-      <nav className="sticky top-20 z-40 px-4 py-2 mb-8 mt-0 hidden md:block">
-        <div className="max-w-fit mx-auto flex flex-wrap justify-center items-center gap-2 md:gap-4 bg-white/5 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
-          {viewMode === "photos" && selectedAlbum && (
-            <button
-              onClick={() => {
-                setViewMode("albums");
-                setSelectedAlbum(null);
-                setCategorieActive("Toutes");
-              }}
-              className="flex items-center gap-2 text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all duration-300 px-4 py-2 rounded-full text-[#ffe992] hover:bg-white/10 mr-4 border-r border-white/10 pr-6"
-            >
-              <ArrowLeft size={14} /> Albums
-            </button>
-          )}
+      {/* Navigation des filtres et contrôles - Style Glassmorphism */}
+      <div className="sticky top-20 z-40 px-4 py-2 mb-8 mt-0">
+        <div className="max-w-[1600px] mx-auto">
+          {/* Barre de navigation avec filtres */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
+            {/* Filtres de catégories - Masqué sur mobile */}
+            <nav className="hidden md:block">
+              <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 bg-white/5 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
+                {viewMode === "photos" && selectedAlbum && (
+                  <button
+                    onClick={() => {
+                      setViewMode("albums");
+                      setSelectedAlbum(null);
+                      setCategorieActive("Toutes");
+                    }}
+                    className="flex items-center gap-2 text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all duration-300 px-4 py-2 rounded-full text-[#ffe992] hover:bg-white/10 mr-4 border-r border-white/10 pr-6"
+                  >
+                    <ArrowLeft size={14} /> Albums
+                  </button>
+                )}
 
-          {loading ? (
-            <Skeleton width={200} height={30} className="rounded-full" />
-          ) : viewMode === "albums" ? (
-            <span className="text-xs text-gray-400 uppercase tracking-widest px-4">
-              Sélectionnez un album
-            </span>
-          ) : (
-            categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setCategorieActive(cat)}
-                className={`relative text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all duration-300 px-4 py-2 rounded-full ${
-                  categorieActive === cat
-                    ? "text-[#ffe992] font-medium bg-white/10"
-                    : "text-gray-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                {cat}
-              </button>
-            ))
-          )}
+                {loading ? (
+                  <Skeleton width={200} height={30} className="rounded-full" />
+                ) : viewMode === "albums" ? (
+                  <span className="text-xs text-gray-400 uppercase tracking-widest px-4">
+                    Sélectionnez un album
+                  </span>
+                ) : (
+                  categories.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setCategorieActive(cat)}
+                      className={`relative text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all duration-300 px-4 py-2 rounded-full ${
+                        categorieActive === cat
+                          ? "text-[#ffe992] font-medium bg-white/10"
+                          : "text-gray-400 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))
+                )}
+              </div>
+            </nav>
+
+            {/* Contrôles de tri et d'affichage */}
+            {(viewMode === "photos" || viewMode === "albums") && (
+              <div className="flex items-center gap-4 bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
+                <div className="text-xs text-gray-400 hidden sm:block">
+                  {viewMode === "albums"
+                    ? `${albums.length} album${albums.length > 1 ? "s" : ""}`
+                    : `${allFilteredPhotos.length} photo${allFilteredPhotos.length > 1 ? "s" : ""}`}
+                </div>
+                <PhotoSortControls
+                  sortBy={sortBy}
+                  onSortChange={setSortBy}
+                  viewMode={displayMode}
+                  onViewModeChange={setDisplayMode}
+                  className=""
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </nav>
+      </div>
 
       {/* Grille principale */}
       <main className="max-w-[1600px] mx-auto px-6 md:px-12 pb-32 relative z-10">
@@ -887,7 +1016,11 @@ export default function Galerie() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8"
+          className={
+            viewMode === "photos" && displayMode === "list"
+              ? "space-y-4"
+              : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8"
+          }
         >
           <AnimatePresence mode="popLayout">
             {loading
@@ -900,31 +1033,33 @@ export default function Galerie() {
                     </div>
                   ))
               : viewMode === "albums"
-              ? // ALBUM GRID
-                albums.map((album) => (
-                  <AlbumCard
-                    key={album._id}
-                    album={album}
-                    photoCounts={photoCounts}
-                    albumImages={albumPhotos[album._id] || []}
-                    onSelect={() => {
-                      setSelectedAlbum(album);
-                      setViewMode("photos");
-                    }}
-                  />
-                ))
-              : // PHOTO GRID
-                filtered.map((photo) => (
-                  <PhotoCard
-                    key={photo._id || photo.id}
-                    photo={photo}
-                    onView={() => {
-                      const index = filtered.findIndex((p) => p._id === photo._id);
-                      setLightboxIndex(index);
-                    }}
-                    onAddToCart={() => handleAjouterAuPanier(photo)}
-                  />
-                ))}
+                ? // ALBUM GRID
+                  sortedAlbums.map((album) => (
+                    <AlbumCard
+                      key={album._id}
+                      album={album}
+                      photoCounts={photoCounts}
+                      albumImages={albumPhotos[album._id] || []}
+                      onSelect={() => {
+                        setSelectedAlbum(album);
+                        setViewMode("photos");
+                      }}
+                    />
+                  ))
+                : // PHOTO GRID
+                  filtered.map((photo) => (
+                    <PhotoCard
+                      key={photo._id || photo.id}
+                      photo={photo}
+                      onView={() => {
+                        const index = filtered.findIndex(
+                          (p) => p._id === photo._id,
+                        );
+                        setLightboxIndex(index);
+                      }}
+                      onAddToCart={() => handleAjouterAuPanier(photo)}
+                    />
+                  ))}
           </AnimatePresence>
         </motion.div>
 
@@ -1019,7 +1154,7 @@ export default function Galerie() {
                   {lightboxIndex + 1} / {filtered.length}
                 </p>
               </div>
-              
+
               {/* Boutons actions */}
               <div className="flex items-center gap-3 pointer-events-auto">
                 <button

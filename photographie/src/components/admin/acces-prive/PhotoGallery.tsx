@@ -1,3 +1,9 @@
+import { useState, useMemo } from "react";
+import PhotoSortControls, {
+  SortOption,
+  ViewMode,
+} from "../../common/PhotoSortControls";
+
 // ==========================================
 // 📝 Interface des Props
 // ==========================================
@@ -17,27 +23,80 @@ export default function PhotoGallery({
   onEdit,
   onDelete,
 }: PhotoGalleryProps) {
+  const [sortBy, setSortBy] = useState<SortOption>("date-desc");
+  const [displayMode, setDisplayMode] = useState<ViewMode>("grid");
+
+  // Tri des photos
+  const sortedPhotos = useMemo(() => {
+    if (!photos || photos.length === 0) return [];
+
+    return [...photos].sort((a, b) => {
+      switch (sortBy) {
+        case "date-desc":
+          return (b._id || "").localeCompare(a._id || "");
+        case "date-asc":
+          return (a._id || "").localeCompare(b._id || "");
+        case "name-asc":
+          return (a.titre || "").localeCompare(b.titre || "");
+        case "name-desc":
+          return (b.titre || "").localeCompare(a.titre || "");
+        default:
+          return 0;
+      }
+    });
+  }, [photos, sortBy]);
+
   return (
     <div className="mt-8 pt-6 border-t border-white/10">
-      <h3 className="text-lg font-semibold text-white mb-4">
-        Photos de la galerie privée
-      </h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-white">
+          Photos de la galerie privée
+        </h3>
+      </div>
 
       {/* Liste des photos */}
       <div className="space-y-4">
-        <h4 className="text-sm font-bold text-[#ffe992]">
-          Photos existantes ({photos?.length || 0})
-        </h4>
+        <div className="flex items-center justify-between">
+          <h4 className="text-sm font-bold text-[#ffe992]">
+            Photos existantes ({photos?.length || 0})
+          </h4>
+
+          {photos && photos.length > 0 && (
+            <PhotoSortControls
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              viewMode={displayMode}
+              onViewModeChange={setDisplayMode}
+              className=""
+            />
+          )}
+        </div>
 
         {photos && photos.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {photos.map((photo) => (
+          <div
+            className={
+              displayMode === "list"
+                ? "space-y-3"
+                : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+            }
+          >
+            {sortedPhotos.map((photo) => (
               <div
                 key={photo._id || photo.id}
-                className="bg-[#232336] p-2 rounded border border-white/10 group relative hover:border-[#ffe992]/30 transition-colors"
+                className={
+                  displayMode === "list"
+                    ? "bg-[#232336] p-3 rounded border border-white/10 group relative hover:border-[#ffe992]/30 transition-colors flex items-center gap-4"
+                    : "bg-[#232336] p-2 rounded border border-white/10 group relative hover:border-[#ffe992]/30 transition-colors"
+                }
               >
                 {/* Image Thumbnail */}
-                <div className="aspect-square w-full mb-2 overflow-hidden rounded bg-black/50">
+                <div
+                  className={
+                    displayMode === "list"
+                      ? "w-24 h-24 flex-shrink-0 overflow-hidden rounded bg-black/50"
+                      : "aspect-square w-full mb-2 overflow-hidden rounded bg-black/50"
+                  }
+                >
                   <img
                     src={photo.src}
                     alt={photo.alt || "Photo galerie"}
@@ -47,15 +106,23 @@ export default function PhotoGallery({
                 </div>
 
                 {/* Infos Photo */}
-                <p className="text-xs text-white font-bold truncate">
-                  {photo.titre || "Sans titre"}
-                </p>
-                <p className="text-[10px] text-gray-400 truncate mb-2">
-                  {photo.description || "Aucune description"}
-                </p>
+                <div className={displayMode === "list" ? "flex-1 min-w-0" : ""}>
+                  <p className="text-xs text-white font-bold truncate">
+                    {photo.titre || "Sans titre"}
+                  </p>
+                  <p className="text-[10px] text-gray-400 truncate mb-2">
+                    {photo.description || "Aucune description"}
+                  </p>
+                </div>
 
                 {/* Actions (Modifier / Supprimer) */}
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <div
+                  className={
+                    displayMode === "list"
+                      ? "flex gap-1 flex-shrink-0"
+                      : "flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  }
+                >
                   <button
                     type="button"
                     onClick={() => onEdit(photo)}

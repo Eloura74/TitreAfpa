@@ -17,7 +17,12 @@ import {
   ChevronRight,
   Square,
   CheckSquare,
+  Search,
 } from "lucide-react";
+import PhotoSortControls, {
+  SortOption,
+  ViewMode,
+} from "../components/common/PhotoSortControls";
 import { PhotoOriginale } from "../types/evenement";
 
 import Navbar from "../components/layout/navbar"; // Composant cohérence UI
@@ -79,6 +84,11 @@ export default function EcrinPrive() {
     total: 0,
   });
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
+
+  // --- Nouveaux états Recherche et Tri ---
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("date-desc");
+  const [displayMode, setDisplayMode] = useState<ViewMode>("grid");
 
   useEffect(() => {
     checkSession();
@@ -577,56 +587,87 @@ export default function EcrinPrive() {
           )}
         </AnimatePresence>
 
-        {/* Barre d'actions secondaires (Sélection Multiple) */}
+        {/* Barre de recherche et contrôles */}
         {accesInfo?.photosOriginales &&
           accesInfo.photosOriginales.length > 0 && (
-            <div className="flex items-center justify-between bg-[#12121a]/80 backdrop-blur-md border border-[#ffe992]/20 p-4 rounded-2xl mb-6 shadow-lg">
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={toggleSelectAll}
-                  className="flex items-center gap-2 text-gray-300 hover:text-[#ffe992] transition-colors"
-                  title={
-                    selectedPhotos.size === accesInfo.photosOriginales.length
-                      ? "Tout désélectionner"
-                      : "Tout sélectionner"
-                  }
-                >
-                  {selectedPhotos.size === accesInfo.photosOriginales.length ? (
-                    <CheckSquare size={20} className="text-[#ffe992]" />
-                  ) : (
-                    <Square size={20} />
-                  )}
-                  <span className="text-sm tracking-wide font-medium">
-                    Tout sélectionner
-                  </span>
-                </button>
+            <div className="space-y-4 mb-6">
+              {/* Recherche et tri */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-[#12121a]/80 backdrop-blur-md border border-[#ffe992]/20 p-4 rounded-2xl shadow-lg">
+                {/* Barre de recherche */}
+                <div className="flex-1 relative">
+                  <Search
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Rechercher une photo par nom..."
+                    className="w-full bg-black/40 border border-white/10 rounded-lg pl-12 pr-4 py-2.5 text-white text-sm focus:border-[#ffe992] transition-colors outline-none placeholder-gray-500"
+                  />
+                </div>
 
-                {selectedPhotos.size > 0 && (
-                  <span className="text-sm font-semibold text-[#ffe992] bg-[#ffe992]/10 px-3 py-1 rounded-full">
-                    {selectedPhotos.size} sélectionnée(s)
-                  </span>
-                )}
+                {/* Contrôles de tri et affichage */}
+                <PhotoSortControls
+                  sortBy={sortBy}
+                  onSortChange={setSortBy}
+                  viewMode={displayMode}
+                  onViewModeChange={setDisplayMode}
+                  className=""
+                />
               </div>
 
-              {selectedPhotos.size > 0 && (
-                <button
-                  onClick={handleDownloadMultiple}
-                  disabled={isDownloadingMultiple}
-                  className="flex items-center gap-2 px-6 py-2 bg-[#ffe992] hover:bg-white text-black rounded-lg font-bold text-sm tracking-widest uppercase transition-all shadow-[0_0_15px_rgba(255,233,146,0.3)] disabled:opacity-50"
-                >
-                  {isDownloadingMultiple ? (
-                    <>
-                      <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                      {downloadProgress.current} / {downloadProgress.total}
-                    </>
-                  ) : (
-                    <>
-                      <Download size={16} />
-                      Télécharger
-                    </>
+              {/* Barre d'actions (Sélection Multiple) */}
+              <div className="flex items-center justify-between bg-[#12121a]/80 backdrop-blur-md border border-[#ffe992]/20 p-4 rounded-2xl shadow-lg">
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={toggleSelectAll}
+                    className="flex items-center gap-2 text-gray-300 hover:text-[#ffe992] transition-colors"
+                    title={
+                      selectedPhotos.size === accesInfo.photosOriginales.length
+                        ? "Tout désélectionner"
+                        : "Tout sélectionner"
+                    }
+                  >
+                    {selectedPhotos.size ===
+                    accesInfo.photosOriginales.length ? (
+                      <CheckSquare size={20} className="text-[#ffe992]" />
+                    ) : (
+                      <Square size={20} />
+                    )}
+                    <span className="text-sm tracking-wide font-medium">
+                      Tout sélectionner
+                    </span>
+                  </button>
+
+                  {selectedPhotos.size > 0 && (
+                    <span className="text-sm font-semibold text-[#ffe992] bg-[#ffe992]/10 px-3 py-1 rounded-full">
+                      {selectedPhotos.size} sélectionnée(s)
+                    </span>
                   )}
-                </button>
-              )}
+                </div>
+
+                {selectedPhotos.size > 0 && (
+                  <button
+                    onClick={handleDownloadMultiple}
+                    disabled={isDownloadingMultiple}
+                    className="flex items-center gap-2 px-6 py-2 bg-[#ffe992] hover:bg-white text-black rounded-lg font-bold text-sm tracking-widest uppercase transition-all shadow-[0_0_15px_rgba(255,233,146,0.3)] disabled:opacity-50"
+                  >
+                    {isDownloadingMultiple ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                        {downloadProgress.current} / {downloadProgress.total}
+                      </>
+                    ) : (
+                      <>
+                        <Download size={16} />
+                        Télécharger
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
@@ -647,127 +688,161 @@ export default function EcrinPrive() {
             </p>
           </div>
         ) : (
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
-            {accesInfo.photosOriginales.map((photo, index) => {
-              const isSelected = selectedPhotos.has(photo._id!);
-              return (
-                <motion.div
-                  key={photo._id || index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05, duration: 0.5 }}
-                  className={`break-inside-avoid relative group rounded-2xl overflow-hidden border transition-all duration-300 ${
-                    isSelected
-                      ? "border-[#ffe992] shadow-[0_0_20px_rgba(255,233,146,0.2)]"
-                      : "border-white/5 bg-black/40"
-                  }`}
-                >
-                  {/* Case à cocher pour sélection */}
-                  <button
-                    onClick={(e) => toggleSelection(photo._id!, e)}
-                    className={`absolute top-4 left-4 z-20 p-1.5 rounded-md backdrop-blur-md transition-all ${
+          <div
+            className={
+              displayMode === "list"
+                ? "space-y-4"
+                : "columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6"
+            }
+          >
+            {accesInfo.photosOriginales
+              .filter((photo) => {
+                if (!searchQuery) return true;
+                return photo.nom
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase());
+              })
+              .sort((a, b) => {
+                switch (sortBy) {
+                  case "date-desc":
+                    return (b._id || "").localeCompare(a._id || "");
+                  case "date-asc":
+                    return (a._id || "").localeCompare(b._id || "");
+                  case "name-asc":
+                    return (a.nom || "").localeCompare(b.nom || "");
+                  case "name-desc":
+                    return (b.nom || "").localeCompare(a.nom || "");
+                  default:
+                    return 0;
+                }
+              })
+              .map((photo, index) => {
+                const isSelected = selectedPhotos.has(photo._id!);
+                return (
+                  <motion.div
+                    key={photo._id || index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.5 }}
+                    className={`${displayMode === "list" ? "flex items-center gap-4 p-4" : "break-inside-avoid"} relative group rounded-2xl overflow-hidden border transition-all duration-300 ${
                       isSelected
-                        ? "bg-[#ffe992] text-black scale-110 shadow-[0_0_10px_rgba(255,233,146,0.5)]"
-                        : "bg-black/50 text-white/50 opacity-0 group-hover:opacity-100 hover:text-white border border-white/20"
+                        ? "border-[#ffe992] shadow-[0_0_20px_rgba(255,233,146,0.2)]"
+                        : "border-white/5 bg-black/40"
                     }`}
                   >
-                    {isSelected ? (
-                      <CheckSquare size={20} />
-                    ) : (
-                      <Square size={20} />
-                    )}
-                  </button>
+                    {/* Case à cocher pour sélection */}
+                    <button
+                      onClick={(e) => toggleSelection(photo._id!, e)}
+                      className={`absolute top-4 left-4 z-20 p-1.5 rounded-md backdrop-blur-md transition-all ${
+                        isSelected
+                          ? "bg-[#ffe992] text-black scale-110 shadow-[0_0_10px_rgba(255,233,146,0.5)]"
+                          : "bg-black/50 text-white/50 opacity-0 group-hover:opacity-100 hover:text-white border border-white/20"
+                      }`}
+                    >
+                      {isSelected ? (
+                        <CheckSquare size={20} />
+                      ) : (
+                        <Square size={20} />
+                      )}
+                    </button>
 
-                  {/* Image miniature avec fallback */}
-                  <div
-                    className="relative w-full overflow-hidden cursor-zoom-in group-hover:shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] transition-all"
-                    onClick={() => {
-                      if (selectedPhotos.size > 0) {
-                        // Mode sélection actif : click = sélectionner
-                        toggleSelection(photo._id!);
-                      } else {
-                        openLightbox(index);
-                      }
-                    }}
-                    title={
-                      selectedPhotos.size > 0
-                        ? "Ajouter à la sélection"
-                        : "Cliquez pour agrandir"
-                    }
-                  >
-                    {!photo.miniature ||
-                    photo.miniature === "undefined" ||
-                    photo.miniature.trim() === "" ||
-                    imageErrors.has(photo._id!) ? (
-                      <div
-                        className="w-full flex flex-col items-center justify-center bg-gradient-to-br from-black/80 to-[#12121a] border border-white/5"
-                        style={{ minHeight: "250px" }}
-                      >
-                        <ImageIcon size={48} className="text-gray-600 mb-3" />
-                        <span className="text-xs text-gray-400 truncate max-w-[80%] px-4 py-1 bg-black/50 rounded-full border border-gray-800">
-                          {photo.nom}
-                        </span>
-                      </div>
-                    ) : (
-                      <img
-                        src={photo.miniature}
-                        alt={photo.nom}
-                        loading="lazy"
-                        className={`w-full h-auto object-cover transition-all duration-700 ease-in-out ${isSelected ? "opacity-100 scale-[1.03]" : "opacity-80 group-hover:opacity-100 group-hover:scale-[1.03]"}`}
-                        style={{ minHeight: "200px" }}
-                        onError={() =>
-                          setImageErrors((prev) =>
-                            new Set(prev).add(photo._id!),
-                          )
+                    {/* Image miniature avec fallback */}
+                    <div
+                      className={`relative overflow-hidden cursor-zoom-in group-hover:shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] transition-all ${
+                        displayMode === "list"
+                          ? "w-32 h-32 flex-shrink-0"
+                          : "w-full"
+                      }`}
+                      onClick={() => {
+                        if (selectedPhotos.size > 0) {
+                          // Mode sélection actif : click = sélectionner
+                          toggleSelection(photo._id!);
+                        } else {
+                          openLightbox(index);
                         }
-                      />
-                    )}
-
-                    {/* Overlay au survol pour DL Simple */}
-                    {!isSelected && (
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
-                        <h3 className="text-white font-medium truncate mb-1 text-sm">
-                          {photo.nom}
-                        </h3>
-                        <p className="text-xs text-[#ffe992] uppercase tracking-wider mb-2">
-                          {photo.format} • {formatFileSize(photo.taille)}
-                        </p>
-
-                        {/* Commentaire admin */}
-                        {photo.commentaire && (
-                          <div className="mb-3 p-2 bg-blue-500/20 border-l-2 border-blue-400 rounded">
-                            <p className="text-xs text-blue-200 italic">
-                              💬 {photo.commentaire}
-                            </p>
-                          </div>
-                        )}
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDownload(photo);
-                          }}
-                          disabled={downloadingPhotoId === photo._id}
-                          className="w-full relative overflow-hidden bg-white/10 hover:bg-[#ffe992] text-white hover:text-black border border-white/20 hover:border-transparent backdrop-blur-md transition-all duration-300 py-3 rounded-lg flex items-center justify-center gap-2 font-semibold text-sm uppercase tracking-wide disabled:opacity-50"
+                      }}
+                      title={
+                        selectedPhotos.size > 0
+                          ? "Ajouter à la sélection"
+                          : "Cliquez pour agrandir"
+                      }
+                    >
+                      {!photo.miniature ||
+                      photo.miniature === "undefined" ||
+                      photo.miniature.trim() === "" ||
+                      imageErrors.has(photo._id!) ? (
+                        <div
+                          className="w-full flex flex-col items-center justify-center bg-gradient-to-br from-black/80 to-[#12121a] border border-white/5"
+                          style={{ minHeight: "250px" }}
                         >
-                          {downloadingPhotoId === photo._id ? (
-                            <>
-                              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                              Génération...
-                            </>
-                          ) : (
-                            <>
-                              <Download size={16} />
-                              Obtenir l'Original
-                            </>
+                          <ImageIcon size={48} className="text-gray-600 mb-3" />
+                          <span className="text-xs text-gray-400 truncate max-w-[80%] px-4 py-1 bg-black/50 rounded-full border border-gray-800">
+                            {photo.nom}
+                          </span>
+                        </div>
+                      ) : (
+                        <img
+                          src={photo.miniature}
+                          alt={photo.nom}
+                          loading="lazy"
+                          className={`${displayMode === "list" ? "w-full h-full" : "w-full h-auto"} object-cover transition-all duration-700 ease-in-out ${isSelected ? "opacity-100 scale-[1.03]" : "opacity-80 group-hover:opacity-100 group-hover:scale-[1.03]"}`}
+                          style={{
+                            minHeight:
+                              displayMode === "list" ? "128px" : "200px",
+                          }}
+                          onError={() =>
+                            setImageErrors((prev) =>
+                              new Set(prev).add(photo._id!),
+                            )
+                          }
+                        />
+                      )}
+
+                      {/* Overlay au survol pour DL Simple */}
+                      {!isSelected && (
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
+                          <h3 className="text-white font-medium truncate mb-1 text-sm">
+                            {photo.nom}
+                          </h3>
+                          <p className="text-xs text-[#ffe992] uppercase tracking-wider mb-2">
+                            {photo.format} • {formatFileSize(photo.taille)}
+                          </p>
+
+                          {/* Commentaire admin */}
+                          {photo.commentaire && (
+                            <div className="mb-3 p-2 bg-blue-500/20 border-l-2 border-blue-400 rounded">
+                              <p className="text-xs text-blue-200 italic">
+                                💬 {photo.commentaire}
+                              </p>
+                            </div>
                           )}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              );
-            })}
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownload(photo);
+                            }}
+                            disabled={downloadingPhotoId === photo._id}
+                            className="w-full relative overflow-hidden bg-white/10 hover:bg-[#ffe992] text-white hover:text-black border border-white/20 hover:border-transparent backdrop-blur-md transition-all duration-300 py-3 rounded-lg flex items-center justify-center gap-2 font-semibold text-sm uppercase tracking-wide disabled:opacity-50"
+                          >
+                            {downloadingPhotoId === photo._id ? (
+                              <>
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Génération...
+                              </>
+                            ) : (
+                              <>
+                                <Download size={16} />
+                                Obtenir l'Original
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
           </div>
         )}
       </main>

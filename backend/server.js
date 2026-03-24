@@ -46,11 +46,11 @@ const app = express();
 // Configuration pour Vercel (derrière un proxy)
 app.set("trust proxy", 1);
 
-// ================================
-// CONFIGURATION DE CORS (sécurité frontend/backend)
-// ================================
-
-// Autorise UNIQUEMENT le domaine frontend Vercel à faire des requêtes
+// Augmentation de la limite des headers pour les gros fichiers
+app.use((req, res, next) => {
+  req.socket.setMaxListeners(0);
+  next();
+});
 // app.use(
 //   cors({
 //     origin: [

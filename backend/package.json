@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "cross-env NODE_ENV=test jest --detectOpenHandles --forceExit --verbose",
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "start": "node --max-http-header-size=16384 server.js",
+    "dev": "node --max-http-header-size=16384 --watch server.js"
   },
   "jest": {
     "testEnvironment": "node",
