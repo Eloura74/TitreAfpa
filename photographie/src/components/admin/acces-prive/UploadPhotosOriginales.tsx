@@ -79,6 +79,7 @@ export default function UploadPhotosOriginales({
             headers: {
               "Content-Type": "multipart/form-data",
             },
+            withCredentials: false, // Désactive l'envoi des cookies pour éviter l'erreur 431
             onUploadProgress: (progressEvent) => {
               if (progressEvent.total) {
                 const percentComplete = Math.round(
