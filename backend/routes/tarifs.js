@@ -79,11 +79,22 @@ router.use(isAdmin); // Vérifie que l'utilisateur est un admin
 // Sauvegarde la configuration hiérarchique
 router.post("/config", async (req, res) => {
   try {
-    const newConfig = new TarifConfig(req.body);
-    await newConfig.save();
-    res.json(newConfig);
+    // Cherche le document existant et le met à jour, ou le crée s'il n'existe pas
+    const config = await TarifConfig.findOneAndUpdate(
+      {}, // Cherche n'importe quel document (il ne devrait y en avoir qu'un seul)
+      { categories: req.body.categories }, // Met à jour les catégories
+      {
+        new: true, // Retourne le document mis à jour
+        upsert: true, // Crée le document s'il n'existe pas
+        runValidators: true, // Valide les données
+      },
+    );
+    res.json(config);
   } catch (err) {
-    res.status(500).json({ message: "Erreur sauvegarde config", error: err });
+    console.error("Erreur sauvegarde config tarifs:", err);
+    res
+      .status(500)
+      .json({ message: "Erreur sauvegarde config", error: err.message });
   }
 });
 
@@ -111,7 +122,7 @@ router.put("/:id", async (req, res) => {
   const tarif = await Tarif.findByIdAndUpdate(
     req.params.id, // ID du tarif à modifier
     req.body, // Nouvelles données envoyées
-    { new: true } // Option pour renvoyer le tarif modifié
+    { new: true }, // Option pour renvoyer le tarif modifié
   );
 
   res.json(tarif); // Retourne le tarif modifié
