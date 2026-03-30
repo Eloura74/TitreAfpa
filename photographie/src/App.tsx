@@ -38,6 +38,7 @@ const About = lazy(() => import("./pages/About"));
 // Pages galeries (chargement fréquent)
 const Galerie = lazy(() => import("./pages/Galerie"));
 const GalerieGraphique = lazy(() => import("./pages/GalerieGraphique"));
+const DecouvrirGraphisme = lazy(() => import("./pages/DecouvrirGraphisme"));
 
 // Pages services et événements
 const Evenements = lazy(() => import("./pages/Evenements"));
@@ -196,6 +197,12 @@ function App() {
                 <Route
                   path="/galerie-graphique"
                   element={<GalerieGraphique />}
+                />
+
+                {/* Route pour la page Découvrir le Graphisme */}
+                <Route
+                  path="/decouvrir-graphisme"
+                  element={<DecouvrirGraphisme />}
                 />
 
                 {/* Route pour la page Tirage en ligne */}

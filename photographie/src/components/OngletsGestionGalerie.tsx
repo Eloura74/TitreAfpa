@@ -12,7 +12,8 @@ import { FolderPlus, X } from "lucide-react";
 import AlbumManager from "./admin/galerie/AlbumManager";
 import TarifConfiguratorV2 from "./admin/tarifs/TarifConfiguratorV2";
 import ImportTarifsJSON from "./admin/tarifs/ImportTarifsJSON";
-import GestionAbout from "./GestionAbout"; // Import du nouveau composant
+import GestionAbout from "./GestionAbout";
+import GestionGraphismeShowcase from "./GestionGraphismeShowcase"; // Import du nouveau composant
 
 export default function OngletsGestionGalerie() {
   const [actif, setActif] = useState(0);
@@ -62,7 +63,8 @@ export default function OngletsGestionGalerie() {
     },
     { nom: "Accès Privé", composant: <GestionAccesPrive /> },
     { nom: "Services", composant: <GestionServices /> },
-    { nom: "À Propos", composant: <GestionAbout /> }, // Nouvel onglet
+    { nom: "À Propos", composant: <GestionAbout /> },
+    { nom: "Présentation Graphisme", composant: <GestionGraphismeShowcase /> },
   ];
 
   return (

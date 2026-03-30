@@ -405,6 +405,10 @@ app.use("/api/picto", pictoRoutes);
 // Page À Propos
 app.use("/api/about", aboutRoutes);
 
+// Graphisme Showcase (2 images de présentation)
+const graphismeShowcaseRoutes = require("./routes/graphismeShowcase");
+app.use("/api/graphisme-showcase", graphismeShowcaseRoutes);
+
 // Upload Cloudinary (signature pour upload direct)
 app.use("/api/upload-cloudinary", uploadCloudinaryRoutes);
 
@@ -427,6 +431,7 @@ logger.info("Routes API montées avec succès", {
     "/api/albums",
     "/api/picto",
     "/api/about",
+    "/api/graphisme-showcase",
     "/api/sitemap.xml",
   ],
 });
