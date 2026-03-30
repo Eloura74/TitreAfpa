@@ -4,7 +4,8 @@ import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import PageTitle from "../components/ui/PageTitle";
 import { API_URL } from "../config/api";
-import { Loader2 } from "lucide-react";
+import { Loader2, ZoomIn } from "lucide-react";
+import ImageZoomModal from "../components/ui/ImageZoomModal";
 
 interface ShowcaseImage {
   _id: string;
@@ -14,30 +15,51 @@ interface ShowcaseImage {
   ordre: number;
 }
 
+interface GraphismeDescription {
+  _id: string;
+  titre: string;
+  description: string;
+}
+
 export default function DecouvrirGraphisme() {
   const [images, setImages] = useState<ShowcaseImage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<ShowcaseImage | null>(
+    null,
+  );
+  const [description, setDescription] = useState<GraphismeDescription | null>(
+    null,
+  );
 
   useEffect(() => {
     document.title = "Découvrir le Graphisme | Fabien Licata";
   }, []);
 
   useEffect(() => {
-    const fetchShowcaseImages = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/graphisme-showcase`);
-        if (response.ok) {
-          const data = await response.json();
+        const [showcaseResponse, descriptionResponse] = await Promise.all([
+          fetch(`${API_URL}/api/graphisme-showcase`),
+          fetch(`${API_URL}/api/graphisme-description`),
+        ]);
+
+        if (showcaseResponse.ok) {
+          const data = await showcaseResponse.json();
           setImages(data);
         }
+
+        if (descriptionResponse.ok) {
+          const data = await descriptionResponse.json();
+          setDescription(data);
+        }
       } catch (error) {
-        console.error("Erreur lors du chargement des images:", error);
+        console.error("Erreur lors du chargement des données:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchShowcaseImages();
+    fetchData();
   }, []);
 
   const getImageUrl = (image: string) => {
@@ -107,7 +129,8 @@ export default function DecouvrirGraphisme() {
                 <motion.div
                   key={showcase._id}
                   variants={itemVariants}
-                  className="group relative overflow-hidden rounded-2xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,233,146,0.4)]"
+                  className="group relative overflow-hidden rounded-2xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,233,146,0.4)] cursor-pointer"
+                  onClick={() => setSelectedImage(showcase)}
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img
@@ -116,6 +139,12 @@ export default function DecouvrirGraphisme() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="bg-[#ffe992]/90 p-4 rounded-full">
+                        <ZoomIn className="w-8 h-8 text-black" />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
@@ -147,12 +176,11 @@ export default function DecouvrirGraphisme() {
           >
             <div className="max-w-3xl mx-auto backdrop-blur-sm bg-black/20 border border-[#ffe992]/15 rounded-2xl p-8">
               <h2 className="text-2xl font-playfair-sc text-[#ffe992] mb-4 uppercase tracking-wider">
-                Le Graphisme selon Fabien
+                {description?.titre || "Le Graphisme selon Fabien"}
               </h2>
               <p className="text-gray-300 leading-relaxed">
-                Le graphisme est l'art de communiquer visuellement des idées, des émotions et des messages
-                à travers la composition, la typographie, les couleurs et les formes. C'est une discipline
-                qui allie créativité et technique pour créer des visuels impactants et mémorables.
+                {description?.description ||
+                  "Le graphisme est l'art de communiquer visuellement des idées, des émotions et des messages à travers la composition, la typographie, les couleurs et les formes. C'est une discipline qui allie créativité et technique pour créer des visuels impactants et mémorables."}
               </p>
             </div>
           </motion.div>
@@ -160,6 +188,14 @@ export default function DecouvrirGraphisme() {
       </main>
 
       <Footer />
+
+      <ImageZoomModal
+        isOpen={selectedImage !== null}
+        onClose={() => setSelectedImage(null)}
+        imageUrl={selectedImage ? getImageUrl(selectedImage.image) : ""}
+        imageAlt={selectedImage?.titre || ""}
+        titre={selectedImage?.titre}
+      />
     </div>
   );
 }

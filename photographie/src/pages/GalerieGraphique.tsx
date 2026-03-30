@@ -215,7 +215,7 @@ export default function GalerieGraphique() {
                     {/* Carte Glassmorphism */}
                     <div className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/30 hover:shadow-[0_0_30px_rgba(255,233,146,0.1)] hover:-translate-y-2 h-full flex flex-col">
                       {/* Image Section */}
-                      <div className="relative aspect-[3/4] overflow-hidden">
+                      <div className="relative w-full h-96 overflow-hidden bg-black/20">
                         <motion.img
                           whileHover={{ scale: 1.05 }}
                           transition={{ duration: 0.8, ease: "easeOut" }}
@@ -223,7 +223,7 @@ export default function GalerieGraphique() {
                           alt={oeuvre.titre}
                           loading="lazy"
                           decoding="async"
-                          className="w-full h-full object-cover transition-opacity duration-700"
+                          className="w-full h-full object-contain transition-opacity duration-700"
                           onContextMenu={preventRightClick}
                         />
 
