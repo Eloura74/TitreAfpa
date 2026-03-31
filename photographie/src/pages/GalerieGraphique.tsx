@@ -335,7 +335,7 @@ export default function GalerieGraphique() {
 
             {/* Conteneur principal : Image + Panneau latéral */}
             <div
-              className="flex flex-col md:flex-row items-center justify-center gap-4 max-w-[95vw] max-h-[90vh] w-full mb-4"
+              className="flex flex-col md:flex-row items-center justify-center gap-4 w-full h-full"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Image */}
@@ -345,12 +345,12 @@ export default function GalerieGraphique() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className="flex-shrink-0 max-w-full md:max-w-[65%] max-h-[70vh] md:max-h-[90vh] mb-4"
+                className="flex-1 flex items-center justify-center max-h-[85vh] md:max-h-[90vh]"
               >
                 <img
                   src={getWatermarkedImageUrl(oeuvres[lightboxIndex].image)}
                   alt={oeuvres[lightboxIndex].titre || "Oeuvre"}
-                  className="w-full h-full object-contain select-none"
+                  className="max-w-full max-h-full object-contain select-none"
                   onContextMenu={preventRightClick}
                 />
               </motion.div>
@@ -365,7 +365,7 @@ export default function GalerieGraphique() {
                   duration: 0.5,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className="flex-shrink-0 w-full md:w-[350px] rounded-2xl p-6 md:p-8 flex flex-col gap-4 max-h-[90vh]"
+                className="flex-shrink-0 w-full md:w-[350px] lg:w-[400px] rounded-2xl p-6 md:p-8 flex flex-col gap-4 max-h-[85vh] md:max-h-[90vh] overflow-y-auto"
               >
                 {/* En-tête : Numéro + Titre */}
                 <motion.div
