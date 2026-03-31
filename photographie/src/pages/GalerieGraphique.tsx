@@ -335,22 +335,24 @@ export default function GalerieGraphique() {
 
             {/* Conteneur principal : Image + Panneau latéral */}
             <div
-              className="flex flex-col md:flex-row items-center justify-center gap-4 w-full h-full"
+              className="flex flex-col md:flex-row items-stretch justify-center gap-4 w-full h-full px-4 md:px-8"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Image */}
+              {/* Image - Conteneur avec fond noir pour letterbox */}
               <motion.div
                 key={oeuvres[lightboxIndex].id}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className="flex-1 flex items-center justify-center max-h-[85vh] md:max-h-[90vh]"
+                className="flex-1 flex items-center justify-center bg-black"
+                style={{ maxHeight: "calc(100vh - 8rem)" }}
               >
                 <img
                   src={getWatermarkedImageUrl(oeuvres[lightboxIndex].image)}
                   alt={oeuvres[lightboxIndex].titre || "Oeuvre"}
-                  className="max-w-full max-h-full object-contain select-none"
+                  className="w-auto h-full object-contain select-none"
+                  style={{ maxWidth: "100%", maxHeight: "100%" }}
                   onContextMenu={preventRightClick}
                 />
               </motion.div>
@@ -365,7 +367,8 @@ export default function GalerieGraphique() {
                   duration: 0.5,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className="flex-shrink-0 w-full md:w-[350px] lg:w-[400px] rounded-2xl p-6 md:p-8 flex flex-col gap-4 max-h-[85vh] md:max-h-[90vh] overflow-y-auto"
+                className="flex-shrink-0 w-full md:w-[350px] lg:w-[400px] rounded-2xl p-6 md:p-8 flex flex-col gap-4 overflow-y-auto"
+                style={{ maxHeight: "calc(100vh - 8rem)" }}
               >
                 {/* En-tête : Numéro + Titre */}
                 <motion.div
