@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Eye, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, X, ZoomIn } from "lucide-react";
 import {
   getWatermarkedImageUrl,
   preventRightClick,
@@ -13,6 +13,7 @@ import Skeleton from "../components/Skeleton";
 import { useToast } from "../components/Toast";
 import { SelectionFormatModal } from "../components/galerie/SelectionFormatModal";
 import PageTitle from "../components/ui/PageTitle";
+import ImageZoomModal from "../components/ui/ImageZoomModal";
 
 // Contextes & Types
 import { usePanier } from "../store/panierContext";
@@ -67,6 +68,10 @@ export default function GalerieGraphique() {
     (TarifOeuvre | Tarif)[]
   >([]);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [zoomImage, setZoomImage] = useState<{
+    url: string;
+    titre: string;
+  } | null>(null);
 
   const { ajouterArticle } = usePanier();
   const { addToast } = useToast();
@@ -307,6 +312,21 @@ export default function GalerieGraphique() {
               <X size={32} />
             </button>
 
+            {/* Bouton Zoom */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoomImage({
+                  url: getWatermarkedImageUrl(oeuvres[lightboxIndex].image),
+                  titre: oeuvres[lightboxIndex].titre || "Oeuvre",
+                });
+              }}
+              className="absolute top-4 right-20 p-3 text-white bg-black/50 hover:bg-black/70 rounded-full backdrop-blur-sm transition-all z-50"
+              aria-label="Zoomer sur l'image"
+            >
+              <ZoomIn size={32} />
+            </button>
+
             {/* Navigation Gauche */}
             {lightboxIndex > 0 && (
               <button
@@ -351,9 +371,16 @@ export default function GalerieGraphique() {
                 <img
                   src={getWatermarkedImageUrl(oeuvres[lightboxIndex].image)}
                   alt={oeuvres[lightboxIndex].titre || "Oeuvre"}
-                  className="w-auto h-full object-contain select-none"
+                  className="w-auto h-full object-contain select-none cursor-zoom-in"
                   style={{ maxWidth: "100%", maxHeight: "100%" }}
                   onContextMenu={preventRightClick}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setZoomImage({
+                      url: getWatermarkedImageUrl(oeuvres[lightboxIndex].image),
+                      titre: oeuvres[lightboxIndex].titre || "Oeuvre",
+                    });
+                  }}
                 />
               </motion.div>
 
@@ -477,6 +504,15 @@ export default function GalerieGraphique() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Modal de Zoom */}
+      <ImageZoomModal
+        isOpen={zoomImage !== null}
+        onClose={() => setZoomImage(null)}
+        imageUrl={zoomImage?.url || ""}
+        imageAlt={zoomImage?.titre || ""}
+        titre={zoomImage?.titre}
+      />
 
       <Footer />
     </div>
