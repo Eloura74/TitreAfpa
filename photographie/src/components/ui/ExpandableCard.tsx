@@ -18,11 +18,25 @@ export const ExpandableCard: React.FC<ExpandableCardProps> = ({
   useEffect(() => {
     if (isExpanded) {
       document.body.style.overflow = "hidden";
+      // Cacher temporairement le navbar
+      const navbar = document.querySelector(".navbar-container");
+      if (navbar) {
+        (navbar as HTMLElement).style.display = "none";
+      }
     } else {
       document.body.style.overflow = "unset";
+      // Réafficher le navbar
+      const navbar = document.querySelector(".navbar-container");
+      if (navbar) {
+        (navbar as HTMLElement).style.display = "";
+      }
     }
     return () => {
       document.body.style.overflow = "unset";
+      const navbar = document.querySelector(".navbar-container");
+      if (navbar) {
+        (navbar as HTMLElement).style.display = "";
+      }
     };
   }, [isExpanded]);
 
@@ -46,7 +60,8 @@ export const ExpandableCard: React.FC<ExpandableCardProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+            style={{ zIndex: 99999 }}
             onClick={onClose}
           />
 
@@ -97,7 +112,8 @@ export const ExpandableCard: React.FC<ExpandableCardProps> = ({
               damping: 30,
               duration: 0.5,
             }}
-            className="fixed z-[101] overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a1a20] via-black/95 to-[#0f0f14] border-2 border-[#ffe992]/60 shadow-[0_0_60px_rgba(255,233,146,0.4)]"
+            className="fixed overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a1a20] via-black/95 to-[#0f0f14] border-2 border-[#ffe992]/60 shadow-[0_0_60px_rgba(255,233,146,0.4)]"
+            style={{ zIndex: 100000 }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
@@ -110,9 +126,40 @@ export const ExpandableCard: React.FC<ExpandableCardProps> = ({
             </button>
 
             {/* Content */}
-            <div className="h-full overflow-y-auto p-8 scrollbar-thin scrollbar-thumb-[#ffe992]/40 scrollbar-track-[#ffe992]/10">
+            <div
+              className="h-full overflow-y-auto p-8"
+              style={{
+                scrollbarWidth: "thin",
+                scrollbarColor:
+                  "rgba(255, 233, 146, 0.6) rgba(255, 233, 146, 0.05)",
+              }}
+            >
               {children}
             </div>
+
+            {/* Custom Scrollbar Styles */}
+            <style
+              dangerouslySetInnerHTML={{
+                __html: `
+                .fixed.z-\\[10000\\] > div::-webkit-scrollbar {
+                  width: 12px;
+                }
+                .fixed.z-\\[10000\\] > div::-webkit-scrollbar-track {
+                  background: rgba(255, 233, 146, 0.05);
+                  border-radius: 10px;
+                  margin: 8px 0;
+                }
+                .fixed.z-\\[10000\\] > div::-webkit-scrollbar-thumb {
+                  background: linear-gradient(180deg, rgba(255, 233, 146, 0.6), rgba(255, 233, 146, 0.3));
+                  border-radius: 10px;
+                  border: 2px solid rgba(0, 0, 0, 0.2);
+                }
+                .fixed.z-\\[10000\\] > div::-webkit-scrollbar-thumb:hover {
+                  background: linear-gradient(180deg, rgba(255, 233, 146, 0.8), rgba(255, 233, 146, 0.5));
+                }
+              `,
+              }}
+            />
           </motion.div>
         </>
       )}

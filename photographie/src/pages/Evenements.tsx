@@ -310,15 +310,15 @@ export default function Evenements() {
             {/* Image Section */}
             <div className="md:w-1/2 flex flex-col gap-4">
               {expandedEvent.image ? (
-                <div className="relative aspect-video overflow-hidden rounded-xl">
+                <div className="relative w-full h-[400px] overflow-hidden rounded-xl bg-black">
                   <img
                     src={expandedEvent.image}
                     alt={expandedEvent.titre}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </div>
               ) : (
-                <div className="relative aspect-video overflow-hidden rounded-xl bg-white/5 flex items-center justify-center">
+                <div className="relative w-full h-[400px] overflow-hidden rounded-xl bg-white/5 flex items-center justify-center">
                   <MapPin className="text-white/20 w-24 h-24" />
                 </div>
               )}

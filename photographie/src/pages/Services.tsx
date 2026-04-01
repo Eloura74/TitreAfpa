@@ -125,11 +125,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         <div className="relative flex flex-col md:flex-row gap-8 h-full">
           {/* Images Section */}
           <div className="md:w-1/2 flex flex-col gap-4">
-            <div className="relative aspect-video overflow-hidden rounded-xl">
+            <div className="relative w-full h-[400px] overflow-hidden rounded-xl bg-black">
               <img
                 src={service.images[0] || "/placeholder-service.jpg"}
                 alt={service.titre}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             </div>
             {service.images.length > 1 && (
