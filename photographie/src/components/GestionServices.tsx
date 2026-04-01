@@ -11,6 +11,7 @@ import {
   X,
   Upload,
 } from "lucide-react";
+import { CustomizationPanel } from "./admin/CustomizationPanel";
 
 const API_URL = `${BASE_API_URL}/api/services`;
 
@@ -23,6 +24,25 @@ export default function GestionServices() {
     images: [],
     categorie: "Autre",
   });
+
+  const [customization, setCustomization] = useState({
+    accentColor: "#ffe992",
+    backgroundColor: null as string | null,
+    badge: {
+      text: null as string | null,
+      color: "#ffe992",
+      position: "top-right" as "top-left" | "top-right",
+    },
+    typography: {
+      titleFont: "default" as "default" | "playfair" | "cinzel" | "montserrat",
+      titleSize: "medium" as "small" | "medium" | "large",
+      titleStyle: "normal" as "normal" | "bold" | "italic",
+    },
+    displayOrder: 0,
+    icon: null as string | null,
+    hoverEffect: "zoom" as "none" | "zoom" | "rotate" | "glow",
+  });
+
   const [editId, setEditId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +71,7 @@ export default function GestionServices() {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -68,7 +88,7 @@ export default function GestionServices() {
         // Étape 1: Obtenir la signature du backend
         const signRes = await fetch(
           `${BASE_API_URL}/api/upload-cloudinary/sign`,
-          { method: "GET", credentials: "include" }
+          { method: "GET", credentials: "include" },
         );
 
         if (!signRes.ok)
@@ -87,7 +107,7 @@ export default function GestionServices() {
 
         const uploadRes = await fetch(
           `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
-          { method: "POST", body: formData }
+          { method: "POST", body: formData },
         );
 
         const uploadData = await uploadRes.json();
@@ -120,11 +140,12 @@ export default function GestionServices() {
     setSuccess(null);
 
     try {
+      const dataToSend = { ...form, customization };
       if (editId) {
-        await axios.put(`${API_URL}/${editId}`, form);
+        await axios.put(`${API_URL}/${editId}`, dataToSend);
         setSuccess("Service modifié avec succès.");
       } else {
-        await axios.post(API_URL, form);
+        await axios.post(API_URL, dataToSend);
         setSuccess("Service créé avec succès.");
       }
       loadServices();
@@ -141,6 +162,47 @@ export default function GestionServices() {
     setForm(service);
     setImagePreview(service.images);
     setEditId(service._id || service.id || null);
+
+    // Charger la personnalisation si elle existe
+    if (service.customization) {
+      setCustomization({
+        accentColor: service.customization.accentColor || "#ffe992",
+        backgroundColor: service.customization.backgroundColor || null,
+        badge: {
+          text: service.customization.badge?.text || null,
+          color: service.customization.badge?.color || "#ffe992",
+          position: service.customization.badge?.position || "top-right",
+        },
+        typography: {
+          titleFont: service.customization.typography?.titleFont || "default",
+          titleSize: service.customization.typography?.titleSize || "medium",
+          titleStyle: service.customization.typography?.titleStyle || "normal",
+        },
+        displayOrder: service.customization.displayOrder || 0,
+        icon: service.customization.icon || null,
+        hoverEffect: service.customization.hoverEffect || "zoom",
+      });
+    } else {
+      // Réinitialiser aux valeurs par défaut
+      setCustomization({
+        accentColor: "#ffe992",
+        backgroundColor: null,
+        badge: {
+          text: null,
+          color: "#ffe992",
+          position: "top-right",
+        },
+        typography: {
+          titleFont: "default",
+          titleSize: "medium",
+          titleStyle: "normal",
+        },
+        displayOrder: 0,
+        icon: null,
+        hoverEffect: "zoom",
+      });
+    }
+
     setError(null);
     setSuccess(null);
   };
@@ -322,6 +384,14 @@ export default function GestionServices() {
                   ))}
                 </div>
               )}
+
+              {/* Panneau de personnalisation */}
+              <div className="pt-4 border-t border-white/5">
+                <CustomizationPanel
+                  customization={customization}
+                  onChange={setCustomization}
+                />
+              </div>
 
               <div className="flex gap-3 pt-4 border-t border-white/5">
                 <button

@@ -24,8 +24,11 @@ exports.getAll = async (req, res) => {
 // ***************************
 exports.getOne = async (req, res) => {
   try {
-    const evenement = await Evenement.findById(req.params.id).populate("photos");
-    if (!evenement) return res.status(404).json({ erreur: "Événement non trouvé" });
+    const evenement = await Evenement.findById(req.params.id).populate(
+      "photos",
+    );
+    if (!evenement)
+      return res.status(404).json({ erreur: "Événement non trouvé" });
 
     // Si public, accès autorisé
     if (evenement.visibilite === "public") {
@@ -34,11 +37,17 @@ exports.getOne = async (req, res) => {
 
     // Si privé, vérification des droits
     // Admin ou le client assigné
-    if (req.user && (req.user.role === "admin" || (evenement.client && evenement.client.toString() === req.user.id))) {
+    if (
+      req.user &&
+      (req.user.role === "admin" ||
+        (evenement.client && evenement.client.toString() === req.user.id))
+    ) {
       return res.json(evenement);
     }
 
-    return res.status(403).json({ erreur: "Accès refusé à cet événement privé." });
+    return res
+      .status(403)
+      .json({ erreur: "Accès refusé à cet événement privé." });
   } catch (err) {
     res.status(500).json({ erreur: err.message });
   }
@@ -49,7 +58,9 @@ exports.getOne = async (req, res) => {
 // ***************************
 exports.getMyEvents = async (req, res) => {
   try {
-    const evenements = await Evenement.find({ client: req.user.id }).populate("photos");
+    const evenements = await Evenement.find({ client: req.user.id }).populate(
+      "photos",
+    );
     res.json(evenements);
   } catch (err) {
     res.status(500).json({ erreur: err.message });
@@ -69,13 +80,23 @@ exports.create = async (req, res) => {
       if (clientUser) {
         data.client = clientUser._id;
       } else {
-        return res.status(400).json({ erreur: `Client avec l'email ${data.clientEmail} introuvable.` });
+        return res.status(400).json({
+          erreur: `Client avec l'email ${data.clientEmail} introuvable.`,
+        });
       }
       delete data.clientEmail;
     }
 
+    console.log(
+      "[EVENEMENT CREATE] Données reçues:",
+      JSON.stringify(data, null, 2),
+    );
     const nouvelEvenement = new Evenement(data);
     await nouvelEvenement.save();
+    console.log(
+      "[EVENEMENT CREATE] Événement sauvegardé avec customization:",
+      nouvelEvenement.customization,
+    );
     res.status(201).json(nouvelEvenement);
   } catch (err) {
     console.error("Erreur création événement:", err);
@@ -102,7 +123,7 @@ exports.update = async (req, res) => {
     const evenementModifie = await Evenement.findByIdAndUpdate(
       req.params.id,
       data,
-      { new: true }
+      { new: true },
     );
     res.json(evenementModifie);
   } catch (err) {
@@ -117,22 +138,66 @@ exports.addPhotos = async (req, res) => {
   try {
     const { photoIds } = req.body; // Tableau d'IDs de photos
     if (!photoIds || !Array.isArray(photoIds)) {
-      return res.status(400).json({ erreur: "Liste d'IDs de photos invalide." });
+      return res
+        .status(400)
+        .json({ erreur: "Liste d'IDs de photos invalide." });
     }
 
-    const evenement = await Evenement.findById(req.params.id);
-    if (!evenement) return res.status(404).json({ erreur: "Événement non trouvé" });
-
-    // Ajout des photos sans doublons
-    photoIds.forEach(id => {
-      if (!evenement.photos.includes(id)) {
-        evenement.photos.push(id);
-      }
+    // Étape 1: Mettre à jour l'événement
+    await Evenement.findByIdAndUpdate(req.params.id, {
+      $addToSet: { photos: { $each: photoIds } },
     });
 
-    await evenement.save();
-    res.json(evenement);
+    // Étape 2: Récupérer l'événement avec populate (requête séparée)
+    const evenementPopulated = await Evenement.findById(req.params.id)
+      .populate("photos")
+      .exec();
+
+    if (!evenementPopulated) {
+      return res.status(404).json({ erreur: "Événement non trouvé" });
+    }
+
+    console.log(
+      "[ADD PHOTOS] Photos après populate:",
+      evenementPopulated.photos,
+    );
+    console.log(
+      "[ADD PHOTOS] Type du premier:",
+      typeof evenementPopulated.photos[0],
+    );
+    console.log("[ADD PHOTOS] Premier élément:", evenementPopulated.photos[0]);
+
+    res.json(evenementPopulated);
   } catch (err) {
+    res.status(500).json({ erreur: err.message });
+  }
+};
+
+// ***************************
+// Supprimer une photo d'un événement
+// ***************************
+exports.removePhoto = async (req, res) => {
+  try {
+    const { id, photoId } = req.params;
+
+    // Étape 1: Mettre à jour l'événement
+    await Evenement.findByIdAndUpdate(id, { $pull: { photos: photoId } });
+
+    // Étape 2: Récupérer l'événement avec populate (requête séparée)
+    const evenementPopulated = await Evenement.findById(id)
+      .populate("photos")
+      .exec();
+
+    if (!evenementPopulated) {
+      return res.status(404).json({ erreur: "Événement non trouvé" });
+    }
+
+    res.json({
+      message: "Photo supprimée avec succès",
+      evenement: evenementPopulated,
+    });
+  } catch (err) {
+    console.error("Erreur suppression photo:", err);
     res.status(500).json({ erreur: err.message });
   }
 };

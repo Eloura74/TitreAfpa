@@ -27,10 +27,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   onReserve,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [cardPosition, setCardPosition] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  } | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const [cardPosition, setCardPosition] = useState<
-    { top: number; left: number; width: number; height: number } | undefined
-  >();
 
   const handleExpand = () => {
     if (cardRef.current) {
@@ -41,21 +44,63 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         width: rect.width,
         height: rect.height,
       });
+      setIsExpanded(true);
     }
-    setIsExpanded(true);
   };
+
+  // Récupérer les personnalisations
+  const accentColor = service.customization?.accentColor || "#ffe992";
+  const badge = service.customization?.badge;
+  const titleFont = service.customization?.typography?.titleFont || "default";
+  const titleSize = service.customization?.typography?.titleSize || "medium";
+
+  const fontClass = {
+    default: "font-playfair-sc",
+    playfair: "font-serif",
+    cinzel: "font-serif",
+    montserrat: "font-sans",
+  }[titleFont];
+
+  const sizeClass = {
+    small: "text-base",
+    medium: "text-lg",
+    large: "text-xl",
+  }[titleSize];
 
   return (
     <>
       <motion.div
         ref={cardRef}
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ y: 20, opacity: 0 }}
+        whileInView={{
+          y: 0,
+          opacity: 1,
+          transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+        }}
         viewport={{ once: true }}
-        transition={{ delay: index * 0.1 }}
-        className="relative h-[550px]"
+        className="group relative"
       >
-        <div className="group h-full flex flex-col relative overflow-hidden rounded-xl border border-white/10 hover:border-[#ffe992]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(255,233,146,0.6)]">
+        <div
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-black/60 via-black/80 to-black/90 border transition-all duration-500 shadow-xl flex flex-col h-full"
+          style={{
+            borderColor: `${accentColor}20`,
+            boxShadow: `0 0 40px ${accentColor}30`,
+          }}
+        >
+          {/* Badge personnalisé */}
+          {badge?.text && (
+            <div
+              className={`absolute ${badge.position === "top-left" ? "top-4 left-4" : "top-4 right-4"} z-10 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider`}
+              style={{
+                backgroundColor: `${badge.color}40`,
+                color: badge.color,
+                border: `1px solid ${badge.color}60`,
+              }}
+            >
+              {badge.text}
+            </div>
+          )}
+
           {/* Image */}
           <div className="relative w-full h-64 overflow-hidden bg-black/20">
             <img
@@ -68,11 +113,20 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 
           {/* Contenu */}
           <div className="relative flex flex-col px-4 py-3 bg-gradient-to-b from-black/30 to-black/40 flex-1">
-            <div className="absolute inset-0 bg-gradient-to-t from-[#ffe992]/5 via-transparent to-black opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            <div
+              className="absolute inset-0 bg-gradient-to-t via-transparent to-black opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+              style={{ backgroundColor: `${accentColor}05` }}
+            />
 
             <div className="relative z-10 flex flex-col gap-2 h-full">
               {/* Titre */}
-              <h3 className="text-lg font-playfair-sc uppercase tracking-wider text-[#ffe992] font-bold leading-tight text-center drop-shadow-[0_0_20px_rgba(255,233,146,0.8)] animate-pulse-subtle">
+              <h3
+                className={`${sizeClass} ${fontClass} uppercase tracking-wider font-bold leading-tight text-center animate-pulse-subtle`}
+                style={{
+                  color: accentColor,
+                  textShadow: `0 0 20px ${accentColor}80`,
+                }}
+              >
                 {service.titre}
               </h3>
 
@@ -81,7 +135,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                 <span className="text-xs text-gray-400 uppercase tracking-wider block mb-1">
                   À partir de
                 </span>
-                <span className="text-xl text-[#ffe992] font-bold">
+                <span
+                  className="text-xl font-bold"
+                  style={{ color: accentColor }}
+                >
                   {service.prix > 0 ? `${service.prix}€` : "Sur devis"}
                 </span>
               </div>
@@ -95,14 +152,29 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
               <div className="flex flex-col gap-2 mt-2">
                 <button
                   onClick={handleExpand}
-                  className="w-full bg-gradient-to-r from-[#ffe992]/20 to-[#ffe992]/30 hover:from-[#ffe992]/30 hover:to-[#ffe992]/40 text-[#ffe992] text-xs font-bold uppercase tracking-wider py-2 rounded-lg border border-[#ffe992]/40 hover:border-[#ffe992]/70 transition-all duration-300 flex items-center justify-center gap-2"
+                  className="w-full text-xs font-bold uppercase tracking-wider py-2 rounded-lg transition-all duration-300 flex items-center justify-center gap-2"
+                  style={{
+                    background: `linear-gradient(to right, ${accentColor}20, ${accentColor}30)`,
+                    color: accentColor,
+                    border: `1px solid ${accentColor}40`,
+                  }}
                 >
                   <Eye className="w-4 h-4" />
                   <span>Voir plus</span>
                 </button>
                 <button
                   onClick={onReserve}
-                  className="w-full bg-gradient-to-r from-[#ffe992] to-[#f4d677] text-black text-xs font-bold uppercase tracking-wider py-2.5 rounded-lg hover:from-[#f4d677] hover:to-[#ffe992] transition-all duration-300 shadow-[0_4px_12px_rgba(255,233,146,0.4)] hover:shadow-[0_6px_16px_rgba(255,233,146,0.6)] hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full text-black text-xs font-bold uppercase tracking-wider py-2.5 rounded-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                  style={{
+                    background: `linear-gradient(to right, ${accentColor}, ${accentColor}dd)`,
+                    boxShadow: `0 4px 12px ${accentColor}40`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = `0 6px 16px ${accentColor}60`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = `0 4px 12px ${accentColor}40`;
+                  }}
                 >
                   Réserver
                 </button>

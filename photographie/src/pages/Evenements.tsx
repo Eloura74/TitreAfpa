@@ -48,6 +48,27 @@ const EventCard: React.FC<EventCardProps> = ({ event, onExpand }) => {
     }
   };
 
+  // Récupérer les personnalisations ou utiliser les valeurs par défaut
+  const accentColor = event.customization?.accentColor || "#ffe992";
+  const badge = event.customization?.badge;
+  const titleFont = event.customization?.typography?.titleFont || "default";
+  const titleSize = event.customization?.typography?.titleSize || "medium";
+
+  // Mapping des polices
+  const fontClass = {
+    default: "font-serif",
+    playfair: "font-serif",
+    cinzel: "font-serif",
+    montserrat: "font-sans",
+  }[titleFont];
+
+  // Mapping des tailles
+  const sizeClass = {
+    small: "text-base",
+    medium: "text-lg",
+    large: "text-xl",
+  }[titleSize];
+
   return (
     <motion.div
       ref={cardRef}
@@ -61,7 +82,27 @@ const EventCard: React.FC<EventCardProps> = ({ event, onExpand }) => {
       layout
       className="group relative flex flex-col h-full"
     >
-      <div className="h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-4 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/30 hover:shadow-[0_0_30px_rgba(255,233,146,0.1)]">
+      <div
+        className="h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border p-4 transition-all duration-500 hover:bg-white/10"
+        style={{
+          borderColor: `${accentColor}20`,
+          boxShadow: `0 0 30px ${accentColor}10`,
+        }}
+      >
+        {/* Badge personnalisé */}
+        {badge?.text && (
+          <div
+            className={`absolute ${badge.position === "top-left" ? "top-4 left-4" : "top-4 right-4"} z-10 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider`}
+            style={{
+              backgroundColor: `${badge.color}40`,
+              color: badge.color,
+              border: `1px solid ${badge.color}60`,
+            }}
+          >
+            {badge.text}
+          </div>
+        )}
+
         {/* Image Section avec Overlay */}
         <div className="relative overflow-hidden aspect-[3/4] mb-6 rounded-xl">
           {event.image ? (
@@ -90,24 +131,30 @@ const EventCard: React.FC<EventCardProps> = ({ event, onExpand }) => {
         {/* Content Section - Épuré */}
         <div className="flex flex-col items-center text-center space-y-3">
           <div className="flex flex-col items-center gap-2">
-            <h3 className="text-lg font-serif text-[#ffe992] tracking-wide group-hover:text-white transition-colors duration-300">
+            <h3
+              className={`${sizeClass} ${fontClass} tracking-wide group-hover:text-white transition-colors duration-300`}
+              style={{ color: accentColor }}
+            >
               {event.titre}
             </h3>
             <div className="flex flex-wrap justify-center gap-3 text-white/60 text-[10px] tracking-[0.2em] uppercase">
               <div className="flex items-center gap-1">
-                <MapPin size={12} className="text-[#ffe992]" />
+                <MapPin size={12} style={{ color: accentColor }} />
                 <span>{event.lieu || "Lieu non renseigné"}</span>
               </div>
               {event.theme && (
                 <div className="flex items-center gap-1">
-                  <Target size={12} className="text-[#ffe992]" />
+                  <Target size={12} style={{ color: accentColor }} />
                   <span>{event.theme}</span>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="w-12 h-[1px] bg-white/10 group-hover:bg-[#ffe992]/50 transition-colors duration-500" />
+          <div
+            className="w-12 h-[1px] transition-colors duration-500"
+            style={{ backgroundColor: `${accentColor}20` }}
+          />
 
           <span className="text-white/40 text-xs font-light tracking-widest">
             {new Date(event.dateDebut).toLocaleDateString()}
@@ -116,7 +163,20 @@ const EventCard: React.FC<EventCardProps> = ({ event, onExpand }) => {
           {/* Bouton Voir plus */}
           <button
             onClick={handleExpand}
-            className="mt-4 w-full bg-gradient-to-r from-[#ffe992]/20 to-[#ffe992]/30 hover:from-[#ffe992]/30 hover:to-[#ffe992]/40 text-[#ffe992] text-xs font-bold uppercase tracking-wider py-2 rounded-lg border border-[#ffe992]/40 hover:border-[#ffe992]/70 transition-all duration-300 flex items-center justify-center gap-2"
+            className="mt-4 w-full text-xs font-bold uppercase tracking-wider py-2 rounded-lg transition-all duration-300 flex items-center justify-center gap-2"
+            style={{
+              background: `linear-gradient(to right, ${accentColor}20, ${accentColor}30)`,
+              color: accentColor,
+              border: `1px solid ${accentColor}40`,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = `linear-gradient(to right, ${accentColor}30, ${accentColor}40)`;
+              e.currentTarget.style.borderColor = `${accentColor}70`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = `linear-gradient(to right, ${accentColor}20, ${accentColor}30)`;
+              e.currentTarget.style.borderColor = `${accentColor}40`;
+            }}
           >
             <Eye className="w-4 h-4" />
             <span>Voir plus</span>
@@ -166,11 +226,14 @@ export default function Evenements() {
             location?: string;
             place?: string;
             theme?: string;
-            photos?: string[];
+            photos?: Array<{ _id: string; src: string } | string>;
           }) => ({
             ...ev,
             id: ev._id || ev.id || "",
             lieu: ev.lieu || ev.location || ev.place || "",
+            // Convertir les objets Photo en URLs
+            photos:
+              ev.photos?.map((p) => (typeof p === "string" ? p : p.src)) || [],
           }),
         );
 
@@ -324,15 +387,15 @@ export default function Evenements() {
               )}
               {expandedEvent.photos && expandedEvent.photos.length > 0 && (
                 <div className="grid grid-cols-3 gap-2">
-                  {expandedEvent.photos.slice(0, 3).map((photo, idx) => (
+                  {expandedEvent.photos.slice(0, 6).map((photo, idx) => (
                     <div
                       key={idx}
-                      className="relative aspect-video overflow-hidden rounded-lg"
+                      className="relative aspect-video overflow-hidden rounded-lg bg-black"
                     >
                       <img
                         src={photo}
-                        alt={`${expandedEvent.titre} ${idx + 2}`}
-                        className="w-full h-full object-cover"
+                        alt={`${expandedEvent.titre} ${idx + 1}`}
+                        className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                       />
                     </div>
                   ))}

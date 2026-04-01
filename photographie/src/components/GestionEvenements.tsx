@@ -18,6 +18,7 @@ import {
   X,
   Upload,
 } from "lucide-react";
+import { CustomizationPanel } from "./admin/CustomizationPanel";
 
 const API_URL = `${BASE_API_URL}/api/evenements`;
 
@@ -35,6 +36,24 @@ export default function GestionEvenements() {
     theme: "",
     visibilite: "public",
     clientEmail: "",
+  });
+
+  const [customization, setCustomization] = useState({
+    accentColor: "#ffe992",
+    backgroundColor: null,
+    badge: {
+      text: null,
+      color: "#ffe992",
+      position: "top-right" as "top-left" | "top-right",
+    },
+    typography: {
+      titleFont: "default" as "default" | "playfair" | "cinzel" | "montserrat",
+      titleSize: "medium" as "small" | "medium" | "large",
+      titleStyle: "normal" as "normal" | "bold" | "italic",
+    },
+    displayOrder: 0,
+    icon: null,
+    hoverEffect: "zoom" as "none" | "zoom" | "rotate" | "glow",
   });
 
   const [tarifs, setTarifs] = useState<Tarif[]>([]);
@@ -167,30 +186,11 @@ export default function GestionEvenements() {
   const handlePhotosUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!editId || !e.target.files) return;
 
-    if (selectedTariffs.length === 0) {
-      alert("Veuillez sélectionner au moins un tarif à appliquer aux photos.");
-      return;
-    }
-
     setLoading(true);
     const files = Array.from(e.target.files);
     const uploadedPhotoIds: string[] = [];
 
     try {
-      const tarifsToApply = selectedTariffs
-        .map((id) => {
-          const t = tarifs.find((tarif) => tarif.id === id || tarif._id === id);
-          return t
-            ? {
-                id: t.id || t._id,
-                format: t.format,
-                support: t.support,
-                prix: t.prix,
-              }
-            : null;
-        })
-        .filter(Boolean);
-
       for (const file of files) {
         // Étape 1: Obtenir la signature du backend
         const signRes = await fetch(
@@ -228,7 +228,7 @@ export default function GestionEvenements() {
             src: imageUrl,
             titre: file.name,
             categorie: "Evenement",
-            tarifs: tarifsToApply,
+            tarifs: [],
             alt: `Photo événement ${form.titre}`,
             description: `Photo de l'événement ${form.titre}`,
           },
@@ -243,7 +243,7 @@ export default function GestionEvenements() {
       }
 
       if (uploadedPhotoIds.length > 0) {
-        await axios.post(
+        const response = await axios.post(
           `${API_URL}/${editId}/photos`,
           { photoIds: uploadedPhotoIds },
           {
@@ -251,7 +251,21 @@ export default function GestionEvenements() {
           },
         );
 
+        // Recharger la liste ET mettre à jour le formulaire avec l'événement modifié
+        console.log("Response après ajout:", response.data);
+        console.log("Photos dans response:", response.data.photos);
+        console.log("Type du premier élément:", typeof response.data.photos[0]);
+        console.log(
+          "Premier élément détaillé:",
+          JSON.stringify(response.data.photos[0], null, 2),
+        );
         loadEvenements();
+        if (response.data && response.data.photos) {
+          setForm({
+            ...form,
+            photos: response.data.photos,
+          });
+        }
         setSuccess(`${uploadedPhotoIds.length} photos ajoutées avec succès !`);
       }
     } catch (err) {
@@ -307,8 +321,8 @@ export default function GestionEvenements() {
           );
       }
 
-      // 2. Inclure l'URL Cloudinary dans les données
-      const finalData = { ...dataToSend, image: imageUrl };
+      // 2. Inclure l'URL Cloudinary et la personnalisation dans les données
+      const finalData = { ...dataToSend, image: imageUrl, customization };
 
       if (editId) {
         await axios.put(`${API_URL}/${editId}`, finalData, {
@@ -349,8 +363,49 @@ export default function GestionEvenements() {
       visibilite: evt.visibilite || "public",
       clientEmail: "",
     });
+
+    // Charger la personnalisation si elle existe
+    if (evt.customization) {
+      setCustomization({
+        accentColor: evt.customization.accentColor || "#ffe992",
+        backgroundColor: evt.customization.backgroundColor || null,
+        badge: {
+          text: evt.customization.badge?.text || null,
+          color: evt.customization.badge?.color || "#ffe992",
+          position: evt.customization.badge?.position || "top-right",
+        },
+        typography: {
+          titleFont: evt.customization.typography?.titleFont || "default",
+          titleSize: evt.customization.typography?.titleSize || "medium",
+          titleStyle: evt.customization.typography?.titleStyle || "normal",
+        },
+        displayOrder: evt.customization.displayOrder || 0,
+        icon: evt.customization.icon || null,
+        hoverEffect: evt.customization.hoverEffect || "zoom",
+      });
+    } else {
+      // Réinitialiser aux valeurs par défaut
+      setCustomization({
+        accentColor: "#ffe992",
+        backgroundColor: null,
+        badge: {
+          text: null,
+          color: "#ffe992",
+          position: "top-right",
+        },
+        typography: {
+          titleFont: "default",
+          titleSize: "medium",
+          titleStyle: "normal",
+        },
+        displayOrder: 0,
+        icon: null,
+        hoverEffect: "zoom",
+      });
+    }
+
     setImagePreview(evt.image || "");
-    setEditId(evt.id || null);
+    setEditId(evt._id || evt.id || null);
     setError(null);
     setSuccess(null);
   };
@@ -604,6 +659,14 @@ export default function GestionEvenements() {
                 </div>
               )}
 
+              {/* Panneau de personnalisation */}
+              <div className="pt-4 border-t border-white/5">
+                <CustomizationPanel
+                  customization={customization}
+                  onChange={setCustomization}
+                />
+              </div>
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
@@ -633,44 +696,9 @@ export default function GestionEvenements() {
               </h3>
 
               <div className="space-y-4">
-                <div className="bg-[#1a1a20] p-4 rounded-lg border border-white/5">
-                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-                    1. Tarifs applicables
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-32 overflow-y-auto custom-scrollbar">
-                    {tarifs.map((t) => (
-                      <label
-                        key={t.id || t._id}
-                        className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer hover:bg-white/5 p-2 rounded transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedTariffs.includes(
-                            t.id || t._id || "",
-                          )}
-                          onChange={(e) => {
-                            const id = t.id || t._id || "";
-                            if (e.target.checked)
-                              setSelectedTariffs([...selectedTariffs, id]);
-                            else
-                              setSelectedTariffs(
-                                selectedTariffs.filter((tid) => tid !== id),
-                              );
-                          }}
-                          className="rounded border-gray-600 bg-black/50 text-[#ffe992] focus:ring-[#ffe992]"
-                        />
-                        <span>
-                          {t.nom}{" "}
-                          <span className="text-gray-500">({t.prix}€)</span>
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
                 <div>
                   <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                    2. Ajouter des photos
+                    Ajouter des photos
                   </h4>
                   <div className="relative group">
                     <input
@@ -693,13 +721,78 @@ export default function GestionEvenements() {
                 </div>
 
                 {form.photos && form.photos.length > 0 && (
-                  <div className="p-3 bg-white/5 rounded-lg text-center">
-                    <p className="text-sm text-[#ffe992] font-bold">
-                      {form.photos.length} photos
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      associées à cet événement
-                    </p>
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                      Photos associées ({form.photos.length})
+                    </h4>
+                    <div className="grid grid-cols-3 gap-2">
+                      {form.photos.map((photo, idx) => {
+                        const photoId =
+                          typeof photo === "string"
+                            ? photo
+                            : (photo as any)?._id || (photo as any)?.id;
+                        const photoSrc =
+                          typeof photo === "string"
+                            ? photo
+                            : (photo as any)?.src;
+
+                        return (
+                          <div
+                            key={photoId || idx}
+                            className="relative aspect-square overflow-hidden rounded-lg bg-black group"
+                          >
+                            {photoSrc ? (
+                              <img
+                                src={photoSrc}
+                                alt={`Photo ${idx + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-white/5">
+                                <ImageIcon className="text-white/40 w-8 h-8" />
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (
+                                  window.confirm(
+                                    "Supprimer cette photo de l'événement ?",
+                                  )
+                                ) {
+                                  try {
+                                    const response = await axios.delete(
+                                      `${API_URL}/${editId}/photos/${photoId}`,
+                                      { withCredentials: true },
+                                    );
+
+                                    // Mettre à jour immédiatement le formulaire
+                                    if (response.data?.evenement) {
+                                      setForm({
+                                        ...form,
+                                        photos:
+                                          response.data.evenement.photos || [],
+                                      });
+                                    }
+
+                                    loadEvenements();
+                                    setSuccess("Photo supprimée avec succès !");
+                                  } catch (err) {
+                                    setError("Erreur lors de la suppression.");
+                                  }
+                                }
+                              }}
+                              className="absolute top-1 right-1 bg-red-500/80 hover:bg-red-500 text-white p-1.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white text-[10px] text-center py-1.5">
+                              Photo {idx + 1}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </div>

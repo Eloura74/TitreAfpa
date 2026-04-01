@@ -56,6 +56,78 @@ const evenementSchema = new mongoose.Schema({
     enum: ["public", "prive"],
     default: "public",
   },
+
+  // Champ "theme" : thème de l'événement (optionnel)
+  theme: {
+    type: String,
+    required: false,
+  },
+
+  // ========================================
+  // CHAMPS DE PERSONNALISATION (OPTIONNELS)
+  // ========================================
+  customization: {
+    // Couleur d'accentuation (badge, bordures)
+    accentColor: {
+      type: String,
+      default: "#ffe992", // Couleur dorée par défaut
+    },
+    // Couleur de fond personnalisée
+    backgroundColor: {
+      type: String,
+      default: null, // null = utiliser le style par défaut
+    },
+    // Badge personnalisé
+    badge: {
+      text: {
+        type: String,
+        default: null, // Ex: "NOUVEAU", "POPULAIRE"
+      },
+      color: {
+        type: String,
+        default: "#ffe992",
+      },
+      position: {
+        type: String,
+        enum: ["top-left", "top-right"],
+        default: "top-right",
+      },
+    },
+    // Typographie
+    typography: {
+      titleFont: {
+        type: String,
+        enum: ["default", "playfair", "cinzel", "montserrat"],
+        default: "default",
+      },
+      titleSize: {
+        type: String,
+        enum: ["small", "medium", "large"],
+        default: "medium",
+      },
+      titleStyle: {
+        type: String,
+        enum: ["normal", "bold", "italic"],
+        default: "normal",
+      },
+    },
+    // Ordre d'affichage (priorité)
+    displayOrder: {
+      type: Number,
+      default: 0, // 0 = ordre par défaut, plus élevé = affiché en premier
+    },
+    // Icône personnalisée
+    icon: {
+      type: String,
+      default: null, // Nom de l'icône Lucide
+    },
+    // Animation au survol
+    hoverEffect: {
+      type: String,
+      enum: ["none", "zoom", "rotate", "glow"],
+      default: "zoom",
+    },
+  },
 });
 
 // ****************************************

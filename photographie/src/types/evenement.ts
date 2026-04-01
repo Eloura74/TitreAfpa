@@ -20,7 +20,7 @@ export interface Evenement {
   dateFin: string;
   lieu?: string;
   image?: string;
-  photos?: string[];
+  photos?: Array<string | { _id?: string; id?: string; src: string }>;
   theme?: string;
   visibilite?: "public" | "prive";
   client?:
@@ -37,4 +37,22 @@ export interface Evenement {
   maxTelechargementTotal?: number;
   nbTelechargementTotal?: number;
   statut?: "actif" | "expire" | "suspendu";
+
+  customization?: {
+    accentColor?: string;
+    backgroundColor?: string | null;
+    badge?: {
+      text?: string | null;
+      color?: string;
+      position?: "top-left" | "top-right";
+    };
+    typography?: {
+      titleFont?: "default" | "playfair" | "cinzel" | "montserrat";
+      titleSize?: "small" | "medium" | "large";
+      titleStyle?: "normal" | "bold" | "italic";
+    };
+    displayOrder?: number;
+    icon?: string | null;
+    hoverEffect?: "none" | "zoom" | "rotate" | "glow";
+  };
 }

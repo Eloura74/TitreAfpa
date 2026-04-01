@@ -49,6 +49,12 @@ router.post("/", auth, isAdmin, ctrl.create);
 router.post("/:id/photos", auth, isAdmin, ctrl.addPhotos);
 
 // **************************************
+// DELETE /api/evenements/:id/photos/:photoId
+// **************************************
+// Route protégée : permet à un admin de supprimer une photo d'un événement
+router.delete("/:id/photos/:photoId", auth, isAdmin, ctrl.removePhoto);
+
+// **************************************
 // PUT /api/evenements/:id
 // **************************************
 // Route protégée : permet à un admin de modifier un événement existant via son ID
