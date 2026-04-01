@@ -23,16 +23,19 @@ interface ServiceCardProps {
 
 const ServiceCard: React.FC<ServiceCardProps> = ({
   service,
-  index,
+  index: _index,
   onReserve,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [cardPosition, setCardPosition] = useState<{
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-  } | null>(null);
+  const [cardPosition, setCardPosition] = useState<
+    | {
+        top: number;
+        left: number;
+        width: number;
+        height: number;
+      }
+    | undefined
+  >(undefined);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const handleExpand = () => {

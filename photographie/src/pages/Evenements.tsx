@@ -393,7 +393,7 @@ export default function Evenements() {
                       className="relative aspect-video overflow-hidden rounded-lg bg-black"
                     >
                       <img
-                        src={photo}
+                        src={typeof photo === "string" ? photo : photo.src}
                         alt={`${expandedEvent.titre} ${idx + 1}`}
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                       />

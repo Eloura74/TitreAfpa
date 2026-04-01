@@ -5,7 +5,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Evenement } from "../types/evenement";
-import { Tarif } from "../types/tarif";
 import { API_URL as BASE_API_URL } from "../config/api";
 import {
   Calendar,
@@ -40,9 +39,9 @@ export default function GestionEvenements() {
 
   const [customization, setCustomization] = useState({
     accentColor: "#ffe992",
-    backgroundColor: null,
+    backgroundColor: null as string | null,
     badge: {
-      text: null,
+      text: null as string | null,
       color: "#ffe992",
       position: "top-right" as "top-left" | "top-right",
     },
@@ -52,12 +51,12 @@ export default function GestionEvenements() {
       titleStyle: "normal" as "normal" | "bold" | "italic",
     },
     displayOrder: 0,
-    icon: null,
+    icon: null as string | null,
     hoverEffect: "zoom" as "none" | "zoom" | "rotate" | "glow",
   });
 
-  const [tarifs, setTarifs] = useState<Tarif[]>([]);
-  const [selectedTariffs, setSelectedTariffs] = useState<string[]>([]);
+  // const [tarifs, setTarifs] = useState<Tarif[]>([]);
+  // const [selectedTariffs, setSelectedTariffs] = useState<string[]>([]);
   const [showClientForm, setShowClientForm] = useState(false);
   const [clientForm, setClientForm] = useState({
     nom: "",
@@ -77,7 +76,7 @@ export default function GestionEvenements() {
 
   useEffect(() => {
     loadEvenements();
-    loadTarifs();
+    // loadTarifs();
   }, []);
 
   const loadEvenements = () => {
@@ -95,16 +94,16 @@ export default function GestionEvenements() {
       .finally(() => setLoading(false));
   };
 
-  const loadTarifs = () => {
-    axios
-      .get(`${BASE_API_URL}/api/tarifs`)
-      .then((res) => {
-        if (Array.isArray(res.data)) {
-          setTarifs(res.data.filter((t: any) => t.actif));
-        }
-      })
-      .catch((err) => console.error("Erreur chargement tarifs", err));
-  };
+  // const loadTarifs = () => {
+  //   axios
+  //     .get(`${BASE_API_URL}/api/tarifs`)
+  //     .then((res) => {
+  //       if (Array.isArray(res.data)) {
+  //         setTarifs(res.data.filter((t: any) => t.actif));
+  //       }
+  //     })
+  //     .catch((err) => console.error("Erreur chargement tarifs", err));
+  // };
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -134,42 +133,40 @@ export default function GestionEvenements() {
     });
     setImagePreview("");
     setEditId(null);
-    setSelectedTariffs([]);
     setError(null);
     setSuccess(null);
   };
 
-  const handleCreateClient = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
+  // const handleCreateClient = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setError(null);
+  //   setSuccess(null);
 
-    try {
-      await axios.post(`${BASE_API_URL}/api/auth/register`, clientForm);
-      setSuccess(
-        `Client ${clientForm.prenom} ${clientForm.nom} créé avec succès !`,
-      );
-      setForm((prev) => ({ ...prev, clientEmail: clientForm.email }));
-      setShowClientForm(false);
-      setClientForm({
-        nom: "",
-        prenom: "",
-        email: "",
-        motdepasse: "",
-        telephone: "",
-        adresse: { rue: "", ville: "", codePostal: "", pays: "France" },
-      });
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error || "Erreur lors de la création du client.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   try {
+  //     await axios.post(`${BASE_API_URL}/api/auth/register`, clientForm);
+  //     setSuccess(
+  //       `Client ${clientForm.prenom} ${clientForm.nom} créé avec succès !`,
+  //     );
+  //     setForm((prev) => ({ ...prev, clientEmail: clientForm.email }));
+  //     setShowClientForm(false);
+  //     setClientForm({
+  //       nom: "",
+  //       prenom: "",
+  //       email: "",
+  //       motdepasse: "",
+  //       telephone: "",
+  //       adresse: { rue: "", ville: "", codePostal: "", pays: "France" },
+  //     });
+  //   } catch (err: any) {
+  //     setError(
+  //       err.response?.data?.error || "Erreur lors de la création du client.",
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  // Gère le changement d'image : stocke le fichier pour un upload ultérieur via Cloudinary
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
@@ -228,7 +225,6 @@ export default function GestionEvenements() {
             src: imageUrl,
             titre: file.name,
             categorie: "Evenement",
-            tarifs: [],
             alt: `Photo événement ${form.titre}`,
             description: `Photo de l'événement ${form.titre}`,
           },
@@ -649,13 +645,13 @@ export default function GestionEvenements() {
                       className="bg-[#0a0a10] border border-white/10 rounded px-3 py-2 text-white text-sm"
                     />
                   </div>
-                  <button
+                  {/* <button
                     type="button"
                     onClick={handleCreateClient}
                     className="w-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-2 rounded-lg transition-colors"
                   >
                     Créer le compte
-                  </button>
+                  </button> */}
                 </div>
               )}
 
