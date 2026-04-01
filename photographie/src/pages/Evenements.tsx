@@ -13,15 +13,122 @@ import "../styles/globals.css"; // Styles globaux de l'app
 import "../styles/evenements.css"; // Styles spécifiques à cette page
 
 // Icônes importées depuis la librairie Lucide
-import { MapPin, Target } from "lucide-react";
+import { MapPin, Target, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ExpandableCard } from "../components/ui/ExpandableCard";
 
 // Type TypeScript pour sécuriser les objets événements
 import type { Evenement } from "../types/evenement";
 import PageTitle from "../components/ui/PageTitle";
+import { useRef } from "react";
 
 // ============================================================================
-// 📄 COMPOSANT PRINCIPAL DE LA PAGE ÉVÉNEMENTS
+// � COMPOSANT CARTE ÉVÉNEMENT
+// ============================================================================
+interface EventCardProps {
+  event: Evenement;
+  onExpand: (
+    event: Evenement,
+    position: { top: number; left: number; width: number; height: number },
+  ) => void;
+}
+
+const EventCard: React.FC<EventCardProps> = ({ event, onExpand }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleExpand = () => {
+    if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      onExpand(event, {
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      });
+    }
+  };
+
+  return (
+    <motion.div
+      ref={cardRef}
+      initial={{ y: 20, opacity: 0 }}
+      whileInView={{
+        y: 0,
+        opacity: 1,
+        transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+      }}
+      viewport={{ once: true }}
+      layout
+      className="group relative flex flex-col h-full"
+    >
+      <div className="h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-4 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/30 hover:shadow-[0_0_30px_rgba(255,233,146,0.1)]">
+        {/* Image Section avec Overlay */}
+        <div className="relative overflow-hidden aspect-[3/4] mb-6 rounded-xl">
+          {event.image ? (
+            <motion.img
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              src={event.image}
+              alt={event.titre}
+              loading="lazy"
+              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-700"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-white/5">
+              <MapPin className="text-white/20 w-12 h-12" />
+            </div>
+          )}
+
+          {/* Overlay au survol */}
+          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col items-center justify-center p-6 text-center backdrop-blur-[2px]">
+            <p className="text-white/90 text-xs font-light tracking-widest leading-relaxed line-clamp-4">
+              {event.description}
+            </p>
+          </div>
+        </div>
+
+        {/* Content Section - Épuré */}
+        <div className="flex flex-col items-center text-center space-y-3">
+          <div className="flex flex-col items-center gap-2">
+            <h3 className="text-lg font-serif text-[#ffe992] tracking-wide group-hover:text-white transition-colors duration-300">
+              {event.titre}
+            </h3>
+            <div className="flex flex-wrap justify-center gap-3 text-white/60 text-[10px] tracking-[0.2em] uppercase">
+              <div className="flex items-center gap-1">
+                <MapPin size={12} className="text-[#ffe992]" />
+                <span>{event.lieu || "Lieu non renseigné"}</span>
+              </div>
+              {event.theme && (
+                <div className="flex items-center gap-1">
+                  <Target size={12} className="text-[#ffe992]" />
+                  <span>{event.theme}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="w-12 h-[1px] bg-white/10 group-hover:bg-[#ffe992]/50 transition-colors duration-500" />
+
+          <span className="text-white/40 text-xs font-light tracking-widest">
+            {new Date(event.dateDebut).toLocaleDateString()}
+          </span>
+
+          {/* Bouton Voir plus */}
+          <button
+            onClick={handleExpand}
+            className="mt-4 w-full bg-gradient-to-r from-[#ffe992]/20 to-[#ffe992]/30 hover:from-[#ffe992]/30 hover:to-[#ffe992]/40 text-[#ffe992] text-xs font-bold uppercase tracking-wider py-2 rounded-lg border border-[#ffe992]/40 hover:border-[#ffe992]/70 transition-all duration-300 flex items-center justify-center gap-2"
+          >
+            <Eye className="w-4 h-4" />
+            <span>Voir plus</span>
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// ============================================================================
+// � COMPOSANT PRINCIPAL DE LA PAGE ÉVÉNEMENTS
 // ============================================================================
 export default function Evenements() {
   // ----------------------------------------------------------------------------
@@ -30,6 +137,10 @@ export default function Evenements() {
   const [evenements, setEvenements] = useState<Evenement[]>([]); // Liste des événements récupérés
   const [filter, setFilter] = useState<"à venir" | "passé" | "tous">("tous"); // Filtre actif
   const [loading, setLoading] = useState(true);
+  const [expandedEvent, setExpandedEvent] = useState<Evenement | null>(null);
+  const [cardPosition, setCardPosition] = useState<
+    { top: number; left: number; width: number; height: number } | undefined
+  >();
 
   // ----------------------------------------------------------------------------
   // 🔁 useEffect : Récupération des données à l’ouverture de la page
@@ -60,7 +171,7 @@ export default function Evenements() {
             ...ev,
             id: ev._id || ev.id || "",
             lieu: ev.lieu || ev.location || ev.place || "",
-          })
+          }),
         );
 
         setEvenements(events); // Mise à jour de l'état
@@ -98,16 +209,6 @@ export default function Evenements() {
       opacity: 1,
       transition: { staggerChildren: 0.1, delayChildren: 0.2 },
     },
-  };
-
-  const cardVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
-    },
-    exit: { scale: 0.98, opacity: 0, transition: { duration: 0.3 } },
   };
 
   // ----------------------------------------------------------------------------
@@ -180,71 +281,102 @@ export default function Evenements() {
             ) : (
               // Cartes événements
               filteredEvents.map((event) => (
-                <motion.div
+                <EventCard
                   key={event.id}
-                  variants={cardVariants}
-                  layout
-                  className="group relative flex flex-col h-full"
-                >
-                  <div className="h-full block relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-4 transition-all duration-500 hover:bg-white/10 hover:border-[#ffe992]/30 hover:shadow-[0_0_30px_rgba(255,233,146,0.1)]">
-                    {/* Image Section avec Overlay */}
-                    <div className="relative overflow-hidden aspect-[3/4] mb-6 rounded-xl">
-                      {event.image ? (
-                        <motion.img
-                          whileHover={{ scale: 1.05 }}
-                          transition={{ duration: 0.8, ease: "easeOut" }}
-                          src={event.image}
-                          alt={event.titre}
-                          loading="lazy"
-                          className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-700"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-white/5">
-                          <MapPin className="text-white/20 w-12 h-12" />
-                        </div>
-                      )}
-
-                      {/* Overlay au survol */}
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col items-center justify-center p-6 text-center backdrop-blur-[2px]">
-                        <p className="text-white/90 text-xs font-light tracking-widest leading-relaxed line-clamp-4">
-                          {event.description}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Content Section - Épuré */}
-                    <div className="flex flex-col items-center text-center space-y-3">
-                      <div className="flex flex-col items-center gap-2">
-                        <h3 className="text-lg font-serif text-[#ffe992] tracking-wide group-hover:text-white transition-colors duration-300">
-                          {event.titre}
-                        </h3>
-                        <div className="flex flex-wrap justify-center gap-3 text-white/60 text-[10px] tracking-[0.2em] uppercase">
-                          <div className="flex items-center gap-1">
-                            <MapPin size={12} className="text-[#ffe992]" />
-                            <span>{event.lieu || "Lieu non renseigné"}</span>
-                          </div>
-                          {event.theme && (
-                            <div className="flex items-center gap-1">
-                              <Target size={12} className="text-[#ffe992]" />
-                              <span>{event.theme}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="w-12 h-[1px] bg-white/10 group-hover:bg-[#ffe992]/50 transition-colors duration-500" />
-
-                      <span className="text-white/40 text-xs font-light tracking-widest">
-                        {new Date(event.dateDebut).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
+                  event={event}
+                  onExpand={(evt, pos) => {
+                    setCardPosition(pos);
+                    setExpandedEvent(evt);
+                  }}
+                />
               ))
             )}
           </AnimatePresence>
         </motion.div>
       </main>
+
+      {/* Modal d'expansion */}
+      {expandedEvent && (
+        <ExpandableCard
+          isExpanded={expandedEvent !== null}
+          onClose={() => setExpandedEvent(null)}
+          cardPosition={cardPosition}
+        >
+          {/* Effets lumineux */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#ffe992]/15 via-[#ffe992]/5 to-transparent pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#ffe992] to-transparent pointer-events-none" />
+
+          <div className="relative flex flex-col md:flex-row gap-8 h-full">
+            {/* Image Section */}
+            <div className="md:w-1/2 flex flex-col gap-4">
+              {expandedEvent.image ? (
+                <div className="relative aspect-video overflow-hidden rounded-xl">
+                  <img
+                    src={expandedEvent.image}
+                    alt={expandedEvent.titre}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="relative aspect-video overflow-hidden rounded-xl bg-white/5 flex items-center justify-center">
+                  <MapPin className="text-white/20 w-24 h-24" />
+                </div>
+              )}
+              {expandedEvent.photos && expandedEvent.photos.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {expandedEvent.photos.slice(0, 3).map((photo, idx) => (
+                    <div
+                      key={idx}
+                      className="relative aspect-video overflow-hidden rounded-lg"
+                    >
+                      <img
+                        src={photo}
+                        alt={`${expandedEvent.titre} ${idx + 2}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Content Section */}
+            <div className="md:w-1/2 flex flex-col">
+              {/* Titre avec séparateur */}
+              <div className="mb-6 pb-4 border-b border-[#ffe992]/30">
+                <h3 className="text-3xl font-serif font-bold text-[#ffe992] drop-shadow-[0_0_15px_rgba(255,233,146,0.8)] text-center uppercase tracking-wider mb-3">
+                  {expandedEvent.titre}
+                </h3>
+                <div className="flex flex-wrap justify-center gap-4 text-white/80 text-sm">
+                  <div className="flex items-center gap-2">
+                    <MapPin size={16} className="text-[#ffe992]" />
+                    <span>{expandedEvent.lieu || "Lieu non renseigné"}</span>
+                  </div>
+                  {expandedEvent.theme && (
+                    <div className="flex items-center gap-2">
+                      <Target size={16} className="text-[#ffe992]" />
+                      <span>{expandedEvent.theme}</span>
+                    </div>
+                  )}
+                </div>
+                <p className="text-center text-white/60 text-sm mt-3">
+                  Du {new Date(expandedEvent.dateDebut).toLocaleDateString()}
+                  {expandedEvent.dateFin &&
+                    ` au ${new Date(expandedEvent.dateFin).toLocaleDateString()}`}
+                </p>
+              </div>
+
+              {/* Description complète avec scroll */}
+              <div className="flex-1 overflow-y-auto mb-6 pr-2">
+                <p className="text-base text-gray-200 leading-relaxed text-justify whitespace-pre-line">
+                  {expandedEvent.description ||
+                    "Aucune description disponible."}
+                </p>
+              </div>
+            </div>
+          </div>
+        </ExpandableCard>
+      )}
 
       {/* --- Pied de page --- */}
       <Footer />
