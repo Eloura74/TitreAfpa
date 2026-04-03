@@ -66,6 +66,7 @@ const TarifConfiguratorV2 = lazy(
 // Pages client spécifiques
 const ClientEvenement = lazy(() => import("./pages/ClientEvenement"));
 const EcrinPrive = lazy(() => import("./pages/EcrinPrive"));
+const Reportages = lazy(() => import("./pages/Reportages"));
 
 // Pages légales
 const MentionsLegales = lazy(() => import("./pages/MentionsLegales"));
@@ -222,6 +223,9 @@ function App() {
                   path="/client/evenement/:id"
                   element={<ClientEvenement />}
                 />
+
+                {/* Route pour la page Reportages (liste publics + privés) */}
+                <Route path="/reportages" element={<Reportages />} />
 
                 {/* Routes pour l'écrin privé (téléchargement originaux R2) */}
                 <Route path="/ecrin-prive" element={<EcrinPrive />} />

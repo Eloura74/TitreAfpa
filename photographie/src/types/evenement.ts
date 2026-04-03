@@ -29,6 +29,7 @@ export interface Evenement {
   clientEmail?: string;
 
   codeAcces?: string;
+  isPublic?: boolean;
   photosOriginales?: PhotoOriginale[];
   typeValidite?: "permanent" | "temporaire";
   dateExpiration?: string;

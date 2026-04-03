@@ -514,7 +514,7 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* SECTION L'ÉCRIN PRIVÉ (Bas Centre) */}
+        {/* SECTION REPORTAGES (Bas Centre) */}
         <motion.section
           onMouseEnter={() => setHoveredSide("ecrin")}
           onMouseLeave={() => setHoveredSide(null)}
@@ -549,7 +549,7 @@ export default function Home() {
                 animate="visible"
                 className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium font-syncopate"
               >
-                Espace Client
+                Collections Exclusives
               </motion.span>
             </div>
 
@@ -569,7 +569,7 @@ export default function Home() {
                   bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
                 `}
               >
-                L'Écrin Privé
+                Reportages
               </motion.h1>
             </div>
 
@@ -581,8 +581,8 @@ export default function Home() {
                 animate="visible"
                 className="pointer-events-auto text-gray-400 text-[10px] md:text-xs italic font-extralight tracking-widest max-w-md mx-auto font-playfair"
               >
-                "Accédez à vos reportages privés et sélectionnez vos souvenirs
-                d'exception"
+                "Découvrez nos reportages publics et accédez à vos galeries
+                privées sécurisées"
               </motion.p>
             </div>
 
@@ -594,7 +594,7 @@ export default function Home() {
               className="pointer-events-auto"
             >
               <button
-                onClick={() => navigate("/ecrin-prive")}
+                onClick={() => navigate("/reportages")}
                 className="group relative px-8 py-3 overflow-hidden rounded-xl transition-all duration-500"
               >
                 {/* Sheen effect */}
@@ -609,7 +609,7 @@ export default function Home() {
                   className="relative text-[10px] md:text-xs uppercase tracking-[0.2em] group-hover:tracking-[0.3em] transition-all duration-500
                 bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent font-syncopate"
                 >
-                  Se connecter
+                  Découvrir
                 </span>
               </button>
             </motion.div>

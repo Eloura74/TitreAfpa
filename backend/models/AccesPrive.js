@@ -39,6 +39,11 @@ const accesPriveSchema = new mongoose.Schema({
     uppercase: true,
   },
 
+  isPublic: {
+    type: Boolean,
+    default: false,
+  },
+
   photosOriginales: [PhotoOriginaleSchema],
 
   typeValidite: {

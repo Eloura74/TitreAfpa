@@ -91,8 +91,31 @@ export default function EcrinPrive() {
   const [displayMode, setDisplayMode] = useState<ViewMode>("grid");
 
   useEffect(() => {
-    checkSession();
-  }, []);
+    const initSession = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/ecrin/session`, {
+          withCredentials: true,
+        });
+        if (res.data.success) {
+          // Vérifier si le slug correspond
+          if (codeAccesFromUrl && res.data.acces) {
+            const sessionSlug = res.data.acces.slug || res.data.acces.codeAcces;
+            if (sessionSlug !== codeAccesFromUrl) {
+              // Slug différent = déconnecter
+              await handleLogout(true);
+              return;
+            }
+          }
+          setIsConnected(true);
+          setAccesInfo(res.data.acces);
+        }
+      } catch {
+        setIsConnected(false);
+      }
+    };
+
+    initSession();
+  }, [codeAccesFromUrl]);
 
   // Chargement des informations publiques si un slug est dans l'URL
   useEffect(() => {
@@ -114,7 +137,6 @@ export default function EcrinPrive() {
       if (res.data.success) {
         setIsConnected(true);
         setAccesInfo(res.data.acces);
-        // Synchroniser l'URL avec le slug actuel si nécessaire
       }
     } catch {
       setIsConnected(false);
@@ -151,7 +173,7 @@ export default function EcrinPrive() {
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = async (silent = false) => {
     try {
       await axios.post(
         `${API_URL}/api/ecrin/logout`,
@@ -161,10 +183,14 @@ export default function EcrinPrive() {
       setIsConnected(false);
       setAccesInfo(null);
       setCodeAcces("");
-      setSuccess("Déconnexion réussie");
-      navigate("/ecrin-prive", { replace: true });
+      if (!silent) {
+        setSuccess("Déconnexion réussie");
+        navigate("/ecrin-prive", { replace: true });
+      }
     } catch {
-      setError("Erreur lors de la déconnexion");
+      if (!silent) {
+        setError("Erreur lors de la déconnexion");
+      }
     }
   };
 
@@ -529,7 +555,7 @@ export default function EcrinPrive() {
 
           <div className="relative z-10 shrink-0">
             <button
-              onClick={handleLogout}
+              onClick={() => handleLogout(false)}
               className="group flex items-center gap-3 px-6 py-3 bg-black/40 hover:bg-black/60 border border-white/10 hover:border-red-500/50 rounded-xl text-white hover:text-red-400 transition-all shadow-lg"
             >
               <LogOut

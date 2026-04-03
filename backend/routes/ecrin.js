@@ -71,6 +71,33 @@ const upload = multer({
   },
 });
 
+// Route pour lister tous les reportages (publics et privés)
+router.get("/all", async (req, res) => {
+  try {
+    const acces = await AccesPrive.find({ statut: "actif" })
+      .select(
+        "titre description dateDebut dateFin image slug isPublic photosOriginales",
+      )
+      .lean();
+
+    res.json({
+      success: true,
+      acces: acces.map((a) => ({
+        ...a,
+        photosOriginales: a.photosOriginales || [],
+      })),
+    });
+  } catch (error) {
+    console.error("Erreur récupération reportages:", error);
+    console.error("Stack:", error.stack);
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors de la récupération des reportages",
+      error: error.message,
+    });
+  }
+});
+
 router.get("/info/:slug", async (req, res) => {
   try {
     // Rétrocompatibilité : on cherche par slug, ou par codeAcces pour les anciens événements

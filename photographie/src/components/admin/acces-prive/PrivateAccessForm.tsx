@@ -135,6 +135,36 @@ export default function PrivateAccessForm({
           </p>
         </div>
 
+        {/* Visibilité : Public ou Privé */}
+        <div className="bg-[#232336] p-4 rounded border border-white/10 space-y-3">
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              name="isPublic"
+              checked={form.isPublic || false}
+              onChange={(e) => {
+                const event = {
+                  target: {
+                    name: "isPublic",
+                    value: e.target.checked,
+                  },
+                } as any;
+                handleChange(event);
+              }}
+              className="w-5 h-5 accent-[#ffe992] cursor-pointer"
+            />
+            <div className="flex-1">
+              <span className="text-white font-semibold text-sm block">
+                Reportage Public
+              </span>
+              <span className="text-xs text-gray-400">
+                Si coché, ce reportage sera visible sur la page /reportages sans
+                code d'accès
+              </span>
+            </div>
+          </label>
+        </div>
+
         {/* Type de validité */}
         <div className="bg-[#232336] p-4 rounded border border-white/10 space-y-3">
           <label className="text-sm font-bold text-[#ffe992] block">
