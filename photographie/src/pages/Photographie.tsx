@@ -3,13 +3,7 @@ import { useEffect, useState } from "react";
 // Import des composants Link pour la navigation interne sans rechargement de page
 import { Link } from "react-router-dom";
 // Import d'icônes depuis la bibliothèque lucide-react pour les visuels
-import {
-  CalendarDays,
-  Camera,
-  GalleryHorizontal,
-  ShoppingCart,
-  Info,
-} from "lucide-react";
+import { Camera, GalleryHorizontal } from "lucide-react";
 // Import des composants layout Navbar (barre de navigation) et Footer (pied de page)
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
@@ -142,7 +136,6 @@ export default function Photographie() {
   // États pour stocker les images dynamiques depuis la BDD
   const [galerieImage, setGalerieImage] =
     useState<string>("/images/photo5.jpg");
-  const [eventImage, setEventImage] = useState<string>("/images/event1.jpg");
 
   // useEffect est utilisé ici pour modifier le titre de l'onglet du navigateur quand la page est chargée
   useEffect(() => {
@@ -166,21 +159,6 @@ export default function Photographie() {
             setGalerieImage(
               transformImageUrl(randomPhoto.src, "/images/photo5.jpg"),
             );
-          }
-        }
-
-        // Récupérer une image aléatoire des événements si disponible
-        const resEvents = await fetch(`${API_URL}/api/evenements`);
-        if (resEvents.ok) {
-          const dataEvents = await resEvents.json();
-          if (dataEvents.length > 0) {
-            const randomEvent =
-              dataEvents[Math.floor(Math.random() * dataEvents.length)];
-            if (randomEvent.image) {
-              setEventImage(
-                transformImageUrl(randomEvent.image, "/images/event1.jpg"),
-              );
-            }
           }
         }
       } catch (error) {
@@ -287,9 +265,8 @@ export default function Photographie() {
                 <span className="font-semibold text-[#ffe992] drop-shadow-[0_0_8px_rgba(255,233,146,0.6)]">
                   Photographique
                 </span>{" "}
-                de Fabien. Retrouvez ici l'ensemble des services liés à la photo
-                : événements, tirage en ligne, galerie artistique et plus
-                encore.
+                de Fabien. Découvrez ma galerie artistique et mes services
+                photographiques sur mesure.
               </motion.p>
             </div>
           </motion.div>
@@ -298,10 +275,9 @@ export default function Photographie() {
           </span>
         </motion.div>
 
-        {/* Barre de navigation sous forme de cartes sur une ligne */}
-        {/* ecart de 4 entre les cartes */}
+        {/* Barre de navigation sous forme de cartes */}
         <motion.nav
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 w-full max-w-7xl px-4"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-4xl px-4"
           variants={containerVariants}
         >
           <NavigationCard
@@ -320,33 +296,6 @@ export default function Photographie() {
             icon={<Camera className="w-5 h-5 text-[#ffe992]" />}
             title="Services"
             description="Mariages, shootings..."
-          />
-
-          <NavigationCard
-            to="/evenements"
-            image={eventImage}
-            alt="Événements"
-            icon={<CalendarDays className="w-5 h-5 text-[#ffe992]" />}
-            title="Événements"
-            description="Tous les événements photo."
-          />
-
-          <NavigationCard
-            to="/about"
-            image="/images/about.jpg"
-            alt="À Propos"
-            icon={<Info className="w-5 h-5 text-[#ffe992]" />}
-            title="À Propos"
-            description="En savoir plus."
-          />
-
-          <NavigationCard
-            to="/panier"
-            image="/images/pannier.jpg"
-            alt="Panier"
-            icon={<ShoppingCart className="w-5 h-5 text-[#ffe992]" />}
-            title="Panier"
-            description="Vos achats photo."
           />
         </motion.nav>
       </motion.main>
