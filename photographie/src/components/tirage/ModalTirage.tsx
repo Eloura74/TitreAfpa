@@ -68,13 +68,13 @@ export const ModalTirage: React.FC<ModalTirageProps> = ({
     const formatObj = offre.formats.find((f) => f.value === format); // Récupère l'objet complet du format sélectionné
     if (!formatObj) return; // Si le format est invalide, on sort
 
-    // Création de l’article à ajouter dans le panier
+    // Création de l'article à ajouter dans le panier - Fix PayPal validation
     const nouvelArticle: ArticlePanierType = {
       id: uuidv4(), // ID unique généré automatiquement
       nom: `${offre.titre} (${formatObj.label})`, // Exemple : "Poster (30x40)"
       prix: formatObj.prix,
       quantite,
-      image: image || offre.image, // Soit l’image uploadée, soit l’image par défaut
+      image: image || offre.image, // Soit l'image uploadée, soit l'image par défaut
       format: formatObj.label, // Format pour validation backend
       support: offre.titre, // Support (Bijoux, Poster, etc.) pour validation backend
     };

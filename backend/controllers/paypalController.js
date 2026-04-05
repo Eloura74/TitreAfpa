@@ -1,3 +1,4 @@
+// Fix PayPal validation - support tirages personnalisés
 const paypal = require("@paypal/checkout-server-sdk");
 const Photo = require("../models/Photo");
 const OeuvreGraphique = require("../models/OeuvreGraphique");
