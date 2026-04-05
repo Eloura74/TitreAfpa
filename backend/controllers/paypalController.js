@@ -136,7 +136,7 @@ async function getValidatedPrice(article) {
   }
 
   // 5. Fallback pour tirages personnalisés : recherche flexible dans TarifConfig
-  if (prixValidé === null && article.format && article.support) {
+  if (prixValidé === null && article.format) {
     logger.info("Tentative de validation flexible pour tirage personnalisé");
 
     for (const category of tarifConfig.categories) {
@@ -149,23 +149,46 @@ async function getValidatedPrice(article) {
           article.format.includes(format.nom) ||
           format.nom.includes(article.format);
 
-        if (formatMatch && format.supports && Array.isArray(format.supports)) {
-          const support = format.supports.find(
-            (s) =>
-              s.nom === article.support ||
-              article.support.includes(s.nom) ||
-              s.nom.includes(article.support),
-          );
+        if (formatMatch) {
+          // Si le format a des supports, chercher le support correspondant
+          if (
+            format.supports &&
+            Array.isArray(format.supports) &&
+            article.support
+          ) {
+            const support = format.supports.find(
+              (s) =>
+                s.nom === article.support ||
+                article.support.includes(s.nom) ||
+                s.nom.includes(article.support),
+            );
 
-          if (support && Math.abs(support.prix - article.prix) < 0.01) {
-            prixValidé = support.prix;
-            logger.info("Prix validé via correspondance flexible", {
-              formatConfig: format.nom,
-              formatArticle: article.format,
-              supportConfig: support.nom,
-              supportArticle: article.support,
-              prix: prixValidé,
-            });
+            if (support) {
+              prixValidé = support.prix;
+              logger.info(
+                "Prix validé via correspondance flexible (avec support)",
+                {
+                  formatConfig: format.nom,
+                  formatArticle: article.format,
+                  supportConfig: support.nom,
+                  supportArticle: article.support,
+                  prix: prixValidé,
+                },
+              );
+              break;
+            }
+          }
+          // Si le format n'a pas de supports, utiliser le prix du format directement
+          else if (format.prix !== undefined) {
+            prixValidé = format.prix;
+            logger.info(
+              "Prix validé via correspondance flexible (format simple)",
+              {
+                formatConfig: format.nom,
+                formatArticle: article.format,
+                prix: prixValidé,
+              },
+            );
             break;
           }
         }
