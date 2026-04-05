@@ -416,6 +416,10 @@ app.use("/api/graphisme-description", graphismeDescriptionRoutes);
 // Upload Cloudinary (signature pour upload direct)
 app.use("/api/upload-cloudinary", uploadCloudinaryRoutes);
 
+// Mentions Légales
+const mentionsLegalesRoutes = require("./routes/mentionsLegales");
+app.use("/api/mentions-legales", mentionsLegalesRoutes);
+
 // Sitemap dynamique (SEO)
 const sitemapRoutes = require("./routes/sitemap");
 app.use("/api", sitemapRoutes);

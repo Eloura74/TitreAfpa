@@ -1,8 +1,31 @@
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
+import { API_URL } from "../config/api";
 
 export default function MentionsLegales() {
+  const [contenu, setContenu] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadMentionsLegales();
+  }, []);
+
+  const loadMentionsLegales = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/mentions-legales`);
+      if (res.data.success) {
+        setContenu(res.data.contenu);
+      }
+    } catch (err) {
+      console.error("Erreur chargement mentions légales:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
@@ -18,116 +41,16 @@ export default function MentionsLegales() {
               Mentions Légales
             </h1>
 
-            <div className="space-y-8 text-gray-300">
-              <section>
-                <h2 className="text-2xl font-semibold text-[#ffe992] mb-4">
-                  1. Informations légales
-                </h2>
-                <p className="mb-2">
-                  <strong>Nom de l'entreprise :</strong> Photographe Pro
-                </p>
-                <p className="mb-2">
-                  <strong>Forme juridique :</strong> [À compléter]
-                </p>
-                <p className="mb-2">
-                  <strong>Adresse :</strong> [À compléter]
-                </p>
-                <p className="mb-2">
-                  <strong>Email :</strong> fabien.licata@gmail.com
-                </p>
-                <p className="mb-2">
-                  <strong>Téléphone :</strong> [À compléter]
-                </p>
-                <p className="mb-2">
-                  <strong>SIRET :</strong> [À compléter]
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold text-[#ffe992] mb-4">
-                  2. Directeur de la publication
-                </h2>
-                <p>
-                  Le directeur de la publication du site est : [Nom du
-                  directeur]
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold text-[#ffe992] mb-4">
-                  3. Hébergement
-                </h2>
-                <p className="mb-2">
-                  <strong>Hébergeur :</strong> Vercel Inc.
-                </p>
-                <p className="mb-2">
-                  <strong>Adresse :</strong> 340 S Lemon Ave #4133, Walnut, CA
-                  91789, USA
-                </p>
-                <p>
-                  <strong>Site web :</strong>{" "}
-                  <a
-                    href="https://vercel.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#ffe992] hover:underline"
-                  >
-                    vercel.com
-                  </a>
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold text-[#ffe992] mb-4">
-                  4. Propriété intellectuelle
-                </h2>
-                <p>
-                  L'ensemble du contenu de ce site (textes, images, vidéos,
-                  logos) est protégé par le droit d'auteur. Toute reproduction,
-                  même partielle, est interdite sans autorisation préalable.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold text-[#ffe992] mb-4">
-                  5. Données personnelles
-                </h2>
-                <p className="mb-4">
-                  Conformément au Règlement Général sur la Protection des
-                  Données (RGPD), vous disposez d'un droit d'accès, de
-                  rectification et de suppression de vos données personnelles.
-                </p>
-                <p>
-                  Pour exercer ces droits, contactez-nous à :
-                  fabien.licata@gmail.com
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold text-[#ffe992] mb-4">
-                  6. Cookies
-                </h2>
-                <p>
-                  Ce site utilise des cookies pour améliorer l'expérience
-                  utilisateur et analyser le trafic. En continuant à naviguer
-                  sur ce site, vous acceptez l'utilisation de cookies.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold text-[#ffe992] mb-4">
-                  7. Crédits
-                </h2>
-                <p className="mb-2">
-                  <strong>Conception et développement :</strong> [Nom du
-                  développeur]
-                </p>
-                <p>
-                  <strong>Photographies :</strong> © Photographe Pro - Tous
-                  droits réservés
-                </p>
-              </section>
-            </div>
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ffe992]"></div>
+              </div>
+            ) : (
+              <div
+                className="space-y-8 text-gray-300 prose prose-invert prose-headings:text-[#ffe992] prose-a:text-[#ffe992] prose-a:hover:underline max-w-none"
+                dangerouslySetInnerHTML={{ __html: contenu }}
+              />
+            )}
           </motion.div>
         </div>
       </main>

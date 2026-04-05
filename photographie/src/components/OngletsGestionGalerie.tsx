@@ -15,6 +15,7 @@ import ImportTarifsJSON from "./admin/tarifs/ImportTarifsJSON";
 import GestionAbout from "./GestionAbout";
 import GestionGraphismeShowcase from "./GestionGraphismeShowcase";
 import GestionGraphismeDescription from "./GestionGraphismeDescription";
+import GestionMentionsLegales from "./GestionMentionsLegales";
 
 export default function OngletsGestionGalerie() {
   const [actif, setActif] = useState(0);
@@ -76,6 +77,7 @@ export default function OngletsGestionGalerie() {
         </div>
       ),
     },
+    { nom: "Mentions Légales", composant: <GestionMentionsLegales /> },
   ];
 
   return (
