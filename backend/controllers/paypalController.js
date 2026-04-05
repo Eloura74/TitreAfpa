@@ -10,12 +10,12 @@ let environment;
 if (process.env.NODE_ENV === "production") {
   environment = new paypal.core.LiveEnvironment(
     process.env.PAYPAL_CLIENT_ID,
-    process.env.PAYPAL_CLIENT_SECRET
+    process.env.PAYPAL_CLIENT_SECRET,
   );
 } else {
   environment = new paypal.core.SandboxEnvironment(
     process.env.PAYPAL_CLIENT_ID,
-    process.env.PAYPAL_CLIENT_SECRET
+    process.env.PAYPAL_CLIENT_SECRET,
   );
 }
 const client = new paypal.core.PayPalHttpClient(environment);
@@ -26,21 +26,30 @@ const client = new paypal.core.PayPalHttpClient(environment);
  * NE FAIT JAMAIS CONFIANCE AU PRIX ENVOYÉ PAR LE CLIENT
  */
 async function getValidatedPrice(article) {
+  // Log des données reçues pour debug
+  logger.info("Validation prix - Article reçu", {
+    id: article.id,
+    nom: article.nom,
+    format: article.format,
+    support: article.support,
+    prix: article.prix,
+  });
+
   // 1. Cas spécial HD (prix fixe)
   if (article.id && article.id.includes("-HD-")) {
     const photoId = article.id.split("-HD-")[0];
     if (!photoId || !photoId.match(/^[0-9a-fA-F]{24}$/)) {
       throw new Error(`ID Photo invalide pour HD: ${article.id}`);
     }
-    
+
     const photo = await Photo.findById(photoId);
     if (!photo) {
       throw new Error(`Photo introuvable pour HD: ${photoId}`);
     }
-    
+
     return {
       nomArticle: `${photo.titre || "Photo"} (Fichier Numérique HD)`,
-      prixUnitaire: 25.0 // Prix fixe HD
+      prixUnitaire: 25.0, // Prix fixe HD
     };
   }
 
@@ -54,22 +63,52 @@ async function getValidatedPrice(article) {
   let prixValidé = null;
   let nomArticle = article.nom || "Article";
 
+  logger.info("Recherche tarif dans config", {
+    recherche: { format: article.format, support: article.support },
+    nbCategories: tarifConfig.categories.length,
+  });
+
   for (const category of tarifConfig.categories) {
     if (!category.formats) continue;
-    
+
     for (const format of category.formats) {
+      logger.debug("Comparaison format", {
+        formatConfig: format.nom,
+        formatArticle: article.format,
+        match: format.nom === article.format,
+      });
+
       if (format.nom === article.format) {
         // Si c'est un tirage avec supports
         if (format.supports && Array.isArray(format.supports)) {
-          const support = format.supports.find(s => s.nom === article.support);
+          logger.info("Format trouvé avec supports", {
+            format: format.nom,
+            supports: format.supports.map((s) => s.nom),
+          });
+
+          const support = format.supports.find(
+            (s) => s.nom === article.support,
+          );
           if (support) {
             prixValidé = support.prix;
+            logger.info("Prix validé trouvé", {
+              prix: prixValidé,
+              support: support.nom,
+            });
             break;
+          } else {
+            logger.warn("Support non trouvé dans format", {
+              supportRecherché: article.support,
+              supportsDisponibles: format.supports.map((s) => s.nom),
+            });
           }
         }
         // Si c'est un format simple sans supports
         else if (format.prix !== undefined) {
           prixValidé = format.prix;
+          logger.info("Prix validé trouvé (format simple)", {
+            prix: prixValidé,
+          });
           break;
         }
       }
@@ -83,11 +122,11 @@ async function getValidatedPrice(article) {
     const photo = await Photo.findById(possiblePhotoId);
     if (photo) {
       nomArticle = photo.titre || article.nom;
-      
+
       // Si prix non validé par config, chercher dans photo.tarifs
       if (prixValidé === null && photo.tarifs && photo.tarifs.length > 0) {
         const tarif = photo.tarifs.find(
-          t => t.format === article.format && t.support === article.support
+          (t) => t.format === article.format && t.support === article.support,
         );
         if (tarif) {
           prixValidé = tarif.prix;
@@ -96,20 +135,68 @@ async function getValidatedPrice(article) {
     }
   }
 
-  // 5. Si toujours aucun prix validé, REJETER la commande
+  // 5. Fallback pour tirages personnalisés : recherche flexible dans TarifConfig
+  if (prixValidé === null && article.format && article.support) {
+    logger.info("Tentative de validation flexible pour tirage personnalisé");
+
+    for (const category of tarifConfig.categories) {
+      if (!category.formats) continue;
+
+      for (const format of category.formats) {
+        // Correspondance flexible : le format peut contenir le label (ex: "10x10 cm" contient "10x10")
+        const formatMatch =
+          format.nom === article.format ||
+          article.format.includes(format.nom) ||
+          format.nom.includes(article.format);
+
+        if (formatMatch && format.supports && Array.isArray(format.supports)) {
+          const support = format.supports.find(
+            (s) =>
+              s.nom === article.support ||
+              article.support.includes(s.nom) ||
+              s.nom.includes(article.support),
+          );
+
+          if (support && Math.abs(support.prix - article.prix) < 0.01) {
+            prixValidé = support.prix;
+            logger.info("Prix validé via correspondance flexible", {
+              formatConfig: format.nom,
+              formatArticle: article.format,
+              supportConfig: support.nom,
+              supportArticle: article.support,
+              prix: prixValidé,
+            });
+            break;
+          }
+        }
+      }
+      if (prixValidé !== null) break;
+    }
+  }
+
+  // 6. Si toujours aucun prix validé, REJETER la commande
   if (prixValidé === null || prixValidé === undefined) {
-    logger.error("Prix non validable", { 
-      article: article.nom, 
-      format: article.format, 
+    logger.error("Prix non validable - aucun tarif trouvé", {
+      articleNom: article.nom,
+      format: article.format,
       support: article.support,
-      prixClient: article.prix
+      prixClient: article.prix,
+      categoriesDisponibles: tarifConfig.categories.map((c) => ({
+        nom: c.nom,
+        formats: c.formats?.map((f) => ({
+          nom: f.nom,
+          supports: f.supports?.map((s) => s.nom),
+        })),
+      })),
     });
-    throw new Error(`Prix non validable pour: ${article.nom} (${article.format})`);
+    throw new Error(
+      `Prix non validable pour: ${article.nom} - Format: ${article.format || "non spécifié"}, Support: ${article.support || "non spécifié"}`,
+    );
   }
 
   return {
     nomArticle,
-    prixUnitaire: prixValidé
+    prixUnitaire: prixValidé,
   };
 }
 
@@ -159,7 +246,10 @@ exports.createOrder = async (req, res) => {
     });
 
     const order = await client.execute(request);
-    logger.info("Commande PayPal créée", { orderId: order.result.id, total: total.toFixed(2) });
+    logger.info("Commande PayPal créée", {
+      orderId: order.result.id,
+      total: total.toFixed(2),
+    });
     res.json({ id: order.result.id });
   } catch (err) {
     logger.error("Erreur création commande PayPal", { error: err.message });
@@ -203,9 +293,9 @@ exports.captureOrder = async (req, res) => {
       // utilisateur: req.user ? req.user._id : undefined // Si on avait l'user connecté
     });
 
-    logger.info("Paiement PayPal enregistré", { 
-      montant: nouveauPaiement.montant, 
-      transactionId: nouveauPaiement.transactionId 
+    logger.info("Paiement PayPal enregistré", {
+      montant: nouveauPaiement.montant,
+      transactionId: nouveauPaiement.transactionId,
     });
 
     // Import des services d'email
@@ -217,13 +307,13 @@ exports.captureOrder = async (req, res) => {
     // 1. Email Client
     if (payer.email_address) {
       sendOrderConfirmation(payer.email_address, nouveauPaiement).catch((err) =>
-        logger.error("Erreur envoi email confirmation", { error: err.message })
+        logger.error("Erreur envoi email confirmation", { error: err.message }),
       );
     }
 
     // 2. Email Admin
     sendAdminNotification(nouveauPaiement, items).catch((err) =>
-      logger.error("Erreur envoi email admin", { error: err.message })
+      logger.error("Erreur envoi email admin", { error: err.message }),
     );
 
     res.json(result);

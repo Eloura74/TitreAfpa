@@ -29,7 +29,11 @@ interface ModalTirageProps {
 }
 
 // === Composant ModalTirage ===
-export const ModalTirage: React.FC<ModalTirageProps> = ({ open, onClose, offre }) => {
+export const ModalTirage: React.FC<ModalTirageProps> = ({
+  open,
+  onClose,
+  offre,
+}) => {
   // Référence vers l’input fichier (permet d’y accéder directement si besoin)
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -61,7 +65,7 @@ export const ModalTirage: React.FC<ModalTirageProps> = ({ open, onClose, offre }
   // === Gère la validation du formulaire ===
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault(); // Empêche le rechargement de page
-    const formatObj = offre.formats.find(f => f.value === format); // Récupère l'objet complet du format sélectionné
+    const formatObj = offre.formats.find((f) => f.value === format); // Récupère l'objet complet du format sélectionné
     if (!formatObj) return; // Si le format est invalide, on sort
 
     // Création de l’article à ajouter dans le panier
@@ -71,6 +75,8 @@ export const ModalTirage: React.FC<ModalTirageProps> = ({ open, onClose, offre }
       prix: formatObj.prix,
       quantite,
       image: image || offre.image, // Soit l’image uploadée, soit l’image par défaut
+      format: formatObj.label, // Format pour validation backend
+      support: offre.titre, // Support (Bijoux, Poster, etc.) pour validation backend
     };
 
     // Ajout de l’article dans le contexte global du panier
@@ -95,14 +101,17 @@ export const ModalTirage: React.FC<ModalTirageProps> = ({ open, onClose, offre }
         </button>
 
         {/* Titre de l’offre */}
-        <h2 className="text-2xl font-bold mb-4 text-yellow-300">{offre.titre}</h2>
+        <h2 className="text-2xl font-bold mb-4 text-yellow-300">
+          {offre.titre}
+        </h2>
 
         {/* === Formulaire d’ajout au panier === */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
           {/* Upload de l’image à imprimer */}
           <label className="block">
-            <span className="font-semibold text-white">Votre photo à imprimer</span>
+            <span className="font-semibold text-white">
+              Votre photo à imprimer
+            </span>
             <input
               type="file"
               accept="image/*"
@@ -151,10 +160,7 @@ export const ModalTirage: React.FC<ModalTirageProps> = ({ open, onClose, offre }
           </label>
 
           {/* Bouton de validation final */}
-          <button
-            type="submit"
-            className="btn-main w-full mt-4"
-          >
+          <button type="submit" className="btn-main w-full mt-4">
             Ajouter au panier
           </button>
         </form>
