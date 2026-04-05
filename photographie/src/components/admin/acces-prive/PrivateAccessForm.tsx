@@ -21,6 +21,7 @@ interface PrivateAccessFormProps {
 
   // Gestion de l'image de couverture
   handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveImage: () => void;
   imagePreview: string;
 
   // Rafraîchissement après upload R2
@@ -39,6 +40,7 @@ export default function PrivateAccessForm({
   loading,
   editId,
   handleImageChange,
+  handleRemoveImage,
   imagePreview,
   onRefresh,
 }: PrivateAccessFormProps) {
@@ -60,28 +62,49 @@ export default function PrivateAccessForm({
         />
 
         {/* Image de Couverture */}
-        <div className="space-y-1">
+        <div className="space-y-2">
           <label className="text-xs text-gray-400">Image de couverture</label>
-          <input
-            name="image"
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="w-full bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white text-sm file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-[#ffe992] file:text-black hover:file:bg-[#d6c487] transition-colors"
-          />
-        </div>
 
-        {/* Prévisualisation Couverture */}
-        {imagePreview && (
-          <div className="relative group">
-            <img
-              src={imagePreview}
-              alt="Prévisualisation"
-              className="w-full h-32 object-cover rounded border border-white/10"
+          {/* Prévisualisation avec boutons d'action */}
+          {imagePreview && (
+            <div className="relative group">
+              <img
+                src={imagePreview}
+                alt="Prévisualisation"
+                className="w-full h-32 object-cover rounded border border-white/10"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                <label className="cursor-pointer px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded transition-colors">
+                  Modifier
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs rounded transition-colors"
+                >
+                  Supprimer
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Input file si pas d'image */}
+          {!imagePreview && (
+            <input
+              name="image"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white text-sm file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-[#ffe992] file:text-black hover:file:bg-[#d6c487] transition-colors"
             />
-            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors pointer-events-none" />
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Dates */}
         <div className="grid grid-cols-2 gap-2">

@@ -131,10 +131,13 @@ export default function GestionAccesPrive() {
     formData.append("signature", signature);
     formData.append("folder", folder);
 
-    // 3. Envoyer directement à Cloudinary
+    // 3. Envoyer directement à Cloudinary (sans credentials)
     const cloudinaryRes = await axios.post(
       `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
       formData,
+      {
+        withCredentials: false, // Cloudinary n'accepte pas les credentials
+      },
     );
 
     return cloudinaryRes.data.secure_url;
@@ -164,6 +167,12 @@ export default function GestionAccesPrive() {
         setLoading(false);
       }
     }
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview("");
+    setForm((prev) => ({ ...prev, image: "" }));
+    setSuccess("Image de couverture supprimée.");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -284,6 +293,7 @@ export default function GestionAccesPrive() {
             loading={loading}
             editId={editId}
             handleImageChange={handleImageChange}
+            handleRemoveImage={handleRemoveImage}
             imagePreview={imagePreview}
             onRefresh={loadEvenements}
           />

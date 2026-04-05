@@ -26,9 +26,9 @@ cloudinary.config({
 // -------------------------------------------------------------
 // Génère une signature pour permettre au frontend d'uploader directement vers Cloudinary
 // Cela permet de contourner la limite de taille de Vercel (4.5MB)
-const { authenticate } = require("../middleware/auth");
+const { isAdmin } = require("../middleware/auth");
 
-router.get("/sign", authenticate, (req, res) => {
+router.get("/sign", isAdmin, (req, res) => {
   try {
     const timestamp = Math.round(new Date().getTime() / 1000);
     const folder = "galerie";
@@ -43,7 +43,7 @@ router.get("/sign", authenticate, (req, res) => {
     // Génération de la signature
     const signature = cloudinary.utils.api_sign_request(
       paramsToSign,
-      process.env.CLOUDINARY_API_SECRET
+      process.env.CLOUDINARY_API_SECRET,
     );
 
     res.json({
