@@ -126,11 +126,64 @@ async function getValidatedPrice(article) {
 
       // Si prix non validé par config, chercher dans photo.tarifs
       if (prixValidé === null && photo.tarifs && photo.tarifs.length > 0) {
+        logger.info("Recherche dans photo.tarifs", {
+          articleFormat: article.format,
+          articleSupport: article.support,
+          tarifsDisponibles: photo.tarifs.map((t) => ({
+            format: t.format,
+            support: t.support,
+            prix: t.prix,
+          })),
+        });
+
         const tarif = photo.tarifs.find(
           (t) => t.format === article.format && t.support === article.support,
         );
         if (tarif) {
           prixValidé = tarif.prix;
+          logger.info("Prix trouvé dans photo.tarifs", { prix: prixValidé });
+        } else {
+          logger.warn("Aucun tarif correspondant trouvé dans photo.tarifs");
+        }
+      }
+
+      // Si photo.tarifs est vide, résoudre depuis availableTariffIds
+      if (
+        prixValidé === null &&
+        photo.availableTariffIds &&
+        photo.availableTariffIds.length > 0
+      ) {
+        logger.info("photo.tarifs vide, résolution depuis availableTariffIds", {
+          nbTarifsDisponibles: photo.availableTariffIds.length,
+        });
+
+        // Parcourir les tarifs disponibles dans TarifConfig
+        for (const category of tarifConfig.categories) {
+          for (const product of category.products || []) {
+            for (const support of product.supports || []) {
+              for (const format of support.formats || []) {
+                // Vérifier si ce tarif est dans availableTariffIds
+                if (photo.availableTariffIds.includes(format.id)) {
+                  // Vérifier si format et support correspondent
+                  if (
+                    format.name === article.format &&
+                    support.name === article.support
+                  ) {
+                    prixValidé = format.price;
+                    logger.info("Prix trouvé via availableTariffIds", {
+                      format: format.name,
+                      support: support.name,
+                      prix: prixValidé,
+                    });
+                    break;
+                  }
+                }
+              }
+              if (prixValidé !== null) break;
+            }
+            if (prixValidé !== null) break;
+          }
+          if (prixValidé !== null) break;
         }
       }
     }
@@ -138,20 +191,94 @@ async function getValidatedPrice(article) {
 
   // 5. Fallback pour tirages personnalisés : recherche flexible dans TarifConfig
   if (prixValidé === null && article.format) {
-    logger.info("Tentative de validation flexible pour tirage personnalisé");
+    logger.info("Tentative de validation flexible pour tirage personnalisé", {
+      formatRecherche: article.format,
+      supportRecherche: article.support,
+    });
 
+    // Normaliser le format pour la comparaison (× → x)
+    const normalizeFormat = (str) =>
+      str.replace(/×/g, "x").replace(/\s/g, "").toLowerCase();
+    const articleFormatNorm = normalizeFormat(article.format);
+
+    // Parcourir la vraie structure : categories > products > supports > formats
+    for (const category of tarifConfig.categories) {
+      if (!category.products) continue;
+
+      for (const product of category.products) {
+        if (!product.supports) continue;
+
+        for (const support of product.supports) {
+          if (!support.formats) continue;
+
+          for (const format of support.formats) {
+            // Correspondance flexible avec normalisation
+            const formatNorm = normalizeFormat(format.name);
+            const formatMatch =
+              formatNorm === articleFormatNorm ||
+              articleFormatNorm.includes(formatNorm) ||
+              formatNorm.includes(articleFormatNorm);
+
+            if (formatMatch) {
+              logger.info("Format correspondant trouvé", {
+                category: category.name,
+                support: support.name,
+                formatConfig: format.name,
+                formatArticle: article.format,
+                formatNormConfig: formatNorm,
+                formatNormArticle: articleFormatNorm,
+                prix: format.price,
+              });
+
+              // Vérifier si le support correspond
+              const supportMatch =
+                support.name === article.support ||
+                article.support.includes(support.name) ||
+                support.name.includes(article.support);
+
+              if (supportMatch) {
+                prixValidé = format.price;
+                logger.info("Prix validé via correspondance flexible", {
+                  formatConfig: format.name,
+                  formatArticle: article.format,
+                  supportConfig: support.name,
+                  supportArticle: article.support,
+                  prix: prixValidé,
+                });
+                break;
+              } else {
+                logger.warn("Format trouvé mais support non correspondant", {
+                  supportRecherche: article.support,
+                  supportTrouve: support.name,
+                });
+              }
+            }
+          }
+          if (prixValidé !== null) break;
+        }
+        if (prixValidé !== null) break;
+      }
+      if (prixValidé !== null) break;
+    }
+  }
+
+  // 6. Si toujours pas trouvé, chercher dans l'ancienne structure (category.formats) pour compatibilité
+  if (prixValidé === null && article.format) {
     for (const category of tarifConfig.categories) {
       if (!category.formats) continue;
 
       for (const format of category.formats) {
-        // Correspondance flexible : le format peut contenir le label (ex: "10x10 cm" contient "10x10")
+        const normalizeFormat = (str) =>
+          str.replace(/×/g, "x").replace(/\s/g, "").toLowerCase();
+        const formatNorm = normalizeFormat(format.nom);
+        const articleFormatNorm = normalizeFormat(article.format);
+
         const formatMatch =
-          format.nom === article.format ||
-          article.format.includes(format.nom) ||
-          format.nom.includes(article.format);
+          formatNorm === articleFormatNorm ||
+          articleFormatNorm.includes(formatNorm) ||
+          formatNorm.includes(articleFormatNorm);
 
         if (formatMatch) {
-          // Si le format a des supports, chercher le support correspondant
           if (
             format.supports &&
             Array.isArray(format.supports) &&
@@ -166,30 +293,21 @@ async function getValidatedPrice(article) {
 
             if (support) {
               prixValidé = support.prix;
-              logger.info(
-                "Prix validé via correspondance flexible (avec support)",
-                {
-                  formatConfig: format.nom,
-                  formatArticle: article.format,
-                  supportConfig: support.nom,
-                  supportArticle: article.support,
-                  prix: prixValidé,
-                },
-              );
+              logger.info("Prix validé via ancienne structure", {
+                formatConfig: format.nom,
+                supportConfig: support.nom,
+                prix: prixValidé,
+              });
               break;
             }
           }
           // Si le format n'a pas de supports, utiliser le prix du format directement
           else if (format.prix !== undefined) {
             prixValidé = format.prix;
-            logger.info(
-              "Prix validé via correspondance flexible (format simple)",
-              {
-                formatConfig: format.nom,
-                formatArticle: article.format,
-                prix: prixValidé,
-              },
-            );
+            logger.info("Prix validé via ancienne structure (format simple)", {
+              formatConfig: format.nom,
+              prix: prixValidé,
+            });
             break;
           }
         }

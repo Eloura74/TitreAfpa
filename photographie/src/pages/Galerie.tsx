@@ -562,7 +562,7 @@ export default function Galerie() {
                     resolved.push({
                       id: fmt.id,
                       format: fmt.name,
-                      support: `${supp.name} (${prod.name})`,
+                      support: supp.name,
                       prix: fmt.price,
                     });
                   }
@@ -664,15 +664,18 @@ export default function Galerie() {
   const handleSelectFormat = (tarif: TarifOeuvre | Tarif) => {
     if (!photoSelectionnee) return;
 
+    // Utiliser directement le support du tarif (déjà nettoyé par resolveTariffs)
+    const supportValue = tarif.support || "Standard";
+
     ajouterArticle({
       id: crypto.randomUUID(),
       photoId: photoSelectionnee._id,
-      nom: `${photoSelectionnee.titre} (${tarif.format})`,
+      nom: photoSelectionnee.titre, // Utiliser uniquement le titre de la photo
       prix: tarif.prix,
       quantite: 1,
       image: photoSelectionnee.src,
-      format: tarif.format,
-      support: tarif.support,
+      format: tarif.format, // Format tel quel depuis TarifConfig (ex: "10x10")
+      support: supportValue, // Support nettoyé ou par défaut
     });
 
     addToast(
