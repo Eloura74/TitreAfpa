@@ -48,6 +48,12 @@ const offres = [
     prix: "à partir de 10,75 €",
     image: "/images/cartes.png",
   },
+  {
+    titre: "Bijoux",
+    description: "petits formats",
+    prix: "à partir de 5,50 €",
+    image: "/images/bijoux.png",
+  },
 ];
 
 // ==============================
@@ -70,6 +76,10 @@ const FORMATS_PAR_OFFRE: Record<string, FormatOption[]> = {
   "Cartes postales": [
     { label: "10 cartes 10x15 cm", value: "10x15", prix: 10.75 },
     { label: "20 cartes 10x15 cm", value: "20x15", prix: 19.99 },
+  ],
+  Bijoux: [
+    { label: "10x10 cm", value: "10x10 cm", prix: 5.5 },
+    { label: "13x13 cm", value: "13x13 cm", prix: 7.0 },
   ],
 };
 
@@ -109,7 +119,7 @@ const TirageEnLigne: React.FC = () => {
   // États pour contrôler la modale de commande (ouverte/fermée) et l'offre sélectionnée
   const [modalOpen, setModalOpen] = useState(false);
   const [offreActive, setOffreActive] = useState<(typeof offres)[0] | null>(
-    null
+    null,
   );
 
   // useEffect pour modifier le titre de l’onglet navigateur au chargement de la page

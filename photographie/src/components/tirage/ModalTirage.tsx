@@ -75,7 +75,7 @@ export const ModalTirage: React.FC<ModalTirageProps> = ({
       prix: formatObj.prix,
       quantite,
       image: image || offre.image, // Soit l'image uploadée, soit l'image par défaut
-      format: formatObj.label, // Format pour validation backend
+      format: formatObj.value, // Format exact pour validation backend (ex: "10x10 cm")
       support: offre.titre, // Support (Bijoux, Poster, etc.) pour validation backend
     };
 
