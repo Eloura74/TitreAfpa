@@ -510,7 +510,7 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* SECTION REPORTAGES (Bas Centre) */}
+        {/* SECTION REPORTAGES (Bas Centre)   */}
         <motion.section
           onMouseEnter={() => setHoveredSide("ecrin")}
           onMouseLeave={() => setHoveredSide(null)}
