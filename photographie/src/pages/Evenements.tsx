@@ -201,6 +201,8 @@ export default function Evenements() {
   const [cardPosition, setCardPosition] = useState<
     { top: number; left: number; width: number; height: number } | undefined
   >();
+  const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number>(0);
 
   // ----------------------------------------------------------------------------
   // 🔁 useEffect : Récupération des données à l’ouverture de la page
@@ -386,17 +388,29 @@ export default function Evenements() {
                 </div>
               )}
               {expandedEvent.photos && expandedEvent.photos.length > 0 && (
-                <div className="grid grid-cols-3 gap-2">
-                  {expandedEvent.photos.slice(0, 6).map((photo, idx) => (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {expandedEvent.photos.slice(0, 12).map((photo, idx) => (
                     <div
                       key={idx}
-                      className="relative aspect-video overflow-hidden rounded-lg bg-black"
+                      className="relative aspect-square overflow-hidden rounded-lg bg-black cursor-pointer group"
+                      onClick={() => {
+                        setLightboxPhoto(
+                          typeof photo === "string" ? photo : photo.src,
+                        );
+                        setLightboxIndex(idx);
+                      }}
                     >
                       <img
                         src={typeof photo === "string" ? photo : photo.src}
                         alt={`${expandedEvent.titre} ${idx + 1}`}
-                        className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 ease-out"
                       />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                        <Eye
+                          className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          size={24}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -439,6 +453,118 @@ export default function Evenements() {
             </div>
           </div>
         </ExpandableCard>
+      )}
+
+      {/* Lightbox pour afficher les photos en plein écran */}
+      {lightboxPhoto && expandedEvent && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center p-4"
+          style={{ zIndex: 999999 }}
+          onClick={() => setLightboxPhoto(null)}
+        >
+          <button
+            onClick={() => setLightboxPhoto(null)}
+            className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors z-10"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+
+          {/* Navigation précédent */}
+          {lightboxIndex > 0 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const newIndex = lightboxIndex - 1;
+                setLightboxIndex(newIndex);
+                const photo = expandedEvent.photos?.[newIndex];
+                if (photo) {
+                  setLightboxPhoto(
+                    typeof photo === "string" ? photo : photo.src,
+                  );
+                }
+              }}
+              className="absolute left-4 text-white/80 hover:text-white transition-colors z-10"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+          )}
+
+          {/* Image */}
+          <motion.img
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            src={lightboxPhoto}
+            alt={`${expandedEvent.titre} - Photo ${lightboxIndex + 1}`}
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          {/* Navigation suivant */}
+          {expandedEvent.photos &&
+            lightboxIndex < expandedEvent.photos.length - 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const newIndex = lightboxIndex + 1;
+                  setLightboxIndex(newIndex);
+                  const photo = expandedEvent.photos?.[newIndex];
+                  if (photo) {
+                    setLightboxPhoto(
+                      typeof photo === "string" ? photo : photo.src,
+                    );
+                  }
+                }}
+                className="absolute right-4 text-white/80 hover:text-white transition-colors z-10"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            )}
+
+          {/* Compteur de photos */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 text-sm">
+            {lightboxIndex + 1} / {expandedEvent.photos?.length || 0}
+          </div>
+        </motion.div>
       )}
 
       {/* --- Pied de page --- */}
