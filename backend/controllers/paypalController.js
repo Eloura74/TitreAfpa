@@ -6,14 +6,15 @@ const TarifConfig = require("../models/TarifConfig");
 const logger = require("../utils/logger");
 
 // Configuration de l'environnement PayPal
-// En production, utilisez LiveEnvironment au lieu de SandboxEnvironment
+// Utilise PAYPAL_MODE pour déterminer l'environnement (sandbox ou live)
 let environment;
-if (process.env.NODE_ENV === "production") {
+if (process.env.PAYPAL_MODE === "live") {
   environment = new paypal.core.LiveEnvironment(
     process.env.PAYPAL_CLIENT_ID,
     process.env.PAYPAL_CLIENT_SECRET,
   );
 } else {
+  // Par défaut, utilise Sandbox (même en production Vercel)
   environment = new paypal.core.SandboxEnvironment(
     process.env.PAYPAL_CLIENT_ID,
     process.env.PAYPAL_CLIENT_SECRET,
