@@ -9,9 +9,31 @@ import {
   User,
   CreditCard,
   X,
+  ChevronDown,
+  ChevronUp,
+  Package,
+  MapPin,
 } from "lucide-react";
 
 const API_URL = `${BASE_API_URL}/api/paiements`;
+
+interface Article {
+  nom: string;
+  quantite: number;
+  prixUnitaire: number;
+  format?: string;
+  support?: string;
+}
+
+interface AdresseLivraison {
+  nom?: string;
+  prenom?: string;
+  adresse?: string;
+  codePostal?: string;
+  ville?: string;
+  pays?: string;
+  telephone?: string;
+}
 
 interface Paiement {
   _id?: string;
@@ -23,6 +45,8 @@ interface Paiement {
   source?: "manuel" | "paypal" | "stripe";
   transactionId?: string;
   statut?: string;
+  articles?: Article[];
+  adresseLivraison?: AdresseLivraison;
 }
 
 export default function GestionPaiements() {
@@ -36,6 +60,7 @@ export default function GestionPaiements() {
   const [editId, setEditId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPaiements();
@@ -51,7 +76,7 @@ export default function GestionPaiements() {
       .catch((e) => {
         setError(
           e?.response?.data?.message ||
-            "Erreur lors du chargement des paiements."
+            "Erreur lors du chargement des paiements.",
         );
         setPaiements([]);
       })
@@ -59,7 +84,7 @@ export default function GestionPaiements() {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -93,7 +118,7 @@ export default function GestionPaiements() {
       const err = e as any;
       setError(
         err?.response?.data?.message ||
-          "Erreur lors de l'enregistrement du paiement."
+          "Erreur lors de l'enregistrement du paiement.",
       );
     } finally {
       setLoading(false);
@@ -122,7 +147,7 @@ export default function GestionPaiements() {
       const err = e as any;
       setError(
         err?.response?.data?.message ||
-          "Erreur lors de la suppression du paiement."
+          "Erreur lors de la suppression du paiement.",
       );
     } finally {
       setLoading(false);
@@ -259,8 +284,8 @@ export default function GestionPaiements() {
                   {loading
                     ? "Traitement..."
                     : editId
-                    ? "Enregistrer"
-                    : "Ajouter"}
+                      ? "Enregistrer"
+                      : "Ajouter"}
                 </button>
                 {editId && (
                   <button
@@ -319,61 +344,178 @@ export default function GestionPaiements() {
                     </tr>
                   ) : (
                     paiements.map((p) => (
-                      <tr
-                        key={p._id}
-                        className="hover:bg-white/5 transition-colors group"
-                      >
-                        <td className="p-4 text-sm text-gray-300">
-                          {new Date(p.date).toLocaleDateString()}
-                        </td>
-                        <td className="p-4">
-                          <span
-                            className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full border ${
-                              p.source === "paypal"
-                                ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
-                                : p.source === "stripe"
-                                ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
-                                : "bg-gray-500/10 text-gray-400 border-gray-500/20"
-                            }`}
-                          >
-                            {p.source || "Manuel"}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <div className="font-bold text-white text-sm">
-                            {p.nomClient || p.utilisateur || "Inconnu"}
-                          </div>
-                          {p.emailClient && (
-                            <div className="text-xs text-gray-500 mt-0.5">
-                              {p.emailClient}
+                      <>
+                        <tr
+                          key={p._id}
+                          className="hover:bg-white/5 transition-colors group"
+                        >
+                          <td className="p-4 text-sm text-gray-300">
+                            {new Date(p.date).toLocaleDateString()}
+                          </td>
+                          <td className="p-4">
+                            <span
+                              className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full border ${
+                                p.source === "paypal"
+                                  ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                                  : p.source === "stripe"
+                                    ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                                    : "bg-gray-500/10 text-gray-400 border-gray-500/20"
+                              }`}
+                            >
+                              {p.source || "Manuel"}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <div className="font-bold text-white text-sm">
+                              {p.nomClient || p.utilisateur || "Inconnu"}
                             </div>
+                            {p.emailClient && (
+                              <div className="text-xs text-gray-500 mt-0.5">
+                                {p.emailClient}
+                              </div>
+                            )}
+                          </td>
+                          <td className="p-4 text-xs font-mono text-gray-500">
+                            {p.transactionId || "-"}
+                          </td>
+                          <td className="p-4 text-right font-bold text-[#ffe992]">
+                            {p.montant?.toFixed(2)} €
+                          </td>
+                          <td className="p-4 text-right">
+                            <div className="flex justify-end gap-2">
+                              {(p.articles?.length || p.adresseLivraison) && (
+                                <button
+                                  className="p-1.5 bg-white/5 hover:bg-[#ffe992] hover:text-black text-gray-300 rounded transition-colors"
+                                  onClick={() =>
+                                    setExpandedId(
+                                      expandedId === p._id
+                                        ? null
+                                        : p._id || null,
+                                    )
+                                  }
+                                  title="Voir détails"
+                                >
+                                  {expandedId === p._id ? (
+                                    <ChevronUp size={14} />
+                                  ) : (
+                                    <ChevronDown size={14} />
+                                  )}
+                                </button>
+                              )}
+                              <button
+                                className="p-1.5 bg-white/5 hover:bg-[#ffe992] hover:text-black text-gray-300 rounded transition-colors opacity-0 group-hover:opacity-100"
+                                onClick={() => handleEdit(p)}
+                                title="Éditer"
+                              >
+                                <Edit size={14} />
+                              </button>
+                              <button
+                                className="p-1.5 bg-white/5 hover:bg-red-500 hover:text-white text-gray-300 rounded transition-colors opacity-0 group-hover:opacity-100"
+                                onClick={() => p._id && handleDelete(p._id)}
+                                title="Supprimer"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                        {expandedId === p._id &&
+                          (p.articles?.length || p.adresseLivraison) && (
+                            <tr key={`${p._id}-details`}>
+                              <td colSpan={6} className="p-0 bg-[#1a1a20]/50">
+                                <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                  {/* Articles commandés */}
+                                  {p.articles && p.articles.length > 0 && (
+                                    <div className="space-y-3">
+                                      <h4 className="text-sm font-bold text-[#ffe992] uppercase tracking-wider flex items-center gap-2">
+                                        <Package size={16} />
+                                        Articles commandés
+                                      </h4>
+                                      <div className="space-y-2">
+                                        {p.articles.map((article, idx) => (
+                                          <div
+                                            key={idx}
+                                            className="bg-[#0a0a10] rounded-lg p-3 border border-white/5"
+                                          >
+                                            <div className="flex justify-between items-start">
+                                              <div className="flex-1">
+                                                <div className="font-bold text-white text-sm">
+                                                  {article.nom}
+                                                </div>
+                                                {article.format && (
+                                                  <div className="text-xs text-gray-500 mt-1">
+                                                    Format: {article.format}
+                                                  </div>
+                                                )}
+                                                {article.support && (
+                                                  <div className="text-xs text-gray-500">
+                                                    Support: {article.support}
+                                                  </div>
+                                                )}
+                                              </div>
+                                              <div className="text-right ml-4">
+                                                <div className="text-sm text-gray-400">
+                                                  x{article.quantite}
+                                                </div>
+                                                <div className="text-sm font-bold text-[#ffe992]">
+                                                  {article.prixUnitaire.toFixed(
+                                                    2,
+                                                  )}{" "}
+                                                  €
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Adresse de livraison */}
+                                  {p.adresseLivraison && (
+                                    <div className="space-y-3">
+                                      <h4 className="text-sm font-bold text-[#ffe992] uppercase tracking-wider flex items-center gap-2">
+                                        <MapPin size={16} />
+                                        Adresse de livraison
+                                      </h4>
+                                      <div className="bg-[#0a0a10] rounded-lg p-4 border border-white/5 space-y-2">
+                                        {(p.adresseLivraison.prenom ||
+                                          p.adresseLivraison.nom) && (
+                                          <div className="font-bold text-white">
+                                            {p.adresseLivraison.prenom}{" "}
+                                            {p.adresseLivraison.nom}
+                                          </div>
+                                        )}
+                                        {p.adresseLivraison.adresse && (
+                                          <div className="text-sm text-gray-300">
+                                            {p.adresseLivraison.adresse}
+                                          </div>
+                                        )}
+                                        {(p.adresseLivraison.codePostal ||
+                                          p.adresseLivraison.ville) && (
+                                          <div className="text-sm text-gray-300">
+                                            {p.adresseLivraison.codePostal}{" "}
+                                            {p.adresseLivraison.ville}
+                                          </div>
+                                        )}
+                                        {p.adresseLivraison.pays && (
+                                          <div className="text-sm text-gray-300">
+                                            {p.adresseLivraison.pays}
+                                          </div>
+                                        )}
+                                        {p.adresseLivraison.telephone && (
+                                          <div className="text-sm text-gray-400 mt-2">
+                                            Tél: {p.adresseLivraison.telephone}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
                           )}
-                        </td>
-                        <td className="p-4 text-xs font-mono text-gray-500">
-                          {p.transactionId || "-"}
-                        </td>
-                        <td className="p-4 text-right font-bold text-[#ffe992]">
-                          {p.montant?.toFixed(2)} €
-                        </td>
-                        <td className="p-4 text-right">
-                          <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              className="p-1.5 bg-white/5 hover:bg-[#ffe992] hover:text-black text-gray-300 rounded transition-colors"
-                              onClick={() => handleEdit(p)}
-                              title="Éditer"
-                            >
-                              <Edit size={14} />
-                            </button>
-                            <button
-                              className="p-1.5 bg-white/5 hover:bg-red-500 hover:text-white text-gray-300 rounded transition-colors"
-                              onClick={() => p._id && handleDelete(p._id)}
-                              title="Supprimer"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
+                      </>
                     ))
                   )}
                 </tbody>

@@ -417,12 +417,24 @@ exports.captureOrder = async (req, res) => {
     const purchaseUnit = result.purchase_units[0];
     const amount = purchaseUnit.payments.captures[0].amount.value;
 
-    // Récupération des articles pour l'email admin (si disponibles dans la réponse)
-    // Note: PayPal ne renvoie pas toujours les items dans la réponse de capture,
-    // il faut parfois refaire un getOrder ou se fier à ce qu'on a envoyé.
-    // Mais purchase_units[0].items devrait être là si on a mis 'return=representation' à la création ?
-    // Pas garanti. On va essayer de les récupérer, sinon liste vide.
+    // Récupération des articles depuis la réponse PayPal
     const items = purchaseUnit.items || [];
+
+    // Formatage des articles pour MongoDB
+    const articlesFormatted = items.map((item) => ({
+      nom: item.name,
+      quantite: parseInt(item.quantity),
+      prixUnitaire: parseFloat(item.unit_amount.value),
+      format: item.description || "",
+      support: "",
+    }));
+
+    // Extraction de l'adresse de livraison (si disponible)
+    const shipping = purchaseUnit.shipping || {};
+    const shippingAddress = shipping.address || {};
+    const shippingName = shipping.name?.full_name || "";
+    const [prenom, ...nomParts] = shippingName.split(" ");
+    const nom = nomParts.join(" ");
 
     // Enregistrement du paiement en base de données
     const nouveauPaiement = await Paiement.create({
@@ -433,6 +445,16 @@ exports.captureOrder = async (req, res) => {
       transactionId: result.id,
       nomClient: `${payer.name.given_name} ${payer.name.surname}`,
       emailClient: payer.email_address,
+      articles: articlesFormatted,
+      adresseLivraison: {
+        nom: nom || payer.name.surname,
+        prenom: prenom || payer.name.given_name,
+        adresse: shippingAddress.address_line_1 || "",
+        codePostal: shippingAddress.postal_code || "",
+        ville: shippingAddress.admin_area_2 || "",
+        pays: shippingAddress.country_code || "",
+        telephone: payer.phone?.phone_number?.national_number || "",
+      },
       // utilisateur: req.user ? req.user._id : undefined // Si on avait l'user connecté
     });
 

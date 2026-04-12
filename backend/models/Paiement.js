@@ -70,6 +70,28 @@ const paiementSchema = new mongoose.Schema({
     enum: ["paypal", "stripe", "carte", "virement"],
     required: false,
   },
+
+  // Articles commandés (pour affichage admin)
+  articles: [
+    {
+      nom: String,
+      quantite: Number,
+      prixUnitaire: Number,
+      format: String,
+      support: String,
+    },
+  ],
+
+  // Adresse de livraison
+  adresseLivraison: {
+    nom: String,
+    prenom: String,
+    adresse: String,
+    codePostal: String,
+    ville: String,
+    pays: String,
+    telephone: String,
+  },
 });
 
 // ============================================
