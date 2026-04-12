@@ -71,7 +71,9 @@ export default function GestionPaiements() {
     axios
       .get(API_URL, { withCredentials: true })
       .then((r) => {
-        setPaiements(Array.isArray(r.data) ? r.data : []);
+        // Backend retourne {status, data} au lieu d'un array direct
+        const paiementsData = r.data.data || r.data;
+        setPaiements(Array.isArray(paiementsData) ? paiementsData : []);
       })
       .catch((e) => {
         setError(
