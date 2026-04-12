@@ -71,6 +71,7 @@ const ReportagePublic = lazy(() => import("./pages/ReportagePublic"));
 
 // Pages légales
 const MentionsLegales = lazy(() => import("./pages/MentionsLegales"));
+const CGV = lazy(() => import("./pages/CGV"));
 
 // ==============================
 //  Composant principal App : configuration des routes
@@ -236,8 +237,9 @@ function App() {
                   element={<EcrinPrive />}
                 />
 
-                {/* Route pour les mentions légales */}
+                {/* Routes pour les pages légales */}
                 <Route path="/mentions-legales" element={<MentionsLegales />} />
+                <Route path="/cgv" element={<CGV />} />
               </Routes>
             </Suspense>
           </Router>

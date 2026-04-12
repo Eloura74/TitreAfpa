@@ -31,6 +31,10 @@ export default function Footer() {
               Mentions légales
             </Link>
 
+            <Link to="/cgv" className="footer-link">
+              CGV
+            </Link>
+
             <a
               href="https://www.instagram.com/fabien.licata.photographiste/"
               target="_blank"

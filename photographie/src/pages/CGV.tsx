@@ -5,22 +5,22 @@ import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import { API_URL } from "../config/api";
 
-export default function MentionsLegales() {
+export default function CGV() {
   const [contenu, setContenu] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadMentionsLegales();
+    loadCGV();
   }, []);
 
-  const loadMentionsLegales = async () => {
+  const loadCGV = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/mentions-legales`);
       if (res.data.success) {
-        setContenu(res.data.mentionsLegales || "");
+        setContenu(res.data.cgv || "");
       }
     } catch (err) {
-      console.error("Erreur chargement mentions légales:", err);
+      console.error("Erreur chargement CGV:", err);
     } finally {
       setLoading(false);
     }
@@ -38,7 +38,7 @@ export default function MentionsLegales() {
             transition={{ duration: 0.6 }}
           >
             <h1 className="text-4xl sm:text-5xl font-bold mb-8 bg-gradient-to-r from-[#d6c487] via-[#ffe992] to-[#c9b36f] bg-clip-text text-transparent">
-              Mentions Légales
+              Conditions Générales de Vente
             </h1>
 
             {loading ? (

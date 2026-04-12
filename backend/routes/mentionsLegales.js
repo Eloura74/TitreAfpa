@@ -3,20 +3,21 @@ const router = express.Router();
 const MentionsLegales = require("../models/MentionsLegales");
 const { isAdmin } = require("../middleware/auth");
 
-// GET /api/mentions-legales - Récupérer les mentions légales (public)
+// GET /api/mentions-legales - Récupérer les mentions légales et CGV (public)
 router.get("/", async (req, res) => {
   try {
     let mentions = await MentionsLegales.findOne();
-    
+
     // Si aucun document n'existe, en créer un avec le contenu par défaut
     if (!mentions) {
       mentions = new MentionsLegales();
       await mentions.save();
     }
-    
+
     res.json({
       success: true,
-      contenu: mentions.contenu,
+      mentionsLegales: mentions.mentionsLegales,
+      cgv: mentions.cgv,
       derniereModification: mentions.derniereModification,
     });
   } catch (error) {
@@ -28,33 +29,46 @@ router.get("/", async (req, res) => {
   }
 });
 
-// PUT /api/mentions-legales - Mettre à jour les mentions légales (admin)
+// PUT /api/mentions-legales - Mettre à jour les mentions légales et CGV (admin)
 router.put("/", isAdmin, async (req, res) => {
   try {
-    const { contenu } = req.body;
-    
-    if (!contenu) {
+    const { mentionsLegales, cgv } = req.body;
+
+    // Nettoyer le HTML vide de Quill (ex: '<p><br></p>')
+    const cleanMentions =
+      mentionsLegales?.replace(/<p><br><\/p>/g, "").trim() || "";
+    const cleanCgv = cgv?.replace(/<p><br><\/p>/g, "").trim() || "";
+
+    // Validation : au moins un contenu doit être rempli
+    if (!cleanMentions && !cleanCgv) {
       return res.status(400).json({
         success: false,
-        message: "Le contenu est requis",
+        message:
+          "Veuillez remplir au moins un des deux contenus (Mentions Légales ou CGV)",
       });
     }
-    
+
     let mentions = await MentionsLegales.findOne();
-    
+
     if (!mentions) {
-      mentions = new MentionsLegales({ contenu });
+      mentions = new MentionsLegales({
+        mentionsLegales: mentionsLegales || "",
+        cgv: cgv || "",
+      });
     } else {
-      mentions.contenu = contenu;
+      if (mentionsLegales !== undefined)
+        mentions.mentionsLegales = mentionsLegales;
+      if (cgv !== undefined) mentions.cgv = cgv;
       mentions.derniereModification = new Date();
     }
-    
+
     await mentions.save();
-    
+
     res.json({
       success: true,
-      message: "Mentions légales mises à jour avec succès",
-      contenu: mentions.contenu,
+      message: "Mentions légales et CGV mises à jour avec succès",
+      mentionsLegales: mentions.mentionsLegales,
+      cgv: mentions.cgv,
       derniereModification: mentions.derniereModification,
     });
   } catch (error) {

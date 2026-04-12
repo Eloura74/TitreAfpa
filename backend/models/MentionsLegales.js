@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const mentionsLegalesSchema = new mongoose.Schema(
   {
-    contenu: {
+    mentionsLegales: {
       type: String,
       required: true,
       default: `<h2>1. Informations légales</h2>
@@ -35,6 +35,37 @@ const mentionsLegalesSchema = new mongoose.Schema(
 <p><strong>Conception et développement :</strong> [Nom du développeur]</p>
 <p><strong>Photographies :</strong> © Photographe Pro - Tous droits réservés</p>`,
     },
+    cgv: {
+      type: String,
+      required: true,
+      default: `<h2>1. Objet</h2>
+<p>Les présentes Conditions Générales de Vente (CGV) régissent les relations contractuelles entre le photographe professionnel et ses clients.</p>
+
+<h2>2. Prestations proposées</h2>
+<p>Le photographe propose des prestations de photographie professionnelle incluant :</p>
+<ul>
+<li>Séances photo (portrait, événement, mariage, etc.)</li>
+<li>Retouches et post-traitement</li>
+<li>Livraison de fichiers numériques haute résolution</li>
+<li>Tirages papier et produits dérivés</li>
+</ul>
+
+<h2>3. Tarifs et paiement</h2>
+<p>Les tarifs sont indiqués en euros TTC. Un acompte de 30% est requis à la réservation. Le solde est dû à la livraison des photos.</p>
+
+<h2>4. Droits d'auteur</h2>
+<p>Le photographe conserve les droits d'auteur sur toutes les créations. Le client acquiert un droit d'usage personnel non exclusif.</p>
+
+<h2>5. Délais de livraison</h2>
+<p>Les photos retouchées sont livrées sous 2 à 4 semaines après la séance, sauf mention contraire.</p>
+
+<h2>6. Annulation</h2>
+<p>Toute annulation moins de 48h avant la séance entraîne la perte de l'acompte versé.</p>`,
+    },
+    contenu: {
+      type: String,
+      default: "",
+    },
     derniereModification: {
       type: Date,
       default: Date.now,
@@ -42,7 +73,7 @@ const mentionsLegalesSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("MentionsLegales", mentionsLegalesSchema);
