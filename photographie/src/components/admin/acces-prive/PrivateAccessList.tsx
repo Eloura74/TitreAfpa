@@ -90,9 +90,15 @@ export default function PrivateAccessList({
                   >
                     {event.titre}
                   </h4>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/20 whitespace-nowrap">
-                    Privé
-                  </span>
+                  {event.isPublic ? (
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/20 whitespace-nowrap">
+                      Public
+                    </span>
+                  ) : (
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/20 whitespace-nowrap">
+                      Privé
+                    </span>
+                  )}
                 </div>
 
                 {/* Bouton Expand & Copy Link */}

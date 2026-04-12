@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Evenement } from "../../../types/evenement";
 import UploadPhotosOriginales from "./UploadPhotosOriginales";
 import PhotoOriginalesManager from "./PhotoOriginalesManager";
+import TariffSelectorForReportage from "./TariffSelectorForReportage";
+import { tariffServiceV2 } from "../../../services/tariffServiceV2";
+import { TariffConfigV2 } from "../../../types/tarifConfigV2";
 
 // ==========================================
 // 📝 Interface des Props
@@ -24,6 +27,9 @@ interface PrivateAccessFormProps {
   handleRemoveImage: () => void;
   imagePreview: string;
 
+  // Gestion des tarifs
+  handleTariffIdsChange?: (ids: string[]) => void;
+
   // Rafraîchissement après upload R2
   onRefresh?: () => void;
 }
@@ -42,8 +48,24 @@ export default function PrivateAccessForm({
   handleImageChange,
   handleRemoveImage,
   imagePreview,
+  handleTariffIdsChange,
   onRefresh,
 }: PrivateAccessFormProps) {
+  const [tariffConfig, setTariffConfig] = useState<TariffConfigV2 | null>(null);
+
+  useEffect(() => {
+    const loadTariffs = async () => {
+      const config = await tariffServiceV2.getTariffConfig();
+      setTariffConfig(config);
+    };
+    loadTariffs();
+  }, []);
+
+  const handleTariffToggle = (ids: string[]) => {
+    if (handleTariffIdsChange) {
+      handleTariffIdsChange(ids);
+    }
+  };
   return (
     <div>
       <h3 className="text-xl font-semibold text-white mb-4">
@@ -144,17 +166,34 @@ export default function PrivateAccessForm({
 
         {/* Code d'accès unique */}
         <div className="space-y-1">
-          <label className="text-xs text-gray-400">Code d'accès unique *</label>
+          <label className="text-xs text-gray-400">
+            Code d'accès unique {!form.isPublic && "*"}
+            {form.isPublic && (
+              <span className="text-gray-500 ml-2">
+                (optionnel pour reportage public)
+              </span>
+            )}
+          </label>
           <input
             name="codeAcces"
-            placeholder="Ex: SHOOTING-2024-ABC123"
+            placeholder={
+              form.isPublic
+                ? "Optionnel - Laissez vide pour reportage public uniquement"
+                : "Ex: SHOOTING-2024-ABC123"
+            }
             value={form.codeAcces || ""}
             onChange={handleChange}
-            className="w-full bg-[#232336] border border-[#ffe992]/30 rounded px-4 py-2 text-white uppercase focus:border-[#ffe992] outline-none transition-colors placeholder-gray-500"
-            required
+            className={`w-full bg-[#232336] border rounded px-4 py-2 text-white uppercase focus:border-[#ffe992] outline-none transition-colors placeholder-gray-500 ${
+              form.isPublic
+                ? "border-white/10 opacity-60"
+                : "border-[#ffe992]/30"
+            }`}
+            required={!form.isPublic}
           />
           <p className="text-xs text-gray-500 mt-1">
-            Le client utilisera ce code pour accéder à ses photos
+            {form.isPublic
+              ? "Pour un reportage public, le code d'accès est optionnel. Laissez vide si vous voulez uniquement un accès public."
+              : "Le client utilisera ce code pour accéder à ses photos"}
           </p>
         </div>
 
@@ -165,15 +204,7 @@ export default function PrivateAccessForm({
               type="checkbox"
               name="isPublic"
               checked={form.isPublic || false}
-              onChange={(e) => {
-                const event = {
-                  target: {
-                    name: "isPublic",
-                    value: e.target.checked,
-                  },
-                } as any;
-                handleChange(event);
-              }}
+              onChange={handleChange}
               className="w-5 h-5 accent-[#ffe992] cursor-pointer"
             />
             <div className="flex-1">
@@ -186,6 +217,24 @@ export default function PrivateAccessForm({
               </span>
             </div>
           </label>
+
+          {/* Sélection des formats si reportage public */}
+          {form.isPublic && tariffConfig && (
+            <div className="mt-4 pt-4 border-t border-white/10">
+              <label className="text-sm font-bold text-[#ffe992] block mb-3">
+                Formats disponibles pour la commande
+              </label>
+              <p className="text-xs text-gray-400 mb-3">
+                Sélectionnez les formats que les clients pourront commander
+                depuis la page publique du reportage
+              </p>
+              <TariffSelectorForReportage
+                config={tariffConfig}
+                selectedIds={form.availableTariffIds || []}
+                onToggle={handleTariffToggle}
+              />
+            </div>
+          )}
         </div>
 
         {/* Type de validité */}
@@ -309,10 +358,10 @@ export default function PrivateAccessForm({
         </div>
 
         {/* Upload Photos Originales R2 (uniquement en mode édition) */}
-        {editId && form.codeAcces && (
+        {editId && (
           <UploadPhotosOriginales
             accesId={editId}
-            codeAcces={form.codeAcces}
+            codeAcces={form.codeAcces || editId}
             onUploadComplete={() => {
               if (onRefresh) onRefresh();
             }}
@@ -321,13 +370,12 @@ export default function PrivateAccessForm({
 
         {/* Gestion des Photos Originales (suppression et commentaires) */}
         {editId &&
-          form.codeAcces &&
           form.photosOriginales &&
           form.photosOriginales.length > 0 && (
             <div className="mt-6">
               <PhotoOriginalesManager
                 accesId={editId}
-                codeAcces={form.codeAcces}
+                codeAcces={form.codeAcces || editId}
                 photos={form.photosOriginales}
                 onPhotosUpdate={() => {
                   if (onRefresh) onRefresh();

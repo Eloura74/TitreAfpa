@@ -33,8 +33,9 @@ const accesPriveSchema = new mongoose.Schema({
 
   codeAcces: {
     type: String,
-    required: true,
+    required: false,
     unique: true,
+    sparse: true,
     trim: true,
     uppercase: true,
   },
@@ -42,6 +43,11 @@ const accesPriveSchema = new mongoose.Schema({
   isPublic: {
     type: Boolean,
     default: false,
+  },
+
+  availableTariffIds: {
+    type: [String],
+    default: [],
   },
 
   photosOriginales: [PhotoOriginaleSchema],

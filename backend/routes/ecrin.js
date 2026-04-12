@@ -104,7 +104,7 @@ router.get("/info/:slug", async (req, res) => {
     const searchVal = req.params.slug;
     const acces = await AccesPrive.findOne({
       $or: [{ slug: searchVal }, { codeAcces: searchVal.toUpperCase().trim() }],
-    }).select("titre image");
+    });
 
     if (!acces) {
       return res
@@ -296,10 +296,10 @@ router.post("/generate-upload-url", async (req, res) => {
     const { accesId, codeAcces, fileName, fileType } = req.body;
 
     // Validation des paramètres requis
-    if (!accesId || !codeAcces || !fileName) {
+    if (!accesId || !fileName) {
       return res.status(400).json({
         success: false,
-        message: "Paramètres manquants (accesId, codeAcces, fileName)",
+        message: "Paramètres manquants (accesId, fileName)",
       });
     }
 
@@ -313,16 +313,20 @@ router.post("/generate-upload-url", async (req, res) => {
       });
     }
 
-    // Vérification du code d'accès
-    if (acces.codeAcces !== codeAcces.toUpperCase().trim()) {
-      return res.status(403).json({
-        success: false,
-        message: "Code d'accès invalide",
-      });
+    // Vérification du code d'accès (seulement si l'accès a un code)
+    if (acces.codeAcces && codeAcces) {
+      if (acces.codeAcces !== codeAcces.toUpperCase().trim()) {
+        return res.status(403).json({
+          success: false,
+          message: "Code d'accès invalide",
+        });
+      }
     }
 
     // Génération de la clé R2 unique
-    const r2Key = `${codeAcces}/${Date.now()}-${fileName}`;
+    // Utiliser le codeAcces s'il existe, sinon l'ID de l'accès
+    const folderName = acces.codeAcces || accesId;
+    const r2Key = `${folderName}/${Date.now()}-${fileName}`;
 
     // Création de la commande PutObject pour générer l'URL pré-signée
     const command = new PutObjectCommand({
@@ -361,7 +365,7 @@ router.post("/confirm-upload", async (req, res) => {
       req.body;
 
     // Validation des paramètres
-    if (!accesId || !codeAcces || !r2Key || !fileName) {
+    if (!accesId || !r2Key || !fileName) {
       return res.status(400).json({
         success: false,
         message: "Paramètres manquants",
@@ -378,11 +382,14 @@ router.post("/confirm-upload", async (req, res) => {
       });
     }
 
-    if (acces.codeAcces !== codeAcces.toUpperCase().trim()) {
-      return res.status(403).json({
-        success: false,
-        message: "Code d'accès invalide",
-      });
+    // Vérification du code d'accès (seulement si l'accès a un code)
+    if (acces.codeAcces && codeAcces) {
+      if (acces.codeAcces !== codeAcces.toUpperCase().trim()) {
+        return res.status(403).json({
+          success: false,
+          message: "Code d'accès invalide",
+        });
+      }
     }
 
     let miniatureUrl = null;
@@ -409,10 +416,12 @@ router.post("/confirm-upload", async (req, res) => {
         .toBuffer();
 
       // Upload de la miniature vers Cloudinary
+      // Utiliser le codeAcces s'il existe, sinon l'ID de l'accès
+      const folderName = acces.codeAcces || accesId;
       const uploadResult = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
-            folder: `ecrin-prive/${codeAcces}/miniatures`,
+            folder: `ecrin-prive/${folderName}/miniatures`,
             resource_type: "image",
             transformation: [
               { width: 1200, height: 1200, crop: "limit" },

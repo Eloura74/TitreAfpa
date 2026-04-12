@@ -24,6 +24,7 @@ export default function GestionAccesPrive() {
     clientEmail: "",
     codeAcces: "",
     isPublic: false,
+    availableTariffIds: [],
     typeValidite: "permanent",
     dateExpiration: "",
     typeLimiteTelechargement: "illimite",
@@ -80,7 +81,13 @@ export default function GestionAccesPrive() {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
   ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const target = e.target as HTMLInputElement;
+    const value = target.type === "checkbox" ? target.checked : target.value;
+    setForm({ ...form, [target.name]: value });
+  };
+
+  const handleTariffIdsChange = (ids: string[]) => {
+    setForm({ ...form, availableTariffIds: ids });
   };
 
   const resetForm = () => {
@@ -98,6 +105,7 @@ export default function GestionAccesPrive() {
       clientEmail: "",
       codeAcces: "",
       isPublic: false,
+      availableTariffIds: [],
       typeValidite: "permanent",
       dateExpiration: "",
       typeLimiteTelechargement: "illimite",
@@ -295,6 +303,7 @@ export default function GestionAccesPrive() {
             handleImageChange={handleImageChange}
             handleRemoveImage={handleRemoveImage}
             imagePreview={imagePreview}
+            handleTariffIdsChange={handleTariffIdsChange}
             onRefresh={loadEvenements}
           />
         </div>

@@ -30,6 +30,7 @@ export interface Evenement {
 
   codeAcces?: string;
   isPublic?: boolean;
+  availableTariffIds?: string[];
   photosOriginales?: PhotoOriginale[];
   typeValidite?: "permanent" | "temporaire";
   dateExpiration?: string;
