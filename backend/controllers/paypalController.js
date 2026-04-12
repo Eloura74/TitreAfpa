@@ -404,6 +404,7 @@ const Paiement = require("../models/Paiement"); // Import du modèle Paiement
 
 exports.captureOrder = async (req, res) => {
   const { orderID } = req.params;
+  const { articles: articlesFromFrontend } = req.body;
 
   const request = new paypal.orders.OrdersCaptureRequest(orderID);
   request.requestBody({});
@@ -417,17 +418,15 @@ exports.captureOrder = async (req, res) => {
     const purchaseUnit = result.purchase_units[0];
     const amount = purchaseUnit.payments.captures[0].amount.value;
 
-    // Récupération des articles depuis la réponse PayPal
-    const items = purchaseUnit.items || [];
-
-    // Formatage des articles pour MongoDB
-    const articlesFormatted = items.map((item) => ({
-      nom: item.name,
-      quantite: parseInt(item.quantity),
-      prixUnitaire: parseFloat(item.unit_amount.value),
-      format: item.description || "",
-      support: "",
-    }));
+    // Utilisation des articles envoyés par le frontend (plus fiable que PayPal)
+    const articlesFormatted =
+      articlesFromFrontend?.map((article) => ({
+        nom: article.nom,
+        quantite: article.quantite,
+        prixUnitaire: article.prix,
+        format: article.format || "",
+        support: article.support || "",
+      })) || [];
 
     // Extraction de l'adresse de livraison (si disponible)
     const shipping = purchaseUnit.shipping || {};
@@ -477,7 +476,7 @@ exports.captureOrder = async (req, res) => {
     }
 
     // 2. Email Admin
-    sendAdminNotification(nouveauPaiement, items).catch((err) =>
+    sendAdminNotification(nouveauPaiement, articlesFormatted).catch((err) =>
       logger.error("Erreur envoi email admin", { error: err.message }),
     );
 

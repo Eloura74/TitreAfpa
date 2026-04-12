@@ -95,6 +95,9 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
                 headers: {
                   "Content-Type": "application/json",
                 },
+                body: JSON.stringify({
+                  articles: articles,
+                }),
               },
             );
 
