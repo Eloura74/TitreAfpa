@@ -5,9 +5,9 @@ import GestionPaiements from "./GestionPaiements";
 import GestionPaniers from "./GestionPaniers";
 import GestionAccesPrive from "./GestionAccesPrive";
 import GestionServices from "./GestionServices";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FolderPlus, X } from "lucide-react";
+import { FolderPlus, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 import AlbumManager from "./admin/galerie/AlbumManager";
 import TarifConfiguratorV2 from "./admin/tarifs/TarifConfiguratorV2";
@@ -21,6 +21,9 @@ export default function OngletsGestionGalerie() {
   const [actif, setActif] = useState(0);
   const [showAlbumManager, setShowAlbumManager] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleAlbumChange = () => {
     setRefreshKey((prev) => prev + 1);
@@ -29,6 +32,40 @@ export default function OngletsGestionGalerie() {
   const handleGoToTarifs = () => {
     setActif(5);
   };
+
+  const checkScrollButtons = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } =
+        scrollContainerRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+    }
+  };
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 300;
+      scrollContainerRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  useEffect(() => {
+    checkScrollButtons();
+    const container = scrollContainerRef.current;
+    if (container) {
+      // Forcer le scroll à gauche au chargement
+      container.scrollLeft = 0;
+      container.addEventListener("scroll", checkScrollButtons);
+      window.addEventListener("resize", checkScrollButtons);
+      return () => {
+        container.removeEventListener("scroll", checkScrollButtons);
+        window.removeEventListener("resize", checkScrollButtons);
+      };
+    }
+  }, []);
 
   const onglets = [
     {
@@ -81,32 +118,70 @@ export default function OngletsGestionGalerie() {
   ];
 
   return (
-    <div>
-      {/* Navigation des onglets - Scroll horizontal sur mobile */}
-      <div className="flex gap-2 mb-6 md:mb-8 justify-start md:justify-center overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
-        {onglets.map((onglet, i) => (
+    <div className="-mx-6">
+      {/* Navigation des onglets avec scroll horizontal amélioré */}
+      <div className="relative mb-6 md:mb-8 overflow-visible px-6">
+        {/* Bouton scroll gauche */}
+        {canScrollLeft && (
           <button
-            key={onglet.nom}
-            onClick={() => setActif(i)}
-            className={`
-              relative px-3 md:px-6 py-2 md:py-3 rounded-full text-xs md:text-sm font-medium transition-all duration-300 whitespace-nowrap flex-shrink-0
-              ${
-                actif === i
-                  ? "text-black shadow-[0_0_20px_rgba(255,233,146,0.4)]"
-                  : "text-gray-400 hover:text-white hover:bg-white/5"
-              }
-            `}
+            onClick={() => scroll("left")}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-[#0a0a10] via-[#0a0a10] to-transparent pl-2 pr-8 py-2 group"
+            aria-label="Défiler vers la gauche"
           >
-            {actif === i && (
-              <motion.div
-                layoutId="activeTab"
-                className="absolute inset-0 bg-[#ffe992] rounded-full"
-                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-              />
-            )}
-            <span className="relative z-10">{onglet.nom}</span>
+            <div className="bg-[#ffe992]/10 hover:bg-[#ffe992]/20 border border-[#ffe992]/30 rounded-full p-2 transition-all duration-300 group-hover:scale-110">
+              <ChevronLeft size={20} className="text-[#ffe992]" />
+            </div>
           </button>
-        ))}
+        )}
+
+        {/* Container des onglets avec scroll */}
+        <div
+          ref={scrollContainerRef}
+          className={`flex gap-2 justify-start overflow-x-auto pb-2 scroll-smooth transition-all duration-300 ${
+            canScrollLeft ? "pl-16 pr-4 md:pl-20 md:pr-12" : "px-4 md:px-12"
+          } ${canScrollRight && !canScrollLeft ? "pr-16 md:pr-20" : ""}`}
+          style={{
+            scrollbarWidth: "thin",
+            scrollbarColor: "#ffe992 transparent",
+          }}
+        >
+          {onglets.map((onglet, i) => (
+            <button
+              key={onglet.nom}
+              onClick={() => setActif(i)}
+              className={`
+                relative px-3 md:px-6 py-2 md:py-3 rounded-full text-xs md:text-sm font-medium transition-all duration-300 whitespace-nowrap flex-shrink-0
+                ${
+                  actif === i
+                    ? "text-black shadow-[0_0_20px_rgba(255,233,146,0.4)]"
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                }
+              `}
+            >
+              {actif === i && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute inset-0 bg-[#ffe992] rounded-full"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <span className="relative z-10">{onglet.nom}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Bouton scroll droite */}
+        {canScrollRight && (
+          <button
+            onClick={() => scroll("right")}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-l from-[#0a0a10] via-[#0a0a10] to-transparent pr-2 pl-8 py-2 group"
+            aria-label="Défiler vers la droite"
+          >
+            <div className="bg-[#ffe992]/10 hover:bg-[#ffe992]/20 border border-[#ffe992]/30 rounded-full p-2 transition-all duration-300 group-hover:scale-110">
+              <ChevronRight size={20} className="text-[#ffe992]" />
+            </div>
+          </button>
+        )}
       </div>
 
       {/* Zone de contenu */}
