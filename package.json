@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "cd photographie && npm run build",
+    "build": "cd photographie && npm install && npm run build",
     "postinstall": "cd backend && npm install"
   },
   "dependencies": {
