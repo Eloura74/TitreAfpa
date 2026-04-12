@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const tariffConfigSchema = new mongoose.Schema(
   {
+    globalCoefficient: {
+      type: Number,
+      default: 1.75,
+    },
     categories: [
       {
         id: String,
@@ -35,7 +39,7 @@ const tariffConfigSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true, collection: "tariffconfis" }
+  { timestamps: true, collection: "tariffconfis" },
 );
 
 const TariffConfig = mongoose.model("TariffConfig", tariffConfigSchema);

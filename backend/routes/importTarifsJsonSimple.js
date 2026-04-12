@@ -60,6 +60,8 @@ router.post("/import-json", isAdmin, async (req, res) => {
                     width: parseInt(dimensions[0]) || 0,
                     height: parseInt(dimensions[1]) || 0,
                     price: item.prixSite,
+                    coutFournisseur: item.coutFournisseur || 0,
+                    margeNette: item.margeNette || 0,
                   };
                 }),
               },
@@ -75,7 +77,10 @@ router.post("/import-json", isAdmin, async (req, res) => {
     await TariffConfig.deleteMany({});
 
     // Créer et sauvegarder la nouvelle configuration
-    const config = new TariffConfig({ categories });
+    const config = new TariffConfig({
+      categories,
+      globalCoefficient: params?.coefficientGlobal || 1.75,
+    });
     await config.save();
 
     res.json({

@@ -11,7 +11,7 @@ import { FolderPlus, X } from "lucide-react";
 
 import AlbumManager from "./admin/galerie/AlbumManager";
 import TarifConfiguratorV2 from "./admin/tarifs/TarifConfiguratorV2";
-import ImportTarifsJSON from "./admin/tarifs/ImportTarifsJSON";
+import CoefficientGlobalManager from "./admin/tarifs/CoefficientGlobalManager";
 import GestionAbout from "./GestionAbout";
 import GestionGraphismeShowcase from "./GestionGraphismeShowcase";
 import GestionGraphismeDescription from "./GestionGraphismeDescription";
@@ -58,7 +58,7 @@ export default function OngletsGestionGalerie() {
       nom: "Tarifs",
       composant: (
         <div className="space-y-8">
-          <ImportTarifsJSON />
+          <CoefficientGlobalManager />
           <TarifConfiguratorV2 />
         </div>
       ),
