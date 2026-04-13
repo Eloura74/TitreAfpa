@@ -230,7 +230,6 @@ export default function EcrinPrive() {
         ...photo,
         _id: photo._id,
         titre: photo.nom,
-        src: photo.miniature || photo.fichierR2,
         availableTariffIds: accesInfo.availableTariffIds,
       };
 
@@ -251,7 +250,7 @@ export default function EcrinPrive() {
       nom: selectedPhoto.nom,
       prix: tarif.prix,
       quantite: tarif.quantity || 1,
-      image: selectedPhoto.src,
+      image: selectedPhoto.miniature || selectedPhoto.fichierR2,
       format: tarif.format,
       support: supportValue,
     });
