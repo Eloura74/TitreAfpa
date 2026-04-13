@@ -8,6 +8,7 @@ import { photographerSchema } from "../utils/schemas";
 import GoldDust from "../components/GoldDust";
 import ContactFooter from "./ContactFooter";
 import CoverflowCarousel from "../components/CoverflowCarousel";
+import EventPromoPopup from "../components/EventPromoPopup";
 import { API_URL } from "../config/api";
 import { getWatermarkedImageUrl } from "../utils/cloudinaryUtils";
 
@@ -615,6 +616,9 @@ export default function Home() {
 
       {/* FOOTER */}
       <ContactFooter />
+
+      {/* POP-UP ÉVÉNEMENT À VENIR */}
+      <EventPromoPopup />
 
       {/* INDICATEUR MOBILE (3 points) */}
       <div className="md:hidden fixed right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-50 pointer-events-none">

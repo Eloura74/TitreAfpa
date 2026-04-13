@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Instagram, Facebook } from "lucide-react";
 
 export default function Footer() {
   const [isContactOpen, setIsContactOpen] = useState(false);
@@ -40,37 +42,62 @@ export default function Footer() {
       {/* FOOTER */}
       <footer className="absolute bottom-4 md:bottom-10 w-full px-6 md:px-16 z-30 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 opacity-50 hover:opacity-100 transition-opacity duration-1000">
         <p className="text-[8px] md:text-[9px] uppercase tracking-[0.3em] md:tracking-[0.5em] font-extralight">
-          © 2026 Fabien Licata
+          &copy; 2026 Fabien Licata
         </p>
 
-        <div className="flex gap-8 md:gap-12 text-[10px] md:text-[12px] uppercase tracking-[0.3em] md:tracking-[0.5em] font-extralight">
+        <div className="flex gap-6 md:gap-8 text-[10px] md:text-[12px] uppercase tracking-[0.3em] md:tracking-[0.5em] font-extralight items-center">
+          <Link
+            to="/mentions-legales"
+            className="hover:text-yellow-400 transition-all duration-300"
+            style={{ color: "rgba(255, 255, 255, 0.8)" }}
+          >
+            Mentions légales
+          </Link>
+
+          <span className="text-white/20">|</span>
+
+          <Link
+            to="/cgv"
+            className="hover:text-yellow-400 transition-all duration-300"
+            style={{ color: "rgba(255, 255, 255, 0.8)" }}
+          >
+            CGV
+          </Link>
+
+          <span className="text-white/20">|</span>
+
           <a
             href="https://www.instagram.com/fabien.licata.photographiste/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-yellow-400 transition-colors border-b border-transparent hover:border-yellow-400"
+            className="hover:text-yellow-400 transition-all duration-300 hover:scale-110"
+            style={{ color: "rgba(255, 255, 255, 0.8)" }}
+            aria-label="Instagram"
           >
-            Instagram
+            <Instagram size={20} strokeWidth={1.5} />
           </a>
 
-          <span className="border-b border-transparent select-none">|</span>
+          <span className="text-white/20">|</span>
 
           <a
             href="https://www.facebook.com/FabienLicata"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-yellow-400 transition-colors border-b border-transparent hover:border-yellow-400"
+            className="hover:text-yellow-400 transition-all duration-300 hover:scale-110"
+            style={{ color: "rgba(255, 255, 255, 0.8)" }}
+            aria-label="Facebook"
           >
-            Facebook
+            <Facebook size={20} strokeWidth={1.5} />
           </a>
 
-          <span className="border-b border-transparent select-none">|</span>
+          <span className="text-white/20">|</span>
 
           {/* CONTACT (ouvre la modale) */}
           <a
             href="#"
             onClick={openContact}
-            className="hover:text-yellow-400 transition-colors border-b border-transparent hover:border-yellow-400"
+            className="hover:text-yellow-400 transition-all duration-300"
+            style={{ color: "rgba(255, 255, 255, 0.8)" }}
           >
             Contact
           </a>
