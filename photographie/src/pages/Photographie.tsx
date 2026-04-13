@@ -15,6 +15,7 @@ import "../styles/home.css";
 import { motion } from "framer-motion";
 import { API_URL } from "../config/api";
 import { getWatermarkedImageUrl } from "../utils/cloudinaryUtils";
+import { useCovers } from "../hooks/useCovers";
 
 // Variantes d'animation pour l'apparition en cascade
 const containerVariants = {
@@ -133,9 +134,8 @@ const transformImageUrl = (
  * une navigation claire et des liens vers les sections importantes.
  */
 export default function Photographie() {
-  // États pour stocker les images dynamiques depuis la BDD
-  const [galerieImage, setGalerieImage] =
-    useState<string>("/images/photo5.jpg");
+  const { covers } = useCovers();
+  const [galerieImage, setGalerieImage] = useState("/images/photo3.jpg");
 
   // useEffect est utilisé ici pour modifier le titre de l'onglet du navigateur quand la page est chargée
   useEffect(() => {
@@ -206,7 +206,7 @@ export default function Photographie() {
       {/* Conteneur de l'image de fond et de la texture */}
       <div className="hero-image-container fixed inset-0 z-0">
         <img
-          src={homeImages.hero} // Image de fond principale, issue du fichier de config
+          src={covers.backgroundSite || homeImages.hero} // Image de fond dynamique ou fallback
           alt="Photographe professionnel" // Texte alternatif pour accessibilité
           className="hero-image w-full h-full object-cover opacity-60" // Classe CSS pour le style
         />
@@ -282,7 +282,7 @@ export default function Photographie() {
         >
           <NavigationCard
             to="/galerie"
-            image={galerieImage}
+            image={covers.photographie || galerieImage}
             alt="Galerie Photo"
             icon={<GalleryHorizontal className="w-5 h-5 text-[#ffe992]" />}
             title="Galerie Photo"
@@ -291,7 +291,7 @@ export default function Photographie() {
 
           <NavigationCard
             to="/services"
-            image="/images/shooting.jpg"
+            image={covers.services || "/images/shooting.jpg"}
             alt="Services"
             icon={<Camera className="w-5 h-5 text-[#ffe992]" />}
             title="Services"

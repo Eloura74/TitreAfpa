@@ -10,6 +10,7 @@ import "../styles/home.css"; // Styles spécifiques à cette page
 import { motion } from "framer-motion";
 import { API_URL } from "../config/api";
 import { getWatermarkedImageUrl } from "../utils/cloudinaryUtils";
+import { useCovers } from "../hooks/useCovers";
 
 // Variantes d'animation pour l'apparition en cascade
 const containerVariants = {
@@ -129,7 +130,8 @@ const transformImageUrl = (
  * - Comprend une navbar, un fond image, des liens vers différentes sections et un footer
  */
 export default function Graphisme() {
-  const [galerieGraphImage, setGalerieGraphImage] = useState<string>(
+  const { covers } = useCovers();
+  const [galerieGraphImage, setGalerieGraphImage] = useState(
     "/images/oeuvre1.png",
   );
 
@@ -199,7 +201,7 @@ export default function Graphisme() {
       {/* Conteneur pour l'image de fond et la texture */}
       <div className="hero-image-container fixed inset-0 z-0">
         <img
-          src={homeImages.hero} // Source de l'image issue du JSON
+          src={covers.backgroundSite || homeImages.hero} // Image de fond dynamique ou fallback
           alt="Fabien graphiste" // Texte alternatif pour accessibilité
           className="hero-image w-full h-full object-cover opacity-60" // Classe CSS pour styliser l'image
         />
@@ -278,7 +280,7 @@ export default function Graphisme() {
         >
           <NavigationCard
             to="/galerie-graphique"
-            image={galerieGraphImage}
+            image={covers.graphismeGalerie || galerieGraphImage}
             alt="Galerie Graphique"
             icon={<GalleryHorizontal className="w-5 h-5 text-[#ffe992]" />}
             title="Galerie graphique"
@@ -287,7 +289,9 @@ export default function Graphisme() {
 
           <NavigationCard
             to="/decouvrir-graphisme"
-            image="/images/graphisme-showcase.jpg"
+            image={
+              covers.graphismeDecouvrir || "/images/graphisme-showcase.jpg"
+            }
             alt="Découvrir le Graphisme"
             icon={<Lightbulb className="w-5 h-5 text-[#ffe992]" />}
             title="Découvrir le Graphisme"

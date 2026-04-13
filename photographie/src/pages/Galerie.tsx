@@ -36,6 +36,7 @@ import {
 import StickyCtaMobile from "../components/common/StickyCtaMobile";
 import Pagination from "../components/common/Pagination";
 import homeImages from "../config/images.json";
+import { useCovers } from "../hooks/useCovers";
 
 // Styles
 import "../styles/globals.css";
@@ -486,6 +487,7 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
 };
 
 export default function Galerie() {
+  const { covers } = useCovers();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [categorieActive, setCategorieActive] = useState<string>("Toutes");
@@ -853,7 +855,7 @@ export default function Galerie() {
       {/* Conteneur de l'image de fond et de la texture */}
       <div className="hero-image-container fixed inset-0 z-0">
         <img
-          src={homeImages.hero}
+          src={covers.backgroundSite || homeImages.hero}
           alt="Galerie d'art"
           className="hero-image w-full h-full object-cover opacity-60"
         />

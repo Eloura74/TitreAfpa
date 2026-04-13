@@ -16,6 +16,7 @@ import GestionAbout from "./GestionAbout";
 import GestionGraphismeShowcase from "./GestionGraphismeShowcase";
 import GestionGraphismeDescription from "./GestionGraphismeDescription";
 import GestionMentionsLegales from "./GestionMentionsLegales";
+import GestionCouvertures from "./GestionCouvertures";
 
 export default function OngletsGestionGalerie() {
   const [actif, setActif] = useState(0);
@@ -115,6 +116,7 @@ export default function OngletsGestionGalerie() {
       ),
     },
     { nom: "Mentions Légales", composant: <GestionMentionsLegales /> },
+    { nom: "Couvertures", composant: <GestionCouvertures /> },
   ];
 
   return (

@@ -11,6 +11,7 @@ import CoverflowCarousel from "../components/CoverflowCarousel";
 import EventPromoPopup from "../components/EventPromoPopup";
 import { API_URL } from "../config/api";
 import { getWatermarkedImageUrl } from "../utils/cloudinaryUtils";
+import { useCovers } from "../hooks/useCovers";
 
 const revealVariants = {
   hidden: { y: "30%", opacity: 0 },
@@ -27,6 +28,7 @@ const revealVariants = {
 
 export default function Home() {
   const navigate = useNavigate();
+  const { covers } = useCovers();
   const { setChoix } = useAuthStore();
   const [hoveredSide, setHoveredSide] = useState<
     "photo" | "graph" | "ecrin" | null
@@ -181,7 +183,7 @@ export default function Home() {
         className="fixed inset-0 z-0 pointer-events-none"
       >
         <img
-          src={homeImages.hero}
+          src={covers.backgroundSite || homeImages.hero}
           className="w-full h-full object-cover"
           alt="Background"
         />
