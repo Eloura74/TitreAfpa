@@ -45,6 +45,16 @@ const accesPriveSchema = new mongoose.Schema({
     default: false,
   },
 
+  allowDownload: {
+    type: Boolean,
+    default: true,
+  },
+
+  allowPrint: {
+    type: Boolean,
+    default: true,
+  },
+
   availableTariffIds: {
     type: [String],
     default: [],

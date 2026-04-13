@@ -218,15 +218,56 @@ export default function PrivateAccessForm({
             </div>
           </label>
 
-          {/* Sélection des formats si reportage public */}
-          {form.isPublic && tariffConfig && (
+          {/* Permissions : Téléchargement */}
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              name="allowDownload"
+              checked={form.allowDownload !== false}
+              onChange={handleChange}
+              className="w-5 h-5 accent-[#ffe992] cursor-pointer"
+            />
+            <div className="flex-1">
+              <span className="text-white font-semibold text-sm block">
+                Autoriser le téléchargement
+              </span>
+              <span className="text-xs text-gray-400">
+                Les clients pourront télécharger les photos originales haute
+                résolution
+              </span>
+            </div>
+          </label>
+
+          {/* Permissions : Impression */}
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              name="allowPrint"
+              checked={form.allowPrint !== false}
+              onChange={handleChange}
+              className="w-5 h-5 accent-[#ffe992] cursor-pointer"
+            />
+            <div className="flex-1">
+              <span className="text-white font-semibold text-sm block">
+                Autoriser l'impression
+              </span>
+              <span className="text-xs text-gray-400">
+                Les clients pourront commander des tirages et impressions
+              </span>
+            </div>
+          </label>
+
+          {/* Sélection des formats si impression autorisée (public ou privé) */}
+          {form.allowPrint !== false && tariffConfig && (
             <div className="mt-4 pt-4 border-t border-white/10">
               <label className="text-sm font-bold text-[#ffe992] block mb-3">
                 Formats disponibles pour la commande
               </label>
               <p className="text-xs text-gray-400 mb-3">
                 Sélectionnez les formats que les clients pourront commander
-                depuis la page publique du reportage
+                {form.isPublic
+                  ? " depuis la page publique du reportage"
+                  : " depuis l'écrin privé"}
               </p>
               <TariffSelectorForReportage
                 config={tariffConfig}

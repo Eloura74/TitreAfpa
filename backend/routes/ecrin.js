@@ -76,7 +76,7 @@ router.get("/all", async (req, res) => {
   try {
     const acces = await AccesPrive.find({ statut: "actif" })
       .select(
-        "titre description dateDebut dateFin image slug isPublic photosOriginales",
+        "titre description dateDebut dateFin image slug isPublic allowDownload allowPrint photosOriginales availableTariffIds",
       )
       .lean();
 
@@ -104,7 +104,9 @@ router.get("/info/:slug", async (req, res) => {
     const searchVal = req.params.slug;
     const acces = await AccesPrive.findOne({
       $or: [{ slug: searchVal }, { codeAcces: searchVal.toUpperCase().trim() }],
-    });
+    }).select(
+      "titre description dateDebut dateFin image slug lieu isPublic allowDownload allowPrint photosOriginales availableTariffIds",
+    );
 
     if (!acces) {
       return res
@@ -182,6 +184,9 @@ router.post("/login", async (req, res) => {
         image: acces.image,
         nbPhotos: acces.photos?.length || 0,
         nbPhotosOriginales: acces.photosOriginales?.length || 0,
+        allowDownload: acces.allowDownload,
+        allowPrint: acces.allowPrint,
+        availableTariffIds: acces.availableTariffIds,
         typeValidite: acces.typeValidite,
         dateExpiration: acces.dateExpiration,
         typeLimiteTelechargement: acces.typeLimiteTelechargement,
@@ -257,6 +262,9 @@ router.get("/session", async (req, res) => {
         image: acces.image,
         photos: acces.photos,
         photosOriginales: acces.photosOriginales,
+        allowDownload: acces.allowDownload,
+        allowPrint: acces.allowPrint,
+        availableTariffIds: acces.availableTariffIds,
         typeValidite: acces.typeValidite,
         dateExpiration: acces.dateExpiration,
         typeLimiteTelechargement: acces.typeLimiteTelechargement,

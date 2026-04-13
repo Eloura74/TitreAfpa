@@ -39,6 +39,8 @@ interface Reportage {
   lieu?: string;
   slug?: string;
   isPublic: boolean;
+  allowDownload?: boolean;
+  allowPrint?: boolean;
   availableTariffIds: string[];
   photosOriginales: PhotoOriginale[];
 }
@@ -268,16 +270,18 @@ export default function ReportagePublic() {
                     <p className="text-white text-sm font-medium mb-2 line-clamp-1">
                       {photo.nom}
                     </p>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddToCart(photo);
-                      }}
-                      className="w-full bg-[#ffe992] text-black text-xs font-bold py-2 px-3 rounded hover:bg-[#d6c487] transition-colors flex items-center justify-center gap-2"
-                    >
-                      <ShoppingCart size={14} />
-                      Commander
-                    </button>
+                    {reportage.allowPrint !== false && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToCart(photo);
+                        }}
+                        className="w-full bg-[#ffe992] text-black text-xs font-bold py-2 px-3 rounded hover:bg-[#d6c487] transition-colors flex items-center justify-center gap-2"
+                      >
+                        <ShoppingCart size={14} />
+                        Commander
+                      </button>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -370,18 +374,22 @@ export default function ReportagePublic() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 pointer-events-auto">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToCart(reportage.photosOriginales[lightboxIndex]);
-                  }}
-                  className="px-6 py-2.5 bg-[#ffe992] hover:bg-[#f4d677] text-black text-sm font-bold transition-all uppercase tracking-widest rounded-full shadow-[0_4px_12px_rgba(255,233,146,0.4)] hover:shadow-[0_6px_16px_rgba(255,233,146,0.6)] flex items-center gap-2"
-                >
-                  <ShoppingCart size={16} />
-                  Commander cette photo
-                </button>
-              </div>
+              {reportage.allowPrint !== false && (
+                <div className="flex items-center gap-3 pointer-events-auto">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart(
+                        reportage.photosOriginales[lightboxIndex],
+                      );
+                    }}
+                    className="px-6 py-2.5 bg-[#ffe992] hover:bg-[#f4d677] text-black text-sm font-bold transition-all uppercase tracking-widest rounded-full shadow-[0_4px_12px_rgba(255,233,146,0.4)] hover:shadow-[0_6px_16px_rgba(255,233,146,0.6)] flex items-center gap-2"
+                  >
+                    <ShoppingCart size={16} />
+                    Commander cette photo
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

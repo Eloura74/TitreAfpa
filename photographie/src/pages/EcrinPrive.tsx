@@ -18,30 +18,34 @@ import {
   Square,
   CheckSquare,
   Search,
+  ShoppingCart,
 } from "lucide-react";
 import PhotoSortControls, {
   SortOption,
   ViewMode,
 } from "../components/common/PhotoSortControls";
 import { PhotoOriginale } from "../types/evenement";
+import { SelectionFormatModalV2 } from "../components/galerie/SelectionFormatModalV2";
+import { usePanier } from "../store/panierContext";
+import { useToast } from "../components/Toast";
+import { tariffServiceV2 } from "../services/tariffServiceV2";
+import { TariffConfigV2 } from "../types/tarifConfigV2";
 
 import Navbar from "../components/layout/navbar"; // Composant cohérence UI
 import Footer from "../components/layout/Footer"; // Composant cohérence UI
 
 interface AccesInfo {
-  id: string;
+  _id: string;
   titre: string;
   description: string;
-  client: {
-    nom: string;
-    prenom: string;
-    email: string;
-  };
   dateDebut: string;
   dateFin: string;
   image?: string;
   photos: unknown[];
   photosOriginales: PhotoOriginale[];
+  allowDownload?: boolean;
+  allowPrint?: boolean;
+  availableTariffIds?: string[];
   typeValidite: "permanent" | "temporaire";
   dateExpiration?: string;
   typeLimiteTelechargement: "illimite" | "par_photo" | "total";
@@ -53,6 +57,8 @@ interface AccesInfo {
 export default function EcrinPrive() {
   const { codeAcces: codeAccesFromUrl } = useParams<{ codeAcces: string }>();
   const navigate = useNavigate();
+  const { ajouterArticle } = usePanier();
+  const { addToast } = useToast();
 
   const [codeAcces, setCodeAcces] = useState("");
   const [isConnected, setIsConnected] = useState(false);
@@ -63,6 +69,13 @@ export default function EcrinPrive() {
   const [downloadingPhotoId, setDownloadingPhotoId] = useState<string | null>(
     null,
   );
+
+  // États pour le panier et la sélection de formats
+  const [selectedPhoto, setSelectedPhoto] = useState<PhotoOriginale | null>(
+    null,
+  );
+  const [modalVisible, setModalVisible] = useState(false);
+  const [tariffConfig, setTariffConfig] = useState<TariffConfigV2 | null>(null);
 
   // Infos publiques récupérées via le slug d'URL
   const [publicInfo, setPublicInfo] = useState<{
@@ -116,6 +129,15 @@ export default function EcrinPrive() {
 
     initSession();
   }, [codeAccesFromUrl]);
+
+  // Charger la configuration des tarifs
+  useEffect(() => {
+    const loadTariffs = async () => {
+      const config = await tariffServiceV2.getTariffConfig();
+      setTariffConfig(config);
+    };
+    loadTariffs();
+  }, []);
 
   // Chargement des informations publiques si un slug est dans l'URL
   useEffect(() => {
@@ -192,6 +214,54 @@ export default function EcrinPrive() {
         setError("Erreur lors de la déconnexion");
       }
     }
+  };
+
+  const handleAddToCart = useCallback(
+    (photo: PhotoOriginale) => {
+      if (
+        !accesInfo?.availableTariffIds ||
+        accesInfo.availableTariffIds.length === 0
+      ) {
+        addToast("Aucun format disponible pour ce reportage", "error");
+        return;
+      }
+
+      const photoWithTariffs = {
+        ...photo,
+        _id: photo._id,
+        titre: photo.nom,
+        src: photo.miniature || photo.fichierR2,
+        availableTariffIds: accesInfo.availableTariffIds,
+      };
+
+      setSelectedPhoto(photoWithTariffs);
+      setModalVisible(true);
+    },
+    [accesInfo, addToast],
+  );
+
+  const handleSelectFormat = (tarif: any) => {
+    if (!selectedPhoto) return;
+
+    const supportValue = tarif.support || "Standard";
+
+    ajouterArticle({
+      id: crypto.randomUUID(),
+      photoId: selectedPhoto._id,
+      nom: selectedPhoto.nom,
+      prix: tarif.prix,
+      quantite: tarif.quantity || 1,
+      image: selectedPhoto.src,
+      format: tarif.format,
+      support: supportValue,
+    });
+
+    addToast(
+      `${selectedPhoto.nom} (${tarif.format}) ajouté au panier`,
+      "success",
+    );
+    setModalVisible(false);
+    setSelectedPhoto(null);
   };
 
   const handleDownload = async (photo: PhotoOriginale) => {
@@ -674,25 +744,26 @@ export default function EcrinPrive() {
                   )}
                 </div>
 
-                {selectedPhotos.size > 0 && (
-                  <button
-                    onClick={handleDownloadMultiple}
-                    disabled={isDownloadingMultiple}
-                    className="flex items-center gap-2 px-6 py-2 bg-[#ffe992] hover:bg-white text-black rounded-lg font-bold text-sm tracking-widest uppercase transition-all shadow-[0_0_15px_rgba(255,233,146,0.3)] disabled:opacity-50"
-                  >
-                    {isDownloadingMultiple ? (
-                      <>
-                        <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                        {downloadProgress.current} / {downloadProgress.total}
-                      </>
-                    ) : (
-                      <>
-                        <Download size={16} />
-                        Télécharger
-                      </>
-                    )}
-                  </button>
-                )}
+                {selectedPhotos.size > 0 &&
+                  accesInfo?.allowDownload !== false && (
+                    <button
+                      onClick={handleDownloadMultiple}
+                      disabled={isDownloadingMultiple}
+                      className="flex items-center gap-2 px-6 py-2 bg-[#ffe992] hover:bg-white text-black rounded-lg font-bold text-sm tracking-widest uppercase transition-all shadow-[0_0_15px_rgba(255,233,146,0.3)] disabled:opacity-50"
+                    >
+                      {isDownloadingMultiple ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                          {downloadProgress.current} / {downloadProgress.total}
+                        </>
+                      ) : (
+                        <>
+                          <Download size={16} />
+                          Télécharger
+                        </>
+                      )}
+                    </button>
+                  )}
               </div>
             </div>
           )}
@@ -843,26 +914,43 @@ export default function EcrinPrive() {
                             </div>
                           )}
 
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDownload(photo);
-                            }}
-                            disabled={downloadingPhotoId === photo._id}
-                            className="w-full relative overflow-hidden bg-white/10 hover:bg-[#ffe992] text-white hover:text-black border border-white/20 hover:border-transparent backdrop-blur-md transition-all duration-300 py-3 rounded-lg flex items-center justify-center gap-2 font-semibold text-sm uppercase tracking-wide disabled:opacity-50"
-                          >
-                            {downloadingPhotoId === photo._id ? (
-                              <>
-                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                Génération...
-                              </>
-                            ) : (
-                              <>
-                                <Download size={16} />
-                                Obtenir l'Original
-                              </>
+                          <div className="flex flex-col gap-2">
+                            {accesInfo?.allowDownload !== false && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDownload(photo);
+                                }}
+                                disabled={downloadingPhotoId === photo._id}
+                                className="w-full relative overflow-hidden bg-white/10 hover:bg-[#ffe992] text-white hover:text-black border border-white/20 hover:border-transparent backdrop-blur-md transition-all duration-300 py-3 rounded-lg flex items-center justify-center gap-2 font-semibold text-sm uppercase tracking-wide disabled:opacity-50"
+                              >
+                                {downloadingPhotoId === photo._id ? (
+                                  <>
+                                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Génération...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Download size={16} />
+                                    Obtenir l'Original
+                                  </>
+                                )}
+                              </button>
                             )}
-                          </button>
+
+                            {accesInfo?.allowPrint !== false && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAddToCart(photo);
+                                }}
+                                className="w-full bg-[#ffe992] hover:bg-white text-black font-bold py-3 rounded-lg flex items-center justify-center gap-2 text-sm uppercase tracking-wide transition-all"
+                              >
+                                <ShoppingCart size={16} />
+                                Commander
+                              </button>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -984,23 +1072,25 @@ export default function EcrinPrive() {
                   </p>
                 </div>
 
-                <button
-                  onClick={() => handleDownload(currentPhoto)}
-                  disabled={downloadingPhotoId === currentPhoto._id}
-                  className="shrink-0 bg-[#ffe992] hover:bg-white text-black font-bold py-3 px-6 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,233,146,0.3)]"
-                >
-                  {downloadingPhotoId === currentPhoto._id ? (
-                    <>
-                      <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                      Préparation...
-                    </>
-                  ) : (
-                    <>
-                      <Download size={20} />
-                      Télécharger HD
-                    </>
-                  )}
-                </button>
+                {accesInfo?.allowDownload !== false && (
+                  <button
+                    onClick={() => handleDownload(currentPhoto)}
+                    disabled={downloadingPhotoId === currentPhoto._id}
+                    className="shrink-0 bg-[#ffe992] hover:bg-white text-black font-bold py-3 px-6 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,233,146,0.3)]"
+                  >
+                    {downloadingPhotoId === currentPhoto._id ? (
+                      <>
+                        <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                        Préparation...
+                      </>
+                    ) : (
+                      <>
+                        <Download size={20} />
+                        Télécharger HD
+                      </>
+                    )}
+                  </button>
+                )}
               </motion.div>
             </div>
 
@@ -1015,6 +1105,20 @@ export default function EcrinPrive() {
               />
             </button>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal de sélection de format */}
+      <AnimatePresence>
+        {modalVisible && selectedPhoto && tariffConfig && (
+          <SelectionFormatModalV2
+            photo={selectedPhoto}
+            onSelect={handleSelectFormat}
+            onClose={() => {
+              setModalVisible(false);
+              setSelectedPhoto(null);
+            }}
+          />
         )}
       </AnimatePresence>
     </div>
