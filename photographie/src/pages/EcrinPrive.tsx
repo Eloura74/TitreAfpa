@@ -230,8 +230,9 @@ export default function EcrinPrive() {
         ...photo,
         _id: photo._id,
         titre: photo.nom,
+        src: photo.miniature || photo.fichierR2,
         availableTariffIds: accesInfo.availableTariffIds,
-      };
+      } as any;
 
       setSelectedPhoto(photoWithTariffs);
       setModalVisible(true);
