@@ -66,8 +66,14 @@ export default function MonCompte() {
         .then(([resEvents, resPaiements]) => {
           // Extraction des tableaux depuis le champ "data" de chaque réponse
           // Sécurité : si data n'existe pas ou n'est pas un tableau, on met un tableau vide
-          setEvenements(Array.isArray(resEvents.data?.data) ? resEvents.data.data : []);
-          setPaiements(Array.isArray(resPaiements.data?.data) ? resPaiements.data.data : []);
+          setEvenements(
+            Array.isArray(resEvents.data?.data) ? resEvents.data.data : [],
+          );
+          setPaiements(
+            Array.isArray(resPaiements.data?.data)
+              ? resPaiements.data.data
+              : [],
+          );
         })
         .finally(() => {
           setLoading(false);
@@ -109,14 +115,11 @@ export default function MonCompte() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 border-b border-white/10 pb-8 gap-6">
           <div>
             <h1 className="text-4xl md:text-5xl font-serif italic text-[#ffe992] mb-2">
-              L'Écrin Privé
-            </h1>
-            <p className="text-gray-400 text-sm md:text-base tracking-wide">
               Bienvenue,{" "}
-              <span className="text-white font-medium">
+              <span className="text-white">
                 {user.prenom} {user.nom}
               </span>
-            </p>
+            </h1>
           </div>
           <div className="flex flex-col items-end gap-2">
             <span className="text-xs uppercase tracking-widest text-gray-500">
