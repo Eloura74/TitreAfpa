@@ -165,7 +165,7 @@ router.put("/:id", isAdmin, async (req, res) => {
       req.body,
       {
         new: true, // Renvoie l’objet mis à jour
-      }
+      },
     );
 
     // Envoie la photo modifiée au client
@@ -196,6 +196,48 @@ router.delete("/:id", isAdmin, async (req, res) => {
       message: "Erreur suppression",
       error: err.message,
     });
+  }
+});
+
+// ------------------------------
+// POST /api/galerie/:id/like
+// ------------------------------
+// Incrémente le compteur de likes d'une photo
+router.post("/:id/like", async (req, res) => {
+  try {
+    const photo = await Photo.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { likes: 1 } },
+      { new: true },
+    );
+    if (!photo) {
+      return res.status(404).json({ message: "Photo non trouvée" });
+    }
+    res.json({ likes: photo.likes });
+  } catch (err) {
+    console.error("❌ Erreur POST /galerie/:id/like :", err);
+    res.status(500).json({ message: "Erreur serveur", error: err.message });
+  }
+});
+
+// ------------------------------
+// POST /api/galerie/:id/view
+// ------------------------------
+// Incrémente le compteur de vues d'une photo
+router.post("/:id/view", async (req, res) => {
+  try {
+    const photo = await Photo.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },
+      { new: true },
+    );
+    if (!photo) {
+      return res.status(404).json({ message: "Photo non trouvée" });
+    }
+    res.json({ views: photo.views });
+  } catch (err) {
+    console.error("❌ Erreur POST /galerie/:id/view :", err);
+    res.status(500).json({ message: "Erreur serveur", error: err.message });
   }
 });
 

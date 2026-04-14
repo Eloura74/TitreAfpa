@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Eye, X, ZoomIn } from "lucide-react";
 import {
@@ -19,6 +19,10 @@ import ImageZoomModal from "../components/ui/ImageZoomModal";
 import { usePanier } from "../store/panierContext";
 import { API_URL } from "../config/api";
 import { Tarif, TarifOeuvre } from "../types/tarif";
+import {
+  LikeViewCounter,
+  LikeViewCounterRef,
+} from "../components/LikeViewCounter";
 
 // Styles
 import "../styles/globals.css";
@@ -31,6 +35,8 @@ interface OeuvreGraphique {
   image: string;
   prix: number;
   description?: string;
+  likes?: number;
+  views?: number;
   // Ajout pour compatibilité avec le modal
   src?: string;
   categorie?: string;
@@ -76,6 +82,9 @@ export default function GalerieGraphique() {
   const { ajouterArticle } = usePanier();
   const { addToast } = useToast();
 
+  // Refs pour les LikeViewCounter
+  const likeViewRefs = useRef<{ [key: string]: LikeViewCounterRef | null }>({});
+
   // 1. Fetch & Normalisation
   useEffect(() => {
     const fetchOeuvres = async () => {
@@ -102,6 +111,8 @@ export default function GalerieGraphique() {
             categorie: "Art Graphique", // Catégorie par défaut
             prix: oeuvre.prix,
             description: oeuvre.description,
+            likes: oeuvre.likes || 0,
+            views: oeuvre.views || 0,
           };
         });
 
@@ -237,6 +248,8 @@ export default function GalerieGraphique() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              // Incrémenter la vue avant d'ouvrir le lightbox
+                              likeViewRefs.current[oeuvre.id]?.incrementView();
                               setLightboxIndex(index);
                             }}
                             className="w-full bg-white/10 backdrop-blur-md text-white font-bold text-xs uppercase tracking-widest py-3 rounded hover:bg-white/20 transition-colors transform translate-y-4 group-hover:translate-y-0 duration-500 delay-75 flex items-center justify-center gap-2"
@@ -269,6 +282,17 @@ export default function GalerieGraphique() {
                         </div>
 
                         <div className="w-full h-[1px] bg-white/10 group-hover:bg-[#ffe992]/30 transition-colors duration-500" />
+
+                        {/* Likes et Vues */}
+                        <LikeViewCounter
+                          ref={(ref) => {
+                            likeViewRefs.current[oeuvre.id] = ref;
+                          }}
+                          id={oeuvre.id}
+                          likes={oeuvre.likes || 0}
+                          views={oeuvre.views || 0}
+                          apiEndpoint="/api/oeuvres-graphique"
+                        />
 
                         <span className="text-[#ffe992] text-sm font-medium tracking-widest">
                           {oeuvre.prix} €

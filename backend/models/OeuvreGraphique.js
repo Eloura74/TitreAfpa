@@ -24,6 +24,20 @@ const OeuvreGraphiqueSchema = new mongoose.Schema({
   // Champ "description" : chaîne optionnelle permettant d’ajouter un texte descriptif
   // Exemple : "Impression fine art réalisée en édition limitée"
   description: { type: String },
+
+  // Nombre de likes (nombre entier, défaut 0)
+  likes: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
+
+  // Nombre de vues (nombre entier, défaut 0)
+  views: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
 });
 
 // ****************************************

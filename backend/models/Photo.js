@@ -42,7 +42,7 @@ const TarifOeuvreSchema = new mongoose.Schema(
       min: 0, // Interdit les valeurs négatives
     },
   },
-  { _id: false } // Ce sous-schéma ne génère pas d’identifiant MongoDB (_id) pour chaque tarif
+  { _id: false }, // Ce sous-schéma ne génère pas d’identifiant MongoDB (_id) pour chaque tarif
 );
 
 // *************************************
@@ -128,6 +128,20 @@ const photoSchema = new mongoose.Schema({
     ref: "Album",
     default: null,
   },
+
+  // Nombre de likes (nombre entier, défaut 0)
+  likes: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
+
+  // Nombre de vues (nombre entier, défaut 0)
+  views: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
 });
 
 // ============================================
@@ -145,7 +159,7 @@ photoSchema.index({ album: 1, createdAt: -1 });
 
 // Index text pour recherche plein texte (titre, description, alt)
 // Utilisé dans : GET /api/galerie?search=paysage
-photoSchema.index({ titre: 'text', description: 'text', alt: 'text' });
+photoSchema.index({ titre: "text", description: "text", alt: "text" });
 
 // Index simple : Recherche par utilisateur
 // Utilisé dans : Afficher toutes les photos d'un utilisateur

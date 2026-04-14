@@ -85,7 +85,7 @@ router.put("/:id", isAdmin, async (req, res) => {
     const updatedOeuvre = await OeuvreGraphique.findByIdAndUpdate(
       req.params.id, // ID dans l’URL
       req.body, // Données à modifier
-      { new: true } // Renvoie l’objet mis à jour au lieu de l’ancien
+      { new: true }, // Renvoie l’objet mis à jour au lieu de l’ancien
     );
 
     // Retourne l’œuvre mise à jour
@@ -122,6 +122,48 @@ router.post("/upload", isAdmin, (req, res) => {
   return res.status(400).json({
     message: "L'upload local est désactivé. Utilisez /api/upload-cloudinary.",
   });
+});
+
+// ------------------------------
+// POST /api/oeuvres-graphique/:id/like
+// ------------------------------
+// Incrémente le compteur de likes d'une œuvre graphique
+router.post("/:id/like", async (req, res) => {
+  try {
+    const oeuvre = await OeuvreGraphique.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { likes: 1 } },
+      { new: true },
+    );
+    if (!oeuvre) {
+      return res.status(404).json({ message: "Œuvre non trouvée" });
+    }
+    res.json({ likes: oeuvre.likes });
+  } catch (err) {
+    console.error("❌ Erreur POST /oeuvres-graphique/:id/like :", err);
+    res.status(500).json({ message: "Erreur serveur", error: err.message });
+  }
+});
+
+// ------------------------------
+// POST /api/oeuvres-graphique/:id/view
+// ------------------------------
+// Incrémente le compteur de vues d'une œuvre graphique
+router.post("/:id/view", async (req, res) => {
+  try {
+    const oeuvre = await OeuvreGraphique.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },
+      { new: true },
+    );
+    if (!oeuvre) {
+      return res.status(404).json({ message: "Œuvre non trouvée" });
+    }
+    res.json({ views: oeuvre.views });
+  } catch (err) {
+    console.error("❌ Erreur POST /oeuvres-graphique/:id/view :", err);
+    res.status(500).json({ message: "Erreur serveur", error: err.message });
+  }
 });
 
 // ----------------------------------------------------

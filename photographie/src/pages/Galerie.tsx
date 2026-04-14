@@ -37,6 +37,10 @@ import StickyCtaMobile from "../components/common/StickyCtaMobile";
 import Pagination from "../components/common/Pagination";
 import homeImages from "../config/images.json";
 import { useCovers } from "../hooks/useCovers";
+import {
+  LikeViewCounter,
+  LikeViewCounterRef,
+} from "../components/LikeViewCounter";
 
 // Styles
 import "../styles/globals.css";
@@ -55,6 +59,8 @@ interface Photo {
   type: string;
   tarifs?: TarifOeuvre[];
   availableTariffIds?: string[];
+  likes?: number;
+  views?: number;
 }
 
 // --- Variantes d'animation (Douces comme Home) ---
@@ -261,6 +267,7 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const likeViewRef = useRef<LikeViewCounterRef>(null);
 
   // Fermer le flip au clic extérieur
   useEffect(() => {
@@ -331,6 +338,8 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      // Incrémenter la vue avant d'ouvrir le lightbox
+                      likeViewRef.current?.incrementView();
                       onView();
                     }}
                     className="w-full bg-white/10 backdrop-blur-md text-white font-bold text-xs uppercase tracking-widest py-3 rounded hover:bg-white/20 transition-colors transform translate-y-4 group-hover:translate-y-0 duration-500 delay-75 flex items-center justify-center gap-2"
@@ -422,6 +431,17 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
                       {photo.categorie}
                     </span>
                   </div>
+
+                  {/* Likes et Vues */}
+                  {photo._id && (
+                    <LikeViewCounter
+                      ref={likeViewRef}
+                      id={photo._id}
+                      likes={photo.likes || 0}
+                      views={photo.views || 0}
+                      apiEndpoint="/api/galerie"
+                    />
+                  )}
 
                   {/* Bouton Ajouter au panier */}
                   <button
