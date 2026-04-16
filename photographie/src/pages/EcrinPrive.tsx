@@ -52,6 +52,7 @@ interface AccesInfo {
   maxTelechargementParPhoto?: number;
   maxTelechargementTotal?: number;
   nbTelechargementTotal: number;
+  defaultSortBy?: SortOption;
 }
 
 export default function EcrinPrive() {
@@ -100,8 +101,15 @@ export default function EcrinPrive() {
 
   // --- Nouveaux états Recherche et Tri ---
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("date-desc");
+  const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [displayMode, setDisplayMode] = useState<ViewMode>("grid");
+
+  // Mettre à jour le tri quand accesInfo change (utilise defaultSortBy depuis MongoDB)
+  useEffect(() => {
+    if (accesInfo?.defaultSortBy) {
+      setSortBy(accesInfo.defaultSortBy);
+    }
+  }, [accesInfo?.defaultSortBy]);
 
   useEffect(() => {
     const initSession = async () => {

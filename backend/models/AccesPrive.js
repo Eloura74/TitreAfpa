@@ -100,6 +100,12 @@ const accesPriveSchema = new mongoose.Schema({
     default: "actif",
   },
 
+  defaultSortBy: {
+    type: String,
+    enum: ["date-desc", "date-asc", "name-asc", "name-desc"],
+    default: "name-asc",
+  },
+
   createdAt: { type: Date, default: Date.now },
 });
 

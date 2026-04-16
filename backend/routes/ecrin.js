@@ -271,6 +271,7 @@ router.get("/session", async (req, res) => {
         maxTelechargementParPhoto: acces.maxTelechargementParPhoto,
         maxTelechargementTotal: acces.maxTelechargementTotal,
         nbTelechargementTotal: acces.nbTelechargementTotal,
+        defaultSortBy: acces.defaultSortBy || "name-asc",
       },
     });
   } catch (error) {
