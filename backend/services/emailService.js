@@ -42,9 +42,12 @@ const sendVerificationEmail = async (to, token) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    logger.info('Email de vérification envoyé', { to });
+    logger.info("Email de vérification envoyé", { to });
   } catch (error) {
-    logger.error('Erreur envoi email de vérification', { to, error: error.message });
+    logger.error("Erreur envoi email de vérification", {
+      to,
+      error: error.message,
+    });
     throw error; // Propager l'erreur pour la gérer dans le contrôleur
   }
 };
@@ -71,9 +74,12 @@ const sendWelcomeEmail = async (to, prenom) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    logger.info('Email de bienvenue envoyé', { to });
+    logger.info("Email de bienvenue envoyé", { to });
   } catch (error) {
-    logger.error('Erreur envoi email de bienvenue', { to, error: error.message });
+    logger.error("Erreur envoi email de bienvenue", {
+      to,
+      error: error.message,
+    });
   }
 };
 
@@ -101,57 +107,118 @@ const sendOrderConfirmation = async (to, commande) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    logger.info('Email confirmation commande envoyé', { to });
+    logger.info("Email confirmation commande envoyé", { to });
   } catch (error) {
-    logger.error('Erreur envoi email confirmation commande', { to, error: error.message });
+    logger.error("Erreur envoi email confirmation commande", {
+      to,
+      error: error.message,
+    });
   }
 };
 
 /**
  * Envoie une notification de nouvelle commande à l'administrateur
- * @param {object} commande - Détails de la commande
+ * @param {object} paiement - Détails du paiement (modèle Paiement)
  * @param {Array} articles - Liste des articles commandés
  */
-const sendAdminNotification = async (commande, articles) => {
-  // Construire la liste des articles pour l'email
+const sendAdminNotification = async (paiement, articles) => {
+  // Formatter l'adresse de livraison
+  const adresse = paiement.adresseLivraison || {};
+  const adresseComplete = [
+    adresse.prenom,
+    adresse.nom,
+    adresse.adresse,
+    [adresse.codePostal, adresse.ville].filter(Boolean).join(" "),
+    adresse.pays,
+    adresse.telephone ? `📞 ${adresse.telephone}` : null,
+  ]
+    .filter(Boolean)
+    .join("<br>");
+
+  // Construire la liste détaillée des articles
   const articlesListHtml = articles
     .map(
-      (item) => `
-    <li style="margin-bottom: 10px;">
-      <strong>${item.name}</strong><br>
-      Quantité: ${item.quantity}<br>
-      Prix unitaire: ${item.unit_amount.value} €
-    </li>
-  `
+      (item, index) => `
+    <tr style="border-bottom: 1px solid #ddd;">
+      <td style="padding: 10px;">${index + 1}</td>
+      <td style="padding: 10px;"><strong>${item.nom}</strong></td>
+      <td style="padding: 10px; text-align: center;">${item.quantite}</td>
+      <td style="padding: 10px;">${item.format || "-"}</td>
+      <td style="padding: 10px;">${item.support || "-"}</td>
+      <td style="padding: 10px; text-align: right;">${item.prixUnitaire?.toFixed(2)} €</td>
+      <td style="padding: 10px; text-align: right;"><strong>${(item.prixUnitaire * item.quantite).toFixed(2)} €</strong></td>
+    </tr>
+  `,
     )
     .join("");
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER, // L'admin reçoit l'email sur son propre compte
-    subject: `[ADMIN] Nouvelle commande #${commande.transactionId} - ${commande.montant} €`,
+    to: process.env.EMAIL_USER, // L'admin reçoit l'email
+    subject: `🛒 Nouvelle commande #${paiement.transactionId} - ${paiement.montant.toFixed(2)} €`,
     html: `
-      <div style="font-family: Arial, sans-serif; color: #333;">
-        <h2>Nouvelle commande reçue !</h2>
-        <p><strong>Client :</strong> ${commande.nomClient} (${commande.emailClient})</p>
-        <p><strong>Montant :</strong> ${commande.montant} €</p>
-        <p><strong>Transaction :</strong> ${commande.transactionId}</p>
+      <div style="font-family: Arial, sans-serif; color: #333; max-width: 700px; margin: 0 auto;">
+        <h2 style="color: #d6c487; border-bottom: 2px solid #d6c487; padding-bottom: 10px;">
+          🛍️ Nouvelle commande reçue !
+        </h2>
         
-        <h3>Détails de la commande :</h3>
-        <ul>
-          ${articlesListHtml}
-        </ul>
+        <!-- Infos client -->
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+          <h3 style="margin-top: 0; color: #333;">👤 Informations client</h3>
+          <p style="margin: 5px 0;"><strong>Nom :</strong> ${paiement.nomClient}</p>
+          <p style="margin: 5px 0;"><strong>Email :</strong> <a href="mailto:${paiement.emailClient}">${paiement.emailClient}</a></p>
+        </div>
+
+        <!-- Adresse de livraison -->
+        <div style="background: #f0f0f0; padding: 15px; border-radius: 5px; margin: 15px 0;">
+          <h3 style="margin-top: 0; color: #333;">📍 Adresse de livraison</h3>
+          <p style="margin: 5px 0;">${adresseComplete || "Non renseignée (PayPal)"}</p>
+        </div>
+
+        <!-- Résumé commande -->
+        <div style="background: #fff8e1; padding: 15px; border-radius: 5px; margin: 15px 0;">
+          <h3 style="margin-top: 0; color: #333;">💰 Résumé</h3>
+          <p style="margin: 5px 0;"><strong>Transaction ID :</strong> ${paiement.transactionId}</p>
+          <p style="margin: 5px 0;"><strong>Date :</strong> ${new Date(paiement.date).toLocaleString("fr-FR")}</p>
+          <p style="margin: 5px 0;"><strong>Méthode :</strong> ${paiement.source?.toUpperCase() || "PAYPAL"}</p>
+          <p style="margin: 5px 0; font-size: 18px; color: #2e7d32;"><strong>Total : ${paiement.montant.toFixed(2)} €</strong></p>
+        </div>
         
-        <p>Connectez-vous à votre espace administration pour plus de détails.</p>
+        <!-- Détails articles -->
+        <h3 style="color: #333; margin-top: 20px;">📦 Articles commandés</h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+          <thead style="background: #d6c487; color: white;">
+            <tr>
+              <th style="padding: 10px; text-align: left;">#</th>
+              <th style="padding: 10px; text-align: left;">Article</th>
+              <th style="padding: 10px; text-align: center;">Qté</th>
+              <th style="padding: 10px; text-align: left;">Format</th>
+              <th style="padding: 10px; text-align: left;">Support</th>
+              <th style="padding: 10px; text-align: right;">Prix U.</th>
+              <th style="padding: 10px; text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${articlesListHtml}
+          </tbody>
+        </table>
+        
+        <p style="margin-top: 20px; color: #666; font-size: 12px;">
+          Connectez-vous à votre <a href="${process.env.FRONTEND_URL}/gestion-galerie" style="color: #d6c487;">espace administration</a> pour gérer cette commande.
+        </p>
       </div>
     `,
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    logger.info('Email notification admin envoyé');
+    logger.info("Email notification admin envoyé", {
+      commande: paiement.transactionId,
+    });
   } catch (error) {
-    logger.error('Erreur envoi email notification admin', { error: error.message });
+    logger.error("Erreur envoi email notification admin", {
+      error: error.message,
+    });
   }
 };
 

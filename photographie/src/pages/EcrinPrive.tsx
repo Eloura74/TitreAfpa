@@ -180,9 +180,10 @@ export default function EcrinPrive() {
       });
 
       if (res.data.success) {
-        setIsConnected(true);
         setSuccess("Connexion réussie ! Chargement de vos photos...");
+        // Attendre que checkSession charge les données complètes avant de connecter
         await checkSession();
+        setIsConnected(true);
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -388,7 +389,13 @@ export default function EcrinPrive() {
   };
 
   // --- Gestion Lightbox ---
-  const openLightbox = async (index: number) => {
+  const openLightbox = async (photoId: string) => {
+    // Trouver l'index de la photo dans le tableau original photosOriginales
+    const index = accesInfo?.photosOriginales?.findIndex(
+      (p) => p._id === photoId,
+    );
+    if (index === undefined || index === -1) return;
+
     setCurrentPhotoIndex(index);
     setIsLightboxOpen(true);
     setLoadingLightboxImage(false);
@@ -855,7 +862,7 @@ export default function EcrinPrive() {
                           // Mode sélection actif : click = sélectionner
                           toggleSelection(photo._id!);
                         } else {
-                          openLightbox(index);
+                          openLightbox(photo._id!);
                         }
                       }}
                       title={
