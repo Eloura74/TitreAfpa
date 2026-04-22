@@ -1082,17 +1082,12 @@ router.post("/regenerate-thumbnail/:accesId/:photoId", async (req, res) => {
 // =====================================
 // ROUTE : Suppression d'une photo originale (ADMIN)
 // =====================================
-router.delete("/photo/:accesId/:photoId", async (req, res) => {
+const { isAdmin } = require("../middleware/auth");
+
+router.delete("/photo/:accesId/:photoId", isAdmin, async (req, res) => {
   try {
     const { accesId, photoId } = req.params;
     const { codeAcces } = req.body;
-
-    if (!codeAcces) {
-      return res.status(400).json({
-        success: false,
-        message: "Code d'accès requis",
-      });
-    }
 
     const acces = await AccesPrive.findById(accesId);
 
@@ -1103,7 +1098,9 @@ router.delete("/photo/:accesId/:photoId", async (req, res) => {
       });
     }
 
-    if (acces.codeAcces !== codeAcces.toUpperCase().trim()) {
+    // Si codeAcces est fourni, le vérifier (pour compatibilité avec les clients)
+    // Si pas de codeAcces, l'admin peut supprimer sans vérification
+    if (codeAcces && acces.codeAcces !== codeAcces.toUpperCase().trim()) {
       return res.status(403).json({
         success: false,
         message: "Code d'accès invalide",
