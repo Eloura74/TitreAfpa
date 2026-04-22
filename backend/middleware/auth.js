@@ -14,7 +14,10 @@ const User = require("../models/User"); // Import du modèle Mongoose "User" (ut
 const authenticate = async (req, res, next) => {
   // Récupère le token : soit via le header Authorization, soit via le cookie
   let token;
-  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer ")
+  ) {
     token = req.headers.authorization.split(" ")[1];
     console.log("[AUTH] Token found in Authorization header");
   } else if (req.cookies && req.cookies.token) {
@@ -62,13 +65,22 @@ const authenticate = async (req, res, next) => {
 const isAdmin = async (req, res, next) => {
   // On commence par exécuter le middleware authenticate
   await authenticate(req, res, async () => {
+    console.log("[ADMIN-MIDDLEWARE] Vérification admin:", {
+      hasUser: !!req.user,
+      userRole: req.user?.role,
+      userId: req.user?._id,
+      userEmail: req.user?.email,
+    });
+
     // Vérifie que l'utilisateur existe ET que son rôle est bien "admin"
     if (!req.user || req.user.role !== "admin") {
+      console.log("[ADMIN-MIDDLEWARE] Accès refusé - utilisateur non admin");
       return res
         .status(403) // Erreur 403 : accès interdit
         .json({ message: "Accès réservé aux administrateurs" });
     }
 
+    console.log("[ADMIN-MIDDLEWARE] Accès autorisé - utilisateur est admin");
     // L'utilisateur est bien un admin, on continue
     next();
   });
