@@ -1094,38 +1094,66 @@ router.delete("/photo/:accesId/:photoId", isAdmin, async (req, res) => {
     const { accesId, photoId } = req.params;
     const { codeAcces } = req.body;
 
+    console.log("[DELETE PHOTO] Début suppression:", {
+      accesId,
+      photoId,
+      codeAcces,
+    });
+
     const acces = await AccesPrive.findById(accesId);
 
     if (!acces) {
+      console.log("[DELETE PHOTO] Accès introuvable:", accesId);
       return res.status(404).json({
         success: false,
         message: "Accès introuvable",
       });
     }
 
+    console.log("[DELETE PHOTO] Accès trouvé:", {
+      titre: acces.titre,
+      codeAcces: acces.codeAcces,
+    });
+
     // Si codeAcces est fourni, le vérifier (pour compatibilité avec les clients)
     // Si pas de codeAcces, l'admin peut supprimer sans vérification
     if (codeAcces && acces.codeAcces !== codeAcces.toUpperCase().trim()) {
+      console.log("[DELETE PHOTO] Code d'accès invalide:", {
+        fourni: codeAcces,
+        attendu: acces.codeAcces,
+      });
       return res.status(403).json({
         success: false,
         message: "Code d'accès invalide",
       });
     }
 
+    console.log(
+      "[DELETE PHOTO] Code d'accès validé (ou non requis pour admin)",
+    );
+
     const photo = acces.photosOriginales.id(photoId);
 
     if (!photo) {
+      console.log("[DELETE PHOTO] Photo introuvable:", photoId);
       return res.status(404).json({
         success: false,
         message: "Photo introuvable",
       });
     }
 
+    console.log("[DELETE PHOTO] Photo trouvée:", {
+      nom: photo.nom,
+      fichierR2: photo.fichierR2,
+    });
+
     const r2Key = photo.fichierR2;
 
     // Suppression de la photo dans MongoDB
+    console.log("[DELETE PHOTO] Suppression MongoDB...");
     acces.photosOriginales.pull(photoId);
     await acces.save();
+    console.log("[DELETE PHOTO] Suppression MongoDB réussie");
 
     // Suppression du fichier sur R2 (optionnel, en arrière-plan)
     try {

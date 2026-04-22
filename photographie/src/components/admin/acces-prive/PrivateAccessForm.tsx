@@ -416,7 +416,6 @@ export default function PrivateAccessForm({
             <div className="mt-6">
               <PhotoOriginalesManager
                 accesId={editId}
-                codeAcces={form.codeAcces || editId}
                 photos={form.photosOriginales}
                 onPhotosUpdate={() => {
                   if (onRefresh) onRefresh();

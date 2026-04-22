@@ -17,14 +17,12 @@ interface PhotoOriginale {
 
 interface PhotoOriginalesManagerProps {
   accesId: string;
-  codeAcces: string;
   photos: PhotoOriginale[];
   onPhotosUpdate: () => void;
 }
 
 export default function PhotoOriginalesManager({
   accesId,
-  codeAcces,
   photos,
   onPhotosUpdate,
 }: PhotoOriginalesManagerProps) {
@@ -50,7 +48,7 @@ export default function PhotoOriginalesManager({
       const response = await axios.delete(
         `${API_URL}/api/ecrin/photo/${accesId}/${photoId}`,
         {
-          data: { codeAcces },
+          data: {}, // Admin peut supprimer sans codeAcces
           withCredentials: true,
         },
       );
@@ -89,7 +87,6 @@ export default function PhotoOriginalesManager({
       const response = await axios.patch(
         `${API_URL}/api/ecrin/photo/${accesId}/${photoId}/commentaire`,
         {
-          codeAcces,
           commentaire: commentText.trim() || null,
         },
         { withCredentials: true },
@@ -133,7 +130,7 @@ export default function PhotoOriginalesManager({
     try {
       const response = await axios.post(
         `${API_URL}/api/ecrin/regenerate-thumbnail/${accesId}/${photoId}`,
-        { codeAcces },
+        {}, // Admin peut régénérer sans codeAcces
         { withCredentials: true },
       );
 
