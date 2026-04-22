@@ -13,6 +13,7 @@ const path = require("path");
 const sharp = require("sharp");
 const cloudinary = require("cloudinary").v2;
 const jwt = require("jsonwebtoken");
+const { isAdmin } = require("../middleware/auth");
 
 const s3Client = new S3Client({
   region: "auto",
@@ -979,111 +980,115 @@ router.post("/generate-view-url", async (req, res) => {
 // =====================================
 // ROUTE : Régénérer miniature en haute résolution
 // =====================================
-router.post("/regenerate-thumbnail/:accesId/:photoId", async (req, res) => {
-  try {
-    const { accesId, photoId } = req.params;
-    const { codeAcces } = req.body;
-
-    if (!codeAcces) {
-      return res.status(400).json({
-        success: false,
-        message: "Code d'accès requis",
-      });
-    }
-
-    const acces = await AccesPrive.findById(accesId);
-
-    if (!acces || acces.codeAcces !== codeAcces.toUpperCase().trim()) {
-      return res.status(403).json({
-        success: false,
-        message: "Accès invalide",
-      });
-    }
-
-    const photo = acces.photosOriginales.id(photoId);
-
-    if (!photo) {
-      return res.status(404).json({
-        success: false,
-        message: "Photo introuvable",
-      });
-    }
-
-    console.log("[REGEN-THUMB] Régénération pour:", photo.nom);
-
+router.post(
+  "/regenerate-thumbnail/:accesId/:photoId",
+  isAdmin,
+  async (req, res) => {
     try {
-      // Téléchargement de l'image depuis R2
-      const getCommand = new GetObjectCommand({
-        Bucket: process.env.R2_BUCKET_NAME,
-        Key: photo.fichierR2,
-      });
+      const { accesId, photoId } = req.params;
+      const { codeAcces } = req.body;
 
-      const r2Response = await s3Client.send(getCommand);
-      const imageBuffer = await streamToBuffer(r2Response.Body);
+      const acces = await AccesPrive.findById(accesId);
 
-      // Génération de la miniature HD avec Sharp (1200x1200 max)
-      const thumbnailBuffer = await sharp(imageBuffer)
-        .resize(1200, 1200, {
-          fit: "inside",
-          withoutEnlargement: true,
-        })
-        .jpeg({ quality: 85 })
-        .toBuffer();
+      if (!acces) {
+        return res.status(404).json({
+          success: false,
+          message: "Accès introuvable",
+        });
+      }
 
-      // Upload de la miniature vers Cloudinary
-      const uploadResult = await new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          {
-            folder: `ecrin-prive/${codeAcces}/miniatures-hd`,
-            resource_type: "image",
-            transformation: [
-              { width: 1200, height: 1200, crop: "limit" },
-              { quality: "auto:good" },
-            ],
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          },
+      // Si codeAcces est fourni, le vérifier (pour compatibilité avec les clients)
+      // Si pas de codeAcces, l'admin peut régénérer sans vérification
+      if (codeAcces && acces.codeAcces !== codeAcces.toUpperCase().trim()) {
+        return res.status(403).json({
+          success: false,
+          message: "Code d'accès invalide",
+        });
+      }
+
+      const photo = acces.photosOriginales.id(photoId);
+
+      if (!photo) {
+        return res.status(404).json({
+          success: false,
+          message: "Photo introuvable",
+        });
+      }
+
+      console.log("[REGEN-THUMB] Régénération pour:", photo.nom);
+
+      try {
+        // Téléchargement de l'image depuis R2
+        const getCommand = new GetObjectCommand({
+          Bucket: process.env.R2_BUCKET_NAME,
+          Key: photo.fichierR2,
+        });
+
+        const r2Response = await s3Client.send(getCommand);
+        const imageBuffer = await streamToBuffer(r2Response.Body);
+
+        // Génération de la miniature HD avec Sharp (1200x1200 max)
+        const thumbnailBuffer = await sharp(imageBuffer)
+          .resize(1200, 1200, {
+            fit: "inside",
+            withoutEnlargement: true,
+          })
+          .jpeg({ quality: 85 })
+          .toBuffer();
+
+        // Upload de la miniature vers Cloudinary
+        const uploadResult = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              folder: `ecrin-prive/${codeAcces}/miniatures-hd`,
+              resource_type: "image",
+              transformation: [
+                { width: 1200, height: 1200, crop: "limit" },
+                { quality: "auto:good" },
+              ],
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            },
+          );
+          uploadStream.end(thumbnailBuffer);
+        });
+
+        // Mise à jour de l'URL de la miniature
+        photo.miniature = uploadResult.secure_url;
+        await acces.save();
+
+        console.log(
+          "[REGEN-THUMB] Miniature HD générée:",
+          uploadResult.secure_url,
         );
-        uploadStream.end(thumbnailBuffer);
-      });
 
-      // Mise à jour de l'URL de la miniature
-      photo.miniature = uploadResult.secure_url;
-      await acces.save();
-
-      console.log(
-        "[REGEN-THUMB] Miniature HD générée:",
-        uploadResult.secure_url,
-      );
-
-      res.json({
-        success: true,
-        message: "Miniature régénérée en HD",
-        miniature: uploadResult.secure_url,
-      });
+        res.json({
+          success: true,
+          message: "Miniature régénérée en HD",
+          miniature: uploadResult.secure_url,
+        });
+      } catch (error) {
+        console.error("[REGEN-THUMB] Erreur:", error);
+        res.status(500).json({
+          success: false,
+          message: "Erreur lors de la régénération de la miniature",
+        });
+      }
     } catch (error) {
-      console.error("[REGEN-THUMB] Erreur:", error);
+      console.error("Erreur régénération miniature:", error);
       res.status(500).json({
         success: false,
-        message: "Erreur lors de la régénération de la miniature",
+        message: "Erreur serveur",
       });
     }
-  } catch (error) {
-    console.error("Erreur régénération miniature:", error);
-    res.status(500).json({
-      success: false,
-      message: "Erreur serveur",
-    });
-  }
-});
+  },
+);
 
 // =====================================
 // ROUTE : Suppression d'une photo originale (ADMIN)
 // =====================================
-const { isAdmin } = require("../middleware/auth");
-
 router.delete("/photo/:accesId/:photoId", isAdmin, async (req, res) => {
   try {
     const { accesId, photoId } = req.params;
@@ -1154,64 +1159,66 @@ router.delete("/photo/:accesId/:photoId", isAdmin, async (req, res) => {
 // =====================================
 // ROUTE : Ajout/modification d'un commentaire sur une photo (ADMIN)
 // =====================================
-router.patch("/photo/:accesId/:photoId/commentaire", async (req, res) => {
-  try {
-    const { accesId, photoId } = req.params;
-    const { codeAcces, commentaire } = req.body;
+router.patch(
+  "/photo/:accesId/:photoId/commentaire",
+  isAdmin,
+  async (req, res) => {
+    try {
+      const { accesId, photoId } = req.params;
+      const { codeAcces, commentaire } = req.body;
 
-    if (!codeAcces) {
-      return res.status(400).json({
+      const acces = await AccesPrive.findById(accesId);
+
+      if (!acces) {
+        return res.status(404).json({
+          success: false,
+          message: "Accès introuvable",
+        });
+      }
+
+      // Si codeAcces est fourni, le vérifier (pour compatibilité avec les clients)
+      // Si pas de codeAcces, l'admin peut modifier sans vérification
+      if (codeAcces && acces.codeAcces !== codeAcces.toUpperCase().trim()) {
+        return res.status(403).json({
+          success: false,
+          message: "Code d'accès invalide",
+        });
+      }
+
+      const photo = acces.photosOriginales.id(photoId);
+
+      if (!photo) {
+        return res.status(404).json({
+          success: false,
+          message: "Photo introuvable",
+        });
+      }
+
+      photo.commentaire = commentaire || null;
+      await acces.save();
+
+      console.log(
+        "[UPDATE-COMMENTAIRE] Commentaire mis à jour pour:",
+        photo.nom,
+      );
+
+      res.json({
+        success: true,
+        message: "Commentaire mis à jour avec succès",
+        photo: {
+          id: photo._id,
+          nom: photo.nom,
+          commentaire: photo.commentaire,
+        },
+      });
+    } catch (error) {
+      console.error("Erreur mise à jour commentaire:", error);
+      res.status(500).json({
         success: false,
-        message: "Code d'accès requis",
+        message: "Erreur lors de la mise à jour du commentaire",
       });
     }
-
-    const acces = await AccesPrive.findById(accesId);
-
-    if (!acces) {
-      return res.status(404).json({
-        success: false,
-        message: "Accès introuvable",
-      });
-    }
-
-    if (acces.codeAcces !== codeAcces.toUpperCase().trim()) {
-      return res.status(403).json({
-        success: false,
-        message: "Code d'accès invalide",
-      });
-    }
-
-    const photo = acces.photosOriginales.id(photoId);
-
-    if (!photo) {
-      return res.status(404).json({
-        success: false,
-        message: "Photo introuvable",
-      });
-    }
-
-    photo.commentaire = commentaire || null;
-    await acces.save();
-
-    console.log("[UPDATE-COMMENTAIRE] Commentaire mis à jour pour:", photo.nom);
-
-    res.json({
-      success: true,
-      message: "Commentaire mis à jour avec succès",
-      photo: {
-        id: photo._id,
-        nom: photo.nom,
-        commentaire: photo.commentaire,
-      },
-    });
-  } catch (error) {
-    console.error("Erreur mise à jour commentaire:", error);
-    res.status(500).json({
-      success: false,
-      message: "Erreur lors de la mise à jour du commentaire",
-    });
-  }
-});
+  },
+);
 
 module.exports = router;

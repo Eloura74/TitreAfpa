@@ -51,6 +51,7 @@ export default function PhotoOriginalesManager({
         `${API_URL}/api/ecrin/photo/${accesId}/${photoId}`,
         {
           data: { codeAcces },
+          withCredentials: true,
         },
       );
 
@@ -91,6 +92,7 @@ export default function PhotoOriginalesManager({
           codeAcces,
           commentaire: commentText.trim() || null,
         },
+        { withCredentials: true },
       );
 
       if (response.data.success) {
@@ -132,6 +134,7 @@ export default function PhotoOriginalesManager({
       const response = await axios.post(
         `${API_URL}/api/ecrin/regenerate-thumbnail/${accesId}/${photoId}`,
         { codeAcces },
+        { withCredentials: true },
       );
 
       if (response.data.success) {
