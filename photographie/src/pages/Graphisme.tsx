@@ -11,7 +11,7 @@ import { motion } from "framer-motion";
 import { API_URL } from "../config/api";
 import { getWatermarkedImageUrl } from "../utils/cloudinaryUtils";
 import { useCovers } from "../hooks/useCovers";
-
+//test push
 // Variantes d'animation pour l'apparition en cascade
 const containerVariants = {
   hidden: { opacity: 0 },
