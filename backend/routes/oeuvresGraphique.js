@@ -99,6 +99,35 @@ router.put("/:id", isAdmin, async (req, res) => {
 });
 
 // ----------------------------------------------------
+// PATCH /api/oeuvres-graphique/:id/vendu
+// ----------------------------------------------------
+// Toggle le statut vendu d'une œuvre graphique
+router.patch("/:id/vendu", isAdmin, async (req, res) => {
+  try {
+    // Récupère l'œuvre actuelle
+    const oeuvre = await OeuvreGraphique.findById(req.params.id);
+    if (!oeuvre) {
+      return res.status(404).json({ message: "Œuvre non trouvée" });
+    }
+
+    // Toggle le statut vendu
+    oeuvre.vendu = !oeuvre.vendu;
+    const updatedOeuvre = await oeuvre.save();
+
+    // Retourne l'œuvre mise à jour
+    res.status(200).json(updatedOeuvre);
+  } catch (err) {
+    // Gestion des erreurs
+    res
+      .status(500)
+      .json({
+        message: "Erreur modification statut vendu",
+        error: err.message,
+      });
+  }
+});
+
+// ----------------------------------------------------
 // DELETE /api/oeuvres-graphique/:id
 // ----------------------------------------------------
 // Supprimer une œuvre graphique via son identifiant

@@ -275,16 +275,16 @@ export default function Graphisme() {
 
         {/* Navigation principale sous forme de cartes */}
         <motion.nav
-          className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-4xl px-4"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-4xl px-2 mt-8"
           variants={containerVariants}
         >
           <NavigationCard
             to="/galerie-graphique"
             image={covers.graphismeGalerie || galerieGraphImage}
-            alt="Galerie Graphique"
+            alt="Galerie Photo-Graphique"
             icon={<GalleryHorizontal className="w-5 h-5 text-[#ffe992]" />}
-            title="Galerie graphique"
-            description="Œuvres graphiques."
+            title="Galerie Photo-Graphique"
+            description="Œuvres photo-graphiques."
           />
 
           <NavigationCard
@@ -292,10 +292,10 @@ export default function Graphisme() {
             image={
               covers.graphismeDecouvrir || "/images/graphisme-showcase.jpg"
             }
-            alt="Découvrir le Graphisme"
+            alt="Découvrir le Photo-Graphisme"
             icon={<Lightbulb className="w-5 h-5 text-[#ffe992]" />}
-            title="Découvrir le Graphisme"
-            description="Qu'est-ce que le graphisme ?"
+            title="Découvrir le Photo-Graphisme"
+            description="Qu'est-ce que le photo-graphisme ?"
           />
         </motion.nav>
       </motion.main>

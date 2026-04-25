@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "../../config/api";
-import { Edit, Trash2, Plus, Image as ImageIcon } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  Plus,
+  Image as ImageIcon,
+  CheckCircle,
+} from "lucide-react";
 
 interface OeuvreGraphique {
   _id?: string;
@@ -9,6 +15,7 @@ interface OeuvreGraphique {
   image: string;
   prix: number;
   description?: string;
+  vendu?: boolean;
 }
 
 export default function GestionGalerieGraphique() {
@@ -43,7 +50,7 @@ export default function GestionGalerieGraphique() {
       // 1. Récupérer la signature depuis le backend
       console.log(
         "Fetching signature from:",
-        `${API_URL}/api/upload-cloudinary/sign`
+        `${API_URL}/api/upload-cloudinary/sign`,
       );
       const signRes = await fetch(`${API_URL}/api/upload-cloudinary/sign`, {
         method: "GET",
@@ -54,7 +61,7 @@ export default function GestionGalerieGraphique() {
         console.error(
           "Signature fetch failed:",
           signRes.status,
-          signRes.statusText
+          signRes.statusText,
         );
         throw new Error("Erreur lors de la récupération de la signature");
       }
@@ -76,7 +83,7 @@ export default function GestionGalerieGraphique() {
         {
           method: "POST",
           body: formData,
-        }
+        },
       );
 
       if (!uploadRes.ok) {
@@ -130,7 +137,7 @@ export default function GestionGalerieGraphique() {
       if (editId) {
         const { data } = await axios.put(
           `${API_URL}/api/oeuvres-graphique/${editId}`,
-          { ...form, image: imagePath }
+          { ...form, image: imagePath },
         );
         setOeuvres((prev) => prev.map((o) => (o._id === editId ? data : o)));
         setMessage("Œuvre modifiée !");
@@ -174,6 +181,24 @@ export default function GestionGalerieGraphique() {
       setMessage("Œuvre supprimée !");
     } catch {
       setMessage("Erreur lors de la suppression.");
+    }
+  }
+
+  async function handleToggleVendu(id?: string) {
+    if (!id) return;
+
+    try {
+      const { data } = await axios.patch(
+        `${API_URL}/api/oeuvres-graphique/${id}/vendu`,
+        {},
+        { withCredentials: true },
+      );
+      setOeuvres((prev) => prev.map((o) => (o._id === id ? data : o)));
+      setMessage(
+        data.vendu ? "Œuvre marquée comme vendue !" : "Œuvre remise en vente !",
+      );
+    } catch {
+      setMessage("Erreur lors de la modification du statut.");
     }
   }
 
@@ -316,8 +341,8 @@ export default function GestionGalerieGraphique() {
                   {loading
                     ? "Traitement..."
                     : editId
-                    ? "Enregistrer"
-                    : "Ajouter"}
+                      ? "Enregistrer"
+                      : "Ajouter"}
                 </button>
                 {editId && (
                   <button
@@ -390,6 +415,17 @@ export default function GestionGalerieGraphique() {
                       </div>
 
                       <div className="flex justify-end gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-1.5 rounded transition-all ${
+                            oeuvre.vendu
+                              ? "bg-red-500/20 hover:bg-red-500 hover:text-white text-red-400"
+                              : "bg-green-500/20 hover:bg-green-500 hover:text-white text-green-400"
+                          }`}
+                          onClick={() => handleToggleVendu(oeuvre._id)}
+                        >
+                          <CheckCircle size={10} />{" "}
+                          {oeuvre.vendu ? "Remettre en vente" : "Marquer vendu"}
+                        </button>
                         <button
                           className="flex items-center gap-1.5 bg-white/5 hover:bg-[#ffe992] hover:text-black text-gray-300 text-[10px] font-bold uppercase tracking-wider px-2 py-1.5 rounded transition-all"
                           onClick={() => handleEdit(oeuvre)}

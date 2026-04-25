@@ -35,6 +35,7 @@ interface OeuvreGraphique {
   image: string;
   prix: number;
   description?: string;
+  vendu?: boolean;
   likes?: number;
   views?: number;
   // Ajout pour compatibilité avec le modal
@@ -94,27 +95,30 @@ export default function GalerieGraphique() {
         if (!res.ok) throw new Error("Erreur réseau");
         const data = await res.json();
 
-        const sanitized = data.map((oeuvre: any) => {
-          const imgSrc = oeuvre.image?.startsWith("http")
-            ? oeuvre.image
-            : oeuvre.image?.startsWith("/uploads/")
-              ? `${API_URL}${oeuvre.image}`
-              : oeuvre.image?.startsWith("/images/")
-                ? oeuvre.image
-                : `/images/${oeuvre.image || "/placeholder.jpg"}`;
+        const sanitized = data.map(
+          (oeuvre: OeuvreGraphique & { _id?: string }) => {
+            const imgSrc = oeuvre.image?.startsWith("http")
+              ? oeuvre.image
+              : oeuvre.image?.startsWith("/uploads/")
+                ? `${API_URL}${oeuvre.image}`
+                : oeuvre.image?.startsWith("/images/")
+                  ? oeuvre.image
+                  : `/images/${oeuvre.image || "/placeholder.jpg"}`;
 
-          return {
-            id: oeuvre._id || oeuvre.id,
-            titre: oeuvre.titre,
-            image: imgSrc,
-            src: imgSrc, // Alias pour compatibilité
-            categorie: "Art Graphique", // Catégorie par défaut
-            prix: oeuvre.prix,
-            description: oeuvre.description,
-            likes: oeuvre.likes || 0,
-            views: oeuvre.views || 0,
-          };
-        });
+            return {
+              id: oeuvre._id || oeuvre.id,
+              titre: oeuvre.titre,
+              image: imgSrc,
+              src: imgSrc, // Alias pour compatibilité
+              categorie: "Art Graphique", // Catégorie par défaut
+              prix: oeuvre.prix,
+              description: oeuvre.description,
+              vendu: oeuvre.vendu || false,
+              likes: oeuvre.likes || 0,
+              views: oeuvre.views || 0,
+            };
+          },
+        );
 
         setOeuvres(sanitized);
       } catch (err) {
@@ -256,15 +260,17 @@ export default function GalerieGraphique() {
                           >
                             <Eye size={16} /> Voir en grand
                           </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAjouterAuPanier(oeuvre);
-                            }}
-                            className="w-full bg-[#ffe992] text-black font-bold text-xs uppercase tracking-widest py-3 rounded hover:bg-[#d6c487] transition-colors transform translate-y-4 group-hover:translate-y-0 duration-500"
-                          >
-                            Ajouter au panier
-                          </button>
+                          {!oeuvre.vendu && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAjouterAuPanier(oeuvre);
+                              }}
+                              className="w-full bg-[#ffe992] text-black font-bold text-xs uppercase tracking-widest py-3 rounded hover:bg-[#d6c487] transition-colors transform translate-y-4 group-hover:translate-y-0 duration-500"
+                            >
+                              Ajouter au panier
+                            </button>
+                          )}
                         </div>
                       </div>
 
@@ -295,7 +301,7 @@ export default function GalerieGraphique() {
                         />
 
                         <span className="text-[#ffe992] text-sm font-medium tracking-widest">
-                          {oeuvre.prix} €
+                          {oeuvre.vendu ? "VENDU" : `${oeuvre.prix} €`}
                         </span>
                       </div>
                     </div>
@@ -492,23 +498,27 @@ export default function GalerieGraphique() {
                     Prix
                   </p>
                   <p className="text-2xl font-bold text-[#ffe992]">
-                    {oeuvres[lightboxIndex].prix} €
+                    {oeuvres[lightboxIndex].vendu
+                      ? "VENDU"
+                      : `${oeuvres[lightboxIndex].prix} €`}
                   </p>
                 </motion.div>
 
                 {/* Bouton Ajouter au panier */}
-                <motion.button
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.75, duration: 0.4 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAjouterAuPanier(oeuvres[lightboxIndex]);
-                  }}
-                  className="w-full px-6 py-3 bg-[#ffe992] hover:bg-[#d6c487] text-black font-bold text-sm uppercase tracking-widest rounded-xl transition-all flex-shrink-0"
-                >
-                  Ajouter au panier
-                </motion.button>
+                {!oeuvres[lightboxIndex].vendu && (
+                  <motion.button
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.75, duration: 0.4 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAjouterAuPanier(oeuvres[lightboxIndex]);
+                    }}
+                    className="w-full px-6 py-3 bg-[#ffe992] hover:bg-[#d6c487] text-black font-bold text-sm uppercase tracking-widest rounded-xl transition-all flex-shrink-0"
+                  >
+                    Ajouter au panier
+                  </motion.button>
+                )}
 
                 {/* Bouton Fermer */}
                 <motion.button

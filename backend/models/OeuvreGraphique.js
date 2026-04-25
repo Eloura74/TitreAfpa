@@ -25,6 +25,13 @@ const OeuvreGraphiqueSchema = new mongoose.Schema({
   // Exemple : "Impression fine art réalisée en édition limitée"
   description: { type: String },
 
+  // Champ "vendu" : booléen indiquant si l'œuvre a été vendue
+  // Quand vendu = true, le prix n'est pas affiché et "VENDU" remplace le prix
+  vendu: {
+    type: Boolean,
+    default: false,
+  },
+
   // Nombre de likes (nombre entier, défaut 0)
   likes: {
     type: Number,

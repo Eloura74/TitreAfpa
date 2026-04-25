@@ -506,9 +506,9 @@ export default function Home() {
               animate="visible"
               className="pointer-events-auto flex flex-wrap items-center justify-center gap-3 md:gap-4 text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-yellow-100/40 font-syncopate"
             >
-              <span>Galerie Graphique</span>
+              <span>Galerie Photo-Graphique</span>
               <span className="hidden md:block w-[1px] h-3 bg-yellow-700/40" />
-              <span>Découvrir le Graphisme</span>
+              <span>Découvrir le Photo-Graphisme</span>
             </motion.div>
           </div>
         </motion.section>
