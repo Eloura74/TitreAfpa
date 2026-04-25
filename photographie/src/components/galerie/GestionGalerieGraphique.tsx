@@ -138,15 +138,20 @@ export default function GestionGalerieGraphique() {
         const { data } = await axios.put(
           `${API_URL}/api/oeuvres-graphique/${editId}`,
           { ...form, image: imagePath },
+          { withCredentials: true },
         );
         setOeuvres((prev) => prev.map((o) => (o._id === editId ? data : o)));
         setMessage("Œuvre modifiée !");
         setEditId(null);
       } else {
-        const { data } = await axios.post(`${API_URL}/api/oeuvres-graphique`, {
-          ...form,
-          image: imagePath,
-        });
+        const { data } = await axios.post(
+          `${API_URL}/api/oeuvres-graphique`,
+          {
+            ...form,
+            image: imagePath,
+          },
+          { withCredentials: true },
+        );
         setOeuvres((prev) => [...prev, data]);
         setMessage("Œuvre ajoutée !");
       }
@@ -176,7 +181,9 @@ export default function GestionGalerieGraphique() {
     if (!window.confirm("Supprimer cette œuvre ?")) return;
 
     try {
-      await axios.delete(`${API_URL}/api/oeuvres-graphique/${id}`);
+      await axios.delete(`${API_URL}/api/oeuvres-graphique/${id}`, {
+        withCredentials: true,
+      });
       setOeuvres((prev) => prev.filter((o) => o._id !== id));
       setMessage("Œuvre supprimée !");
     } catch {
