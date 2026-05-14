@@ -27,6 +27,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   onReserve,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [cardPosition, setCardPosition] = useState<
     | {
         top: number;
@@ -200,25 +201,39 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         <div className="relative flex flex-col md:flex-row gap-8 h-full">
           {/* Images Section */}
           <div className="md:w-1/2 flex flex-col gap-4 overflow-y-auto">
-            <div className="relative w-full h-[400px] overflow-hidden rounded-xl bg-black flex-shrink-0">
+            <div
+              className="relative w-full h-[400px] overflow-hidden rounded-xl bg-black flex-shrink-0 cursor-pointer group"
+              onClick={() => setSelectedImage(service.images[0])}
+            >
               <img
                 src={service.images[0] || "/placeholder-service.jpg"}
                 alt={service.titre}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
               />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/10 backdrop-blur-md rounded-full p-3 border border-white/20">
+                  <Eye className="w-6 h-6 text-white" />
+                </div>
+              </div>
             </div>
             {service.images.length > 1 && (
               <div className="grid grid-cols-2 gap-3">
                 {service.images.slice(1).map((img, idx) => (
                   <div
                     key={idx}
-                    className="relative aspect-video overflow-hidden rounded-lg bg-black border border-white/10"
+                    className="relative aspect-video overflow-hidden rounded-lg bg-black border border-white/10 cursor-pointer group"
+                    onClick={() => setSelectedImage(img)}
                   >
                     <img
                       src={img}
                       alt={`${service.titre} ${idx + 2}`}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
                     />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/10 backdrop-blur-md rounded-full p-2 border border-white/20">
+                        <Eye className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -259,6 +274,29 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
           </div>
         </div>
       </ExpandableCard>
+
+      {/* Lightbox pour les images */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center p-4 backdrop-blur-xl"
+          onClick={() => setSelectedImage(null)}
+        >
+          <motion.img
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            src={selectedImage}
+            alt="Zoom"
+            className="max-w-full max-h-[90vh] rounded-lg shadow-2xl border border-white/10 object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors bg-black/50 hover:bg-black/70 rounded-full p-3 backdrop-blur-sm"
+            onClick={() => setSelectedImage(null)}
+          >
+            <Eye size={24} className="rotate-180" />
+          </button>
+        </div>
+      )}
     </>
   );
 };
