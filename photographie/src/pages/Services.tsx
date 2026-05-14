@@ -6,7 +6,7 @@ import PageTitle from "../components/ui/PageTitle";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import { API_URL as BASE_API_URL } from "../config/api";
-import { Sparkles, Eye } from "lucide-react";
+import { Sparkles, Eye, X } from "lucide-react";
 import { motion } from "framer-motion";
 import SEO from "../components/SEO";
 import { photographerSchema, createBreadcrumbSchema } from "../utils/schemas";
@@ -278,7 +278,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       {/* Lightbox pour les images */}
       {selectedImage && (
         <div
-          className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center p-4 backdrop-blur-xl"
+          className="fixed inset-0 bg-black/95 flex items-center justify-center p-4 backdrop-blur-xl"
+          style={{ zIndex: 100001 }}
           onClick={() => setSelectedImage(null)}
         >
           <motion.img
@@ -293,7 +294,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
             className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors bg-black/50 hover:bg-black/70 rounded-full p-3 backdrop-blur-sm"
             onClick={() => setSelectedImage(null)}
           >
-            <Eye size={24} className="rotate-180" />
+            <X size={24} />
           </button>
         </div>
       )}
