@@ -199,8 +199,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 
         <div className="relative flex flex-col md:flex-row gap-8 h-full">
           {/* Images Section */}
-          <div className="md:w-1/2 flex flex-col gap-4">
-            <div className="relative w-full h-[400px] overflow-hidden rounded-xl bg-black">
+          <div className="md:w-1/2 flex flex-col gap-4 overflow-y-auto">
+            <div className="relative w-full h-[400px] overflow-hidden rounded-xl bg-black flex-shrink-0">
               <img
                 src={service.images[0] || "/placeholder-service.jpg"}
                 alt={service.titre}
@@ -208,16 +208,16 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
               />
             </div>
             {service.images.length > 1 && (
-              <div className="grid grid-cols-3 gap-2">
-                {service.images.slice(1, 4).map((img, idx) => (
+              <div className="grid grid-cols-2 gap-3">
+                {service.images.slice(1).map((img, idx) => (
                   <div
                     key={idx}
-                    className="relative aspect-video overflow-hidden rounded-lg"
+                    className="relative aspect-video overflow-hidden rounded-lg bg-black border border-white/10"
                   >
                     <img
                       src={img}
                       alt={`${service.titre} ${idx + 2}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   </div>
                 ))}

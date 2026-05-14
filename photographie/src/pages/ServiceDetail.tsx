@@ -160,13 +160,13 @@ export default function ServiceDetail() {
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
                   key={idx}
-                  className="relative group overflow-hidden rounded-xl cursor-pointer aspect-[3/4] border border-white/5"
+                  className="relative group overflow-hidden rounded-xl cursor-pointer aspect-video border border-white/5 bg-black"
                   onClick={() => setSelectedImage(img)}
                 >
                   <img
                     src={img}
                     alt={`${service.titre} ${idx + 1}`}
-                    className="w-full h-full object-cover transition duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100"
+                    className="w-full h-full object-contain transition duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
                   />
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition duration-500" />
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
