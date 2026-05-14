@@ -27,7 +27,9 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   onReserve,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+    null,
+  );
   const [cardPosition, setCardPosition] = useState<
     | {
         top: number;
@@ -51,6 +53,27 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       setIsExpanded(true);
     }
   };
+
+  // Navigation clavier pour le lightbox
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (selectedImageIndex === null) return;
+
+      if (e.key === "Escape") {
+        setSelectedImageIndex(null);
+      } else if (e.key === "ArrowLeft" && selectedImageIndex > 0) {
+        setSelectedImageIndex(selectedImageIndex - 1);
+      } else if (
+        e.key === "ArrowRight" &&
+        selectedImageIndex < service.images.length - 1
+      ) {
+        setSelectedImageIndex(selectedImageIndex + 1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedImageIndex, service.images.length]);
 
   // Récupérer les personnalisations
   const accentColor = service.customization?.accentColor || "#ffe992";
@@ -203,7 +226,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
           <div className="md:w-1/2 flex flex-col gap-4 overflow-y-auto">
             <div
               className="relative w-full h-[400px] overflow-hidden rounded-xl bg-black flex-shrink-0 cursor-pointer group"
-              onClick={() => setSelectedImage(service.images[0])}
+              onClick={() => setSelectedImageIndex(0)}
             >
               <img
                 src={service.images[0] || "/placeholder-service.jpg"}
@@ -222,7 +245,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                   <div
                     key={idx}
                     className="relative aspect-video overflow-hidden rounded-lg bg-black border border-white/10 cursor-pointer group"
-                    onClick={() => setSelectedImage(img)}
+                    onClick={() => setSelectedImageIndex(idx + 1)}
                   >
                     <img
                       src={img}
@@ -276,26 +299,84 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       </ExpandableCard>
 
       {/* Lightbox pour les images */}
-      {selectedImage && (
+      {selectedImageIndex !== null && (
         <div
           className="fixed inset-0 bg-black/95 flex items-center justify-center p-4 backdrop-blur-xl"
           style={{ zIndex: 100001 }}
-          onClick={() => setSelectedImage(null)}
+          onClick={() => setSelectedImageIndex(null)}
         >
           <motion.img
+            key={selectedImageIndex}
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            src={selectedImage}
-            alt="Zoom"
+            src={service.images[selectedImageIndex]}
+            alt={`${service.titre} ${selectedImageIndex + 1}`}
             className="max-w-full max-h-[90vh] rounded-lg shadow-2xl border border-white/10 object-contain"
             onClick={(e) => e.stopPropagation()}
           />
+
+          {/* Bouton Fermer */}
           <button
             className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors bg-black/50 hover:bg-black/70 rounded-full p-3 backdrop-blur-sm"
-            onClick={() => setSelectedImage(null)}
+            onClick={() => setSelectedImageIndex(null)}
           >
             <X size={24} />
           </button>
+
+          {/* Flèche Gauche */}
+          {selectedImageIndex > 0 && (
+            <button
+              className="absolute left-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors bg-black/50 hover:bg-black/70 rounded-full p-3 backdrop-blur-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedImageIndex(selectedImageIndex - 1);
+              }}
+            >
+              <svg
+                className="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+          )}
+
+          {/* Flèche Droite */}
+          {selectedImageIndex < service.images.length - 1 && (
+            <button
+              className="absolute right-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors bg-black/50 hover:bg-black/70 rounded-full p-3 backdrop-blur-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedImageIndex(selectedImageIndex + 1);
+              }}
+            >
+              <svg
+                className="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          )}
+
+          {/* Compteur */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm px-4 py-2 rounded-full text-white text-sm">
+            {selectedImageIndex + 1} / {service.images.length}
+          </div>
         </div>
       )}
     </>
