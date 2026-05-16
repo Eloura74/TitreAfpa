@@ -159,6 +159,27 @@ export default function Services() {
           "reportage",
           "formation",
         ]}
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "Service",
+          name: "Services Photographie",
+          description:
+            "Prestations professionnelles, reportages publics et privés, formations",
+          provider: {
+            "@type": "Person",
+            name: "Fabien Licata",
+            jobTitle: "Photographe et Graphiste",
+          },
+          serviceType: [
+            "Photographie de mariage",
+            "Reportage événementiel",
+            "Formation photographie",
+          ],
+          areaServed: {
+            "@type": "Country",
+            name: "France",
+          },
+        }}
       />
 
       <Navbar />

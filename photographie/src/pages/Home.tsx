@@ -4,7 +4,6 @@ import { useAuthStore } from "../store/authStore";
 import homeImages from "../config/images.json";
 import { motion, useReducedMotion } from "framer-motion";
 import SEO from "../components/SEO";
-import { photographerSchema } from "../utils/schemas";
 import GoldDust from "../components/GoldDust";
 import ContactFooter from "./ContactFooter";
 import CoverflowCarousel from "../components/CoverflowCarousel";
@@ -148,18 +147,40 @@ export default function Home() {
         description="Bienvenue dans l'univers artistique de Fabien Licata, photographe et graphiste professionnel. Découvrez mes créations photographiques, tirages d'art limités, services sur-mesure pour mariages, événements et identité visuelle graphique."
         image={homeImages.hero}
         type="website"
-        keywords={[
-          "photographe professionnel",
-          "graphiste",
-          "photographie art",
-          "tirage photo",
-          "mariage",
-          "événement",
-          "design graphique",
-          "Fabien Licata",
-          "portfolio photo",
-        ]}
-        schema={photographerSchema}
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: "Fabien Licata",
+          description:
+            "Photographe et graphiste professionnel - Mariages, événements, portraits, identité visuelle",
+          image: "https://titre-afpa.vercel.app/images/logoHome.png",
+          url: "https://titre-afpa.vercel.app",
+          telephone: "+33XXXXXXXXXX",
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: "France",
+            addressCountry: "FR",
+          },
+          openingHoursSpecification: {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday",
+            ],
+            opens: "09:00",
+            closes: "18:00",
+          },
+          priceRange: "€€",
+          sameAs: [
+            "https://www.instagram.com/fabienlicata",
+            "https://www.facebook.com/fabienlicata",
+          ],
+        }}
       />
 
       {/* PARTICULES D'OR */}

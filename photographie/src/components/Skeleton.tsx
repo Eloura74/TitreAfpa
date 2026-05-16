@@ -2,7 +2,7 @@ import React from "react";
 
 interface SkeletonProps {
   className?: string;
-  variant?: "text" | "circular" | "rectangular";
+  variant?: "text" | "circular" | "rectangular" | "card";
   width?: string | number;
   height?: string | number;
 }
@@ -14,11 +14,12 @@ const Skeleton: React.FC<SkeletonProps> = ({
   height,
 }) => {
   const baseStyles = "bg-gray-800 animate-pulse relative overflow-hidden";
-  
+
   const variantStyles = {
     text: "rounded-md",
     circular: "rounded-full",
     rectangular: "rounded-lg",
+    card: "rounded-xl",
   };
 
   const style = {
