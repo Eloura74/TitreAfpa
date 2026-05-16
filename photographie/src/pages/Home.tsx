@@ -134,7 +134,7 @@ export default function Home() {
 
   const handleChoix = (choix: "photographie" | "photo-graphiste") => {
     setChoix(choix);
-    navigate(choix === "photographie" ? "/photographie" : "/graphisme");
+    navigate(choix === "photographie" ? "/galerie" : "/graphisme");
   };
 
   return (
@@ -399,8 +399,6 @@ export default function Home() {
               className="pointer-events-auto flex flex-wrap items-center justify-center gap-3 md:gap-4 text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-yellow-100/40 font-syncopate"
             >
               <span>Galerie Photo</span>
-              <span className="hidden md:block w-[1px] h-3 bg-yellow-700/40" />
-              <span>Services</span>
             </motion.div>
           </div>
         </motion.section>
@@ -517,7 +515,8 @@ export default function Home() {
         <motion.section
           onMouseEnter={() => setHoveredSide("ecrin")}
           onMouseLeave={() => setHoveredSide(null)}
-          className="relative flex w-full md:w-full cursor-default flex-col items-center justify-start md:justify-center transition-all duration-700 py-10 md:py-0 md:h-[40vh]"
+          onClick={() => navigate("/services")}
+          className="relative flex w-full md:w-full cursor-pointer flex-col items-center justify-start md:justify-center transition-all duration-700 py-10 md:py-0 md:h-[40vh]"
         >
           {/* Overlay d'assombrissement si non survolé */}
           <div
@@ -548,7 +547,7 @@ export default function Home() {
                 animate="visible"
                 className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium font-syncopate"
               >
-                Mes Services
+                Prestations, Reportages, Formations
               </motion.span>
             </div>
 
@@ -580,7 +579,7 @@ export default function Home() {
                 animate="visible"
                 className="pointer-events-auto text-gray-400 text-[10px] md:text-xs italic font-extralight tracking-widest max-w-md mx-auto font-playfair"
               >
-                "Prestations, reportages et formations professionnelles"
+                "L'excellence au service de votre image"
               </motion.p>
             </div>
 
