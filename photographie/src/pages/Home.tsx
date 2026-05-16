@@ -513,7 +513,7 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* SECTION REPORTAGES (Bas Centre)   */}
+        {/* SECTION SERVICES (Bas Centre) */}
         <motion.section
           onMouseEnter={() => setHoveredSide("ecrin")}
           onMouseLeave={() => setHoveredSide(null)}
@@ -548,7 +548,7 @@ export default function Home() {
                 animate="visible"
                 className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium font-syncopate"
               >
-                Collections Exclusives
+                Mes Services
               </motion.span>
             </div>
 
@@ -568,7 +568,7 @@ export default function Home() {
                   bg-gradient-to-b from-yellow-50 via-yellow-200 to-yellow-600 bg-clip-text text-transparent
                 `}
               >
-                Reportages
+                Services
               </motion.h1>
             </div>
 
@@ -580,8 +580,7 @@ export default function Home() {
                 animate="visible"
                 className="pointer-events-auto text-gray-400 text-[10px] md:text-xs italic font-extralight tracking-widest max-w-md mx-auto font-playfair"
               >
-                "Découvrez nos reportages publics et accédez à vos galeries
-                privées sécurisées"
+                "Prestations, reportages et formations professionnelles"
               </motion.p>
             </div>
 
@@ -593,7 +592,7 @@ export default function Home() {
               className="pointer-events-auto"
             >
               <button
-                onClick={() => navigate("/reportages")}
+                onClick={() => navigate("/services")}
                 className="group relative px-8 py-3 overflow-hidden rounded-xl transition-all duration-500"
               >
                 {/* Sheen effect */}

@@ -43,6 +43,7 @@ const DecouvrirGraphisme = lazy(() => import("./pages/DecouvrirGraphisme"));
 // Pages services et événements
 const Evenements = lazy(() => import("./pages/Evenements"));
 const Services = lazy(() => import("./pages/Services"));
+const Prestations = lazy(() => import("./pages/Prestations"));
 const ServiceDetail = lazy(() => import("./pages/ServiceDetail"));
 
 // Pages e-commerce
@@ -140,6 +141,7 @@ function App() {
 
                 {/* Route pour la page des prestations (services) */}
                 <Route path="/services" element={<Services />} />
+                <Route path="/prestations" element={<Prestations />} />
                 <Route path="/services/:id" element={<ServiceDetail />} />
 
                 {/* Route pour le formulaire de gestion de galerie - PROTÉGÉE */}

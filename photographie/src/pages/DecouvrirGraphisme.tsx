@@ -178,7 +178,7 @@ export default function DecouvrirGraphisme() {
               <h2 className="text-2xl font-playfair-sc text-[#ffe992] mb-4 uppercase tracking-wider">
                 {description?.titre || "Le Graphisme selon Fabien"}
               </h2>
-              <p className="text-gray-300 leading-relaxed">
+              <p className="text-gray-300 leading-relaxed whitespace-pre-line">
                 {description?.description ||
                   "Le graphisme est l'art de communiquer visuellement des idées, des émotions et des messages à travers la composition, la typographie, les couleurs et les formes. C'est une discipline qui allie créativité et technique pour créer des visuels impactants et mémorables."}
               </p>
