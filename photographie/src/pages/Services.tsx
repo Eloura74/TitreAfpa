@@ -5,7 +5,7 @@ import SEO from "../components/SEO";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
 import { Camera, Images, GraduationCap } from "lucide-react";
-import homeImages from "../config/images.json";
+import { useCovers } from "../hooks/useCovers";
 import "../styles/home.css";
 
 const containerVariants = {
@@ -85,7 +85,7 @@ const NavigationCard: React.FC<NavigationCardProps> = ({
               <h3 className="text-xl font-playfair-sc uppercase tracking-wider text-[#ffe992] mb-1 drop-shadow-[0_4px_12px_rgba(0,0,0,1)] font-bold">
                 {title}
               </h3>
-              <p className="text-xs text-gray-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-500 drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">
+              <p className="text-xs text-gray-300 opacity-100 transition-opacity duration-500 drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">
                 {description}
               </p>
             </div>
@@ -126,7 +126,7 @@ const NavigationCard: React.FC<NavigationCardProps> = ({
             <h3 className="text-xl font-playfair-sc uppercase tracking-wider text-[#ffe992] mb-1 drop-shadow-[0_4px_12px_rgba(0,0,0,1)] font-bold">
               {title}
             </h3>
-            <p className="text-xs text-gray-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-500 drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">
+            <p className="text-xs text-gray-300 opacity-100 transition-opacity duration-500 drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">
               {description}
             </p>
           </div>
@@ -137,9 +137,13 @@ const NavigationCard: React.FC<NavigationCardProps> = ({
 };
 
 export default function Services() {
+  const { covers } = useCovers();
+
   useEffect(() => {
     document.title = "Services | Fabien Licata";
   }, []);
+
+  const servicesCover = covers.services || "/images/photo3.jpg";
 
   return (
     <div className="home-page min-h-screen flex flex-col bg-[#0a0a10]">
@@ -159,7 +163,18 @@ export default function Services() {
 
       <Navbar />
 
-      <motion.div
+      {/* Conteneur de l'image de fond et de la texture */}
+      <div className="hero-image-container fixed inset-0 z-0">
+        <img
+          src={covers.backgroundSite || "/images/photo3.jpg"}
+          alt="Services"
+          className="hero-image w-full h-full object-cover opacity-60"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a10]/80 via-transparent to-[#0a0a10]" />
+      </div>
+
+      {/* Effet de scintillement/éblouissement dans le coin supérieur gauche */}
+      {/* <motion.div
         className="fixed top-0 left-0 w-96 h-96 pointer-events-none z-[5]"
         initial={{ opacity: 0.3 }}
         animate={{
@@ -183,11 +198,15 @@ export default function Services() {
           className="absolute top-0 left-0 w-3/4 h-3/4 blur-2xl"
           style={{
             background:
-              "radial-gradient(circle at top left, rgba(255, 233, 146, 0.15), rgba(255, 233, 146, 0.05), transparent)",
+              "radial-gradient(circle at top left, rgba(255, 255, 255, 0.1), transparent)",
           }}
         />
-      </motion.div>
+      </motion.div> */}
 
+      {/* Accent géométrique décoratif */}
+      <div className="geometric-accent fixed top-0 left-0 w-full h-full pointer-events-none z-0 opacity-30" />
+
+      {/* Contenu principal */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-20 pt-32 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -212,29 +231,29 @@ export default function Services() {
         >
           <NavigationCard
             to="/prestations"
-            image={homeImages.hero}
+            image={servicesCover}
             alt="Prestations"
             icon={<Camera className="w-6 h-6 text-[#ffe992]" />}
             title="Prestations"
-            description="Mariage, Shooting, Studio, Événements"
+            description="Mariage, immobilier, festive, formation groupe ou individuel, reportages"
           />
 
           <NavigationCard
             to="/reportages"
-            image={homeImages.hero}
+            image={servicesCover}
             alt="Reportages"
             icon={<Images className="w-6 h-6 text-[#ffe992]" />}
             title="Reportages"
-            description="Galeries publiques et privées"
+            description="Accès aux reportages déjà réalisés, accès libre ou sécurisé"
           />
 
           <NavigationCard
             href="https://planning-photo.vercel.app/"
-            image={homeImages.hero}
+            image={servicesCover}
             alt="Formations"
             icon={<GraduationCap className="w-6 h-6 text-[#ffe992]" />}
             title="Formations"
-            description="Planning et inscriptions"
+            description="Accès au planning pour réserver vos créneaux de formation"
           />
         </motion.nav>
       </main>

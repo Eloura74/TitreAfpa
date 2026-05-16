@@ -13,6 +13,9 @@ router.get("/:type", async (req, res) => {
       "graphisme-galerie",
       "graphisme-decouvrir",
       "services",
+      "prestations",
+      "reportages",
+      "formations",
       "background-site",
     ];
     if (!validTypes.includes(type)) {
@@ -45,6 +48,9 @@ router.post("/:type", isAdmin, async (req, res) => {
       "graphisme-galerie",
       "graphisme-decouvrir",
       "services",
+      "prestations",
+      "reportages",
+      "formations",
       "background-site",
     ];
     if (!validTypes.includes(type)) {
@@ -103,6 +109,9 @@ router.put("/:type/:id", isAdmin, async (req, res) => {
       "graphisme-galerie",
       "graphisme-decouvrir",
       "services",
+      "prestations",
+      "reportages",
+      "formations",
       "background-site",
     ];
     if (!validTypes.includes(type)) {

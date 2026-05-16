@@ -14,12 +14,18 @@ export const useCovers = () => {
     graphismeGalerie: string | null;
     graphismeDecouvrir: string | null;
     services: string | null;
+    prestations: string | null;
+    reportages: string | null;
+    formations: string | null;
     backgroundSite: string | null;
   }>({
     photographie: null,
     graphismeGalerie: null,
     graphismeDecouvrir: null,
     services: null,
+    prestations: null,
+    reportages: null,
+    formations: null,
     backgroundSite: null,
   });
 
@@ -33,6 +39,9 @@ export const useCovers = () => {
           "graphisme-galerie",
           "graphisme-decouvrir",
           "services",
+          "prestations",
+          "reportages",
+          "formations",
           "background-site",
         ];
 
@@ -48,15 +57,26 @@ export const useCovers = () => {
             } catch {
               return { type, image: null };
             }
-          })
+          }),
         );
 
         const newCovers = {
-          photographie: results.find((r) => r.type === "photographie")?.image || null,
-          graphismeGalerie: results.find((r) => r.type === "graphisme-galerie")?.image || null,
-          graphismeDecouvrir: results.find((r) => r.type === "graphisme-decouvrir")?.image || null,
+          photographie:
+            results.find((r) => r.type === "photographie")?.image || null,
+          graphismeGalerie:
+            results.find((r) => r.type === "graphisme-galerie")?.image || null,
+          graphismeDecouvrir:
+            results.find((r) => r.type === "graphisme-decouvrir")?.image ||
+            null,
           services: results.find((r) => r.type === "services")?.image || null,
-          backgroundSite: results.find((r) => r.type === "background-site")?.image || null,
+          prestations:
+            results.find((r) => r.type === "prestations")?.image || null,
+          reportages:
+            results.find((r) => r.type === "reportages")?.image || null,
+          formations:
+            results.find((r) => r.type === "formations")?.image || null,
+          backgroundSite:
+            results.find((r) => r.type === "background-site")?.image || null,
         };
 
         setCovers(newCovers);

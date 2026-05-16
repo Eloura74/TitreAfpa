@@ -12,6 +12,9 @@ interface CoverImage {
     | "graphisme-galerie"
     | "graphisme-decouvrir"
     | "services"
+    | "prestations"
+    | "reportages"
+    | "formations"
     | "background-site";
 }
 
@@ -21,12 +24,18 @@ export default function GestionCouvertures() {
     graphismeGalerie: CoverImage | null;
     graphismeDecouvrir: CoverImage | null;
     services: CoverImage | null;
+    prestations: CoverImage | null;
+    reportages: CoverImage | null;
+    formations: CoverImage | null;
     backgroundSite: CoverImage | null;
   }>({
     photographie: null,
     graphismeGalerie: null,
     graphismeDecouvrir: null,
     services: null,
+    prestations: null,
+    reportages: null,
+    formations: null,
     backgroundSite: null,
   });
 
@@ -37,6 +46,9 @@ export default function GestionCouvertures() {
     | "graphisme-galerie"
     | "graphisme-decouvrir"
     | "services"
+    | "prestations"
+    | "reportages"
+    | "formations"
     | "background-site"
   >("photographie");
 
@@ -51,6 +63,9 @@ export default function GestionCouvertures() {
         graphGalerieRes,
         graphDecouvrirRes,
         servicesRes,
+        prestationsRes,
+        reportagesRes,
+        formationsRes,
         backgroundRes,
       ] = await Promise.all([
         fetch(`${API_URL}/api/covers/photographie`, { credentials: "include" }),
@@ -61,6 +76,15 @@ export default function GestionCouvertures() {
           credentials: "include",
         }),
         fetch(`${API_URL}/api/covers/services`, {
+          credentials: "include",
+        }),
+        fetch(`${API_URL}/api/covers/prestations`, {
+          credentials: "include",
+        }),
+        fetch(`${API_URL}/api/covers/reportages`, {
+          credentials: "include",
+        }),
+        fetch(`${API_URL}/api/covers/formations`, {
           credentials: "include",
         }),
         fetch(`${API_URL}/api/covers/background-site`, {
@@ -92,6 +116,24 @@ export default function GestionCouvertures() {
             ? await servicesRes.json()
             : null
           : null;
+      const prestationsData =
+        prestationsRes.ok || prestationsRes.status === 404
+          ? prestationsRes.ok
+            ? await prestationsRes.json()
+            : null
+          : null;
+      const reportagesData =
+        reportagesRes.ok || reportagesRes.status === 404
+          ? reportagesRes.ok
+            ? await reportagesRes.json()
+            : null
+          : null;
+      const formationsData =
+        formationsRes.ok || formationsRes.status === 404
+          ? formationsRes.ok
+            ? await formationsRes.json()
+            : null
+          : null;
       const backgroundData =
         backgroundRes.ok || backgroundRes.status === 404
           ? backgroundRes.ok
@@ -104,6 +146,9 @@ export default function GestionCouvertures() {
         graphismeGalerie: graphGalerieData,
         graphismeDecouvrir: graphDecouvrirData,
         services: servicesData,
+        prestations: prestationsData,
+        reportages: reportagesData,
+        formations: formationsData,
         backgroundSite: backgroundData,
       });
 
@@ -116,7 +161,13 @@ export default function GestionCouvertures() {
               ? graphDecouvrirData
               : activeTab === "services"
                 ? servicesData
-                : backgroundData;
+                : activeTab === "prestations"
+                  ? prestationsData
+                  : activeTab === "reportages"
+                    ? reportagesData
+                    : activeTab === "formations"
+                      ? formationsData
+                      : backgroundData;
 
       if (currentCover) {
         setFormData({
@@ -144,7 +195,13 @@ export default function GestionCouvertures() {
             ? covers.graphismeDecouvrir
             : activeTab === "services"
               ? covers.services
-              : covers.backgroundSite;
+              : activeTab === "prestations"
+                ? covers.prestations
+                : activeTab === "reportages"
+                  ? covers.reportages
+                  : activeTab === "formations"
+                    ? covers.formations
+                    : covers.backgroundSite;
 
     if (currentCover) {
       setFormData({
@@ -227,7 +284,17 @@ export default function GestionCouvertures() {
           ? covers.photographie
           : activeTab === "graphisme-galerie"
             ? covers.graphismeGalerie
-            : covers.graphismeDecouvrir;
+            : activeTab === "graphisme-decouvrir"
+              ? covers.graphismeDecouvrir
+              : activeTab === "services"
+                ? covers.services
+                : activeTab === "prestations"
+                  ? covers.prestations
+                  : activeTab === "reportages"
+                    ? covers.reportages
+                    : activeTab === "formations"
+                      ? covers.formations
+                      : covers.backgroundSite;
 
       const url = currentCover?._id
         ? `${API_URL}/api/covers/${activeTab}/${currentCover._id}`
@@ -289,7 +356,22 @@ export default function GestionCouvertures() {
     {
       id: "services" as const,
       label: "Services",
-      description: "Card 'Services' sur la page Photographie",
+      description: "Page Services (navigation)",
+    },
+    {
+      id: "prestations" as const,
+      label: "Prestations",
+      description: "Page Prestations (liste des services)",
+    },
+    {
+      id: "reportages" as const,
+      label: "Reportages",
+      description: "Page Reportages (galeries)",
+    },
+    {
+      id: "formations" as const,
+      label: "Formations",
+      description: "Page Formations (lien externe)",
     },
     {
       id: "background-site" as const,
@@ -307,7 +389,13 @@ export default function GestionCouvertures() {
           ? covers.graphismeDecouvrir
           : activeTab === "services"
             ? covers.services
-            : covers.backgroundSite;
+            : activeTab === "prestations"
+              ? covers.prestations
+              : activeTab === "reportages"
+                ? covers.reportages
+                : activeTab === "formations"
+                  ? covers.formations
+                  : covers.backgroundSite;
 
   if (loading) {
     return (
