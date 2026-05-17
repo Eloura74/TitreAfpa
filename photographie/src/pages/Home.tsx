@@ -374,7 +374,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium font-syncopate"
+                className="block pointer-events-auto text-[9px] md:text-[11px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium font-syncopate"
               >
                 Art Visuel
               </motion.span>
@@ -480,7 +480,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium font-syncopate"
+                className="block pointer-events-auto text-[9px] md:text-[11px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium font-syncopate"
               >
                 Design Numérique
               </motion.span>
@@ -566,7 +566,7 @@ export default function Home() {
                 variants={revealVariants}
                 initial="hidden"
                 animate="visible"
-                className="block pointer-events-auto text-[8px] md:text-[9px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium font-syncopate"
+                className="block pointer-events-auto text-[9px] md:text-[11px] uppercase tracking-[0.6em] md:tracking-[0.8em] text-yellow-500/70 font-medium font-syncopate"
               >
                 Prestations, Reportages, Formations
               </motion.span>
