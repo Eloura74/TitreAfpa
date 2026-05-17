@@ -764,6 +764,7 @@ function LeafNode({ item, type, path, selectedPath, onSelect, onDelete }: any) {
 function NodeEditor({ node, config, updateTree }: any) {
   const { type, path, data } = node;
   const [formData, setFormData] = useState(data);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setFormData(data);
@@ -777,7 +778,7 @@ function NodeEditor({ node, config, updateTree }: any) {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Deep update based on path
     const newConfig = JSON.parse(JSON.stringify(config)); // Deep clone
 
@@ -806,6 +807,17 @@ function NodeEditor({ node, config, updateTree }: any) {
     }
 
     updateTree(newConfig);
+
+    // Sauvegarde automatique sur le serveur
+    try {
+      setIsSaving(true);
+      await tariffService.saveTariffConfig(newConfig);
+      console.log("Tarif sauvegardé automatiquement");
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde automatique:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

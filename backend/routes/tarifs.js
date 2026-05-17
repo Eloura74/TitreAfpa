@@ -377,8 +377,8 @@ router.post("/recalculate-global", async (req, res) => {
 // Sauvegarde la configuration hiérarchique
 router.post("/config", async (req, res) => {
   try {
-    // Cherche le document existant et le met à jour, ou le crée s'il n'existe pas
-    const config = await TarifConfig.findOneAndUpdate(
+    const oldConfig = await TariffConfig.findOne().sort({ createdAt: -1 });
+    const newConfig = await TariffConfig.findOneAndUpdate(
       {}, // Cherche n'importe quel document (il ne devrait y en avoir qu'un seul)
       { categories: req.body.categories }, // Met à jour les catégories
       {
@@ -387,7 +387,84 @@ router.post("/config", async (req, res) => {
         runValidators: true, // Valide les données
       },
     );
-    res.json(config);
+
+    // Mettre à jour les tarifs dans toutes les photos qui utilisent les formats modifiés
+    if (oldConfig && oldConfig.categories) {
+      const Photo = require("../models/Photo");
+      const updatedCategories = req.body.categories;
+
+      // Trouver les formats dont le prix a changé
+      const formatPriceChanges = [];
+
+      oldConfig.categories.forEach((oldCat, catIndex) => {
+        const newCat = updatedCategories[catIndex];
+        if (!newCat) return;
+
+        oldCat.products?.forEach((oldProduct, prodIndex) => {
+          const newProduct = newCat.products?.[prodIndex];
+          if (!newProduct) return;
+
+          oldProduct.supports?.forEach((oldSupport, suppIndex) => {
+            const newSupport = newProduct.supports?.[suppIndex];
+            if (!newSupport) return;
+
+            oldSupport.formats?.forEach((oldFormat, fmtIndex) => {
+              const newFormat = newSupport.formats?.[fmtIndex];
+              if (!newFormat) return;
+
+              // Si le prix a changé
+              if (oldFormat.price !== newFormat.price) {
+                formatPriceChanges.push({
+                  formatName: oldFormat.name,
+                  oldPrice: oldFormat.price,
+                  newPrice: newFormat.price,
+                });
+              }
+            });
+          });
+        });
+      });
+
+      console.log(
+        "[CONFIG UPDATE] Formats modifiés:",
+        formatPriceChanges.length,
+      );
+
+      // Mettre à jour les tarifs dans toutes les photos concernées
+      if (formatPriceChanges.length > 0) {
+        let photosUpdated = 0;
+
+        const photos = await Photo.find({ "tarifs.0": { $exists: true } });
+        console.log("[CONFIG UPDATE] Photos à vérifier:", photos.length);
+
+        for (const photo of photos) {
+          let photoModified = false;
+
+          photo.tarifs.forEach((tarif) => {
+            const formatChange = formatPriceChanges.find(
+              (change) => change.formatName === tarif.format,
+            );
+
+            if (formatChange) {
+              tarif.prix = formatChange.newPrice;
+              photoModified = true;
+              console.log(
+                `[CONFIG UPDATE] Photo ${photo._id} - Tarif ${tarif.format}: ${formatChange.oldPrice}€ → ${formatChange.newPrice}€`,
+              );
+            }
+          });
+
+          if (photoModified) {
+            await photo.save();
+            photosUpdated++;
+          }
+        }
+
+        console.log("[CONFIG UPDATE] Photos mises à jour:", photosUpdated);
+      }
+    }
+
+    res.json(newConfig);
   } catch (err) {
     console.error("Erreur sauvegarde config tarifs:", err);
     res

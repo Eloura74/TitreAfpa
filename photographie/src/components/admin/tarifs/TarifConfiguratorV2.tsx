@@ -713,6 +713,7 @@ function FormatNode({
 function NodeEditor({ node, config, updateTree }: any) {
   const { type, path, data } = node;
   const [formData, setFormData] = useState(data);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setFormData(data);
@@ -726,7 +727,7 @@ function NodeEditor({ node, config, updateTree }: any) {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const newConfig = JSON.parse(JSON.stringify(config));
     const cat = newConfig.categories.find((c: any) => c.id === path[0]);
 
@@ -754,6 +755,17 @@ function NodeEditor({ node, config, updateTree }: any) {
       }
     }
     updateTree(newConfig);
+
+    // Sauvegarde automatique sur le serveur
+    try {
+      setIsSaving(true);
+      await tariffServiceV2.saveTariffConfig(newConfig);
+      console.log("Tarif sauvegardé automatiquement");
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde automatique:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

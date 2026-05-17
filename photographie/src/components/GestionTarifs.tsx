@@ -1,4 +1,4 @@
-import TarifConfigurator from "./admin/tarifs/TarifConfigurator";
+import TarifConfiguratorV2 from "./admin/tarifs/TarifConfiguratorV2";
 
 export default function GestionTarifs() {
   return (
@@ -9,12 +9,12 @@ export default function GestionTarifs() {
             Gestion des Tarifs
           </h2>
           <p className="text-[10px] md:text-xs text-gray-400 uppercase tracking-wider">
-            Configuration avancée (Catégories, Finitions, Tailles...)
+            Configuration avancée (Catégories, Produits, Supports, Formats...)
           </p>
         </div>
       </div>
 
-      <TarifConfigurator />
+      <TarifConfiguratorV2 />
     </div>
   );
 }
