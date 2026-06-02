@@ -371,10 +371,10 @@ router.post("/generate-upload-url", async (req, res) => {
 // Appelée après un upload direct réussi pour enregistrer la photo dans MongoDB
 router.post("/confirm-upload", async (req, res) => {
   try {
-    console.log("[CONFIRM-UPLOAD] ========== ROUTE APPELÉE ==========");
+    console.error("[CONFIRM-UPLOAD] ========== ROUTE APPELÉE ==========");
     const { accesId, codeAcces, r2Key, fileName, fileSize, fileType } =
       req.body;
-    console.log("[CONFIRM-UPLOAD] Params:", {
+    console.error("[CONFIRM-UPLOAD] Params:", {
       accesId,
       codeAcces,
       r2Key,
@@ -409,21 +409,21 @@ router.post("/confirm-upload", async (req, res) => {
       }
     }
 
-    console.log("[CONFIRM-UPLOAD] === DÉBUT TRAITEMENT MINIATURE ===");
-    console.log("[CONFIRM-UPLOAD] Fichier:", fileName);
-    console.log("[CONFIRM-UPLOAD] R2 Key:", r2Key);
+    console.error("[CONFIRM-UPLOAD] === DÉBUT TRAITEMENT MINIATURE ===");
+    console.error("[CONFIRM-UPLOAD] Fichier:", fileName);
+    console.error("[CONFIRM-UPLOAD] R2 Key:", r2Key);
 
     let miniatureUrl = null;
 
     // Génération de la miniature en arrière-plan (ne bloque pas la réponse)
     // On télécharge l'image depuis R2, génère la miniature, et l'upload vers Cloudinary
     try {
-      console.log(
+      console.error(
         "[CONFIRM-UPLOAD] Début génération miniature pour:",
         fileName,
       );
-      console.log("[CONFIRM-UPLOAD] R2 Key:", r2Key);
-      console.log("[CONFIRM-UPLOAD] Cloudinary config:", {
+      console.error("[CONFIRM-UPLOAD] R2 Key (dans try):", r2Key);
+      console.error("[CONFIRM-UPLOAD] Cloudinary config:", {
         cloudName: process.env.CLOUDINARY_CLOUD_NAME ? "✓" : "✗",
         apiKey: process.env.CLOUDINARY_API_KEY ? "✓" : "✗",
         apiSecret: process.env.CLOUDINARY_API_SECRET ? "✓" : "✗",
