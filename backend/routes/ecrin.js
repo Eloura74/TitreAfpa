@@ -503,11 +503,10 @@ router.post("/confirm-upload", async (req, res) => {
       miniatureUrl = uploadResult.secure_url;
       console.log("[CONFIRM-UPLOAD] ✓ Miniature générée:", miniatureUrl);
     } catch (thumbError) {
-      console.error(
-        "[CONFIRM-UPLOAD] ✗ Erreur génération miniature (non bloquant):",
-        thumbError.message,
-      );
-      console.error("[CONFIRM-UPLOAD] Stack:", thumbError.stack);
+      console.error("❌❌❌ ERREUR MINIATURE ❌❌❌");
+      console.error("Message:", thumbError.message);
+      console.error("Stack:", thumbError.stack);
+      console.error("❌❌❌ FIN ERREUR ❌❌❌");
     }
 
     // Création de l'objet photo avec miniature
