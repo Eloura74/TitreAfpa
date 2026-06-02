@@ -407,16 +407,45 @@ router.post("/confirm-upload", async (req, res) => {
     // Génération de la miniature en arrière-plan (ne bloque pas la réponse)
     // On télécharge l'image depuis R2, génère la miniature, et l'upload vers Cloudinary
     try {
+      console.log(
+        "[CONFIRM-UPLOAD] Début génération miniature pour:",
+        fileName,
+      );
+      console.log("[CONFIRM-UPLOAD] R2 Key:", r2Key);
+      console.log("[CONFIRM-UPLOAD] Cloudinary config:", {
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME ? "✓" : "✗",
+        apiKey: process.env.CLOUDINARY_API_KEY ? "✓" : "✗",
+        apiSecret: process.env.CLOUDINARY_API_SECRET ? "✓" : "✗",
+      });
+
+      // Vérification de la configuration Cloudinary
+      if (
+        !process.env.CLOUDINARY_CLOUD_NAME ||
+        !process.env.CLOUDINARY_API_KEY ||
+        !process.env.CLOUDINARY_API_SECRET
+      ) {
+        throw new Error(
+          "Configuration Cloudinary manquante - miniature non générée",
+        );
+      }
+
       // Téléchargement de l'image depuis R2
       const getCommand = new GetObjectCommand({
         Bucket: process.env.R2_BUCKET_NAME,
         Key: r2Key,
       });
 
+      console.log("[CONFIRM-UPLOAD] Téléchargement depuis R2...");
       const r2Response = await s3Client.send(getCommand);
       const imageBuffer = await streamToBuffer(r2Response.Body);
+      console.log(
+        "[CONFIRM-UPLOAD] Image téléchargée, taille:",
+        imageBuffer.length,
+        "bytes",
+      );
 
       // Génération de la miniature avec Sharp (1200x1200 max pour lightbox)
+      console.log("[CONFIRM-UPLOAD] Génération miniature avec Sharp...");
       const thumbnailBuffer = await sharp(imageBuffer)
         .resize(1200, 1200, {
           fit: "inside",
@@ -424,10 +453,19 @@ router.post("/confirm-upload", async (req, res) => {
         })
         .jpeg({ quality: 85 })
         .toBuffer();
+      console.log(
+        "[CONFIRM-UPLOAD] Miniature générée, taille:",
+        thumbnailBuffer.length,
+        "bytes",
+      );
 
       // Upload de la miniature vers Cloudinary
       // Utiliser le codeAcces s'il existe, sinon l'ID de l'accès
       const folderName = acces.codeAcces || accesId;
+      console.log(
+        "[CONFIRM-UPLOAD] Upload vers Cloudinary, dossier:",
+        folderName,
+      );
       const uploadResult = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
@@ -439,20 +477,26 @@ router.post("/confirm-upload", async (req, res) => {
             ],
           },
           (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
+            if (error) {
+              console.error("[CONFIRM-UPLOAD] Erreur Cloudinary:", error);
+              reject(error);
+            } else {
+              console.log("[CONFIRM-UPLOAD] Upload Cloudinary réussi");
+              resolve(result);
+            }
           },
         );
         uploadStream.end(thumbnailBuffer);
       });
 
       miniatureUrl = uploadResult.secure_url;
-      console.log("[CONFIRM-UPLOAD] Miniature générée:", miniatureUrl);
+      console.log("[CONFIRM-UPLOAD] ✓ Miniature générée:", miniatureUrl);
     } catch (thumbError) {
       console.error(
-        "[CONFIRM-UPLOAD] Erreur génération miniature (non bloquant):",
-        thumbError,
+        "[CONFIRM-UPLOAD] ✗ Erreur génération miniature (non bloquant):",
+        thumbError.message,
       );
+      console.error("[CONFIRM-UPLOAD] Stack:", thumbError.stack);
     }
 
     // Création de l'objet photo avec miniature
