@@ -402,6 +402,10 @@ router.post("/confirm-upload", async (req, res) => {
       }
     }
 
+    console.log("[CONFIRM-UPLOAD] === DÉBUT TRAITEMENT MINIATURE ===");
+    console.log("[CONFIRM-UPLOAD] Fichier:", fileName);
+    console.log("[CONFIRM-UPLOAD] R2 Key:", r2Key);
+
     let miniatureUrl = null;
 
     // Génération de la miniature en arrière-plan (ne bloque pas la réponse)
