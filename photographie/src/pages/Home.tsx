@@ -408,7 +408,7 @@ export default function Home() {
                 animate="visible"
                 className="pointer-events-auto text-gray-400 text-[10px] md:text-sm italic font-extralight tracking-widest font-playfair"
               >
-                "Capturer l'instant, et sublimer le réel "
+                "Capturer l'instant, et sublimer le réel"
               </motion.p>
             </div>
 
