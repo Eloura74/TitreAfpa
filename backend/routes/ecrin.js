@@ -414,6 +414,7 @@ router.post("/confirm-upload", async (req, res) => {
     console.error("[CONFIRM-UPLOAD] R2 Key:", r2Key);
 
     let miniatureUrl = null;
+    let thumbnailError = null;
 
     // Génération de la miniature en arrière-plan (ne bloque pas la réponse)
     // On télécharge l'image depuis R2, génère la miniature, et l'upload vers Cloudinary
@@ -503,6 +504,11 @@ router.post("/confirm-upload", async (req, res) => {
       miniatureUrl = uploadResult.secure_url;
       console.log("[CONFIRM-UPLOAD] ✓ Miniature générée:", miniatureUrl);
     } catch (thumbError) {
+      thumbnailError = {
+        message: thumbError.message,
+        stack: thumbError.stack,
+        name: thumbError.name,
+      };
       console.error("❌❌❌ ERREUR MINIATURE ❌❌❌");
       console.error("Message:", thumbError.message);
       console.error("Stack:", thumbError.stack);
@@ -534,6 +540,11 @@ router.post("/confirm-upload", async (req, res) => {
       message: "Photo enregistrée avec succès",
       photo: photoData,
       nbPhotosTotal: savedAcces.photosOriginales.length,
+      debug: {
+        miniatureGenerated: miniatureUrl ? true : false,
+        miniatureUrl: miniatureUrl,
+        thumbnailError: thumbnailError,
+      },
     });
   } catch (error) {
     console.error("Erreur confirmation upload:", error);
