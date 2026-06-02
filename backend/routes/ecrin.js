@@ -371,8 +371,15 @@ router.post("/generate-upload-url", async (req, res) => {
 // Appelée après un upload direct réussi pour enregistrer la photo dans MongoDB
 router.post("/confirm-upload", async (req, res) => {
   try {
+    console.log("[CONFIRM-UPLOAD] ========== ROUTE APPELÉE ==========");
     const { accesId, codeAcces, r2Key, fileName, fileSize, fileType } =
       req.body;
+    console.log("[CONFIRM-UPLOAD] Params:", {
+      accesId,
+      codeAcces,
+      r2Key,
+      fileName,
+    });
 
     // Validation des paramètres
     if (!accesId || !r2Key || !fileName) {
