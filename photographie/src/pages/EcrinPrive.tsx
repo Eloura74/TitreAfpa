@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import JSZip from "jszip";
@@ -63,6 +63,7 @@ export default function EcrinPrive() {
 
   const [codeAcces, setCodeAcces] = useState("");
   const [isConnected, setIsConnected] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [accesInfo, setAccesInfo] = useState<AccesInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -159,6 +160,16 @@ export default function EcrinPrive() {
     }
   }, [codeAccesFromUrl, isConnected, loading]);
 
+  // Forcer le focus sur l'input après l'animation
+  useEffect(() => {
+    if (!isConnected && inputRef.current) {
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 500); // Attendre la fin de l'animation Framer Motion
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected]);
+
   const checkSession = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/ecrin/session`, {
@@ -175,6 +186,14 @@ export default function EcrinPrive() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validation : vérifier que le code n'est pas vide
+    if (!codeAcces || codeAcces.trim() === "") {
+      setError("Veuillez saisir un code d'accès");
+      inputRef.current?.focus();
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuccess(null);
@@ -199,6 +218,8 @@ export default function EcrinPrive() {
       } else {
         setError("Code d'accès invalide");
       }
+      // Refocus sur l'input en cas d'erreur
+      inputRef.current?.focus();
     } finally {
       setLoading(false);
     }
@@ -545,20 +566,24 @@ export default function EcrinPrive() {
                   </label>
                   <div className="relative">
                     <input
+                      ref={inputRef}
                       type="text"
                       value={codeAcces}
-                      onChange={(e) =>
-                        setCodeAcces(e.target.value.toUpperCase().trim())
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value.toUpperCase().trim();
+                        setCodeAcces(value);
+                      }}
                       onPaste={(e) => {
                         e.preventDefault();
                         const pastedText = e.clipboardData.getData("text");
                         setCodeAcces(pastedText.toUpperCase().trim());
                       }}
+                      onClick={() => inputRef.current?.focus()}
                       placeholder="Ex: MARIAGE-JULIE-123"
                       className="w-full bg-black/40 border border-[#ffe992]/20 rounded-xl px-5 py-4 text-white text-lg uppercase tracking-wider focus:border-[#ffe992] focus:ring-1 focus:ring-[#ffe992]/50 outline-none transition-all placeholder-white/20 text-center"
                       required
                       disabled={loading}
+                      autoComplete="off"
                       autoFocus
                     />
                   </div>
