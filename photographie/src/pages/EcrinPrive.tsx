@@ -570,7 +570,7 @@ export default function EcrinPrive() {
                       type="text"
                       value={codeAcces}
                       onChange={(e) => {
-                        const value = e.target.value.toUpperCase().trim();
+                        const value = e.target.value.toUpperCase();
                         setCodeAcces(value);
                       }}
                       onPaste={(e) => {
