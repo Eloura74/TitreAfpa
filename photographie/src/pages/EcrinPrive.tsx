@@ -431,16 +431,34 @@ export default function EcrinPrive() {
     );
   }, [accesInfo?.photosOriginales]);
 
-  // Recharger l'image HD quand l'index change
+  // Recharger l'image HD quand l'index change + précharger les images adjacentes
   useEffect(() => {
-    if (!isLightboxOpen) return;
+    if (!isLightboxOpen || !accesInfo?.photosOriginales) return;
 
-    const photo = accesInfo?.photosOriginales?.[currentPhotoIndex];
+    const photo = accesInfo.photosOriginales[currentPhotoIndex];
     if (!photo?._id) return;
 
-    // Utiliser l'URL proxy backend pour charger l'image
+    // Charger l'image actuelle
     const imageUrl = `${API_URL}/api/ecrin/view-photo/${photo._id}`;
     setLightboxImageUrl(imageUrl);
+
+    // Précharger l'image suivante
+    if (currentPhotoIndex < accesInfo.photosOriginales.length - 1) {
+      const nextPhoto = accesInfo.photosOriginales[currentPhotoIndex + 1];
+      if (nextPhoto?._id) {
+        const nextImg = new Image();
+        nextImg.src = `${API_URL}/api/ecrin/view-photo/${nextPhoto._id}`;
+      }
+    }
+
+    // Précharger l'image précédente
+    if (currentPhotoIndex > 0) {
+      const prevPhoto = accesInfo.photosOriginales[currentPhotoIndex - 1];
+      if (prevPhoto?._id) {
+        const prevImg = new Image();
+        prevImg.src = `${API_URL}/api/ecrin/view-photo/${prevPhoto._id}`;
+      }
+    }
   }, [currentPhotoIndex, isLightboxOpen, accesInfo?.photosOriginales]);
 
   // Fermer la lightbox avec la touche Echappement
@@ -532,6 +550,11 @@ export default function EcrinPrive() {
                       onChange={(e) =>
                         setCodeAcces(e.target.value.toUpperCase().trim())
                       }
+                      onPaste={(e) => {
+                        e.preventDefault();
+                        const pastedText = e.clipboardData.getData("text");
+                        setCodeAcces(pastedText.toUpperCase().trim());
+                      }}
                       placeholder="Ex: MARIAGE-JULIE-123"
                       className="w-full bg-black/40 border border-[#ffe992]/20 rounded-xl px-5 py-4 text-white text-lg uppercase tracking-wider focus:border-[#ffe992] focus:ring-1 focus:ring-[#ffe992]/50 outline-none transition-all placeholder-white/20 text-center"
                       required
@@ -860,55 +883,70 @@ export default function EcrinPrive() {
 
                     {/* Image miniature avec fallback */}
                     <div
-                      className={`relative overflow-hidden cursor-zoom-in group-hover:shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] transition-all ${
+                      className={`relative overflow-hidden group-hover:shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] transition-all ${
                         displayMode === "list"
                           ? "w-32 h-32 flex-shrink-0"
                           : "w-full"
                       }`}
-                      onClick={() => {
-                        if (selectedPhotos.size > 0) {
-                          // Mode sélection actif : click = sélectionner
-                          toggleSelection(photo._id!);
-                        } else {
-                          openLightbox(photo._id!);
-                        }
-                      }}
-                      title={
-                        selectedPhotos.size > 0
-                          ? "Ajouter à la sélection"
-                          : "Cliquez pour agrandir"
-                      }
                     >
-                      {!photo.miniature ||
-                      photo.miniature === "undefined" ||
-                      photo.miniature.trim() === "" ||
-                      imageErrors.has(photo._id!) ? (
-                        <div
-                          className="w-full flex flex-col items-center justify-center bg-gradient-to-br from-black/80 to-[#12121a] border border-white/5"
-                          style={{ minHeight: "250px" }}
-                        >
-                          <ImageIcon size={48} className="text-gray-600 mb-3" />
-                          <span className="text-xs text-gray-400 truncate max-w-[80%] px-4 py-1 bg-black/50 rounded-full border border-gray-800">
-                            {photo.nom}
-                          </span>
-                        </div>
-                      ) : (
-                        <img
-                          src={photo.miniature}
-                          alt={photo.nom}
-                          loading="lazy"
-                          className={`${displayMode === "list" ? "w-full h-full" : "w-full h-auto"} object-cover transition-all duration-700 ease-in-out ${isSelected ? "opacity-100 scale-[1.03]" : "opacity-80 group-hover:opacity-100 group-hover:scale-[1.03]"}`}
-                          style={{
-                            minHeight:
-                              displayMode === "list" ? "128px" : "200px",
-                          }}
-                          onError={() =>
-                            setImageErrors((prev) =>
-                              new Set(prev).add(photo._id!),
-                            )
+                      {/* Bouton loupe - toujours visible sur mobile, au survol sur desktop */}
+                      <button
+                        onClick={() => openLightbox(photo._id!)}
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 p-3 bg-black/60 hover:bg-[#ffe992] text-white hover:text-black rounded-full backdrop-blur-sm transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:scale-110"
+                        title="Agrandir l'image"
+                      >
+                        <Search size={24} />
+                      </button>
+
+                      <div
+                        className="cursor-pointer w-full h-full"
+                        onClick={() => {
+                          if (selectedPhotos.size > 0) {
+                            toggleSelection(photo._id!);
+                          } else {
+                            openLightbox(photo._id!);
                           }
-                        />
-                      )}
+                        }}
+                        title={
+                          selectedPhotos.size > 0
+                            ? "Ajouter à la sélection"
+                            : "Cliquez pour agrandir"
+                        }
+                      >
+                        {!photo.miniature ||
+                        photo.miniature === "undefined" ||
+                        photo.miniature.trim() === "" ||
+                        imageErrors.has(photo._id!) ? (
+                          <div
+                            className="w-full flex flex-col items-center justify-center bg-gradient-to-br from-black/80 to-[#12121a] border border-white/5"
+                            style={{ minHeight: "250px" }}
+                          >
+                            <ImageIcon
+                              size={48}
+                              className="text-gray-600 mb-3"
+                            />
+                            <span className="text-xs text-gray-400 truncate max-w-[80%] px-4 py-1 bg-black/50 rounded-full border border-gray-800">
+                              {photo.nom}
+                            </span>
+                          </div>
+                        ) : (
+                          <img
+                            src={photo.miniature}
+                            alt={photo.nom}
+                            loading="lazy"
+                            className={`${displayMode === "list" ? "w-full h-full" : "w-full h-auto"} object-cover transition-all duration-700 ease-in-out ${isSelected ? "opacity-100 scale-[1.03]" : "opacity-80 group-hover:opacity-100 group-hover:scale-[1.03]"}`}
+                            style={{
+                              minHeight:
+                                displayMode === "list" ? "128px" : "200px",
+                            }}
+                            onError={() =>
+                              setImageErrors((prev) =>
+                                new Set(prev).add(photo._id!),
+                              )
+                            }
+                          />
+                        )}
+                      </div>
 
                       {/* Overlay au survol pour DL Simple */}
                       {!isSelected && (
