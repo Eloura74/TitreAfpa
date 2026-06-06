@@ -235,6 +235,9 @@ export default function GestionAccesPrive() {
       id: eventId,
       dateDebut: evt.dateDebut ? evt.dateDebut.split("T")[0] : "",
       dateFin: evt.dateFin ? evt.dateFin.split("T")[0] : "",
+      dateExpiration: evt.dateExpiration
+        ? evt.dateExpiration.split("T")[0]
+        : "",
       image: evt.image || "",
       lieu: evt.lieu || "",
       description: evt.description || "",
