@@ -1138,23 +1138,25 @@ export default function EcrinPrive() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="absolute bottom-8 w-full max-w-2xl px-6 py-4 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4"
+                className="absolute bottom-8 w-full max-w-3xl px-6 py-4 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col items-center gap-4"
               >
-                <div className="flex-1 min-w-0 pr-4">
-                  <h4 className="text-white font-medium text-lg truncate">
+                {/* Nom de l'image - toujours visible en entier */}
+                <div className="w-full text-center">
+                  <h4 className="text-white font-medium text-lg break-words">
                     {currentPhoto.nom}
                   </h4>
-                  <p className="text-[#ffe992] text-sm uppercase tracking-wider">
+                  <p className="text-[#ffe992] text-sm uppercase tracking-wider mt-1">
                     {currentPhoto.format} —{" "}
                     {formatFileSize(currentPhoto.taille)}
                   </p>
                 </div>
 
+                {/* Bouton de téléchargement */}
                 {accesInfo?.allowDownload !== false && (
                   <button
                     onClick={() => handleDownload(currentPhoto)}
                     disabled={downloadingPhotoId === currentPhoto._id}
-                    className="shrink-0 bg-[#ffe992] hover:bg-white text-black font-bold py-3 px-6 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,233,146,0.3)]"
+                    className="bg-[#ffe992] hover:bg-white text-black font-bold py-3 px-8 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,233,146,0.3)]"
                   >
                     {downloadingPhotoId === currentPhoto._id ? (
                       <>
