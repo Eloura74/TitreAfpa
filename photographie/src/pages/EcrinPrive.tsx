@@ -119,6 +119,15 @@ export default function EcrinPrive() {
           withCredentials: true,
         });
         if (res.data.success) {
+          // Vérifier si le slug de la session correspond au slug de l'URL
+          if (codeAccesFromUrl && res.data.acces) {
+            const sessionSlug = res.data.acces.slug || res.data.acces.codeAcces;
+            if (sessionSlug !== codeAccesFromUrl) {
+              // Slug différent = déconnecter pour permettre nouvelle connexion
+              await handleLogout(true);
+              return;
+            }
+          }
           setIsConnected(true);
           setAccesInfo(res.data.acces);
         }
