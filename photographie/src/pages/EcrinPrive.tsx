@@ -65,7 +65,6 @@ export default function EcrinPrive() {
   const [isConnected, setIsConnected] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [accesInfo, setAccesInfo] = useState<AccesInfo | null>(null);
-  const [sessionKey, setSessionKey] = useState(0); // Pour forcer le rechargement
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -120,15 +119,6 @@ export default function EcrinPrive() {
           withCredentials: true,
         });
         if (res.data.success) {
-          // Vérifier si le slug correspond
-          if (codeAccesFromUrl && res.data.acces) {
-            const sessionSlug = res.data.acces.slug || res.data.acces.codeAcces;
-            if (sessionSlug !== codeAccesFromUrl) {
-              // Slug différent = déconnecter
-              await handleLogout(true);
-              return;
-            }
-          }
           setIsConnected(true);
           setAccesInfo(res.data.acces);
         }
@@ -138,7 +128,7 @@ export default function EcrinPrive() {
     };
 
     initSession();
-  }, [codeAccesFromUrl, sessionKey]); // Ajouter sessionKey pour forcer le rechargement
+  }, [codeAccesFromUrl]);
 
   // Charger la configuration des tarifs
   useEffect(() => {
@@ -209,10 +199,8 @@ export default function EcrinPrive() {
 
       if (res.data.success) {
         setSuccess("Connexion réussie ! Chargement de vos photos...");
-        // Attendre que checkSession charge les données complètes avant de connecter
+        // checkSession met déjà à jour isConnected et accesInfo
         await checkSession();
-        // Forcer le rechargement de la session
-        setSessionKey((prev) => prev + 1);
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
