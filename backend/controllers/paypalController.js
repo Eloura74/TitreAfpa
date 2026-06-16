@@ -435,6 +435,18 @@ exports.captureOrder = async (req, res) => {
     const [prenom, ...nomParts] = shippingName.split(" ");
     const nom = nomParts.join(" ");
 
+    // Vérifier si la commande contient des œuvres graphiques (exclues de la rétractation)
+    const containsOeuvreGraphique = articlesFromFrontend?.some(
+      (article) =>
+        article.nom?.toLowerCase().includes("graphique") ||
+        article.nom?.toLowerCase().includes("art graphique") ||
+        article.categorie === "Art Graphique",
+    );
+
+    // Calcul de la date de réception estimée (7 jours ouvrés)
+    const dateReceptionEstimee = new Date();
+    dateReceptionEstimee.setDate(dateReceptionEstimee.getDate() + 7);
+
     // Enregistrement du paiement en base de données
     const nouveauPaiement = await Paiement.create({
       montant: parseFloat(amount),
@@ -454,6 +466,8 @@ exports.captureOrder = async (req, res) => {
         pays: shippingAddress.country_code || "",
         telephone: payer.phone?.phone_number?.national_number || "",
       },
+      dateReception: dateReceptionEstimee,
+      retractationExclue: containsOeuvreGraphique,
       // utilisateur: req.user ? req.user._id : undefined // Si on avait l'user connecté
     });
 

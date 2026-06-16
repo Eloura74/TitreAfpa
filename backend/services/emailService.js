@@ -222,9 +222,121 @@ const sendAdminNotification = async (paiement, articles) => {
   }
 };
 
+const sendRetractationConfirmation = async (to, paiement) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: to,
+    subject: `Confirmation de votre demande de rétractation - Commande #${paiement.transactionId}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #d6c487; border-bottom: 2px solid #d6c487; padding-bottom: 10px;">
+          Demande de rétractation enregistrée
+        </h2>
+        
+        <p>Bonjour ${paiement.nomClient},</p>
+        
+        <p>Nous avons bien reçu votre demande de rétractation pour la commande <strong>#${paiement.transactionId}</strong>.</p>
+        
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #333;">📋 Détails de la demande</h3>
+          <p style="margin: 5px 0;"><strong>Date de la demande :</strong> ${new Date(paiement.retractation.dateDemande).toLocaleDateString("fr-FR")}</p>
+          <p style="margin: 5px 0;"><strong>Montant :</strong> ${paiement.montant.toFixed(2)} €</p>
+          ${paiement.retractation.motif ? `<p style="margin: 5px 0;"><strong>Motif :</strong> ${paiement.retractation.motif}</p>` : ""}
+        </div>
+        
+        <p><strong>Prochaines étapes :</strong></p>
+        <ol>
+          <li>Votre demande sera examinée par notre équipe dans les plus brefs délais</li>
+          <li>Vous recevrez une confirmation par email une fois la demande traitée</li>
+          <li>Si acceptée, le remboursement sera effectué sous 14 jours ouvrés</li>
+        </ol>
+        
+        <p style="margin-top: 20px; color: #666; font-size: 12px;">
+          Conformément à la loi française, vous disposez d'un délai de 14 jours à compter de la réception de votre commande pour exercer votre droit de rétractation.
+        </p>
+        
+        <p>Cordialement,<br>L'équipe Fabien Licata</p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    logger.info("Email confirmation rétractation envoyé", { to });
+  } catch (error) {
+    logger.error("Erreur envoi email confirmation rétractation", {
+      to,
+      error: error.message,
+    });
+  }
+};
+
+const sendRetractationAdminNotification = async (paiement) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: process.env.EMAIL_USER,
+    subject: `🔄 Demande de rétractation - Commande #${paiement.transactionId}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333; max-width: 700px; margin: 0 auto;">
+        <h2 style="color: #ff9800; border-bottom: 2px solid #ff9800; padding-bottom: 10px;">
+          ⚠️ Nouvelle demande de rétractation
+        </h2>
+        
+        <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ff9800;">
+          <h3 style="margin-top: 0; color: #333;">👤 Informations client</h3>
+          <p style="margin: 5px 0;"><strong>Nom :</strong> ${paiement.nomClient}</p>
+          <p style="margin: 5px 0;"><strong>Email :</strong> <a href="mailto:${paiement.emailClient}">${paiement.emailClient}</a></p>
+        </div>
+
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+          <h3 style="margin-top: 0; color: #333;">💰 Détails de la commande</h3>
+          <p style="margin: 5px 0;"><strong>Transaction ID :</strong> ${paiement.transactionId}</p>
+          <p style="margin: 5px 0;"><strong>Date d'achat :</strong> ${new Date(paiement.date).toLocaleDateString("fr-FR")}</p>
+          <p style="margin: 5px 0;"><strong>Date de demande :</strong> ${new Date(paiement.retractation.dateDemande).toLocaleDateString("fr-FR")}</p>
+          <p style="margin: 5px 0;"><strong>Montant :</strong> ${paiement.montant.toFixed(2)} €</p>
+        </div>
+
+        ${
+          paiement.retractation.motif
+            ? `
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0;">
+          <h3 style="margin-top: 0; color: #333;">📝 Motif de rétractation</h3>
+          <p style="margin: 5px 0;">${paiement.retractation.motif}</p>
+        </div>
+        `
+            : ""
+        }
+
+        <p style="margin-top: 20px;">
+          <a href="${process.env.FRONTEND_URL}/gestion-galerie" style="display: inline-block; background: #d6c487; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+            Gérer la demande
+          </a>
+        </p>
+        
+        <p style="margin-top: 20px; color: #666; font-size: 12px;">
+          Action requise : Examinez cette demande et traitez-la dans les plus brefs délais.
+        </p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    logger.info("Email notification admin rétractation envoyé", {
+      commande: paiement.transactionId,
+    });
+  } catch (error) {
+    logger.error("Erreur envoi email notification admin rétractation", {
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   sendVerificationEmail,
   sendWelcomeEmail,
   sendOrderConfirmation,
   sendAdminNotification,
+  sendRetractationConfirmation,
+  sendRetractationAdminNotification,
 };

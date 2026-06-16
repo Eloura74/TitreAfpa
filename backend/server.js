@@ -369,6 +369,10 @@ app.use("/api/evenements", evenementRoutes);
 app.use("/api/paiements", paiementRoutes);
 app.use("/api/paniers", panierRoutes);
 
+// Rétractation (droit de rétractation 14 jours)
+const retractationRoutes = require("./routes/retractation");
+app.use("/api/retractation", retractationRoutes);
+
 // Authentification des utilisateurs (login, register, JWT)
 app.use("/api/auth", authRoutes);
 

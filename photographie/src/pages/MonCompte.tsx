@@ -3,6 +3,7 @@ import { useAuthStore } from "../store/authStore";
 import { useUser } from "../context/UserContext";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/Footer";
+import RetractationButton from "../components/RetractationButton";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { API_URL } from "../config/api";
@@ -14,9 +15,16 @@ interface Paiement {
   montant: number;
   date: string;
   source: string;
-  transactionId?: string;
+  transactionId: string;
   statut: string;
   articles?: unknown[];
+  dateReception?: string;
+  retractationExclue?: boolean;
+  retractation?: {
+    demandee: boolean;
+    statut: string;
+    dateDemande?: string;
+  };
 }
 
 interface Evenement {
@@ -267,6 +275,7 @@ export default function MonCompte() {
                         <th className="py-4 px-6 text-left">Montant</th>
                         <th className="py-4 px-6 text-left">Statut</th>
                         <th className="py-4 px-6 text-left">Moyen</th>
+                        <th className="py-4 px-6 text-left">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
@@ -297,6 +306,24 @@ export default function MonCompte() {
                           </td>
                           <td className="py-4 px-6 text-xs uppercase text-gray-500">
                             {p.source}
+                          </td>
+                          <td className="py-4 px-6">
+                            <RetractationButton
+                              paiement={p}
+                              onRetractationSuccess={() => {
+                                axios
+                                  .get(`${API_URL}/api/paiements/me`, {
+                                    withCredentials: true,
+                                  })
+                                  .then((res) => {
+                                    setPaiements(
+                                      Array.isArray(res.data?.data)
+                                        ? res.data.data
+                                        : [],
+                                    );
+                                  });
+                              }}
+                            />
                           </td>
                         </tr>
                       ))}

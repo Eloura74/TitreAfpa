@@ -92,6 +92,43 @@ const paiementSchema = new mongoose.Schema({
     pays: String,
     telephone: String,
   },
+
+  // Date de réception estimée (pour calculer le délai de rétractation)
+  dateReception: {
+    type: Date,
+    required: false,
+  },
+
+  // Gestion du droit de rétractation (14 jours - loi française)
+  retractation: {
+    demandee: {
+      type: Boolean,
+      default: false,
+    },
+    dateDemande: {
+      type: Date,
+      required: false,
+    },
+    statut: {
+      type: String,
+      enum: ["aucune", "en_cours", "acceptee", "refusee"],
+      default: "aucune",
+    },
+    motif: {
+      type: String,
+      required: false,
+    },
+    commentaireAdmin: {
+      type: String,
+      required: false,
+    },
+  },
+
+  // Exclusion de la rétractation (ex: galerie graphique - œuvres uniques)
+  retractationExclue: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // ============================================
