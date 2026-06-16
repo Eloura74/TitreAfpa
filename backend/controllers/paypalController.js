@@ -165,8 +165,19 @@ async function getValidatedPrice(article) {
               for (const format of support.formats || []) {
                 // Vérifier si ce tarif est dans availableTariffIds
                 if (photo.availableTariffIds.includes(format.id)) {
-                  // Vérifier si format et support correspondent
-                  if (
+                  // Validation par ID de format (plus fiable que nom support)
+                  if (article.id && format.id === article.id) {
+                    prixValidé = format.price;
+                    logger.info("Prix trouvé via ID format", {
+                      formatId: format.id,
+                      format: format.name,
+                      support: support.name,
+                      prix: prixValidé,
+                    });
+                    break;
+                  }
+                  // Fallback: vérifier si format et support correspondent
+                  else if (
                     format.name === article.format &&
                     support.name === article.support
                   ) {

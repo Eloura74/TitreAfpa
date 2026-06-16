@@ -1,0 +1,148 @@
+[1mdiff --git a/photographie/src/components/galerie/SelectionFormatModalV2.tsx b/photographie/src/components/galerie/SelectionFormatModalV2.tsx[m
+[1mindex 09ca3a4..15dc434 100644[m
+[1m--- a/photographie/src/components/galerie/SelectionFormatModalV2.tsx[m
+[1m+++ b/photographie/src/components/galerie/SelectionFormatModalV2.tsx[m
+[36m@@ -32,7 +32,7 @@[m [mexport const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({[m
+   const [selectedSupport, setSelectedSupport] =[m
+     useState<TariffSupportV2 | null>(null);[m
+   const [selectedFormat, setSelectedFormat] = useState<TariffFormatV2 | null>([m
+[31m-    null[m
+[32m+[m[32m    null,[m
+   );[m
+   const [quantity, setQuantity] = useState(1);[m
+ [m
+[36m@@ -59,10 +59,10 @@[m [mexport const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({[m
+         cat.products.some((prod) =>[m
+           prod.supports.some((supp) =>[m
+             supp.formats.some((fmt) =>[m
+[31m-              photo.availableTariffIds.includes(fmt.id)[m
+[31m-            )[m
+[31m-          )[m
+[31m-        )[m
+[32m+[m[32m              photo.availableTariffIds.includes(fmt.id),[m
+[32m+[m[32m            ),[m
+[32m+[m[32m          ),[m
+[32m+[m[32m        ),[m
+       );[m
+ [m
+       if (validCategory) {[m
+[36m@@ -76,8 +76,8 @@[m [mexport const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({[m
+     if (selectedCategory && photo?.availableTariffIds) {[m
+       const validProduct = selectedCategory.products.find((prod) =>[m
+         prod.supports.some((supp) =>[m
+[31m-          supp.formats.some((fmt) => photo.availableTariffIds.includes(fmt.id))[m
+[31m-        )[m
+[32m+[m[32m          supp.formats.some((fmt) => photo.availableTariffIds.includes(fmt.id)),[m
+[32m+[m[32m        ),[m
+       );[m
+       setSelectedProduct(validProduct || null);[m
+     }[m
+[36m@@ -87,7 +87,7 @@[m [mexport const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({[m
+   useEffect(() => {[m
+     if (selectedProduct && photo?.availableTariffIds) {[m
+       const validSupport = selectedProduct.supports.find((supp) =>[m
+[31m-        supp.formats.some((fmt) => photo.availableTariffIds.includes(fmt.id))[m
+[32m+[m[32m        supp.formats.some((fmt) => photo.availableTariffIds.includes(fmt.id)),[m
+       );[m
+       setSelectedSupport(validSupport || null);[m
+     }[m
+[36m@@ -97,7 +97,7 @@[m [mexport const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({[m
+   useEffect(() => {[m
+     if (selectedSupport && photo?.availableTariffIds) {[m
+       const validFormat = selectedSupport.formats.find((fmt) =>[m
+[31m-        photo.availableTariffIds.includes(fmt.id)[m
+[32m+[m[32m        photo.availableTariffIds.includes(fmt.id),[m
+       );[m
+       setSelectedFormat(validFormat || null);[m
+     }[m
+[36m@@ -110,7 +110,7 @@[m [mexport const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({[m
+       const tarif = {[m
+         id: selectedFormat.id,[m
+         format: selectedFormat.name,[m
+[31m-        support: `${selectedSupport.name} (${selectedProduct.name})`,[m
+[32m+[m[32m        support: selectedSupport.name,[m
+         prix: selectedFormat.price,[m
+         quantity: quantity, // Pass quantity if parent supports it[m
+       };[m
+[36m@@ -121,12 +121,12 @@[m [mexport const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({[m
+   // Gestion de la touche Escape pour fermer le modal (accessibilité)[m
+   useEffect(() => {[m
+     const handleEscape = (e: KeyboardEvent) => {[m
+[31m-      if (e.key === 'Escape') {[m
+[32m+[m[32m      if (e.key === "Escape") {[m
+         onClose();[m
+       }[m
+     };[m
+[31m-    document.addEventListener('keydown', handleEscape);[m
+[31m-    return () => document.removeEventListener('keydown', handleEscape);[m
+[32m+[m[32m    document.addEventListener("keydown", handleEscape);[m
+[32m+[m[32m    return () => document.removeEventListener("keydown", handleEscape);[m
+   }, [onClose]);[m
+ [m
+   if (loading) {[m
+[36m@@ -138,7 +138,7 @@[m [mexport const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({[m
+   }[m
+ [m
+   return ([m
+[31m-    <div [m
+[32m+[m[32m    <div[m
+       className="fixed inset-0 flex items-end md:items-center justify-center bg-black/90 backdrop-blur-md z-[100] p-0 md:p-8"[m
+       onClick={onClose}[m
+       role="presentation"[m
+[36m@@ -162,7 +162,10 @@[m [mexport const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({[m
+           />[m
+           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#121218] flex items-end p-4">[m
+             <div>[m
+[31m-              <h2 id="modal-title" className="text-lg font-serif font-bold text-white">[m
+[32m+[m[32m              <h2[m
+[32m+[m[32m                id="modal-title"[m
+[32m+[m[32m                className="text-lg font-serif font-bold text-white"[m
+[32m+[m[32m              >[m
+                 {photo.titre}[m
+               </h2>[m
+               <p className="text-gray-400 text-xs">{photo.categorie}</p>[m
+[36m@@ -181,7 +184,10 @@[m [mexport const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({[m
+         <div className="hidden md:flex w-full md:w-2/3 bg-black/50 relative flex-col flex-1">[m
+           <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start z-10 bg-gradient-to-b from-black/60 to-transparent">[m
+             <div>[m
+[31m-              <h2 id="modal-title" className="text-2xl font-serif font-bold text-white mb-1">[m
+[32m+[m[32m              <h2[m
+[32m+[m[32m                id="modal-title"[m
+[32m+[m[32m                className="text-2xl font-serif font-bold text-white mb-1"[m
+[32m+[m[32m              >[m
+                 {photo.titre}[m
+               </h2>[m
+               <p className="text-gray-300 text-sm">{photo.categorie}</p>[m
+[36m@@ -233,9 +239,9 @@[m [mexport const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({[m
+                   const isAvailable = cat.products.some((p) =>[m
+                     p.supports.some((s) =>[m
+                       s.formats.some((f) =>[m
+[31m-                        photo.availableTariffIds.includes(f.id)[m
+[31m-                      )[m
+[31m-                    )[m
+[32m+[m[32m                        photo.availableTariffIds.includes(f.id),[m
+[32m+[m[32m                      ),[m
+[32m+[m[32m                    ),[m
+                   );[m
+                   if (!isAvailable) return null;[m
+ [m
+[36m@@ -267,8 +273,8 @@[m [mexport const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({[m
+                   {selectedCategory.products.map((prod) => {[m
+                     const isAvailable = prod.supports.some((s) =>[m
+                       s.formats.some((f) =>[m
+[31m-                        photo.availableTariffIds.includes(f.id)[m
+[31m-                      )[m
+[32m+[m[32m                        photo.availableTariffIds.includes(f.id),[m
+[32m+[m[32m                      ),[m
+                     );[m
+                     if (!isAvailable) return null;[m
+ [m
+[36m@@ -305,7 +311,7 @@[m [mexport const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({[m
+                 <div className="grid grid-cols-1 gap-2">[m
+                   {selectedProduct.supports.map((supp) => {[m
+                     const isAvailable = supp.formats.some((f) =>[m
+[31m-                      photo.availableTariffIds.includes(f.id)[m
+[32m+[m[32m                      photo.availableTariffIds.includes(f.id),[m
+                     );[m
+                     if (!isAvailable) return null;[m
+ [m

@@ -112,7 +112,7 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
         format: selectedFormat.name,
         support: selectedSupport.name,
         prix: selectedFormat.price,
-        quantity: quantity, // Pass quantity if parent supports it
+        quantity: quantity,
       };
       onSelect(tarif);
     }
