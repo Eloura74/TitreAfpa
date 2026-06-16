@@ -690,7 +690,7 @@ export default function Galerie() {
     const supportValue = tarif.support || "Standard";
 
     ajouterArticle({
-      id: crypto.randomUUID(),
+      id: tarif.id || crypto.randomUUID(),
       photoId: photoSelectionnee._id,
       nom: photoSelectionnee.titre, // Utiliser uniquement le titre de la photo
       prix: tarif.prix,
