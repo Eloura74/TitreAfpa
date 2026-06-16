@@ -28,12 +28,21 @@ const client = new paypal.core.PayPalHttpClient(environment);
  * NE FAIT JAMAIS CONFIANCE AU PRIX ENVOYÉ PAR LE CLIENT
  */
 async function getValidatedPrice(article) {
+  // Mapping des alias de support (pour compatibilité avec anciennes données)
+  const supportAliases = {
+    Lambda: "RC Couleur Brillant Fuji 250g",
+  };
+
+  // Normaliser le nom du support si c'est un alias
+  const normalizedSupport = supportAliases[article.support] || article.support;
+
   // Log des données reçues pour debug
   logger.info("Validation prix - Article reçu", {
     id: article.id,
     nom: article.nom,
     format: article.format,
     support: article.support,
+    supportNormalized: normalizedSupport,
     prix: article.prix,
   });
 
@@ -89,7 +98,7 @@ async function getValidatedPrice(article) {
           });
 
           const support = format.supports.find(
-            (s) => s.nom === article.support,
+            (s) => s.nom === article.support || s.nom === normalizedSupport,
           );
           if (support) {
             prixValidé = support.prix;
@@ -138,7 +147,9 @@ async function getValidatedPrice(article) {
         });
 
         const tarif = photo.tarifs.find(
-          (t) => t.format === article.format && t.support === article.support,
+          (t) =>
+            t.format === article.format &&
+            (t.support === article.support || t.support === normalizedSupport),
         );
         if (tarif) {
           prixValidé = tarif.prix;
@@ -179,7 +190,8 @@ async function getValidatedPrice(article) {
                   // Fallback: vérifier si format et support correspondent
                   else if (
                     format.name === article.format &&
-                    support.name === article.support
+                    (support.name === article.support ||
+                      support.name === normalizedSupport)
                   ) {
                     prixValidé = format.price;
                     logger.info("Prix trouvé via availableTariffIds", {
@@ -245,8 +257,11 @@ async function getValidatedPrice(article) {
               // Vérifier si le support correspond
               const supportMatch =
                 support.name === article.support ||
+                support.name === normalizedSupport ||
                 article.support.includes(support.name) ||
-                support.name.includes(article.support);
+                support.name.includes(article.support) ||
+                normalizedSupport.includes(support.name) ||
+                support.name.includes(normalizedSupport);
 
               if (supportMatch) {
                 prixValidé = format.price;
@@ -299,8 +314,11 @@ async function getValidatedPrice(article) {
             const support = format.supports.find(
               (s) =>
                 s.nom === article.support ||
+                s.nom === normalizedSupport ||
                 article.support.includes(s.nom) ||
-                s.nom.includes(article.support),
+                s.nom.includes(article.support) ||
+                normalizedSupport.includes(s.nom) ||
+                s.nom.includes(normalizedSupport),
             );
 
             if (support) {
