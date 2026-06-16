@@ -32,7 +32,7 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
   const [selectedSupport, setSelectedSupport] =
     useState<TariffSupportV2 | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<TariffFormatV2 | null>(
-    null
+    null,
   );
   const [quantity, setQuantity] = useState(1);
 
@@ -59,10 +59,10 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
         cat.products.some((prod) =>
           prod.supports.some((supp) =>
             supp.formats.some((fmt) =>
-              photo.availableTariffIds.includes(fmt.id)
-            )
-          )
-        )
+              photo.availableTariffIds.includes(fmt.id),
+            ),
+          ),
+        ),
       );
 
       if (validCategory) {
@@ -76,8 +76,8 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
     if (selectedCategory && photo?.availableTariffIds) {
       const validProduct = selectedCategory.products.find((prod) =>
         prod.supports.some((supp) =>
-          supp.formats.some((fmt) => photo.availableTariffIds.includes(fmt.id))
-        )
+          supp.formats.some((fmt) => photo.availableTariffIds.includes(fmt.id)),
+        ),
       );
       setSelectedProduct(validProduct || null);
     }
@@ -87,7 +87,7 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
   useEffect(() => {
     if (selectedProduct && photo?.availableTariffIds) {
       const validSupport = selectedProduct.supports.find((supp) =>
-        supp.formats.some((fmt) => photo.availableTariffIds.includes(fmt.id))
+        supp.formats.some((fmt) => photo.availableTariffIds.includes(fmt.id)),
       );
       setSelectedSupport(validSupport || null);
     }
@@ -97,7 +97,7 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
   useEffect(() => {
     if (selectedSupport && photo?.availableTariffIds) {
       const validFormat = selectedSupport.formats.find((fmt) =>
-        photo.availableTariffIds.includes(fmt.id)
+        photo.availableTariffIds.includes(fmt.id),
       );
       setSelectedFormat(validFormat || null);
     }
@@ -110,7 +110,7 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
       const tarif = {
         id: selectedFormat.id,
         format: selectedFormat.name,
-        support: `${selectedSupport.name} (${selectedProduct.name})`,
+        support: selectedSupport.name,
         prix: selectedFormat.price,
         quantity: quantity, // Pass quantity if parent supports it
       };
@@ -121,12 +121,12 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
   // Gestion de la touche Escape pour fermer le modal (accessibilité)
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onClose();
       }
     };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [onClose]);
 
   if (loading) {
@@ -138,7 +138,7 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
   }
 
   return (
-    <div 
+    <div
       className="fixed inset-0 flex items-end md:items-center justify-center bg-black/90 backdrop-blur-md z-[100] p-0 md:p-8"
       onClick={onClose}
       role="presentation"
@@ -162,7 +162,10 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
           />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#121218] flex items-end p-4">
             <div>
-              <h2 id="modal-title" className="text-lg font-serif font-bold text-white">
+              <h2
+                id="modal-title"
+                className="text-lg font-serif font-bold text-white"
+              >
                 {photo.titre}
               </h2>
               <p className="text-gray-400 text-xs">{photo.categorie}</p>
@@ -181,7 +184,10 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
         <div className="hidden md:flex w-full md:w-2/3 bg-black/50 relative flex-col flex-1">
           <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start z-10 bg-gradient-to-b from-black/60 to-transparent">
             <div>
-              <h2 id="modal-title" className="text-2xl font-serif font-bold text-white mb-1">
+              <h2
+                id="modal-title"
+                className="text-2xl font-serif font-bold text-white mb-1"
+              >
                 {photo.titre}
               </h2>
               <p className="text-gray-300 text-sm">{photo.categorie}</p>
@@ -233,9 +239,9 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
                   const isAvailable = cat.products.some((p) =>
                     p.supports.some((s) =>
                       s.formats.some((f) =>
-                        photo.availableTariffIds.includes(f.id)
-                      )
-                    )
+                        photo.availableTariffIds.includes(f.id),
+                      ),
+                    ),
                   );
                   if (!isAvailable) return null;
 
@@ -267,8 +273,8 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
                   {selectedCategory.products.map((prod) => {
                     const isAvailable = prod.supports.some((s) =>
                       s.formats.some((f) =>
-                        photo.availableTariffIds.includes(f.id)
-                      )
+                        photo.availableTariffIds.includes(f.id),
+                      ),
                     );
                     if (!isAvailable) return null;
 
@@ -305,7 +311,7 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
                 <div className="grid grid-cols-1 gap-2">
                   {selectedProduct.supports.map((supp) => {
                     const isAvailable = supp.formats.some((f) =>
-                      photo.availableTariffIds.includes(f.id)
+                      photo.availableTariffIds.includes(f.id),
                     );
                     if (!isAvailable) return null;
 
