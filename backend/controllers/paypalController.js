@@ -479,7 +479,7 @@ exports.captureOrder = async (req, res) => {
       },
       dateReception: dateReceptionEstimee,
       retractationExclue: containsOeuvreGraphique,
-      // utilisateur: req.user ? req.user._id : undefined // Si on avait l'user connecté
+      utilisateur: req.user ? req.user._id : undefined,
     });
 
     logger.info("Paiement PayPal enregistré", {
