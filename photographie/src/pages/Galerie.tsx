@@ -689,6 +689,13 @@ export default function Galerie() {
     // Utiliser directement le support du tarif (déjà nettoyé par resolveTariffs)
     const supportValue = tarif.support || "Standard";
 
+    console.log("🔍 DEBUG handleSelectFormat:", {
+      tarifId: tarif.id,
+      format: tarif.format,
+      support: supportValue,
+      prix: tarif.prix,
+    });
+
     ajouterArticle({
       id: tarif.id || crypto.randomUUID(),
       photoId: photoSelectionnee._id,

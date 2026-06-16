@@ -114,6 +114,13 @@ export const SelectionFormatModalV2: React.FC<SelectionFormatModalV2Props> = ({
         prix: selectedFormat.price,
         quantity: quantity,
       };
+      console.log("🔍 DEBUG SelectionFormatModalV2:", {
+        formatId: selectedFormat.id,
+        formatName: selectedFormat.name,
+        supportName: selectedSupport.name,
+        productName: selectedProduct.name,
+        prix: selectedFormat.price,
+      });
       onSelect(tarif);
     }
   };
